@@ -1055,6 +1055,20 @@ describe("dinhDangTien", () => {
   it("xu ly so khong", () => {
     expect(dinhDangTien(0, "VND")).toBe("0 ₫");
   });
+  it("lam tron nua don vi ra xa so 0, ke ca so am", () => {
+    expect(dinhDangTien(2500000.5, "VND")).toBe("2.500.001 ₫");
+    expect(dinhDangTien(-2500000.5, "VND")).toBe("-2.500.001 ₫");
+  });
+
+  it("khong bao gio in ra so 0 am", () => {
+    expect(dinhDangTien(-0.4, "VND")).toBe("0 ₫");
+    expect(dinhDangTien(-0, "VND")).toBe("0 ₫");
+  });
+
+  it("dinh dang so am binh thuong", () => {
+    expect(dinhDangTien(-500000, "VND")).toBe("-500.000 ₫");
+  });
+
   it("dinh dang USD co hai chu so thap phan", () => {
     expect(dinhDangTien(1234.5, "USD")).toBe("$1,234.50");
   });
@@ -1069,10 +1083,25 @@ import { dinhDangNgay } from "@/lib/date";
 
 describe("dinhDangNgay", () => {
   it("dinh dang dd/mm/yyyy", () => {
-    expect(dinhDangNgay(new Date(Date.UTC(2026, 7, 28)))).toBe("28/08/2026");
+    expect(dinhDangNgay(new Date(Date.UTC(2026, 7, 28, 12, 0)))).toBe("28/08/2026");
   });
+
   it("them so khong o dau cho ngay va thang mot chu so", () => {
-    expect(dinhDangNgay(new Date(Date.UTC(2026, 0, 5)))).toBe("05/01/2026");
+    expect(dinhDangNgay(new Date(Date.UTC(2026, 0, 5, 12, 0)))).toBe("05/01/2026");
+  });
+
+  /**
+   * Hai ca duoi day dat sat ranh gioi ngay theo UTC theo hai huong nguoc nhau,
+   * nen neu ai do doi getUTC* thanh getter gio may thi it nhat MOT ca se hong
+   * o bat ky mui gio lech 0 nao. Neu chi dung moc nua dem UTC, test van xanh
+   * tren may UTC+7 (Viet Nam) du ham da hong.
+   */
+  it("dung gio UTC chu khong dung gio may — moc cuoi ngay", () => {
+    expect(dinhDangNgay(new Date(Date.UTC(2026, 7, 28, 23, 30)))).toBe("28/08/2026");
+  });
+
+  it("dung gio UTC chu khong dung gio may — moc dau ngay", () => {
+    expect(dinhDangNgay(new Date(Date.UTC(2026, 0, 5, 0, 30)))).toBe("05/01/2026");
   });
 });
 ```
@@ -1094,8 +1123,18 @@ const dinhDangUsd = new Intl.NumberFormat("en-US", {
   style: "currency", currency: "USD", minimumFractionDigits: 2,
 });
 
+/**
+ * Lam tron nua don vi RA XA so 0 (quy uoc ke toan), khac voi Math.round von
+ * luon lam tron ve phia +Infinity: Math.round(-0.5) cho -0, va Intl se in ra
+ * chuoi "-0 ₫" tren ban bao gia gui khach.
+ */
+function lamTronTien(x: number): number {
+  const n = Math.sign(x) * Math.round(Math.abs(x));
+  return Object.is(n, -0) ? 0 : n;
+}
+
 export function dinhDangTien(soTien: number, tienTe: TienTe): string {
-  if (tienTe === "VND") return `${dinhDangVnd.format(Math.round(soTien))} ₫`;
+  if (tienTe === "VND") return `${dinhDangVnd.format(lamTronTien(soTien))} ₫`;
   return dinhDangUsd.format(soTien);
 }
 ```
