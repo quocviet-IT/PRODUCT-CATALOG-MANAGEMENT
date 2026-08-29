@@ -46,6 +46,13 @@ export async function napMotTep(
   try {
     const daXuLy = await xuLyAnh(tep.noiDung);
 
+    // KHONG dat unique index tren contentHash de "sua" cuoc dua nay.
+    // PRD B6 yeu cau khi gap anh trung thi cho nguoi dung chon: bo qua, thay the,
+    // hay VAN GIU CA HAI. Mot unique index se dong vinh vien lua chon thu ba.
+    // Ngoai ra, khong co ham bat loi rieng cho contentHash nen request thua cuoc dua
+    // se nhan loi chung chung thay vi ket qua "trung" sach se — tuc doi hanh vi,
+    // khong phai no-op. Khi nao cai dat day du B6 thi giai phap dung nhieu kha nang
+    // la partial unique index chu khong phai unique toan phan.
     const trung = await anhRepo.timTheoMaBam(daXuLy.contentHash);
     if (trung) {
       return { tenTep: tep.ten, trangThai: "trung", productIdDaCo: trung.productId };
