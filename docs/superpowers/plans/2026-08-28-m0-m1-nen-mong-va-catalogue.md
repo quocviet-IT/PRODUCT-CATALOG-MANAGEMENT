@@ -2495,8 +2495,21 @@ export type TaoSanPhamInput = {
   createdBy?: string | null;
 };
 
+/**
+ * Drizzle BOC loi Postgres vao .cause, nen message o tang ngoai cung KHONG chua
+ * "duplicate key". Chi kiem tra e.message se khong bao gio nhan ra trung khoa,
+ * va nguoi dung se thay loi CSDL tho thay vi thong bao "Ma san pham da ton tai".
+ * Di theo chuoi .cause va uu tien ma SQLSTATE 23505 (unique_violation) — dang tin
+ * hon so khop chuoi van ban. Gioi han 5 tang de khong lap vo han neu cause vong lai.
+ */
 function laLoiTrungKhoa(e: unknown): boolean {
-  return e instanceof Error && /duplicate key|products_sku_idx|unique/i.test(e.message);
+  let hien: unknown = e;
+  for (let i = 0; i < 5 && hien instanceof Error; i++) {
+    if ((hien as { code?: unknown }).code === "23505") return true;
+    if (/duplicate key|products_sku_idx|unique/i.test(hien.message)) return true;
+    hien = (hien as { cause?: unknown }).cause;
+  }
+  return false;
 }
 
 export async function taoSanPham(input: TaoSanPhamInput, tx?: Tx): Promise<SanPham> {
