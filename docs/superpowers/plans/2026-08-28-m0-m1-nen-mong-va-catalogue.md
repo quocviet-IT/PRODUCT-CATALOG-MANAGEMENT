@@ -765,6 +765,7 @@ export async function dangXuat(): Promise<void> {
 - [ ] **Step 8: Viết trang đăng nhập `src/app/login/page.tsx`**
 
 ```tsx
+import { redirect } from "next/navigation";
 import { dangNhap } from "@/auth/actions";
 import { vi } from "@/messages/vi";
 
@@ -785,7 +786,10 @@ export default async function TrangDangNhap({
   async function guiForm(form: FormData) {
     "use server";
     const ma_loi = await dangNhap(null, form);
-    if (ma_loi) throw new Error(ma_loi);
+    // Phai redirect chu KHONG duoc throw: dangNhap tra ve chuoi ma loi (khong phai
+    // NEXT_REDIRECT), nen throw se thanh loi khong ai bat va hien man hinh loi cua
+    // Next thay vi khung canh bao ngay tren form.
+    if (ma_loi) redirect(`/login?loi=${ma_loi}`);
   }
 
   return (
