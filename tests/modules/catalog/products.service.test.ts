@@ -84,6 +84,22 @@ describe("nghiep vu san pham", () => {
     });
   });
 
+  it("anhDaiDien tra ve khoa thumb cua anh chinh, khong phai id cua chinh no", async () => {
+    await withRollback(async (tx) => {
+      const sp = await taoSanPham({ sku: "SP042", name: "SanPhamAnhChinh042" }, tx);
+      // id cua hang anh (uuid tu sinh) khac hoan toan productId — neu subquery lo
+      // lai so sanh "product_images"."id" thay vi "products"."id" (hai bang deu co
+      // cot ten "id") thi WHERE se khong bao gio khop va tra ve null.
+      await tx.insert(productImages).values({
+        productId: sp.id, storageKey: "k", variants: { thumb: "thumb-key-042", medium: "m", large: "l" },
+        width: 10, height: 10, bytes: 1, contentHash: "hash-042", isPrimary: true,
+      });
+      const kq = await timSanPham({ tuKhoa: "sanphamanhchinh042" }, { trang: 1, moiTrang: 20 }, tx);
+      expect(kq.ds).toHaveLength(1);
+      expect(kq.ds[0].anhDaiDien).toBe("thumb-key-042");
+    });
+  });
+
   it("cap nhat hang loat tra ve so dong da doi", async () => {
     await withRollback(async (tx) => {
       const a = await taoSanPham({ sku: "SP050", name: "A" }, tx);
