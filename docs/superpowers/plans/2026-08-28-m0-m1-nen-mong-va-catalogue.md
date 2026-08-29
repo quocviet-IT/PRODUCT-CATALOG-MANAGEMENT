@@ -1179,7 +1179,7 @@ Phủ yêu cầu **B1**. Task này chỉ viết hàm thuần, chưa chạm cơ s
   - `laToTien(path: string): string[]` — trả danh sách id tổ tiên, không gồm chính nó
   - `laConCua(path: string, pathCha: string): boolean`
   - `doiPathKhiChuyenNhanh(pathCu: string, pathGocCu: string, pathGocMoi: string): string` — dùng khi kéo thả một nhánh sang chỗ khác
-  - `taoVongLap(pathNut: string, idCha: string): boolean` — chặn kéo một nút vào chính con của nó
+  - `taoVongLap(pathDich: string, idNutDangDi: string): boolean` — chặn kéo một nút vào chính nó hoặc vào con cháu của nó. **Tham số 1 là path của đích đến, tham số 2 là id của nút đang di chuyển** — gọi ngược thứ tự sẽ không chặn được gì
 
 - [ ] **Step 1: Viết test**
 
@@ -1246,6 +1246,15 @@ describe("taoVongLap", () => {
   it("cho phep keo sang nhanh khac", () => {
     expect(taoVongLap("/a/b/", "z")).toBe(false);
   });
+
+  it("ghim chieu goi: tham so 1 la path DICH, tham so 2 la id nut DANG DI CHUYEN", () => {
+    // Cay: goc "g" co con "c".
+    // Keo "g" xuong duoi "c" -> vong lap, phai chan.
+    expect(taoVongLap("/g/c/", "g")).toBe(true);
+    // Keo "c" len duoi "g" -> hop le, khong duoc chan.
+    // Neu ai do goi nguoc thu tu thi ca hai dong tren se cho ket qua nguoc lai.
+    expect(taoVongLap("/g/", "c")).toBe(false);
+  });
 });
 ```
 
@@ -1284,9 +1293,24 @@ export function doiPathKhiChuyenNhanh(
   return pathGocMoi + pathCu.slice(pathGocCu.length);
 }
 
-/** Keo nut vao chinh no hoac vao mot to tien cua no se tao vong lap. */
-export function taoVongLap(pathNut: string, idChaMoi: string): boolean {
-  return pathNut.split("/").filter(Boolean).includes(idChaMoi);
+/**
+ * Kiem tra viec chuyen mot nut vao mot vi tri dich co tao vong lap khong.
+ *
+ * CHIEU GOI RAT QUAN TRONG — de goi nguoc:
+ *   taoVongLap(<path cua DICH DEN>, <id cua nut DANG DI CHUYEN>)
+ *
+ * Vong lap xay ra khi dich den chinh la nut do, hoac la CON CHAU cua no —
+ * tuc id cua nut dang di chuyen xuat hien trong path cua dich den.
+ *
+ * Vi du cay a -> b:
+ *   taoVongLap("/a/b/", "a") === true   // keo a xuong duoi con b cua no: vong lap
+ *   taoVongLap("/a/", "b")   === false  // keo b len duoi cha a: hop le
+ *
+ * Goi nguoc thu tu se tra ve false cho dung truong hop vong lap that,
+ * tuc la mo cong cho cay tu tach nhanh ma khong bao loi.
+ */
+export function taoVongLap(pathDich: string, idNutDangDi: string): boolean {
+  return pathDich.split("/").filter(Boolean).includes(idNutDangDi);
 }
 ```
 
@@ -1387,6 +1411,32 @@ describe("nghiep vu danh muc", () => {
       const a = await taoDanhMuc({ name: "A", parentId: null }, tx);
       const b = await taoDanhMuc({ name: "B", parentId: a.id }, tx);
       await expect(chuyenNhanh(a.id, b.id, tx)).rejects.toThrow(LoiVongLap);
+    });
+  });
+
+  it("chan chuyen mot nut vao chinh no", async () => {
+    await withRollback(async (tx) => {
+      const a = await taoDanhMuc({ name: "A", parentId: null }, tx);
+      await expect(chuyenNhanh(a.id, a.id, tx)).rejects.toThrow(LoiVongLap);
+    });
+  });
+
+  it("chan chuyen vao chau (khong chi con truc tiep)", async () => {
+    await withRollback(async (tx) => {
+      const a = await taoDanhMuc({ name: "A", parentId: null }, tx);
+      const b = await taoDanhMuc({ name: "B", parentId: a.id }, tx);
+      const c = await taoDanhMuc({ name: "C", parentId: b.id }, tx);
+      await expect(chuyenNhanh(a.id, c.id, tx)).rejects.toThrow(LoiVongLap);
+    });
+  });
+
+  it("cho phep chuyen len lam nut goc", async () => {
+    await withRollback(async (tx) => {
+      const a = await taoDanhMuc({ name: "A", parentId: null }, tx);
+      const b = await taoDanhMuc({ name: "B", parentId: a.id }, tx);
+      await chuyenNhanh(b.id, null, tx);
+      const ds = await layTatCa(tx);
+      expect(ds.find((d) => d.id === b.id)!.path).toBe(`/${b.id}/`);
     });
   });
 
@@ -1568,14 +1618,16 @@ export async function chuyenNhanh(
 ): Promise<void> {
   const nut = await repo.layTheoId(id, tx);
   if (!nut) throw new Error(`Không tìm thấy danh mục ${id}`);
-  if (parentIdMoi !== null && (parentIdMoi === id || taoVongLap(nut.path, parentIdMoi))) {
-    throw new LoiVongLap();
-  }
 
   let pathChaMoi: string | null = null;
   if (parentIdMoi !== null) {
     const cha = await repo.layTheoId(parentIdMoi, tx);
     if (!cha) throw new Error(`Không tìm thấy danh mục cha ${parentIdMoi}`);
+    // Chieu goi bat buoc: (path cua DICH DEN, id cua nut DANG DI CHUYEN).
+    // Goi nguoc lai se tra ve false dung o truong hop vong lap that.
+    // Truong hop keo nut vao chinh no cung da nam trong phep kiem tra nay,
+    // vi khi do cha.path chinh la nut.path va da chua id.
+    if (taoVongLap(cha.path, id)) throw new LoiVongLap();
     pathChaMoi = cha.path;
   }
 
