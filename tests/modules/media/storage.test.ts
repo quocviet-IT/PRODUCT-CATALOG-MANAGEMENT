@@ -14,17 +14,25 @@ describe("dungKhoa", () => {
 describe("Supabase Storage", () => {
   it("ghi, ky URL roi xoa duoc mot tep", async () => {
     const khoa = `test/${randomUUID()}.txt`;
-    await ghiTep(khoa, Buffer.from("xin chao"), "text/plain");
 
-    const url = await layUrlCoKy(khoa, 60);
-    expect(url).toContain(khoa);
+    // try/finally la BAT BUOC: bucket nay la that va dung chung. Neu mot assertion
+    // do o giua, khong co finally thi doi tuong bi bo lai vinh vien tren ha tang that.
+    try {
+      await ghiTep(khoa, Buffer.from("xin chao"), "text/plain");
 
-    const res = await fetch(url);
-    expect(res.status).toBe(200);
-    expect(await res.text()).toBe("xin chao");
+      const url = await layUrlCoKy(khoa, 60);
+      expect(url).toContain(khoa);
 
-    await xoaTep([khoa]);
-    const sau = await fetch(await layUrlCoKy(khoa, 60).catch(() => url));
-    expect(sau.status).not.toBe(200);
+      const res = await fetch(url);
+      expect(res.status).toBe(200);
+      expect(await res.text()).toBe("xin chao");
+    } finally {
+      await xoaTep([khoa]);
+    }
+
+    // Khang dinh TRUC TIEP: sau khi xoa thi ky lai phai that bai.
+    // Khong duoc dua vao viec URL cu bi tu choi — cach do chi dung nho mot chuoi
+    // hanh vi trung hop, va se am tham mat rang neu layUrlCoKy doi sang tra ve null.
+    await expect(layUrlCoKy(khoa, 60)).rejects.toThrow();
   }, 30_000);
 });
