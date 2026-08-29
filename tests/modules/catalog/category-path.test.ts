@@ -58,4 +58,12 @@ describe("taoVongLap", () => {
   it("cho phep keo sang nhanh khac", () => {
     expect(taoVongLap("/a/b/", "z")).toBe(false);
   });
+  it("ghim chieu goi: tham so 1 la path DICH, tham so 2 la id nut DANG DI CHUYEN", () => {
+    // Cay: goc "g" co con "c".
+    // Keo "g" xuong duoi "c" -> vong lap, phai chan.
+    expect(taoVongLap("/g/c/", "g")).toBe(true);
+    // Keo "c" len duoi "g" -> hop le, khong duoc chan.
+    // Neu ai do goi nguoc thu tu thi ca hai dong tren se cho ket qua nguoc lai.
+    expect(taoVongLap("/g/", "c")).toBe(false);
+  });
 });
