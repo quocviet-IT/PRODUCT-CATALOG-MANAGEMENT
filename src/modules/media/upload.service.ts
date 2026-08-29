@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { xuLyAnh, BIEN_THE, LoiAnhKhongHopLe, type TenBienThe } from "./image-processor";
-import { dungKhoa, ghiTep } from "./storage";
+import { dungKhoa, ghiTep, xoaTep } from "./storage";
 import * as anhRepo from "./images.repo";
 import { db } from "@/db/client";
 import { taoSanPham } from "@/modules/catalog/products.service";
@@ -51,48 +51,61 @@ export async function napMotTep(
       return { tenTep: tep.ten, trangThai: "trung", productIdDaCo: trung.productId };
     }
 
-    // Tao san pham VA chen dong anh trong CUNG mot giao dich: neu khong, san pham
-    // se commit ngay va bi lo ra ngoai (chua co anh nao) trong luc cac luot ghiTep
-    // ben duoi con dang chay — mot truy van "san pham chua co anh" chay dong thoi se
-    // thay san pham "ma" nay. Neu ghiTep loi giua chung, giao dich cuon lai va khong
-    // de lai san pham rong nao trong CSDL (du vai tep goc/bien the co the con vuong
-    // lai tren Storage — Storage khong nam trong pham vi giao dich Postgres).
-    const { productId, imageId } = await db.transaction(async (tx) => {
-      const sp = await taoSanPham({
-        sku: `TMP-${randomUUID().slice(0, 8).toUpperCase()}`,
-        name: tenTuTenTep(tep.ten),
-        status: "draft",
-        createdBy: boi,
-      }, tx);
+    // Sinh id TRUOC de ghi Storage xong roi moi mo giao dich.
+    // KHONG duoc dat cac lenh ghiTep BEN TRONG db.transaction: moi tep can toi 4 luot
+    // di mang ra Singapore, ma giao dich thi giu mot ket noi pooler suot thoi gian do.
+    // Lo 200 anh se giu ket noi gan het request, va pool chi co 10 -> can kiet ket noi.
+    const productId = randomUUID();
+    const imageId = randomUUID();
+    const duoiGoc = tep.ten.split(".").pop()!.toLowerCase();
+    const daGhi: string[] = [];
 
-      const imageId = randomUUID();
-      const duoiGoc = tep.ten.split(".").pop()!.toLowerCase();
-
-      const khoaGoc = dungKhoa(sp.id, imageId, "goc", duoiGoc);
+    try {
+      const khoaGoc = dungKhoa(productId, imageId, "goc", duoiGoc);
       await ghiTep(khoaGoc, tep.noiDung, `image/${duoiGoc === "jpg" ? "jpeg" : duoiGoc}`);
+      daGhi.push(khoaGoc);
 
       const bienThe = {} as Record<TenBienThe, string>;
       for (const { ten } of BIEN_THE) {
-        const khoa = dungKhoa(sp.id, imageId, ten, "webp");
+        const khoa = dungKhoa(productId, imageId, ten, "webp");
         await ghiTep(khoa, daXuLy.bienThe[ten], "image/webp");
+        daGhi.push(khoa);
         bienThe[ten] = khoa;
       }
 
-      await anhRepo.chen({
-        id: imageId,
-        productId: sp.id,
-        storageKey: khoaGoc,
-        variants: bienThe,
-        width: daXuLy.width,
-        height: daXuLy.height,
-        bytes: daXuLy.bytes,
-        contentHash: daXuLy.contentHash,
-        isPrimary: true,
-        sortOrder: 0,
-      }, tx);
+      // Giao dich chi bao quanh HAI lenh chen, khong bao gio bao qua I/O mang.
+      // Hai lenh nay phai nguyen tu voi nhau: neu san pham commit truoc dong anh,
+      // se co mot san pham nhap khong anh lo ra ngoai va bi truy van
+      // "san pham chua co anh" nhin thay.
+      await db.transaction(async (tx) => {
+        await taoSanPham({
+          id: productId,
+          sku: `TMP-${randomUUID().slice(0, 8).toUpperCase()}`,
+          name: tenTuTenTep(tep.ten),
+          status: "draft",
+          createdBy: boi,
+        }, tx);
 
-      return { productId: sp.id, imageId };
-    });
+        await anhRepo.chen({
+          id: imageId,
+          productId,
+          storageKey: khoaGoc,
+          variants: bienThe,
+          width: daXuLy.width,
+          height: daXuLy.height,
+          bytes: daXuLy.bytes,
+          contentHash: daXuLy.contentHash,
+          isPrimary: true,
+          sortOrder: 0,
+        }, tx);
+      });
+    } catch (e) {
+      // Storage khong nam trong giao dich Postgres, nen phai tu don nhung tep
+      // lan nay da ghi. Don theo kieu no luc toi da: loi khi don khong duoc che
+      // mat loi goc.
+      if (daGhi.length > 0) await xoaTep(daGhi).catch(() => {});
+      throw e;
+    }
 
     return { tenTep: tep.ten, trangThai: "thanh_cong", productId, imageId };
   } catch (e) {
