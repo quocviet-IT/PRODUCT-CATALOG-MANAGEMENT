@@ -16,6 +16,8 @@ export class LoiSkuTrung extends Error {
 }
 
 export type TaoSanPhamInput = {
+  /** Cho phep nguoi goi tu sinh id truoc, de ghi Storage xong roi moi mo giao dich. */
+  id?: string;
   sku: string;
   name: string;
   description?: string;
@@ -46,6 +48,7 @@ function laLoiTrungKhoa(e: unknown): boolean {
 export async function taoSanPham(input: TaoSanPhamInput, tx?: Tx): Promise<SanPham> {
   try {
     const r = await repo.chen({
+      ...(input.id ? { id: input.id } : {}),
       sku: input.sku,
       name: input.name,
       description: input.description ?? "",

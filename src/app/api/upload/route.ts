@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { requireUser } from "@/auth/guard";
-import { napNhieuTep, TOI_DA_TEP } from "@/modules/media/upload.service";
+import {
+  napNhieuTep, kiemTraTep, TOI_DA_TEP, type KetQuaMotTep,
+} from "@/modules/media/upload.service";
 
 export const maxDuration = 300;
 
@@ -19,9 +21,20 @@ export async function POST(req: Request): Promise<NextResponse> {
     );
   }
 
-  const ds = await Promise.all(
-    tepList.map(async (t) => ({ ten: t.name, noiDung: Buffer.from(await t.arrayBuffer()) })),
-  );
+  // Kiem tra kich thuoc TRUOC khi doc vao bo nho, va doc TUAN TU.
+  // Promise.all + arrayBuffer() se vat hoa toan bo lo cung luc: 200 tep x 20 MB
+  // la khoang 4 GB nam trong RAM, va tep qua co chi bi tu choi SAU khi da doc xong.
+  const ds: { ten: string; noiDung: Buffer }[] = [];
+  const loiSom: KetQuaMotTep[] = [];
+  for (const t of tepList) {
+    const so_bo = kiemTraTep(t.name, t.size);
+    if (!so_bo.hopLe) {
+      loiSom.push({ tenTep: t.name, trangThai: "loi", thongBao: so_bo.thongBao });
+      continue;
+    }
+    ds.push({ ten: t.name, noiDung: Buffer.from(await t.arrayBuffer()) });
+  }
 
-  return NextResponse.json({ ketQua: await napNhieuTep(ds, user.id) });
+  const ketQua = [...loiSom, ...(await napNhieuTep(ds, user.id))];
+  return NextResponse.json({ ketQua });
 }
