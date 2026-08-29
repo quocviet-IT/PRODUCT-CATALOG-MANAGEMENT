@@ -112,7 +112,7 @@ Kỳ vọng: in ra hostname dạng `db.xxxxx.supabase.co` hoặc `aws-0-ap-south
 ## Task 1: Khởi tạo dự án và tầng cấu hình
 
 **Files:**
-- Create: `package.json`, `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`, `vitest.config.ts`, `.gitignore`, `.env.example`
+- Create: `package.json`, `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`, `vitest.config.mts`, `.gitignore`, `.env.example`
 - Create: `src/lib/env.ts`
 - Create: `src/app/layout.tsx`, `src/app/globals.css`, `src/app/page.tsx`
 - Test: `tests/lib/env.test.ts`
@@ -186,7 +186,7 @@ describe("parseEnv", () => {
 
 - [ ] **Step 5: Cấu hình Vitest**
 
-Tạo `vitest.config.ts`:
+Tạo `vitest.config.mts` (duoi `.mts` danh dau ESM tuong minh; dung `.ts` se sinh canh bao "native config loader" cua Vite 4):
 
 ```ts
 import { defineConfig } from "vitest/config";

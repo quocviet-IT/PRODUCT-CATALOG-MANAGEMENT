@@ -582,10 +582,10 @@ Hai quyết định này cùng phục vụ một nguyên tắc: **một bản b�
 
 | Lớp | Lựa chọn | Lý do |
 |---|---|---|
-| Framework | Next.js 15 (App Router) + TypeScript | Render tại máy chủ cho trang khách xem: nhanh và không lộ mã nội bộ |
+| Framework | Next.js 16 (App Router) + React 19 + TypeScript | Render tại máy chủ cho trang khách xem: nhanh và không lộ mã nội bộ |
 | Giao diện quản trị | Tailwind CSS + shadcn/ui | Dựng nhanh khu vực nội bộ; không liên quan tới CSS của template |
 | CSDL và xác thực | Supabase (PostgreSQL + Auth + Storage) | Hạ tầng quản lý sẵn, đúng với quyết định không tự vận hành máy chủ |
-| Lưu trữ ảnh | Supabase Storage hoặc Cloudflare R2 + CDN | Đủ cho 50.000 ảnh; R2 không tính phí băng thông ra nếu lưu lượng lớn |
+| Lưu trữ ảnh | Supabase Storage + CDN | Đủ cho 50.000 ảnh. Đã chốt Supabase thay vì R2 để gom hạ tầng về một nhà cung cấp |
 | Xử lý ảnh | `sharp` chạy trong job nền | Nhanh, ổn định, tự chủ |
 | Hàng đợi | Bảng job trong PostgreSQL + worker | Đủ cho quy mô này; không cần thêm Redis |
 | Đọc Sheet | Google Sheets API và thư viện `xlsx` | Đọc trực tiếp, không cần tải file trung gian |
@@ -593,6 +593,12 @@ Hai quyết định này cùng phục vụ một nguyên tắc: **một bản b�
 | Làm sạch HTML | `sanitize-html` với danh sách cho phép nghiêm ngặt | Chốt chặn bảo mật cho HTML do API sinh |
 | Sinh template | Claude API, model `claude-opus-5` | Chất lượng cao nhất cho tác vụ hiếm khi gọi nhưng quyết định thẩm mỹ toàn hệ thống |
 | Triển khai | Vercel (ứng dụng) + Supabase (dữ liệu) | Không cần người vận hành máy chủ |
+
+**Phiên bản thực tế khi triển khai (2026-08-28):** Next.js 16.3.3 · React 19.2.8 · Tailwind CSS 4 · PostgreSQL 17.6 (Supabase, vùng `ap-southeast-1`). Bản PRD đầu ghi Next.js 15; `create-next-app` nay trả về 16, và không có hạng mục nào trong kế hoạch phụ thuộc API riêng của 15 nên đã chấp nhận phiên bản mới thay vì ghim ngược.
+
+**Lưu ý kết nối cơ sở dữ liệu:** phải dùng **connection pooler** của Supabase, không dùng host trực tiếp `db.<ref>.supabase.co` — host trực tiếp chỉ phục vụ IPv6. Kèm theo đó, driver bắt buộc đặt `prepare: false` khi đi qua pooler.
+
+**Tên khoá Supabase:** dự án dùng tên khoá thế hệ mới — `publishable key` (thay cho `anon`) và `secret key` (thay cho `service_role`).
 
 **Ghi chú về chi phí API:** `claude-opus-5` có giá 5 USD cho mỗi triệu token đầu vào và 25 USD cho mỗi triệu token đầu ra. Mỗi biến thể tiêu tốn khoảng 3.000 token vào và 8.000 token ra, tức 0,22 USD; mỗi lần tạo phong cách sinh 3 biến thể nên tốn khoảng **0,66 USD**. Vì API chỉ được gọi khi tạo hoặc chỉnh template — không gọi khi báo giá — tổng chi phí API cho cả vòng đời hệ thống dự kiến dưới 30 USD. Đây chính là lý do chọn tầng model cao nhất thay vì tầng rẻ hơn.
 
