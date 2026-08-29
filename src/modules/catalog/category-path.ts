@@ -28,7 +28,7 @@ export function doiPathKhiChuyenNhanh(
 /**
  * Kiem tra viec chuyen mot nut vao mot vi tri dich co tao vong lap khong.
  *
- * CHIEU GOI RAT QUAN TRONG — de goi nguoc:
+ * CHIEU GOI RAT QUAN TRONG — RAT DE BI GOI NGUOC. Dung dung thu tu nay:
  *   taoVongLap(<path cua DICH DEN>, <id cua nut DANG DI CHUYEN>)
  *
  * Vong lap xay ra khi dich den chinh la nut do, hoac la CON CHAU cua no —
