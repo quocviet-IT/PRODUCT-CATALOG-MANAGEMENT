@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { dangNhap } from "@/auth/actions";
 import { vi } from "@/messages/vi";
 
@@ -18,7 +19,7 @@ export default async function TrangDangNhap({
   async function guiForm(form: FormData) {
     "use server";
     const ma_loi = await dangNhap(null, form);
-    if (ma_loi) throw new Error(ma_loi);
+    if (ma_loi) redirect(`/login?loi=${ma_loi}`);
   }
 
   return (
