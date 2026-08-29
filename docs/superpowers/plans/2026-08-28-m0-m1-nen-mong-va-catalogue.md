@@ -728,6 +728,10 @@ export const vi = {
     bi_vo_hieu_hoa: "Tài khoản đã bị vô hiệu hoá. Liên hệ quản trị viên.",
     khong_du_quyen: "Bạn không có quyền truy cập trang này.",
   },
+  danh_muc: {
+    ten_moi_placeholder: "Tên danh mục mới",
+    danh_muc_goc: "— Danh mục gốc —",
+  },
   dieu_huong: {
     catalogue: "Catalogue",
     danh_muc: "Danh mục",
@@ -1674,6 +1678,7 @@ Expected: PASS — 7 test.
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/auth/guard";
+import { db } from "@/db/client";
 import * as service from "@/modules/catalog/categories.service";
 
 export async function themDanhMuc(form: FormData): Promise<void> {
@@ -1687,7 +1692,8 @@ export async function themDanhMuc(form: FormData): Promise<void> {
 
 export async function doiTenDanhMuc(form: FormData): Promise<void> {
   await requireAdmin();
-  const id = String(form.get("id"));
+  const id = String(form.get("id") ?? "");
+  if (!id) return;
   const name = String(form.get("name") ?? "").trim();
   if (!name) return;
   await service.doiTen(id, name);
@@ -1696,9 +1702,15 @@ export async function doiTenDanhMuc(form: FormData): Promise<void> {
 
 export async function xoaDanhMuc(form: FormData): Promise<void> {
   await requireAdmin();
-  const id = String(form.get("id"));
+  const id = String(form.get("id") ?? "");
+  if (!id) return;
   const chuyen = String(form.get("chuyen_san") ?? "") || null;
-  await service.xoaDanhMuc(id, chuyen);
+  // Xoa mot nhanh gom NHIEU lenh ghi: chuyen san pham di, roi xoa tung danh muc.
+  // Phai boc trong mot giao dich — neu khong, mot lenh hong giua chung se de lai
+  // trang thai nua voi: san pham da bi chuyen di trong khi danh muc van con.
+  await db.transaction(async (tx) => {
+    await service.xoaDanhMuc(id, chuyen, tx);
+  });
   revalidatePath("/admin/categories");
 }
 ```
@@ -1734,7 +1746,9 @@ function Nhanh({ nut, mucLui }: { nut: NutCay; mucLui: number }) {
 
 export default async function TrangDanhMuc() {
   const user = await requireUser();
-  const cay = dungCay(await layTatCa());
+  // Lay mot lan roi dung cho ca cay lan o chon danh muc cha.
+  const phang = await layTatCa();
+  const cay = dungCay(phang);
 
   return (
     <div className="max-w-2xl">
@@ -1746,11 +1760,11 @@ export default async function TrangDanhMuc() {
 
       {user.role === "admin" && (
         <form action={themDanhMuc} className="flex gap-2">
-          <input name="name" placeholder="Tên danh mục mới" required
+          <input name="name" placeholder={vi.danh_muc.ten_moi_placeholder} required
                  className="flex-1 rounded border px-3 py-2 text-sm" />
           <select name="parent_id" className="rounded border px-3 py-2 text-sm">
-            <option value="">— Danh mục gốc —</option>
-            {(await layTatCa()).map((d) => (
+            <option value="">{vi.danh_muc.danh_muc_goc}</option>
+            {phang.map((d) => (
               <option key={d.id} value={d.id}>{d.name}</option>
             ))}
           </select>
