@@ -38,4 +38,16 @@ export const vi = {
   quan_tri: {
     xin_chao: "Xin chào",
   },
+  tai_anh: {
+    mo_ta: "Chọn tối đa 200 ảnh, mỗi ảnh không quá 20 MB. Mỗi ảnh tạo ra một sản phẩm nháp — sau đó vào mục Sản phẩm để điền mã, tên và giá.",
+    dang_tai_len: "Đang tải lên…",
+    nut_tai_len: "Tải lên",
+    that_bai: "Tải lên thất bại.",
+    khong_ket_noi: "Không kết nối được máy chủ. Kiểm tra đường truyền rồi thử lại.",
+    thanh_cong: "Thành công",
+    trung: "Trùng",
+    loi: "Lỗi",
+    da_nap: "✓ Đã nạp",
+    da_co_trong_kho: "Ảnh đã có trong kho",
+  },
 } as const;
