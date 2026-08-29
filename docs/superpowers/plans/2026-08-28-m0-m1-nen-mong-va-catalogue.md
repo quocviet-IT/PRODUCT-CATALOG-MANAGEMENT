@@ -886,21 +886,28 @@ export default function Trang() {
 
 - [ ] **Step 10: Tạo tài khoản admin đầu tiên**
 
-Tạo `scripts/tao-admin.ts`:
+Tạo `scripts/tao-admin.mts` (duoi `.mts` la bat buoc: file nay dung top-level await, ma package.json khong dat "type": "module" nen tsx se bien dich `.ts` thanh CommonJS va bao loi "Top-level await is currently not supported with the cjs output format"):
 
 ```ts
 import { config } from "dotenv";
+
+// PHAI nap bien moi truong TRUOC khi import bat cu module nao doc chung.
+// Trong ESM moi lenh `import` tinh deu duoc NANG LEN va chay truoc cac cau lenh
+// thuong, nen `import { db } from "../src/db/client"` se goi getEnv() truoc khi
+// dong config() nay kip chay. Vi vay cac module do phai nap bang import() dong
+// o duoi, khong duoc dat o dau file.
 config({ path: ".env.local" });
-import { createClient } from "@supabase/supabase-js";
-import { db } from "../src/db/client";
-import { users } from "../src/db/schema";
-import { getEnv } from "../src/lib/env";
 
 const [email, matKhau, hoTen] = process.argv.slice(2);
 if (!email || !matKhau || !hoTen) {
-  console.error("Dung: npx tsx scripts/tao-admin.ts <email> <mat-khau> <ho-ten>");
+  console.error('Dung: npx tsx scripts/tao-admin.mts <email> <mat-khau> "<ho ten>"');
   process.exit(1);
 }
+
+const { createClient } = await import("@supabase/supabase-js");
+const { getEnv } = await import("../src/lib/env");
+const { db } = await import("../src/db/client");
+const { users } = await import("../src/db/schema");
 
 const env = getEnv();
 const admin = createClient(env.NEXT_PUBLIC_SUPABASE_URL, env.SUPABASE_SECRET_KEY);
@@ -920,7 +927,7 @@ process.exit(0);
 Chạy:
 
 ```bash
-npx tsx scripts/tao-admin.ts admin@congty.vn MatKhauManh123 "Quản trị viên"
+npx tsx scripts/tao-admin.mts admin@congty.vn MatKhauManh123 "Quản trị viên"
 ```
 
 Expected: in ra `Da tao admin: admin@congty.vn`
@@ -4052,7 +4059,7 @@ Hệ thống quản lý catalogue ảnh sản phẩm và tạo báo giá trực 
 1. Chép `.env.example` thành `.env.local` rồi điền khoá Supabase.
 2. `npm install`
 3. `npm run db:migrate` — áp lược đồ lên Supabase
-4. `npx tsx scripts/tao-admin.ts <email> <mat-khau> "<Họ tên>"` — tạo tài khoản admin đầu tiên
+4. `npx tsx scripts/tao-admin.mts <email> <mat-khau> "<Họ tên>"` — tạo tài khoản admin đầu tiên
 5. `npm run dev` — mở http://localhost:3000
 
 ## Lệnh
