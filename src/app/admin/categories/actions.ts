@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/auth/guard";
+import { db } from "@/db/client";
 import * as service from "@/modules/catalog/categories.service";
 
 export async function themDanhMuc(form: FormData): Promise<void> {
@@ -15,7 +16,8 @@ export async function themDanhMuc(form: FormData): Promise<void> {
 
 export async function doiTenDanhMuc(form: FormData): Promise<void> {
   await requireAdmin();
-  const id = String(form.get("id"));
+  const id = String(form.get("id") ?? "");
+  if (!id) return;
   const name = String(form.get("name") ?? "").trim();
   if (!name) return;
   await service.doiTen(id, name);
@@ -24,8 +26,14 @@ export async function doiTenDanhMuc(form: FormData): Promise<void> {
 
 export async function xoaDanhMuc(form: FormData): Promise<void> {
   await requireAdmin();
-  const id = String(form.get("id"));
+  const id = String(form.get("id") ?? "");
+  if (!id) return;
   const chuyen = String(form.get("chuyen_san") ?? "") || null;
-  await service.xoaDanhMuc(id, chuyen);
+  // Xoa mot nhanh gom NHIEU lenh ghi: chuyen san pham di, roi xoa tung danh muc.
+  // Phai boc trong mot giao dich — neu khong, mot lenh hong giua chung se de lai
+  // trang thai nua voi: san pham da bi chuyen di trong khi danh muc van con.
+  await db.transaction(async (tx) => {
+    await service.xoaDanhMuc(id, chuyen, tx);
+  });
   revalidatePath("/admin/categories");
 }

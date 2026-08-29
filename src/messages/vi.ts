@@ -20,6 +20,10 @@ export const vi = {
     bi_vo_hieu_hoa: "Tài khoản đã bị vô hiệu hoá. Liên hệ quản trị viên.",
     khong_du_quyen: "Bạn không có quyền truy cập trang này.",
   },
+  danh_muc: {
+    ten_moi_placeholder: "Tên danh mục mới",
+    danh_muc_goc: "— Danh mục gốc —",
+  },
   dieu_huong: {
     catalogue: "Catalogue",
     danh_muc: "Danh mục",

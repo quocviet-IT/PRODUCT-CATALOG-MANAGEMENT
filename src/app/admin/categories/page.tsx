@@ -26,7 +26,9 @@ function Nhanh({ nut, mucLui }: { nut: NutCay; mucLui: number }) {
 
 export default async function TrangDanhMuc() {
   const user = await requireUser();
-  const cay = dungCay(await layTatCa());
+  // Lay mot lan roi dung cho ca cay lan o chon danh muc cha.
+  const phang = await layTatCa();
+  const cay = dungCay(phang);
 
   return (
     <div className="max-w-2xl">
@@ -38,11 +40,11 @@ export default async function TrangDanhMuc() {
 
       {user.role === "admin" && (
         <form action={themDanhMuc} className="flex gap-2">
-          <input name="name" placeholder="Tên danh mục mới" required
+          <input name="name" placeholder={vi.danh_muc.ten_moi_placeholder} required
                  className="flex-1 rounded border px-3 py-2 text-sm" />
           <select name="parent_id" className="rounded border px-3 py-2 text-sm">
-            <option value="">— Danh mục gốc —</option>
-            {(await layTatCa()).map((d) => (
+            <option value="">{vi.danh_muc.danh_muc_goc}</option>
+            {phang.map((d) => (
               <option key={d.id} value={d.id}>{d.name}</option>
             ))}
           </select>
