@@ -2499,6 +2499,8 @@ export class LoiSkuTrung extends Error {
 }
 
 export type TaoSanPhamInput = {
+  /** Cho phep nguoi goi tu sinh id truoc, de ghi Storage xong roi moi mo giao dich. */
+  id?: string;
   sku: string;
   name: string;
   description?: string;
@@ -2530,6 +2532,7 @@ function laLoiTrungKhoa(e: unknown): boolean {
 export async function taoSanPham(input: TaoSanPhamInput, tx?: Tx): Promise<SanPham> {
   try {
     const r = await repo.chen({
+      ...(input.id ? { id: input.id } : {}),
       sku: input.sku,
       name: input.name,
       description: input.description ?? "",
@@ -2768,8 +2771,9 @@ export async function layTheoSanPham(productId: string, tx?: Tx) {
 ```ts
 import { randomUUID } from "node:crypto";
 import { xuLyAnh, BIEN_THE, LoiAnhKhongHopLe, type TenBienThe } from "./image-processor";
-import { dungKhoa, ghiTep } from "./storage";
+import { dungKhoa, ghiTep, xoaTep } from "./storage";
 import * as anhRepo from "./images.repo";
+import { db } from "@/db/client";
 import { taoSanPham } from "@/modules/catalog/products.service";
 
 export const TOI_DA_BYTE = 20 * 1024 * 1024;
@@ -2818,40 +2822,63 @@ export async function napMotTep(
       return { tenTep: tep.ten, trangThai: "trung", productIdDaCo: trung.productId };
     }
 
-    const sp = await taoSanPham({
-      sku: `TMP-${randomUUID().slice(0, 8).toUpperCase()}`,
-      name: tenTuTenTep(tep.ten),
-      status: "draft",
-      createdBy: boi,
-    });
-
+    // Sinh id TRUOC de ghi Storage xong roi moi mo giao dich.
+    // KHONG duoc dat cac lenh ghiTep BEN TRONG db.transaction: moi tep can toi 4 luot
+    // di mang ra Singapore, ma giao dich thi giu mot ket noi pooler suot thoi gian do.
+    // Lo 200 anh se giu ket noi gan het request, va pool chi co 10 -> can kiet ket noi.
+    const productId = randomUUID();
     const imageId = randomUUID();
     const duoiGoc = tep.ten.split(".").pop()!.toLowerCase();
+    const daGhi: string[] = [];
 
-    const khoaGoc = dungKhoa(sp.id, imageId, "goc", duoiGoc);
-    await ghiTep(khoaGoc, tep.noiDung, `image/${duoiGoc === "jpg" ? "jpeg" : duoiGoc}`);
+    try {
+      const khoaGoc = dungKhoa(productId, imageId, "goc", duoiGoc);
+      await ghiTep(khoaGoc, tep.noiDung, `image/${duoiGoc === "jpg" ? "jpeg" : duoiGoc}`);
+      daGhi.push(khoaGoc);
 
-    const bienThe = {} as Record<TenBienThe, string>;
-    for (const { ten } of BIEN_THE) {
-      const khoa = dungKhoa(sp.id, imageId, ten, "webp");
-      await ghiTep(khoa, daXuLy.bienThe[ten], "image/webp");
-      bienThe[ten] = khoa;
+      const bienThe = {} as Record<TenBienThe, string>;
+      for (const { ten } of BIEN_THE) {
+        const khoa = dungKhoa(productId, imageId, ten, "webp");
+        await ghiTep(khoa, daXuLy.bienThe[ten], "image/webp");
+        daGhi.push(khoa);
+        bienThe[ten] = khoa;
+      }
+
+      // Giao dich chi bao quanh HAI lenh chen, khong bao gio bao qua I/O mang.
+      // Hai lenh nay phai nguyen tu voi nhau: neu san pham commit truoc dong anh,
+      // se co mot san pham nhap khong anh lo ra ngoai va bi truy van
+      // "san pham chua co anh" nhin thay.
+      await db.transaction(async (tx) => {
+        await taoSanPham({
+          id: productId,
+          sku: `TMP-${randomUUID().slice(0, 8).toUpperCase()}`,
+          name: tenTuTenTep(tep.ten),
+          status: "draft",
+          createdBy: boi,
+        }, tx);
+
+        await anhRepo.chen({
+          id: imageId,
+          productId,
+          storageKey: khoaGoc,
+          variants: bienThe,
+          width: daXuLy.width,
+          height: daXuLy.height,
+          bytes: daXuLy.bytes,
+          contentHash: daXuLy.contentHash,
+          isPrimary: true,
+          sortOrder: 0,
+        }, tx);
+      });
+    } catch (e) {
+      // Storage khong nam trong giao dich Postgres, nen phai tu don nhung tep
+      // lan nay da ghi. Don theo kieu no luc toi da: loi khi don khong duoc che
+      // mat loi goc.
+      if (daGhi.length > 0) await xoaTep(daGhi).catch(() => {});
+      throw e;
     }
 
-    await anhRepo.chen({
-      id: imageId,
-      productId: sp.id,
-      storageKey: khoaGoc,
-      variants: bienThe,
-      width: daXuLy.width,
-      height: daXuLy.height,
-      bytes: daXuLy.bytes,
-      contentHash: daXuLy.contentHash,
-      isPrimary: true,
-      sortOrder: 0,
-    });
-
-    return { tenTep: tep.ten, trangThai: "thanh_cong", productId: sp.id, imageId };
+    return { tenTep: tep.ten, trangThai: "thanh_cong", productId, imageId };
   } catch (e) {
     const thongBao = e instanceof LoiAnhKhongHopLe
       ? e.message
@@ -2883,7 +2910,9 @@ Expected: PASS — 6 test. Test gọi Supabase thật nên mất khoảng 30–6
 ```ts
 import { NextResponse } from "next/server";
 import { requireUser } from "@/auth/guard";
-import { napNhieuTep, TOI_DA_TEP } from "@/modules/media/upload.service";
+import {
+  napNhieuTep, kiemTraTep, TOI_DA_TEP, type KetQuaMotTep,
+} from "@/modules/media/upload.service";
 
 export const maxDuration = 300;
 
@@ -2902,11 +2931,22 @@ export async function POST(req: Request): Promise<NextResponse> {
     );
   }
 
-  const ds = await Promise.all(
-    tepList.map(async (t) => ({ ten: t.name, noiDung: Buffer.from(await t.arrayBuffer()) })),
-  );
+  // Kiem tra kich thuoc TRUOC khi doc vao bo nho, va doc TUAN TU.
+  // Promise.all + arrayBuffer() se vat hoa toan bo lo cung luc: 200 tep x 20 MB
+  // la khoang 4 GB nam trong RAM, va tep qua co chi bi tu choi SAU khi da doc xong.
+  const ds: { ten: string; noiDung: Buffer }[] = [];
+  const loiSom: KetQuaMotTep[] = [];
+  for (const t of tepList) {
+    const so_bo = kiemTraTep(t.name, t.size);
+    if (!so_bo.hopLe) {
+      loiSom.push({ tenTep: t.name, trangThai: "loi", thongBao: so_bo.thongBao });
+      continue;
+    }
+    ds.push({ ten: t.name, noiDung: Buffer.from(await t.arrayBuffer()) });
+  }
 
-  return NextResponse.json({ ketQua: await napNhieuTep(ds, user.id) });
+  const ketQua = [...loiSom, ...(await napNhieuTep(ds, user.id))];
+  return NextResponse.json({ ketQua });
 }
 ```
 
