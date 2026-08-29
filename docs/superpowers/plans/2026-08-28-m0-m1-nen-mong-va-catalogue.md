@@ -1573,12 +1573,19 @@ export class LoiVongLap extends Error {
 
 export type NutCay = DanhMuc & { con: NutCay[] };
 
-/** Ham thuan — dung cay tu danh sach phang, giu thu tu da sap xep cua dau vao. */
+/**
+ * Ham thuan — dung cay tu danh sach phang.
+ *
+ * Tu sap xep theo sortOrder thay vi tin vao thu tu cua dau vao, de nguoi goi
+ * khong the dung sai. Array.sort on dinh nen cac nut cung sortOrder van giu
+ * thu tu phu (theo ten) ma layTatCa da sap tu truy van SQL.
+ */
 export function dungCay(ds: DanhMuc[]): NutCay[] {
+  const daySapXep = [...ds].sort((a, b) => a.sortOrder - b.sortOrder);
   const bang = new Map<string, NutCay>();
-  for (const d of ds) bang.set(d.id, { ...d, con: [] });
+  for (const d of daySapXep) bang.set(d.id, { ...d, con: [] });
   const goc: NutCay[] = [];
-  for (const d of ds) {
+  for (const d of daySapXep) {
     const nut = bang.get(d.id)!;
     const cha = d.parentId ? bang.get(d.parentId) : undefined;
     if (cha) cha.con.push(nut);
