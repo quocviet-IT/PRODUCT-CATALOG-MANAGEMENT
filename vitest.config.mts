@@ -9,6 +9,9 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts"],
     setupFiles: ["tests/setup.ts"],
+    // Cac test cham qua Supabase pooler (ap-southeast-1); vitest mac dinh 5000ms
+    // qua ngan cho lan ket noi dau (cold start) va gay flaky that bai.
+    testTimeout: 15000,
   },
   resolve: {
     alias: { "@": path.resolve(sourceDir, "src") },
