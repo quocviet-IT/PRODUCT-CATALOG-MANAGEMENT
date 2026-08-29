@@ -57,9 +57,16 @@ export async function tim(
       description: products.description, listPrice: products.listPrice,
       currency: products.currency, categoryId: products.categoryId,
       attributes: products.attributes, status: products.status,
+      // "products" va "product_images" deu co cot rieng ten "id". Ben trong subquery
+      // nay pham vi FROM la product_images, nen mot the hien Column binh thuong cho
+      // products.id (${products.id}) bi Drizzle in ra KHONG co tien to bang khi day
+      // la truy van don-bang o tang ngoai — Postgres se hieu no la product_images.id
+      // (cung ten) thay vi products.id, khien WHERE khong bao gio khop va anhDaiDien
+      // luon ra null du san pham co anh that. Phai ep tien to bang tuong minh bang
+      // sql.raw() de tranh dung phai toi uu hoa "don bang" nay cua Drizzle.
       anhDaiDien: raw<string | null>`(
         SELECT ${productImages.variants} ->> 'thumb' FROM ${productImages}
-        WHERE ${productImages.productId} = ${products.id}
+        WHERE ${productImages.productId} = ${raw.raw('"products"."id"')}
         ORDER BY ${productImages.isPrimary} DESC, ${productImages.sortOrder} ASC LIMIT 1
       )`,
     })
