@@ -189,7 +189,7 @@ Route `/api/anh-drive/[fileId]` cho mỗi yêu cầu:
 
 ## 8. Giao diện
 
-Áp hệ thiết kế Hùng Phát. Bề mặt thuộc loại **công cụ nội bộ**: cùng bộ token thương hiệu nhưng đệm chặt hơn (`p-5`), cỡ chữ lớn nhất dừng ở 24px, chỉ dùng bốn cỡ chữ.
+Áp hệ thiết kế Hùng Phát. Bề mặt thuộc loại **công cụ nội bộ**: cùng bộ token thương hiệu nhưng đệm chặt hơn (`p-5`). Cỡ chữ trải từ 10px (nhãn cảnh báo trên thẻ) tới 28px (tiêu đề trang) — xem thang cỡ chữ cụ thể theo từng khối ở §8.4.
 
 ### 8.1 Token
 
@@ -235,12 +235,19 @@ Hệ thiết kế dùng màu này cho nhãn 11px in hoa — cỡ đó không đ�
 
 ### 8.3 Ngân sách màu hồng
 
-Hệ thiết kế cho phép tối đa ba lần xuất hiện mỗi màn hình. Trang này dùng hai:
+Hệ thiết kế cho phép tối đa ba lần xuất hiện mỗi màn hình. Trang có hai màn hình hiển thị, không bao giờ xuất hiện cùng lúc: khi đọc bảng tính lỗi, trang trả về sớm và không render dải số, bộ lọc hay thẻ nào — nên đây là hai màn hình tách biệt, mỗi màn hình tính ngân sách riêng.
+
+**Màn hình lưới** (đường đi bình thường) dùng đủ ba:
 
 1. Viền dưới ô tìm kiếm khi focus, 2px `hp-pink`
 2. Gạch chân bộ lọc đang bật, 2px `hp-pink`
+3. Nút "Lọc" khi rê chuột, nền `hp-pink-strong`
 
-Dấu cảnh báo trên thẻ **không** dùng hồng: số thẻ mang cảnh báo lên tới hàng chục, tô hồng hết là biến màu nhấn thành trang trí lặp — điều hệ thiết kế cấm thẳng. Thay bằng nhãn in hoa giãn chữ màu muted.
+**Màn hình lỗi** (khi không đọc được bảng tính) dùng một:
+
+1. Dòng thông báo lỗi, chữ `hp-pink-strong`
+
+Dấu cảnh báo trên thẻ **không** dùng hồng: số thẻ mang cảnh báo lên tới hàng chục, tô hồng hết là biến màu nhấn thành trang trí lặp — điều hệ thiết kế cấm thẳng. Thay bằng nhãn in hoa giãn chữ màu muted. Ô chọn "chỉ dòng có cảnh báo" cũng không dùng hồng dù luôn hiện: một checkbox là nền tô tĩnh, không phải viền focus, hover hay điểm nhấn cấu trúc — không vai nào trong ba vai được phép khớp với nó.
 
 ### 8.4 Bố cục
 

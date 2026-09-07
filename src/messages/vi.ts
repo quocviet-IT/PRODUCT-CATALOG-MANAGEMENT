@@ -100,5 +100,8 @@ export const vi = {
     co_trung: "Trùng dòng",
     co_tl_vang_lech: "Lệch TL vàng",
     loi_doc_bang: "Không đọc được bảng tính. Kiểm tra cấu hình nguồn dữ liệu rồi thử lại.",
+    chua_co_ma_mau: "— Chưa có mã mẫu —",
+    anh_chua_co_ma_mau: "Ảnh sản phẩm chưa có mã mẫu",
+    size_nhan: "Size",
   },
 } as const;
