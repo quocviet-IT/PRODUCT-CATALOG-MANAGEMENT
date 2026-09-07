@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { CoBatThuong, DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { vi } from "@/messages/vi";
 
@@ -59,7 +58,8 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
           {ds.map((d) => (
             <tr
               key={d.dongSheet}
-              className="bg-hp-card transition-colors duration-150 hover:bg-hp-inset"
+              data-dong={d.dongSheet}
+              className="cursor-pointer bg-hp-card transition-colors duration-150 hover:bg-hp-inset"
             >
               <td className={O_DU_LIEU}>
                 <div className="flex h-14 w-14 items-center justify-center bg-hp-inset">
@@ -80,16 +80,7 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
               <td className={O_SO}><Chu v={d.mo} /></td>
               <td className={`${O_DU_LIEU} min-w-[24rem]`}><Chu v={d.chiTiet} /></td>
               <td className={`${O_GON} text-hp-ink`}>
-                {/* Ma mau la cua vao trang chi tiet. Dat lien ket o CHINH o nay
-                    thay vi boc ca hang: mot hang <tr> khong the la <a> hop le,
-                    va bam nham vao o "Chi tiet SP" de sao chep se bi keo di. */}
-                <Link
-                  href={`/admin/catalogue-sheet/${d.dongSheet}`}
-                  className="underline-offset-4 transition-colors duration-150
-                             hover:text-hp-pink-strong hover:underline"
-                >
-                  {d.maMau ?? vi.catalogue_sheet.chua_co_ma_mau}
-                </Link>
+                {d.maMau ?? vi.catalogue_sheet.chua_co_ma_mau}
               </td>
               <td className={O_GON}><Chu v={d.loai} /></td>
               <td className={O_GON}><Chu v={d.dongSp} /></td>

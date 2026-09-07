@@ -5,6 +5,7 @@ import { catTrang, docBoLocTuUrl, docTrang, locDanhSach, tinhThongKe } from "@/m
 import type { CoBatThuong, DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { BangCatalogue } from "./bang";
 import { ThanhBoLoc } from "./bo-loc";
+import { NganChiTiet } from "./ngan-chi-tiet";
 import { vi } from "@/messages/vi";
 
 /**
@@ -68,8 +69,11 @@ function The({ d }: { d: DongCatalogue }) {
   const coDongTrongLuongSize = trongLuong !== null || d.size !== null;
 
   return (
-    <li className="border border-hp-rule bg-hp-card transition-colors duration-150 hover:border-hp-ink">
-      <Link href={`/admin/catalogue-sheet/${d.dongSheet}`} className="block">
+    <li
+      data-dong={d.dongSheet}
+      className="cursor-pointer border border-hp-rule bg-hp-card transition-colors
+                 duration-150 hover:border-hp-ink"
+    >
       <div className="flex aspect-[4/5] items-center justify-center bg-hp-inset">
         {d.fileIdAnh ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -110,7 +114,6 @@ function The({ d }: { d: DongCatalogue }) {
         )}
 
       </div>
-      </Link>
     </li>
   );
 }
@@ -198,12 +201,16 @@ export default async function TrangCatalogueSheet({
 
       {ds.length === 0 ? (
         <p className="text-sm text-hp-muted">{vi.catalogue_sheet.khong_khop}</p>
-      ) : kieuXem === "bang" ? (
-        <BangCatalogue ds={ds} />
       ) : (
-        <ul className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {ds.map((d) => <The key={d.dongSheet} d={d} />)}
-        </ul>
+        <NganChiTiet>
+          {kieuXem === "bang" ? (
+            <BangCatalogue ds={ds} />
+          ) : (
+            <ul className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+              {ds.map((d) => <The key={d.dongSheet} d={d} />)}
+            </ul>
+          )}
+        </NganChiTiet>
       )}
 
       {daLoc.length > 0 && (

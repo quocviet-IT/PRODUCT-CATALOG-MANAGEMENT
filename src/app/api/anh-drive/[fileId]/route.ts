@@ -1,5 +1,5 @@
 import { getSessionUser } from "@/auth/guard";
-import { layUrlAnhSheet } from "@/modules/media/anh-drive";
+import { CANH_DAI_ANH_SHEET, CO_ANH_HOP_LE, layUrlAnhSheet } from "@/modules/media/anh-drive";
 
 // fileId den tu duong dan URL nen khong tin duoc. Chan truoc khi dung no
 // de dung khoa Storage hay goi Drive.
@@ -19,7 +19,7 @@ function phanHoiRong(status: number, headers?: HeadersInit): Response {
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ fileId: string }> },
 ): Promise<Response> {
   const user = await getSessionUser();
@@ -32,8 +32,13 @@ export async function GET(
     return phanHoiRong(400);
   }
 
+  // Co anh den tu URL nen phai doi chieu danh sach cho phep: mot gia tri tuy y
+  // se sinh vo han khoa cache khac nhau trong bucket.
+  const w = Number(new URL(req.url).searchParams.get("w"));
+  const canhDai = (CO_ANH_HOP_LE as readonly number[]).includes(w) ? w : CANH_DAI_ANH_SHEET;
+
   try {
-    const url = await layUrlAnhSheet(fileId);
+    const url = await layUrlAnhSheet(fileId, canhDai);
     return phanHoiRong(302, { Location: url });
   } catch (loi) {
     // Mot anh hong khong duoc lam hong ca luoi — nguoi goi (tag <img>) chi

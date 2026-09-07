@@ -22,10 +22,11 @@ import sharp from "sharp";
 
 const { dungKhoaAnhSheet, ghiTep, tepTonTai } = await import("../src/modules/media/storage");
 const { CANH_DAI_ANH_SHEET } = await import("../src/modules/media/anh-drive");
+const CANH_DAI = Number(process.argv[3] ?? CANH_DAI_ANH_SHEET);
 
 const TIEN_TO = "https://lh3.googleusercontent.com/drive-storage/";
 // Xin ban rong 1200px roi tu thu nho — de anh 600px khong bi mem.
-const KICH_THUOC_XIN = "w1200";
+const KICH_THUOC_XIN = "w1600";
 
 // Chay: npx tsx scripts/nap-anh-mau.mts [ten-tep-token]
 const tepToken = process.argv[2] ?? "thumb-tokens.local.json";
@@ -35,7 +36,7 @@ const ids = Object.keys(tokens);
 let daCo = 0, napMoi = 0, hong = 0;
 
 for (const [i, fileId] of ids.entries()) {
-  const khoa = dungKhoaAnhSheet(fileId, CANH_DAI_ANH_SHEET);
+  const khoa = dungKhoaAnhSheet(fileId, CANH_DAI);
   const nhan = `[${i + 1}/${ids.length}] ${fileId.slice(0, 10)}...`;
 
   try {
@@ -55,8 +56,8 @@ for (const [i, fileId] of ids.entries()) {
     if (!meta.width || !meta.height) throw new Error("khong doc duoc kich thuoc");
     const rangBuoc =
       meta.width >= meta.height
-        ? { width: Math.min(meta.width, CANH_DAI_ANH_SHEET) }
-        : { height: Math.min(meta.height, CANH_DAI_ANH_SHEET) };
+        ? { width: Math.min(meta.width, CANH_DAI) }
+        : { height: Math.min(meta.height, CANH_DAI) };
 
     const nho = await sharp(goc)
       .rotate()
