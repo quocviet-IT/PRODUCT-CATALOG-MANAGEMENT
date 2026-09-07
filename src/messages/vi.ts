@@ -133,7 +133,7 @@ export const vi = {
     dem_anh: "{n} ảnh",
     chua_co_thu_muc: "Mẫu này không có thư mục ảnh trên bảng tính.",
     thu_muc_rong: "Thư mục ảnh của mẫu này đang trống.",
-    thu_vien_ngoai_mau: "Bản xem thử chỉ nạp sẵn thư viện ảnh cho 12 mẫu đầu. Mẫu này có thư mục trên Drive nhưng chưa được nạp.",
+    thu_vien_ngoai_mau: "Mẫu này có thư mục ảnh trên Drive nhưng chưa được nạp vào bản xem thử.",
     loi_doc_anh: "Không đọc được thư mục ảnh. Kiểm tra quyền truy cập Drive.",
     trang_nhan: "Trang",
     trang_truoc: "Trước",

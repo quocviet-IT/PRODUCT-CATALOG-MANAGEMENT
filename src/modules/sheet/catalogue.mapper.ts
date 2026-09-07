@@ -1,8 +1,15 @@
-/** Mot o cua Sheets API, chi giu ba truong ma man hinh nay can. */
+/** Mot o cua Sheets API, chi giu bon truong ma man hinh nay can. */
 export type OTho = {
   formattedValue?: string;
   userEnteredValue?: { formulaValue?: string; numberValue?: number };
   hyperlink?: string;
+  /**
+   * "Chip" Drive — thu nguoi dung chen bang @ hoac keo tep tu Drive vao o.
+   * Google KHONG dat lien ket cua chip vao truong hyperlink, no nam rieng o
+   * day. Bang tinh dung ca hai kieu trong cung mot cot, nen thieu truong nay
+   * la mat lien ket cua nhung dong dung chip ma khong bao loi gi.
+   */
+  chipRuns?: { chip?: { richLinkProperties?: { uri?: string; mimeType?: string } } }[];
 };
 
 export type CoBatThuong =
@@ -117,6 +124,22 @@ function chu(o: OTho | undefined): string | null {
   return v ? v : null;
 }
 
+/**
+ * Lien ket cua mot o, du no duoc tao kieu nao.
+ *
+ * Cot FOLDER HINH cua bang tinh dung CA HAI kieu: nhung dong cu la lien ket
+ * thuong (hyperlink), nhung dong moi la chip Drive (chipRuns). Doc mot kieu
+ * thoi thi mot nua so dong mat thu vien anh ma khong co dau hieu gi.
+ */
+function lienKet(o: OTho | undefined): string | null {
+  if (o?.hyperlink) return o.hyperlink;
+  for (const run of o?.chipRuns ?? []) {
+    const uri = run.chip?.richLinkProperties?.uri;
+    if (uri) return uri;
+  }
+  return null;
+}
+
 export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
   const tieuDe = (hang[DONG_TIEU_DE] ?? []).map((o) => chuanHoaTieuDe(o.formattedValue ?? ""));
 
@@ -139,7 +162,7 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
     const maMau = chu(lay(h, "maMau"));
     const mo = chu(lay(h, "mo"));
     const chiTiet = chu(lay(h, "chiTiet"));
-    const urlThuMuc = lay(h, "thuMuc")?.hyperlink ?? null;
+    const urlThuMuc = lienKet(lay(h, "thuMuc"));
     const fileIdAnh = tachFileIdAnh(lay(h, "hinh")?.userEnteredValue?.formulaValue);
 
     // includeGridData=true tra ca dong trong nhung con dinh dang (border,
