@@ -76,8 +76,10 @@ export const vi = {
     trang_thai_ngung_ban: "Ngừng bán",
   },
   catalogue_sheet: {
-    tieu_de: "Catalogue nhẫn",
-    nguon: "Nguồn — bảng tính trực tuyến",
+    tieu_de: "Catalogue Online",
+    thuong_hieu: "Hùng Phát",
+    nguon_bang_tinh: "Đọc trực tiếp từ bảng tính, làm mới mỗi 60 giây",
+    nguon_mau: "Dữ liệu mẫu — chưa nối với bảng tính",
     tim_kiem_nhan: "Tìm mã mẫu, SKU hoặc mô tả",
     chat_lieu: "Chất liệu",
     loai_xoan: "Loại xoàn",
