@@ -180,6 +180,8 @@ export const vi = {
     chep_link: "Chép link",
     da_chep: "Đã chép",
     mo_thu: "Mở thử",
+    tai_pdf_sale: "Tải PDF",
+    tai_pdf_giai_thich: "Mở bản in của catalogue này để lưu thành PDF. Khách nhận link thì không thấy nút nào.",
     tao_tiep: "Tạo catalogue khác",
     vua_tao: "Catalogue vừa tạo trên máy này",
 

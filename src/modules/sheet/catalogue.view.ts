@@ -138,18 +138,116 @@ function quaChieu(d: DongCatalogue, loc: BoLocCatalogue, chieu: ChieuLoc): boole
 }
 
 /**
- * Moi cot chu deu tim duoc, khong chi ma mau va mo ta. Nguoi dung go so MO hay
- * "18KW" thi phai ra ket qua, khong phai doan xem cot nao duoc tim.
+ * Tu dong nghia Viet - Anh, tra theo GIA TRI CUA TUNG COT chu khong quet ca
+ * chuoi. Quet ca chuoi thi "lac" se khop nham trong "black", "mat" khop trong
+ * "format" — tra theo cot thi khong the nham.
+ *
+ * Chi khai nhung gia tri CO THAT trong bang tinh. Bang tinh moc them gia tri
+ * moi thi them mot dong o day, khong phai sua ham nao.
  */
-function khoTimKiem(d: DongCatalogue): string {
-  return chuanHoaTimKiem(
-    [
-      d.maMau, d.sku, d.mo, d.so, d.chiTiet,
-      d.chatLieu, d.size, d.dongSp, d.loaiSp, d.mau, d.oChu,
-    ]
-      .filter((x): x is string => Boolean(x))
-      .join(" "),
+const DONG_NGHIA_MAU: Record<string, string> = {
+  white: "trang",
+  yellow: "vang",
+  rose: "hong",
+};
+const DONG_NGHIA_LOAI_SP: Record<string, string> = {
+  "nhan": "ring",
+  "day chuyen": "necklace",
+  "day co": "chain necklace",
+  "lac": "bracelet",
+  "mat": "pendant charm",
+  "bong tai": "earring",
+};
+const DONG_NGHIA_DONG_SP: Record<string, string> = {
+  complete: "hoan chinh",
+  "tron": "plain",
+};
+
+function themDongNghia(v: string | null, bang: Record<string, string>): string[] {
+  if (!v) return [];
+  const dong = bang[chuanHoaTimKiem(v)];
+  return dong ? [dong] : [];
+}
+
+/**
+ * Vung van ban de tim cua mot dong: MOI cot, khong chi ma mau va mo ta.
+ *
+ * Bo dem theo tung dong vi mot lan hien trang goi ham nay chin lan cho moi dong
+ * (mot lan cho danh sach, tam lan cho bo dem cua tam o tha xuong).
+ */
+const boDemKho = new WeakMap<DongCatalogue, string[]>();
+
+function khoTimKiem(d: DongCatalogue): string[] {
+  const cu = boDemKho.get(d);
+  if (cu !== undefined) return cu;
+
+  const phan: (string | null)[] = [
+    d.maMau, d.sku, d.mo, d.so, d.chiTiet,
+    d.chatLieu, d.size, d.dongSp, d.loaiSp, d.mau, d.oChu,
+  ];
+
+  // TL vang la so nen khong tu vao chuoi. Nhan CA HAI cach go: "2.78" va
+  // "2,78" — nguoi dung Viet go dau phay, con bang tinh ghi dau cham.
+  if (d.tlVang !== null) {
+    const so = d.tlVang.toFixed(2);
+    phan.push(so, so.replace(".", ","));
+  }
+  // Loai xoan la nhan noi bo ("lab" / "tu-nhien"), phai doi sang chu nguoi go.
+  if (d.loaiXoan) {
+    phan.push(d.loaiXoan === "lab" ? "lab xoan lab" : "tu nhien natural");
+  }
+
+  phan.push(
+    ...themDongNghia(d.mau, DONG_NGHIA_MAU),
+    ...themDongNghia(d.loaiSp, DONG_NGHIA_LOAI_SP),
+    ...themDongNghia(d.dongSp, DONG_NGHIA_DONG_SP),
   );
+
+  // Giu dang TUNG TU chu khong phai mot chuoi dai: phep khop ben duoi lam viec
+  // theo tu, xem khopTu().
+  const kho = chuanHoaTimKiem(phan.filter((x): x is string => Boolean(x)).join(" "))
+    .split(" ")
+    .filter(Boolean);
+  boDemKho.set(d, kho);
+  return kho;
+}
+
+/** Tu ngan hon nguong nay chi khop tu DAU tu, khong khop giua tu. */
+const DAI_TU_DU_DAI = 4;
+
+/**
+ * Mot tu tim co khop vung van ban khong.
+ *
+ * Khop tu DAU MOI TU truoc. Neu khop bat ky cho nao trong chuoi thi "lac" se
+ * khop trong "necklace" (nguoi tim vong lac lai ra day chuyen), va "5" se khop
+ * trong "25.10006" khien "size 5" tra ve gan het bang.
+ *
+ * Rieng tu tu 4 ky tu tro len thi cho khop ca giua tu, vi do gan nhu chac chan
+ * la ma hang: nguoi ta go "12751" de tim "D12751-01" ma khong go tu dau.
+ */
+function khopTu(kho: string[], t: string): boolean {
+  if (kho.some((w) => w.startsWith(t))) return true;
+  return t.length >= DAI_TU_DU_DAI && kho.some((w) => w.includes(t));
+}
+
+/**
+ * Tach cau tim thanh tung tu. Mot dong phai chua TAT CA cac tu, khong can dung
+ * thu tu va khong can nam canh nhau.
+ *
+ * Truoc day cau tim duoc doi chieu nguyen cum voi ca chuoi da ghep, nen "nhan
+ * 18k" khong ra gi ca: hai tu do nam o hai cot khac nhau va khong bao gio dung
+ * canh nhau. Do la cach nguoi ta go tim that su, nen day la loi chu khong phai
+ * gioi han.
+ */
+export function tachTuKhoa(q: string | null): string[] {
+  if (q === null) return [];
+  return chuanHoaTimKiem(q).split(" ").filter(Boolean);
+}
+
+function quaTimKiem(d: DongCatalogue, tuKhoa: string[]): boolean {
+  if (tuKhoa.length === 0) return true;
+  const kho = khoTimKiem(d);
+  return tuKhoa.every((t) => khopTu(kho, t));
 }
 
 function quaTrongLuong(d: DongCatalogue, loc: BoLocCatalogue): boolean {
@@ -172,13 +270,13 @@ function locTru(
   loc: BoLocCatalogue,
   tru: ChieuLoc | null,
 ): DongCatalogue[] {
-  const tuKhoa = loc.q === null ? null : chuanHoaTimKiem(loc.q);
+  const tuKhoa = tachTuKhoa(loc.q);
   return ds.filter((d) => {
     for (const chieu of MOI_CHIEU) {
       if (chieu !== tru && !quaChieu(d, loc, chieu)) return false;
     }
     if (!quaTrongLuong(d, loc)) return false;
-    if (tuKhoa !== null && !khoTimKiem(d).includes(tuKhoa)) return false;
+    if (!quaTimKiem(d, tuKhoa)) return false;
     return true;
   });
 }

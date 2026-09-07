@@ -1,26 +1,24 @@
 "use client";
 
-import { vi } from "@/messages/vi";
+import { useEffect } from "react";
 
 /**
- * "Tai PDF" = mo hop thoai in cua trinh duyet, khach chon "Luu thanh PDF".
+ * Mo san hop thoai in khi duong dan co "?in=1".
  *
- * Vi sao khong sinh PDF o may chu: link moi la duong gui chinh (quyet dinh
- * 07/09/2026), PDF chi la duong phu. Sinh PDF that can headless Chrome ~50MB
- * tren Vercel hoac phai tu dat tung dong chu kem nhung font tieng Viet — ca
- * hai deu dat hon nhieu so voi gia tri no them vao lúc nay. Duong nay khong
- * them thu vien nao, va ban in luon khop voi trang khach dang xem.
+ * KHACH KHONG THAY NUT NAO. Link gui khach la de xem, khong phai de tai tep —
+ * mot nut "Tai PDF" tren do vua thua vua de khien khach tuong minh phai tai gi
+ * do moi xem duoc. Chi sale, tu man hinh cua ho, moi mo duong dan kem ?in=1;
+ * khach nhan link tran nen khong bao gio gap hop thoai nay.
+ *
+ * Vi sao khong sinh PDF o may chu: sinh PDF that can headless Chrome ~50MB tren
+ * Vercel, hoac phai tu dat tung dong chu kem nhung font tieng Viet. Duong nay
+ * khong them thu vien nao, va ban in luon khop voi trang that.
  */
-export function NutInPdf() {
-  return (
-    <button
-      type="button"
-      onClick={() => window.print()}
-      className="border border-hp-rule px-4 py-1.5 text-[11px] uppercase tracking-[0.14em]
-                 text-hp-muted transition-colors duration-150
-                 hover:border-hp-ink hover:text-hp-ink"
-    >
-      {vi.chia_se.tai_pdf}
-    </button>
-  );
+export function MoHopThoaiIn() {
+  useEffect(() => {
+    // Doi mot nhip cho anh kip ve; in ngay se ra ban thieu anh.
+    const h = setTimeout(() => window.print(), 800);
+    return () => clearTimeout(h);
+  }, []);
+  return null;
 }
