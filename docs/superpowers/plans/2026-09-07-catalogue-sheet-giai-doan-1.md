@@ -305,13 +305,16 @@ export const bangMau: OTho[][] = [
    o("LGDRI: 18KY 15RD/0.234cts 2.41gr D12800 Size: 5"), o("D12800"), o("Complete"),
    o("NHẪN"), o("18KY"), o("2.41"), rong, rong,
    anh("1a-y9LfglXbLQGfH9ybafsMjzv4-O1mWC"), lien("CQ1", THU_MUC)],
-  // 9 va 10 — TRUNG KHIT nhau theo cap (MA MAU, MO)
+  // 9 va 10 — TRUNG KHIT nhau theo cap (MA MAU, MO).
+  // Dung 0.500cts chu khong phai 0.525: voi 0.525 thi 3.68-0.105=3.575 va bien do
+  // lech la 0.00499999999999989 — nam duoi nguong 0.005 CHI NHO SAI SO DAU PHAY DONG.
+  // Mot fixture nhu vay bien test thanh tro choi may rui. 0.500 cho bien do bang 0.
   [rong, o("26.10393"), o("26.35535"),
-   o("LGDRI: PT900PD 6BG/0.525cts 3.68gr D12751-01 Size: 6"), o("D12751-01"), o("Complete"),
+   o("LGDRI: PT900PD 6BG/0.500cts 3.68gr D12751-01 Size: 6"), o("D12751-01"), o("Complete"),
    o("NHẪN"), o("PT900PD"), o("3.58"), rong, rong,
    anh("1hDzs73oviksvqJsp9UBIbIVwylZoL9F_"), lien("CQ1", THU_MUC)],
   [rong, o("26.10393"), o("26.35535"),
-   o("LGDRI: PT900PD 6BG/0.525cts 3.68gr D12751-01 Size: 6"), o("D12751-01"), o("Complete"),
+   o("LGDRI: PT900PD 6BG/0.500cts 3.68gr D12751-01 Size: 6"), o("D12751-01"), o("Complete"),
    o("NHẪN"), o("PT900PD"), o("3.58"), rong, rong,
    anh("1hDzs73oviksvqJsp9UBIbIVwylZoL9F_"), lien("CQ1", THU_MUC)],
   // 11 — NHIEU cum cts trong mot mo ta: 5.18 - 0.2*(0.116+0.441) = 5.0686
@@ -708,12 +711,8 @@ describe("locDanhSach", () => {
     expect(locDanhSach(ds, { ...KHONG_LOC, loaiXoan: "tu-nhien" })).toHaveLength(3);
   });
   it("chi dong co canh bao", () => {
-    expect(locDanhSach(ds, { ...KHONG_LOC, chiCanhBao: true })).toHaveLength(7);
-  });
-  it("tim kiem KHONG DAU van ra ket qua co dau", () => {
-    const co_dau = locDanhSach(ds, { ...KHONG_LOC, q: "MÃ" });
-    const khong_dau = locDanhSach(ds, { ...KHONG_LOC, q: "ma" });
-    expect(khong_dau.length).toBeGreaterThanOrEqual(co_dau.length);
+    // 6 dong mang co: 5,6,7,8,9,10. Dong 3,4,11 sach.
+    expect(locDanhSach(ds, { ...KHONG_LOC, chiCanhBao: true })).toHaveLength(6);
   });
   it("tim theo ma mau, khong phan biet hoa thuong", () => {
     expect(locDanhSach(ds, { ...KHONG_LOC, q: "d12751" })).toHaveLength(2);
@@ -721,9 +720,16 @@ describe("locDanhSach", () => {
   it("tim theo sku", () => {
     expect(locDanhSach(ds, { ...KHONG_LOC, q: "108632" })).toHaveLength(1);
   });
+  it("tim duoc ca trong mo ta, khong chi ma mau va sku", () => {
+    // "PT900PD" chi xuat hien trong Chi tiet SP cua hai dong PT900PD.
+    // Go chu thuong ma van ra ket qua chu hoa -> chung minh luon tinh khong phan
+    // biet hoa thuong. Tinh khong dau da co bo test rieng o tests/lib/vietnamese.test.ts.
+    expect(locDanhSach(ds, { ...KHONG_LOC, q: "pt900pd" })).toHaveLength(2);
+  });
   it("cong don nhieu dieu kien", () => {
+    // 18KY co 4 dong (6,7,8,11); trong do 3 dong mang co (6,7,8).
     expect(locDanhSach(ds, { ...KHONG_LOC, chatLieu: "18KY", chiCanhBao: true }))
-      .toHaveLength(4);
+      .toHaveLength(3);
   });
 });
 ```
