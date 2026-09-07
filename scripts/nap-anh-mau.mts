@@ -27,9 +27,9 @@ const TIEN_TO = "https://lh3.googleusercontent.com/drive-storage/";
 // Xin ban rong 1200px roi tu thu nho — de anh 600px khong bi mem.
 const KICH_THUOC_XIN = "w1200";
 
-const tokens = JSON.parse(
-  await readFile("thumb-tokens.local.json", "utf8"),
-) as Record<string, string>;
+// Chay: npx tsx scripts/nap-anh-mau.mts [ten-tep-token]
+const tepToken = process.argv[2] ?? "thumb-tokens.local.json";
+const tokens = JSON.parse(await readFile(tepToken, "utf8")) as Record<string, string>;
 
 const ids = Object.keys(tokens);
 let daCo = 0, napMoi = 0, hong = 0;

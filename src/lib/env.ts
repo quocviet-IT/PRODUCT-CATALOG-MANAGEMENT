@@ -20,6 +20,8 @@ const schema = z.object({
   // Duong dan toi tep JSON chua bang tho, dung THAY cho Google khi chua co
   // service account. De trong thi doc that tu Google. Chi dung de xem thu.
   CATALOGUE_TEP_MAU: z.string().min(1).optional(),
+  // Tep JSON anh xa idThuMuc -> danh sach anh, dung THAY cho Drive khi xem thu.
+  CATALOGUE_TEP_ANH_MAU: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof schema>;

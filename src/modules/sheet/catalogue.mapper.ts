@@ -26,6 +26,8 @@ export type DongCatalogue = {
   size: string | null;
   fileIdAnh: string | null;
   urlThuMuc: string | null;
+  /** ID thu muc Drive chua TOAN BO anh cua mau, tach tu urlThuMuc. */
+  idThuMuc: string | null;
   co: CoBatThuong[];
 };
 
@@ -79,6 +81,12 @@ export function tachFileIdAnh(congThuc: string | undefined): string | null {
   return m ? m[1] : null;
 }
 
+export function tachIdThuMuc(url: string | null): string | null {
+  if (!url) return null;
+  const m = /\/folders\/([A-Za-z0-9_-]+)/.exec(url);
+  return m ? m[1] : null;
+}
+
 export function tachSize(chiTiet: string | null): string | null {
   if (!chiTiet) return null;
   const m = /Size:\s*(\S+)/i.exec(chiTiet);
@@ -121,6 +129,7 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
     const maMau = chu(lay(h, "maMau"));
     const mo = chu(lay(h, "mo"));
     const chiTiet = chu(lay(h, "chiTiet"));
+    const urlThuMuc = lay(h, "thuMuc")?.hyperlink ?? null;
     const fileIdAnh = tachFileIdAnh(lay(h, "hinh")?.userEnteredValue?.formulaValue);
 
     // includeGridData=true tra ca dong trong nhung con dinh dang (border,
@@ -159,7 +168,8 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
       tlVang: tlVang !== null && Number.isFinite(tlVang) ? tlVang : null,
       size: chu(lay(h, "size")) ?? tachSize(chiTiet),
       fileIdAnh,
-      urlThuMuc: lay(h, "thuMuc")?.hyperlink ?? null,
+      urlThuMuc,
+      idThuMuc: tachIdThuMuc(urlThuMuc),
       co: [],
     };
 
