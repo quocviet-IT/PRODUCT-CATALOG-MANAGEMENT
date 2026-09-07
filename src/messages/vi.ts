@@ -185,6 +185,10 @@ export const vi = {
     // Trang khach xem
     khach_gom: "{n} mẫu",
     tai_pdf: "Tải PDF",
+    phong_to: "Xem ảnh lớn",
+    anh_truoc: "Ảnh trước",
+    anh_sau: "Ảnh sau",
+    dong_anh: "✕ Đóng",
     khong_thay: "Không tìm thấy catalogue này. Có thể link bị sao chép thiếu.",
     lien_he: "Liên hệ nhân viên tư vấn để biết thêm chi tiết.",
   },
