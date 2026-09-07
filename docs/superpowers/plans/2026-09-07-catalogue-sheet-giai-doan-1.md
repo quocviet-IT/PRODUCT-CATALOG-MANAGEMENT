@@ -1412,11 +1412,19 @@ export async function layUrlAnhSheet(fileId: string): Promise<string> {
     // Chi truyen MOT chieu — truyen ca hai kem fit:"inside" lam sharp lam tron
     // hai lan roi lech 1px. Xem chu thich trong image-processor.ts.
     const rangBuoc = meta.width >= meta.height ? { width: kt.width } : { height: kt.height };
-    const nho = await sharp(goc)
-      .rotate()
-      .resize({ ...rangBuoc, withoutEnlargement: true })
-      .webp({ quality: 82 })
-      .toBuffer();
+    // metadata() chi doc header nen tep bi cat ngang giua chung van qua duoc
+    // buoc kiem tra o tren; loi that chi lo ra khi resize/encode phai quet het
+    // du lieu anh. Boc rieng buoc nay de doi loi libvips tho thanh loi mien nguyen.
+    let nho: Buffer;
+    try {
+      nho = await sharp(goc)
+        .rotate()
+        .resize({ ...rangBuoc, withoutEnlargement: true })
+        .webp({ quality: 82 })
+        .toBuffer();
+    } catch (e) {
+      throw new LoiAnhKhongHopLe(e instanceof Error ? e.message : String(e));
+    }
     await ghiTep(khoa, nho, "image/webp");
   }
 
