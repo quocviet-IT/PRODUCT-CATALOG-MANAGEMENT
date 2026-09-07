@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   LoiThieuCot, anhXaBang, chuanHoaTieuDe, tachFileIdAnh, tachSize, tinhTlVangSuyRa,
+  type OTho,
 } from "@/modules/sheet/catalogue.mapper";
 import { bangMau } from "./fixtures/bang-mau";
 
@@ -120,5 +121,29 @@ describe("anhXaBang", () => {
       expect(e).toBeInstanceOf(LoiThieuCot);
       expect((e as LoiThieuCot).cotThieu).toContain("Chi tiết SP");
     }
+  });
+});
+
+describe("anhXaBang — khoa trung phai la (MÃ MẪU, MO), khong phai (MÃ MẪU, Chi tiết SP)", () => {
+  // Bang toi gian, dung rieng cho test nay — khong dung chung bangMau vi so dong
+  // cua bangMau da duoc nhieu test khac gan chet.
+  const o = (v: string): OTho => ({ formattedValue: v });
+  const rong: OTho = {};
+
+  it("cung MÃ MẪU va cung Chi tiết SP nhung khac MO thi KHONG duoc gan co trung", () => {
+    const bang: OTho[][] = [
+      [],
+      [o("SKU"), o("MO"), o("Chi tiết SP"), o("MÃ MẪU"), o("CHẤT LIỆU"), o("TL VÀNG"), o("HÌNH")],
+      // Dong A va B: cung MÃ MẪU va cung Chi tiết SP (chinh la khoa cu, sai) —
+      // nhung MO khac nhau nen KHONG phai ban ghi trung theo dung spec.
+      [o("SKU-A"), o("MO-001"), o("LGDRI: 14KY TEST-KHONG-TRUNG"), o("D99999"),
+        o("14KY"), o("1.00"), rong],
+      [o("SKU-B"), o("MO-002"), o("LGDRI: 14KY TEST-KHONG-TRUNG"), o("D99999"),
+        o("14KY"), o("1.00"), rong],
+    ];
+
+    const ds = anhXaBang(bang);
+
+    expect(ds.filter((d) => d.co.includes("trung"))).toEqual([]);
   });
 });

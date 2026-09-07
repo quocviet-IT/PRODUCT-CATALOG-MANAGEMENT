@@ -12,6 +12,7 @@ export type DongCatalogue = {
   dongSheet: number;
   sku: string | null;
   maMau: string | null;
+  mo: string | null;
   chiTiet: string | null;
   chatLieu: string | null;
   loaiXoan: "lab" | "tu-nhien" | null;
@@ -111,6 +112,7 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
       dongSheet: i + 1,
       sku: chu(lay(h, "sku")),
       maMau: chu(lay(h, "maMau")),
+      mo: chu(lay(h, "mo")),
       chiTiet,
       chatLieu: chu(lay(h, "chatLieu")),
       loaiXoan: chiTiet === null ? null
@@ -139,8 +141,12 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
 
   // Co "trung" gan cho MOI dong trong nhom, khong phai chi ban sao thu hai:
   // nguoi doc can thay ca hai de biet nen giu dong nao.
+  // Khoa trung la cap (MA MAU, MO) theo dung spec. Dung JSON.stringify thay vi
+  // noi chuoi bang dau cach: noi chuoi co the khien hai cap gia tri khac nhau
+  // tao ra cung mot khoa (vi du maMau="A" + mo="B C" trung voi maMau="A B" +
+  // mo="C"), con JSON.stringify giu ranh gioi tung phan tu ro rang.
   const dem = new Map<string, number>();
-  const khoaTrung = (d: DongCatalogue) => `${d.maMau ?? ""} ${d.chiTiet ?? ""}`;
+  const khoaTrung = (d: DongCatalogue) => JSON.stringify([d.maMau, d.mo]);
   for (const d of ds) dem.set(khoaTrung(d), (dem.get(khoaTrung(d)) ?? 0) + 1);
   for (const d of ds) if ((dem.get(khoaTrung(d)) ?? 0) > 1) d.co.push("trung");
 
