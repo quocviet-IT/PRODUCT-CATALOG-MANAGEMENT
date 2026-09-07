@@ -1,11 +1,9 @@
-import { requireUser } from "@/auth/guard";
-import { vi } from "@/messages/vi";
+import { redirect } from "next/navigation";
 
-export default async function TrangChuQuanTri() {
-  const user = await requireUser();
-  return (
-    <h1 className="text-xl font-bold">
-      {vi.quan_tri.xin_chao}, {user.fullName}
-    </h1>
-  );
+/**
+ * Ung dung chi con mot man hinh lam viec, nen /admin khong con la trang chao
+ * ma di thang toi catalogue.
+ */
+export default function TrangChuQuanTri() {
+  redirect("/admin/catalogue-sheet");
 }
