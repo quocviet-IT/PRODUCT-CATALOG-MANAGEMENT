@@ -1,3 +1,4 @@
+import { boDau } from "@/lib/vietnamese";
 import type { DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 
@@ -110,6 +111,41 @@ export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogu
 export function tenHienThi(ten: string, so: number): string {
   const t = ten.trim();
   return t === "" ? `Catalogue #${so}` : t;
+}
+
+/** Do dai toi da cua PHAN TEN trong duong dan. Du de doc, khong lam dai link. */
+export const DAI_PHAN_TEN = 60;
+
+/**
+ * Doi mot cau tieng Viet thanh phan duong dan doc duoc: bo dau, chu thuong,
+ * moi cum ky tu khong phai chu-so thanh mot dau gach.
+ *
+ * Tra ve chuoi RONG khi khong con gi (ten toan ky tu la, hay toan emoji) —
+ * nguoi goi phai tu lo truong hop do.
+ */
+export function chuanHoaSlug(s: string): string {
+  return boDau(s)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, DAI_PHAN_TEN)
+    // Cat theo do dai co the de lai mot dau gach o cuoi.
+    .replace(/-+$/g, "");
+}
+
+/**
+ * Duong dan cua mot catalogue: <phan doc duoc>-<duoi ngau nhien>.
+ *
+ * Vi sao van phai co duoi ngau nhien du da co phan doc duoc: link nay gui rieng
+ * cho MOT khach. Neu duong dan doan duoc (vi du chi la so thu tu, hay dung ten
+ * khach khong kem gi) thi mot nguoi co the mo catalogue cua nguoi khac chi bang
+ * cach sua thanh dia chi.
+ *
+ * Catalogue khong dat ten thi goi theo so — trung voi cach no hien tren trang.
+ */
+export function dungSlug(ten: string, so: number, duoi: string): string {
+  const phanTen = chuanHoaSlug(ten) || `catalogue-${so}`;
+  return `${phanTen}-${duoi}`;
 }
 
 /** Mot muc tren man hinh tao catalogue: nhu muc khach xem, kem TOAN BO thu vien. */

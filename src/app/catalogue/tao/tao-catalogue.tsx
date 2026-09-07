@@ -302,7 +302,7 @@ function DaXong({ slug }: { slug: string }) {
         >
           {daChep ? vi.chia_se.da_chep : vi.chia_se.chep_link}
         </button>
-        <a href={`/c/${slug}`} target="_blank" rel="noreferrer" className={NUT_PHU}>
+        <a href={`/catalogue/${slug}`} target="_blank" rel="noreferrer" className={NUT_PHU}>
           {vi.chia_se.mo_thu}
         </a>
         <Link href="/admin/catalogue-sheet" className={NUT_PHU}>
@@ -334,7 +334,7 @@ function VuaTao() {
         {ds.map((c) => (
           <li key={c.slug}>
             <a
-              href={`/c/${c.slug}`}
+              href={`/catalogue/${c.slug}`}
               target="_blank"
               rel="noreferrer"
               className="text-sm text-hp-body transition-colors duration-150

@@ -5,6 +5,8 @@ import {
   docNoiDung,
   dungNoiDung,
   khoaMau,
+  chuanHoaSlug,
+  dungSlug,
   tenHienThi,
   type NguonMau,
 } from "@/modules/catalogue-share/chia-se.model";
@@ -137,5 +139,47 @@ describe("tenHienThi", () => {
   });
   it("cat khoang trang thua o hai dau ten that", () => {
     expect(tenHienThi("  Anh Minh  ", 3)).toBe("Anh Minh");
+  });
+});
+
+describe("chuanHoaSlug", () => {
+  it("bo dau tieng Viet va ha chu thuong", () => {
+    expect(chuanHoaSlug("Chị Lan — nhẫn cưới 18K")).toBe("chi-lan-nhan-cuoi-18k");
+  });
+  it("gop moi cum ky tu la thanh mot dau gach", () => {
+    expect(chuanHoaSlug("A///B   C__D")).toBe("a-b-c-d");
+  });
+  it("khong de lai dau gach o hai dau", () => {
+    expect(chuanHoaSlug("  --- Xin chao --- ")).toBe("xin-chao");
+  });
+  it("ten toan ky tu la thi tra ve rong", () => {
+    expect(chuanHoaSlug("★★★")).toBe("");
+    expect(chuanHoaSlug("   ")).toBe("");
+  });
+  it("cat bot ten qua dai ma khong de dau gach thua o cuoi", () => {
+    const dai = chuanHoaSlug("a".repeat(50) + " " + "b".repeat(50));
+    expect(dai.length).toBeLessThanOrEqual(60);
+    expect(dai.endsWith("-")).toBe(false);
+  });
+});
+
+describe("dungSlug", () => {
+  it("ghep ten doc duoc voi duoi ngau nhien", () => {
+    expect(dungSlug("Chị Lan — nhẫn cưới 18K", 16, "k3m9x2p4"))
+      .toBe("chi-lan-nhan-cuoi-18k-k3m9x2p4");
+  });
+  it("khong dat ten thi goi theo so, trung voi ten hien tren trang", () => {
+    expect(dungSlug("", 16, "k3m9x2p4")).toBe("catalogue-16-k3m9x2p4");
+    expect(tenHienThi("", 16)).toBe("Catalogue #16");
+  });
+  it("ten toan ky tu la cung lui ve so, khong ra duong dan bat dau bang dau gach", () => {
+    expect(dungSlug("★★★", 7, "aaaaaaaa")).toBe("catalogue-7-aaaaaaaa");
+  });
+  it("duong dan LUON con duoi ngau nhien — day la thu chan nguoi la mo nham", () => {
+    // Neu bo duoi nay thi ai cung do duoc catalogue cua khach khac bang cach
+    // doan ten. Duong dan phai co it nhat mot doan sau cung khong doan duoc.
+    for (const ten of ["Chị Lan", "", "★"]) {
+      expect(dungSlug(ten, 1, "zzzzzzzz").endsWith("-zzzzzzzz")).toBe(true);
+    }
   });
 });
