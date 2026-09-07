@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { requireUser } from "@/auth/guard";
 import { layDanhSachCatalogue, nguonDangDung } from "@/modules/sheet/catalogue.service";
-import { docBoLocTuUrl, locDanhSach, tinhThongKe } from "@/modules/sheet/catalogue.view";
+import { catTrang, docBoLocTuUrl, docTrang, locDanhSach, tinhThongKe } from "@/modules/sheet/catalogue.view";
 import type { CoBatThuong, DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { BangCatalogue } from "./bang";
 import { ThanhBoLoc } from "./bo-loc";
@@ -17,13 +17,29 @@ function docKieuXem(v: string | undefined): KieuXem {
   return v === "luoi" ? "luoi" : "bang";
 }
 
-/** Giu nguyen moi tham so loc hien co, chi doi rieng kieu xem. */
-function urlDoiKieuXem(sp: Record<string, string | undefined>, kieu: KieuXem): string {
+/** Giu nguyen moi tham so hien co, chi doi rieng mot cai. */
+function urlDoi(
+  sp: Record<string, string | undefined>,
+  khoa: string,
+  giaTri: string,
+): string {
   const q = new URLSearchParams();
-  for (const [k, v] of Object.entries(sp)) if (v && k !== "xem") q.set(k, v);
-  q.set("xem", kieu);
+  for (const [k, v] of Object.entries(sp)) if (v && k !== khoa) q.set(k, v);
+  q.set(khoa, giaTri);
   return `/admin/catalogue-sheet?${q.toString()}`;
 }
+
+/** Doi kieu xem thi ve trang 1 — trang 3 cua bang co the khong ton tai o luoi. */
+function urlDoiKieuXem(sp: Record<string, string | undefined>, kieu: KieuXem): string {
+  const conLai = Object.fromEntries(
+    Object.entries(sp).filter(([k]) => k !== "trang"),
+  );
+  return urlDoi(conLai, "xem", kieu);
+}
+
+const NUT_TRANG =
+  "text-[11px] uppercase tracking-[0.14em] text-hp-muted " +
+  "transition-colors duration-150 hover:text-hp-ink hover:underline";
 
 const NHAN_CO: Record<CoBatThuong, string> = {
   "thieu-sku": vi.catalogue_sheet.co_thieu_sku,
@@ -129,7 +145,8 @@ export default async function TrangCatalogueSheet({
 
   const nguon = nguonDangDung();
   const thongKe = tinhThongKe(tatCa);
-  const ds = locDanhSach(tatCa, loc);
+  const daLoc = locDanhSach(tatCa, loc);
+  const { ds, trang, soTrang, tu, den } = catTrang(daLoc, docTrang(sp));
 
   return (
     <>
@@ -157,7 +174,7 @@ export default async function TrangCatalogueSheet({
         <O so={thongKe.tlVangLech} nhan={vi.catalogue_sheet.dem_tl_vang_lech} />
       </div>
 
-      <ThanhBoLoc thongKe={thongKe} hienTai={loc} />
+      <ThanhBoLoc thongKe={thongKe} hienTai={loc} kieuXem={kieuXem} />
 
       {/* Kieu xem khong dung mau hong: ngan sach hong da chi het cho vien focus
           o tim kiem va gach chan bo loc dang bat. O day phan biet bang ink/muted. */}
@@ -192,6 +209,32 @@ export default async function TrangCatalogueSheet({
         <ul className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
           {ds.map((d) => <The key={d.dongSheet} d={d} />)}
         </ul>
+      )}
+
+      {daLoc.length > 0 && (
+        <nav className="mt-8 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-t border-hp-rule pt-5">
+          <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+            {vi.catalogue_sheet.trang_nhan} {trang}/{soTrang}
+          </span>
+
+          {trang > 1 && (
+            <Link href={urlDoi(sp, "trang", String(trang - 1))} className={NUT_TRANG}>
+              {vi.catalogue_sheet.trang_truoc}
+            </Link>
+          )}
+          {trang < soTrang && (
+            <Link href={urlDoi(sp, "trang", String(trang + 1))} className={NUT_TRANG}>
+              {vi.catalogue_sheet.trang_sau}
+            </Link>
+          )}
+
+          <span className="ml-auto text-xs tabular-nums text-hp-muted">
+            {vi.catalogue_sheet.pham_vi
+              .replace("{tu}", String(tu))
+              .replace("{den}", String(den))
+              .replace("{tong}", String(daLoc.length))}
+          </span>
+        </nav>
       )}
     </>
   );

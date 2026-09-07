@@ -26,9 +26,19 @@ function MucLoc({
   );
 }
 
-export function ThanhBoLoc({ thongKe, hienTai }: { thongKe: ThongKe; hienTai: BoLocCatalogue }) {
+export function ThanhBoLoc({
+  thongKe, hienTai, kieuXem,
+}: {
+  thongKe: ThongKe;
+  hienTai: BoLocCatalogue;
+  kieuXem: string;
+}) {
   return (
     <form method="get" className="mb-10 space-y-6">
+      {/* Form GET chi gui chinh cac truong cua no. Khong mang theo "xem" thi loc
+          xong bi nem ve kieu bang du dang o luoi anh. Con "trang" thi CO Y bo
+          di: doi bo loc phai ve trang 1. */}
+      <input type="hidden" name="xem" value={kieuXem} />
       <div className="max-w-sm">
         <label className={NHAN_EYEBROW} htmlFor="q">
           {vi.catalogue_sheet.tim_kiem_nhan}

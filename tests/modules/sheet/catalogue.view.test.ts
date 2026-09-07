@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { anhXaBang } from "@/modules/sheet/catalogue.mapper";
-import { docBoLocTuUrl, locDanhSach, tinhThongKe } from "@/modules/sheet/catalogue.view";
+import { catTrang, docBoLocTuUrl, docTrang, locDanhSach, tinhThongKe } from "@/modules/sheet/catalogue.view";
 import { bangMau } from "./fixtures/bang-mau";
 
 const ds = anhXaBang(bangMau);
@@ -73,5 +73,50 @@ describe("locDanhSach", () => {
     // 18KY co 4 dong (6,7,8,11); trong do 3 dong mang co (6,7,8).
     expect(locDanhSach(ds, { ...KHONG_LOC, chatLieu: "18KY", chiCanhBao: true }))
       .toHaveLength(3);
+  });
+});
+
+describe("docTrang", () => {
+  it("khong co tham so thi la trang 1", () => {
+    expect(docTrang({})).toBe(1);
+  });
+  it("doc so hop le", () => {
+    expect(docTrang({ trang: "3" })).toBe(3);
+  });
+  it("gia tri rac hoac nho hon 1 deu ve trang 1", () => {
+    for (const v of ["0", "-5", "abc", "", "1.9e400"]) expect(docTrang({ trang: v })).toBe(1);
+  });
+});
+
+describe("catTrang", () => {
+  const gia = Array.from({ length: 9 }, (_, i) => ({ dongSheet: i + 1 })) as never[];
+
+  it("chia dung so trang", () => {
+    expect(catTrang(gia, 1, 4).soTrang).toBe(3);
+  });
+  it("trang giua lay dung lat cat", () => {
+    const k = catTrang(gia, 2, 4);
+    expect(k.ds).toHaveLength(4);
+    expect(k.tu).toBe(5);
+    expect(k.den).toBe(8);
+  });
+  it("trang cuoi co the ngan hon moiTrang", () => {
+    const k = catTrang(gia, 3, 4);
+    expect(k.ds).toHaveLength(1);
+    expect(k.den).toBe(9);
+  });
+  it("trang vuot qua bi GHIM ve trang cuoi, khong tra danh sach rong", () => {
+    const k = catTrang(gia, 999, 4);
+    expect(k.trang).toBe(3);
+    expect(k.ds).toHaveLength(1);
+  });
+  it("trang nho hon 1 bi ghim ve trang dau", () => {
+    expect(catTrang(gia, -2, 4).trang).toBe(1);
+  });
+  it("danh sach rong van tra ve mot trang, pham vi bat dau tu 0", () => {
+    const k = catTrang([], 1, 4);
+    expect(k.soTrang).toBe(1);
+    expect(k.tu).toBe(0);
+    expect(k.den).toBe(0);
   });
 });

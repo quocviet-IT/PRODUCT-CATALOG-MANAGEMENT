@@ -32,7 +32,10 @@ export default async function KhungQuanTri({ children }: { children: React.React
           </button>
         </form>
       </nav>
-      <main className="flex-1 p-8">{children}</main>
+      {/* min-w-0: flex item mac dinh co min-width:auto nen KHONG chiu co nho hon
+          noi dung. Thieu no thi bang rong day ca vung noi dung vuot man hinh va
+          toan trang truot ngang, thay vi bang tu cuon trong khung cua no. */}
+      <main className="min-w-0 flex-1 p-8">{children}</main>
     </div>
   );
 }
