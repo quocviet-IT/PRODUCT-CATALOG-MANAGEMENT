@@ -1,5 +1,6 @@
+import { readFile } from "node:fs/promises";
 import { getEnv } from "@/lib/env";
-import { anhXaBang, type DongCatalogue } from "./catalogue.mapper";
+import { anhXaBang, type DongCatalogue, type OTho } from "./catalogue.mapper";
 import { docBangTho } from "./sheet.client";
 
 // Bang tinh do nguoi sua tay, tan suat thay doi tinh bang gio. 60 giay du de
@@ -25,12 +26,30 @@ export class LoiThieuSheetId extends Error {
   }
 }
 
+/**
+ * Doc bang tho tu tep JSON thay vi goi Google. Chi dung khi chua co service
+ * account, de xem duoc man hinh that voi du lieu that.
+ *
+ * Tep nay KHONG duoc commit: no chua ma hang, trong luong vang va ID tep Drive
+ * cua cong ty, ma repo thi cong khai. Xem .gitignore.
+ */
+async function docBangTuTep(duongDan: string): Promise<OTho[][]> {
+  return JSON.parse(await readFile(duongDan, "utf8")) as OTho[][];
+}
+
 export async function layDanhSachCatalogue(): Promise<DongCatalogue[]> {
   if (boDem !== null && Date.now() - boDem.luc < HAN_BO_DEM_MS) return boDem.ds;
 
   const env = getEnv();
-  if (!env.CATALOGUE_SHEET_ID) throw new LoiThieuSheetId();
-  const tho = await docBangTho(env.CATALOGUE_SHEET_ID, env.CATALOGUE_SHEET_TAB);
+  // Di qua DUNG mot mapper nhu duong that, chi khac cho lay bang tho.
+  // Nho vay man hinh xem thu khong bao gio lech voi man hinh chay that.
+  let tho: OTho[][];
+  if (env.CATALOGUE_TEP_MAU) {
+    tho = await docBangTuTep(env.CATALOGUE_TEP_MAU);
+  } else {
+    if (!env.CATALOGUE_SHEET_ID) throw new LoiThieuSheetId();
+    tho = await docBangTho(env.CATALOGUE_SHEET_ID, env.CATALOGUE_SHEET_TAB);
+  }
   const ds = anhXaBang(tho);
   // Chi ghi bo dem SAU khi ca hai buoc thanh cong — khong dem ket qua loi.
   boDem = { luc: Date.now(), ds };

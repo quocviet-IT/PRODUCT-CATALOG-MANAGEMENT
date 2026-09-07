@@ -1,9 +1,29 @@
+import Link from "next/link";
 import { requireUser } from "@/auth/guard";
 import { layDanhSachCatalogue } from "@/modules/sheet/catalogue.service";
 import { docBoLocTuUrl, locDanhSach, tinhThongKe } from "@/modules/sheet/catalogue.view";
 import type { CoBatThuong, DongCatalogue } from "@/modules/sheet/catalogue.mapper";
+import { BangCatalogue } from "./bang";
 import { ThanhBoLoc } from "./bo-loc";
 import { vi } from "@/messages/vi";
+
+/**
+ * Hai kieu xem chung mot bo loc. Bang la mac dinh vi nguoi dung doi chieu voi
+ * bang tinh; luoi anh de luot xem mau.
+ */
+type KieuXem = "bang" | "luoi";
+
+function docKieuXem(v: string | undefined): KieuXem {
+  return v === "luoi" ? "luoi" : "bang";
+}
+
+/** Giu nguyen moi tham so loc hien co, chi doi rieng kieu xem. */
+function urlDoiKieuXem(sp: Record<string, string | undefined>, kieu: KieuXem): string {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) if (v && k !== "xem") q.set(k, v);
+  q.set("xem", kieu);
+  return `/admin/catalogue-sheet?${q.toString()}`;
+}
 
 const NHAN_CO: Record<CoBatThuong, string> = {
   "thieu-sku": vi.catalogue_sheet.co_thieu_sku,
@@ -92,6 +112,7 @@ export default async function TrangCatalogueSheet({
   await requireUser();
   const sp = await searchParams;
   const loc = docBoLocTuUrl(sp);
+  const kieuXem = docKieuXem(sp.xem);
 
   let tatCa: DongCatalogue[];
   try {
@@ -130,8 +151,35 @@ export default async function TrangCatalogueSheet({
 
       <ThanhBoLoc thongKe={thongKe} hienTai={loc} />
 
+      {/* Kieu xem khong dung mau hong: ngan sach hong da chi het cho vien focus
+          o tim kiem va gach chan bo loc dang bat. O day phan biet bang ink/muted. */}
+      <div className="mb-6 flex items-baseline gap-6">
+        <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+          {vi.catalogue_sheet.xem_nhan}
+        </span>
+        {([
+          ["bang", vi.catalogue_sheet.xem_bang],
+          ["luoi", vi.catalogue_sheet.xem_luoi],
+        ] as const).map(([gia_tri, nhan]) => (
+          <Link
+            key={gia_tri}
+            href={urlDoiKieuXem(sp, gia_tri)}
+            aria-current={kieuXem === gia_tri ? "page" : undefined}
+            className={`border-b-2 pb-0.5 text-[11px] uppercase tracking-[0.14em]
+                        transition-colors duration-150
+                        ${kieuXem === gia_tri
+                          ? "border-hp-ink text-hp-ink"
+                          : "border-transparent text-hp-muted hover:text-hp-ink"}`}
+          >
+            {nhan}
+          </Link>
+        ))}
+      </div>
+
       {ds.length === 0 ? (
         <p className="text-sm text-hp-muted">{vi.catalogue_sheet.khong_khop}</p>
+      ) : kieuXem === "bang" ? (
+        <BangCatalogue ds={ds} />
       ) : (
         <ul className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
           {ds.map((d) => <The key={d.dongSheet} d={d} />)}
