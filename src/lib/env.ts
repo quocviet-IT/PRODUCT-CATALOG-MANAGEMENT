@@ -6,6 +6,10 @@ const schema = z.object({
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   SUPABASE_SECRET_KEY: z.string().min(1),
   SUPABASE_STORAGE_BUCKET: z.string().min(1).default("catalogue"),
+  GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().min(1),
+  GOOGLE_SERVICE_ACCOUNT_KEY: z.string().min(1),
+  CATALOGUE_SHEET_ID: z.string().min(1),
+  CATALOGUE_SHEET_TAB: z.string().min(1).default("test"),
 });
 
 export type Env = z.infer<typeof schema>;
