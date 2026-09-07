@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { ThongKe } from "@/modules/sheet/catalogue.view";
 import type { BoLocCatalogue } from "@/modules/sheet/catalogue.view";
 import { vi } from "@/messages/vi";
@@ -64,7 +65,7 @@ export function ThanhBoLoc({ thongKe, hienTai }: { thongKe: ThongKe; hienTai: Bo
       <div className="flex flex-wrap items-center gap-6">
         <label className="flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-hp-muted">
           <input type="checkbox" name="canh_bao" value="1" defaultChecked={hienTai.chiCanhBao}
-                 className="accent-hp-pink-strong" />
+                 className="accent-hp-ink" />
           {vi.catalogue_sheet.chi_canh_bao}
         </label>
 
@@ -75,10 +76,10 @@ export function ThanhBoLoc({ thongKe, hienTai }: { thongKe: ThongKe; hienTai: Bo
           {vi.catalogue_sheet.loc}
         </button>
 
-        <a href="/admin/catalogue-sheet"
-           className="text-[11px] uppercase tracking-[0.14em] text-hp-muted hover:text-hp-ink">
+        <Link href="/admin/catalogue-sheet"
+              className="text-[11px] uppercase tracking-[0.14em] text-hp-muted hover:text-hp-ink">
           {vi.catalogue_sheet.xoa_loc}
-        </a>
+        </Link>
       </div>
     </form>
   );

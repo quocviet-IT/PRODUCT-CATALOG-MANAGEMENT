@@ -28,6 +28,9 @@ function O({ so, nhan }: { so: number; nhan: string }) {
 }
 
 function The({ d }: { d: DongCatalogue }) {
+  const trongLuong = dinhDangGam(d.tlVang);
+  const coDongTrongLuongSize = trongLuong !== null || d.size !== null;
+
   return (
     <li className="border border-hp-rule bg-hp-card">
       <div className="flex aspect-[4/5] items-center justify-center bg-hp-inset">
@@ -35,7 +38,7 @@ function The({ d }: { d: DongCatalogue }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={`/api/anh-drive/${d.fileIdAnh}`}
-            alt={d.maMau ?? ""}
+            alt={d.maMau ?? vi.catalogue_sheet.anh_chua_co_ma_mau}
             loading="lazy"
             className="h-full w-full object-contain"
           />
@@ -52,12 +55,16 @@ function The({ d }: { d: DongCatalogue }) {
             {d.chatLieu}
           </span>
         )}
-        <h3 className="mt-1 font-title text-xl leading-tight text-hp-ink">{d.maMau ?? "—"}</h3>
+        <h3 className="mt-1 font-title text-xl leading-tight text-hp-ink">
+          {d.maMau ?? vi.catalogue_sheet.chua_co_ma_mau}
+        </h3>
 
-        <p className="mt-2 flex flex-wrap gap-x-4 text-sm tabular-nums text-hp-body">
-          {dinhDangGam(d.tlVang) && <span>{dinhDangGam(d.tlVang)}</span>}
-          {d.size && <span>Size {d.size}</span>}
-        </p>
+        {coDongTrongLuongSize && (
+          <p className="mt-2 flex flex-wrap gap-x-4 text-sm tabular-nums text-hp-body">
+            {trongLuong && <span>{trongLuong}</span>}
+            {d.size && <span>{vi.catalogue_sheet.size_nhan} {d.size}</span>}
+          </p>
+        )}
 
         {d.co.length > 0 && (
           <p className="mt-3 text-[10px] uppercase tracking-[0.14em] text-hp-muted">
@@ -89,7 +96,11 @@ export default async function TrangCatalogueSheet({
   let tatCa: DongCatalogue[];
   try {
     tatCa = await layDanhSachCatalogue();
-  } catch {
+  } catch (loi) {
+    // Loi doc bang tinh (auth Google hong, het quota, hay bi doi ten cot) khong
+    // duoc bien mat khong dau vet — nguoi dung chi thay mot dong text an toan,
+    // nhung server phai giu lai chi tiet de con grep khi trang trang hang loat.
+    console.error("[catalogue-sheet] loi doc bang tinh catalogue:", loi);
     return (
       <p className="text-sm text-hp-pink-strong">{vi.catalogue_sheet.loi_doc_bang}</p>
     );
