@@ -5,11 +5,22 @@ import type { OTho } from "./catalogue.mapper";
 // spreadsheets.get kem field mask nay lay du ca ba tang trong MOT lan goi.
 const FIELD_MASK = "sheets.data.rowData.values(formattedValue,userEnteredValue,hyperlink)";
 
+/**
+ * Boc ten tab theo cu phap pham vi A1: dat trong dau nhay don, moi dau nhay
+ * don co san trong ten phai nhan doi. Ten tab la cau hinh (CATALOGUE_SHEET_TAB)
+ * nen co the mang dau cach, dau hai cham... (vi du "Online Cataloge") — thieu
+ * buoc boc nay thi Google khong parse duoc pham vi va tra ve loi 400.
+ * encodeURIComponent chi ma hoa ky tu, khong tu them dau nhay.
+ */
+function boPhamViA1(tab: string): string {
+  return `'${tab.replace(/'/g, "''")}'`;
+}
+
 export async function docBangTho(sheetId: string, tab: string): Promise<OTho[][]> {
   const token = await layAccessToken();
   const url =
     `https://sheets.googleapis.com/v4/spreadsheets/${encodeURIComponent(sheetId)}` +
-    `?ranges=${encodeURIComponent(tab)}&includeGridData=true&fields=${encodeURIComponent(FIELD_MASK)}`;
+    `?ranges=${encodeURIComponent(boPhamViA1(tab))}&includeGridData=true&fields=${encodeURIComponent(FIELD_MASK)}`;
 
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   if (!res.ok) {
