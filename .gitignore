@@ -12,3 +12,4 @@ next-env.d.ts
 
 # Du lieu mau de xem thu khi chua co service account — KHONG commit
 *.local.json
+.vercel

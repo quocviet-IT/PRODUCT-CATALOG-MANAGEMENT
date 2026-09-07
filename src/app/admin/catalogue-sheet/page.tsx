@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { requireUser } from "@/auth/guard";
 import { layDanhSachCatalogue, nguonDangDung } from "@/modules/sheet/catalogue.service";
 import { catTrang, docBoLocTuUrl, docTrang, locDanhSach, tinhThongKe } from "@/modules/sheet/catalogue.view";
 import type { CoBatThuong, DongCatalogue } from "@/modules/sheet/catalogue.mapper";
@@ -140,7 +139,6 @@ export default async function TrangCatalogueSheet({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  await requireUser();
   const sp = await searchParams;
   const loc = docBoLocTuUrl(sp);
   const kieuXem = docKieuXem(sp.xem);

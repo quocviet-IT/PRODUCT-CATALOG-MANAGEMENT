@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const getSessionUser = vi.fn();
 const layUrlAnhSheet = vi.fn();
-vi.mock("@/auth/guard", () => ({ getSessionUser }));
 // Ban gia phai khai DU nhung gi tuyen thuc su import. Tuyen doc CO_ANH_HOP_LE
 // de doi chieu tham so ?w= — thieu no thi tuyen no ngay khi chay.
 vi.mock("@/modules/media/anh-drive", () => ({
@@ -14,31 +12,30 @@ vi.mock("@/modules/media/anh-drive", () => ({
 
 const { GET } = await import("@/app/api/anh-drive/[fileId]/route");
 
-const NGUOI_DUNG = { id: "u1", email: "a@b.c", fullName: "A", role: "sale", isActive: true };
 const goi = (fileId: string) =>
   GET(new Request("http://x/api/anh-drive/x"), { params: Promise.resolve({ fileId }) });
 
 beforeEach(() => {
-  getSessionUser.mockReset();
   layUrlAnhSheet.mockReset();
   layUrlAnhSheet.mockResolvedValue("https://ky.example/anh.webp");
 });
 
 describe("GET /api/anh-drive/[fileId]", () => {
-  it("tu choi khi chua dang nhap", async () => {
-    getSessionUser.mockResolvedValue(null);
-    expect((await goi("1AbcDefGhiJkl")).status).toBe(401);
-    expect(layUrlAnhSheet).not.toHaveBeenCalled();
+  it("phuc vu khi khong co phien dang nhap — tuyen nay dang mo cong khai", async () => {
+    const res = await goi("1AbcDefGhiJkl");
+    expect(res.status).toBe(302);
   });
 
-  it("tu choi khi tai khoan bi vo hieu hoa", async () => {
-    getSessionUser.mockResolvedValue({ ...NGUOI_DUNG, isActive: false });
-    expect((await goi("1AbcDefGhiJkl")).status).toBe(401);
-    expect(layUrlAnhSheet).not.toHaveBeenCalled();
+  it("khong import cong dang nhap — mo cong khai thi khong duoc con phu thuoc auth", async () => {
+    // Chan de viec "vo tinh gan lai requireUser" bi bat ngay, thay vi phai doi
+    // ai do mo trang moi phat hien anh khong hien.
+    const nguon = await import("node:fs/promises").then((fs) =>
+      fs.readFile("src/app/api/anh-drive/[fileId]/route.ts", "utf8"),
+    );
+    expect(nguon).not.toContain("@/auth/guard");
   });
 
   it("tu choi fileId khong hop le — gia tri nay den tu URL", async () => {
-    getSessionUser.mockResolvedValue(NGUOI_DUNG);
     for (const xau of ["../../bi-mat", "a", "co khoang trang", "x".repeat(200)]) {
       expect((await goi(xau)).status).toBe(400);
     }
@@ -46,20 +43,17 @@ describe("GET /api/anh-drive/[fileId]", () => {
   });
 
   it("chuyen huong sang URL co ky khi hop le", async () => {
-    getSessionUser.mockResolvedValue(NGUOI_DUNG);
     const res = await goi("1AbcDefGhiJkl");
     expect(res.status).toBe(302);
     expect(res.headers.get("location")).toBe("https://ky.example/anh.webp");
   });
 
   it("tra 502 khi Drive hong, khong nem ra ngoai", async () => {
-    getSessionUser.mockResolvedValue(NGUOI_DUNG);
     layUrlAnhSheet.mockRejectedValue(new Error("drive hong"));
     expect((await goi("1AbcDefGhiJkl")).status).toBe(502);
   });
 
   it("ghi log phia server khi layUrlAnhSheet loi, nhung than phan hoi van rong va status van 502", async () => {
-    getSessionUser.mockResolvedValue(NGUOI_DUNG);
     const loiGoc = new Error("drive hong");
     layUrlAnhSheet.mockRejectedValue(loiGoc);
     const gianDiep = vi.spyOn(console, "error").mockImplementation(() => {});
@@ -84,16 +78,7 @@ describe("GET /api/anh-drive/[fileId]", () => {
       expect(res.headers.get("cache-control")).toBe("private, no-store");
     };
 
-    // 401 — chua dang nhap
-    getSessionUser.mockResolvedValue(null);
-    kiemTraKhongLuuDem(await goi("1AbcDefGhiJkl"));
-
-    // 401 — tai khoan bi vo hieu hoa
-    getSessionUser.mockResolvedValue({ ...NGUOI_DUNG, isActive: false });
-    kiemTraKhongLuuDem(await goi("1AbcDefGhiJkl"));
-
     // 400 — fileId khong hop le
-    getSessionUser.mockResolvedValue(NGUOI_DUNG);
     kiemTraKhongLuuDem(await goi("a"));
 
     // 302 — hop le

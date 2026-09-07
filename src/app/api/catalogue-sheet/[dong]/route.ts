@@ -1,4 +1,3 @@
-import { getSessionUser } from "@/auth/guard";
 import type { DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import {
   layAnhCuaMau,
@@ -19,11 +18,8 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ dong: string }> },
 ): Promise<Response> {
-  const user = await getSessionUser();
-  if (user === null || !user.isActive) {
-    return new Response(null, { status: 401, headers: { "Cache-Control": "private, no-store" } });
-  }
-
+  // Khong gac dang nhap: catalogue dang mo cong khai theo yeu cau, cong dang
+  // nhap se lam sau. Tuyen nay chi doc, khong ghi gi.
   const { dong } = await params;
   const so = Number(dong);
   if (!Number.isInteger(so) || so < 1) {
