@@ -1,0 +1,77 @@
+import { describe, expect, it } from "vitest";
+import { anhXaBang } from "@/modules/sheet/catalogue.mapper";
+import { docBoLocTuUrl, locDanhSach, tinhThongKe } from "@/modules/sheet/catalogue.view";
+import { bangMau } from "./fixtures/bang-mau";
+
+const ds = anhXaBang(bangMau);
+const KHONG_LOC = { q: null, chatLieu: null, loaiXoan: null, chiCanhBao: false };
+
+describe("docBoLocTuUrl", () => {
+  it("doc du bon tham so", () => {
+    expect(docBoLocTuUrl({ q: "d127", chat_lieu: "18KY", loai_xoan: "lab", canh_bao: "1" }))
+      .toEqual({ q: "d127", chatLieu: "18KY", loaiXoan: "lab", chiCanhBao: true });
+  });
+  it("bo qua gia tri loai_xoan khong hop le", () => {
+    expect(docBoLocTuUrl({ loai_xoan: "bay" }).loaiXoan).toBeNull();
+  });
+  it("chuoi rong coi nhu khong loc", () => {
+    expect(docBoLocTuUrl({ q: "  " }).q).toBeNull();
+  });
+});
+
+describe("tinhThongKe", () => {
+  const tk = tinhThongKe(ds);
+  it("dem dung tong va tung loai canh bao", () => {
+    expect(tk.tong).toBe(9);
+    expect(tk.thieuAnh).toBe(1);
+    expect(tk.thieuSku).toBe(4);
+    expect(tk.tlVangLech).toBe(1);
+  });
+  it("dem theo chat lieu, nhieu nhat truoc", () => {
+    expect(tk.theoChatLieu).toEqual([
+      { gia_tri: "18KY", soLuong: 4 },
+      { gia_tri: "18KW", soLuong: 2 },
+      { gia_tri: "PT900PD", soLuong: 2 },
+      { gia_tri: "14KY", soLuong: 1 },
+    ]);
+  });
+  it("dem theo loai xoan", () => {
+    expect(tk.theoLoaiXoan).toEqual([
+      { gia_tri: "lab", soLuong: 5 },
+      { gia_tri: "tu-nhien", soLuong: 3 },
+    ]);
+  });
+});
+
+describe("locDanhSach", () => {
+  it("khong loc thi tra nguyen danh sach", () => {
+    expect(locDanhSach(ds, KHONG_LOC)).toHaveLength(9);
+  });
+  it("loc theo chat lieu", () => {
+    expect(locDanhSach(ds, { ...KHONG_LOC, chatLieu: "PT900PD" })).toHaveLength(2);
+  });
+  it("loc theo loai xoan", () => {
+    expect(locDanhSach(ds, { ...KHONG_LOC, loaiXoan: "tu-nhien" })).toHaveLength(3);
+  });
+  it("chi dong co canh bao", () => {
+    // 6 dong mang co: 5,6,7,8,9,10. Dong 3,4,11 sach.
+    expect(locDanhSach(ds, { ...KHONG_LOC, chiCanhBao: true })).toHaveLength(6);
+  });
+  it("tim theo ma mau, khong phan biet hoa thuong", () => {
+    expect(locDanhSach(ds, { ...KHONG_LOC, q: "d12751" })).toHaveLength(2);
+  });
+  it("tim theo sku", () => {
+    expect(locDanhSach(ds, { ...KHONG_LOC, q: "108632" })).toHaveLength(1);
+  });
+  it("tim duoc ca trong mo ta, khong chi ma mau va sku", () => {
+    // "PT900PD" chi xuat hien trong Chi tiet SP cua hai dong PT900PD.
+    // Go chu thuong ma van ra ket qua chu hoa -> chung minh luon tinh khong phan
+    // biet hoa thuong. Tinh khong dau da co bo test rieng o tests/lib/vietnamese.test.ts.
+    expect(locDanhSach(ds, { ...KHONG_LOC, q: "pt900pd" })).toHaveLength(2);
+  });
+  it("cong don nhieu dieu kien", () => {
+    // 18KY co 4 dong (6,7,8,11); trong do 3 dong mang co (6,7,8).
+    expect(locDanhSach(ds, { ...KHONG_LOC, chatLieu: "18KY", chiCanhBao: true }))
+      .toHaveLength(3);
+  });
+});
