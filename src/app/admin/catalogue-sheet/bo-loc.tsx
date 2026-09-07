@@ -1,11 +1,48 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { BoLocCatalogue, LoaiXoan, ThongKe } from "@/modules/sheet/catalogue.view";
+import type { CoBatThuong } from "@/modules/sheet/catalogue.mapper";
+import {
+  MOI_CHIEU,
+  thamSoCua,
+  type BoLocCatalogue,
+  type ChieuLoc,
+  type DemLoc,
+  type MucDem,
+} from "@/modules/sheet/catalogue.view";
 import { vi } from "@/messages/vi";
 
 const NHAN = "block text-[11px] uppercase tracking-[0.14em] text-hp-muted";
+
+const NHAN_CHIEU: Record<ChieuLoc, string> = {
+  chatLieu: vi.catalogue_sheet.cot_chat_lieu,
+  loaiSp: vi.catalogue_sheet.cot_loai_sp,
+  dongSp: vi.catalogue_sheet.cot_dong_sp,
+  mau: vi.catalogue_sheet.cot_mau,
+  size: vi.catalogue_sheet.cot_size,
+  loaiXoan: vi.catalogue_sheet.loai_xoan,
+  canhBao: vi.catalogue_sheet.canh_bao_nhan,
+};
+
+/** Hai chieu mang nhan noi bo, phai doi sang chu nguoi doc hieu. */
+const NHAN_XOAN: Record<string, string> = {
+  lab: vi.catalogue_sheet.xoan_lab,
+  "tu-nhien": vi.catalogue_sheet.xoan_tu_nhien,
+};
+const NHAN_CO: Record<CoBatThuong, string> = {
+  "thieu-sku": vi.catalogue_sheet.co_thieu_sku,
+  "thieu-anh": vi.catalogue_sheet.co_thieu_anh,
+  "thieu-mo-ta": vi.catalogue_sheet.co_thieu_mo_ta,
+  "trung": vi.catalogue_sheet.co_trung,
+  "tl-vang-lech": vi.catalogue_sheet.co_tl_vang_lech,
+};
+
+function nhanGiaTri(chieu: ChieuLoc, gia_tri: string): string {
+  if (chieu === "loaiXoan") return NHAN_XOAN[gia_tri] ?? gia_tri;
+  if (chieu === "canhBao") return NHAN_CO[gia_tri as CoBatThuong] ?? gia_tri;
+  return gia_tri;
+}
 
 /** Doi bat ky bo loc nao cung phai ve trang 1: trang 3 co the khong con ton tai. */
 function dungUrl(
@@ -24,53 +61,184 @@ function dungUrl(
 }
 
 /** Bat/tat mot gia tri trong danh sach ngan bang dau phay. */
-function daoGiaTri(hienTai: string[], gia_tri: string): string | null {
+function daoGiaTri(hienTai: readonly string[], gia_tri: string): string | null {
   const moi = hienTai.includes(gia_tri)
     ? hienTai.filter((x) => x !== gia_tri)
     : [...hienTai, gia_tri];
   return moi.length ? moi.join(",") : null;
 }
 
-function MucChon({
-  nhan, soLuong, dangBat, khiBam,
+/**
+ * Mot o tha xuong chon nhieu.
+ *
+ * Khong dung <select multiple>: no bat nguoi dung giu Ctrl de chon nhieu, mot
+ * quy uoc gan nhu khong ai biet, va khong cho hien so luong ben canh tung muc.
+ * Day la nut mo + tam bang o vuong chon.
+ */
+function ThaXuong({
+  chieu,
+  muc,
+  daChon,
+  khiDao,
 }: {
-  nhan: string;
-  soLuong?: number;
-  dangBat: boolean;
-  khiBam: () => void;
+  chieu: ChieuLoc;
+  muc: MucDem[];
+  daChon: readonly string[];
+  khiDao: (gia_tri: string) => void;
 }) {
+  const [mo, setMo] = useState(false);
+  const boc = useRef<HTMLDivElement>(null);
+  const nut = useRef<HTMLButtonElement>(null);
+
+  // Bam ra ngoai thi dong. Nghe o giai bat (capture) de van chay khi mot phan
+  // tu ben trong goi stopPropagation.
+  useEffect(() => {
+    if (!mo) return;
+    function ngoai(e: MouseEvent) {
+      if (!boc.current?.contains(e.target as Node)) setMo(false);
+    }
+    function phim(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      setMo(false);
+      nut.current?.focus();
+    }
+    document.addEventListener("mousedown", ngoai, true);
+    document.addEventListener("keydown", phim);
+    return () => {
+      document.removeEventListener("mousedown", ngoai, true);
+      document.removeEventListener("keydown", phim);
+    };
+  }, [mo]);
+
+  const dangBat = daChon.length > 0;
+
   return (
-    <button
-      type="button"
-      onClick={khiBam}
-      aria-pressed={dangBat}
-      className={`border-b-2 pb-0.5 text-[11px] uppercase tracking-[0.14em]
-                  transition-colors duration-150
-                  ${dangBat
-                    ? "border-hp-pink text-hp-ink"
-                    : "border-transparent text-hp-muted hover:text-hp-ink"}`}
-    >
-      {nhan}
-      {soLuong !== undefined && <span className="ml-1.5 tabular-nums">{soLuong}</span>}
-    </button>
+    <div ref={boc} className="relative">
+      <button
+        ref={nut}
+        type="button"
+        onClick={() => setMo((x) => !x)}
+        aria-expanded={mo}
+        aria-haspopup="true"
+        className={`flex w-full items-center justify-between gap-3 border px-3 py-2
+                    text-[11px] uppercase tracking-[0.14em] transition-colors duration-150
+                    focus:outline-none focus-visible:border-hp-pink
+                    ${dangBat
+                      ? "border-hp-ink text-hp-ink"
+                      : "border-hp-rule text-hp-muted hover:text-hp-ink"}`}
+      >
+        <span className="truncate">
+          {NHAN_CHIEU[chieu]}
+          {dangBat && (
+            <span className="ml-2 tabular-nums">
+              {vi.catalogue_sheet.da_chon.replace("{n}", String(daChon.length))}
+            </span>
+          )}
+        </span>
+        {/* Tam giac quay khi mo — dau hieu duy nhat cho biet o nay bam duoc. */}
+        <span aria-hidden="true" className={mo ? "rotate-180" : undefined}>
+          ▾
+        </span>
+      </button>
+
+      {mo && (
+        <div
+          className="absolute left-0 top-full z-30 mt-1 max-h-72 min-w-full overflow-y-auto
+                     border border-hp-rule bg-hp-card p-1
+                     shadow-[0_4px_24px_rgba(42,39,37,0.10)]"
+        >
+          {muc.length === 0 ? (
+            <p className="px-3 py-2 text-[11px] text-hp-muted">
+              {vi.catalogue_sheet.khong_con_muc}
+            </p>
+          ) : (
+            muc.map((m) => {
+              const chon = daChon.includes(m.gia_tri);
+              return (
+                <label
+                  key={m.gia_tri}
+                  className="flex cursor-pointer items-center gap-3 whitespace-nowrap px-3 py-1.5
+                             transition-colors duration-150 hover:bg-hp-inset"
+                >
+                  <input
+                    type="checkbox"
+                    checked={chon}
+                    onChange={() => khiDao(m.gia_tri)}
+                    className="h-3.5 w-3.5 shrink-0 accent-hp-ink"
+                  />
+                  <span
+                    className={`flex-1 text-sm ${chon ? "text-hp-ink" : "text-hp-body"}`}
+                  >
+                    {nhanGiaTri(chieu, m.gia_tri)}
+                  </span>
+                  {/* Dem 0 van hien: muc do dang duoc chon, an di thi nguoi dung
+                      mat cho de bo chon no ra. */}
+                  <span
+                    className={`tabular-nums text-xs ${
+                      m.soLuong === 0 ? "text-hp-rule" : "text-hp-muted"
+                    }`}
+                  >
+                    {m.soLuong}
+                  </span>
+                </label>
+              );
+            })
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
+const O_SO =
+  "w-20 border-0 border-b border-hp-rule bg-transparent px-0.5 py-1 text-sm tabular-nums " +
+  "text-hp-body transition-colors duration-150 focus:border-b-2 focus:border-hp-pink " +
+  "focus:pb-[3px] focus:outline-none";
+
 export function ThanhBoLoc({
-  thongKe, hienTai,
+  dem,
+  hienTai,
 }: {
-  thongKe: ThongKe;
+  dem: DemLoc;
   hienTai: BoLocCatalogue;
 }) {
   const router = useRouter();
   const duongDan = usePathname();
   const thamSo = useSearchParams();
 
-  // O tim kiem giu trang thai rieng de go khong bi giat, roi moi day len URL sau
-  // mot nhip nghi. Khong co nhip nghi nay thi moi phim la mot lan render lai
-  // toan bo danh sach.
+  // Cac o go chu giu trang thai rieng de go khong bi giat, roi moi day len URL
+  // sau mot nhip nghi. Khong co nhip nghi nay thi moi phim la mot lan render
+  // lai toan bo danh sach. Rieng o tha xuong thi ap dung ngay: mot lan bam la
+  // mot y dinh tron ven, khong co gi de cho.
   const [q, setQ] = useState(hienTai.q ?? "");
+  const [tlTu, setTlTu] = useState(hienTai.tlTu?.toString() ?? "");
+  const [tlDen, setTlDen] = useState(hienTai.tlDen?.toString() ?? "");
   const lanDau = useRef(true);
+
+  /**
+   * Tham so URL MOI NHAT, khong phai ban chup cua lan render dang chay.
+   *
+   * Vi sao can: hen gio 250ms cua o go chu om lay `thamSo` cua luc no duoc dat.
+   * Neu trong 250ms do co mot lan doi khac (bam mot o tha xuong, hay bam Xoa
+   * tat ca) thi khi hen gio no ra, no dung ban chup CU de dung lai URL — va
+   * dap nguoc lai lua chon vua roi. Loi nay tung lam nut "Xoa tat ca bo loc"
+   * xoa duoc khoang trong luong nhung tra lai ngay the chat lieu.
+   */
+  const thamSoNay = useRef<URLSearchParams>(new URLSearchParams(thamSo));
+  useEffect(() => {
+    thamSoNay.current = new URLSearchParams(thamSo);
+  }, [thamSo]);
+
+  /** Loi di DUY NHAT: tinh URL, ghi lai tham so moi, roi moi dieu huong. */
+  const di = useCallback(
+    (doi: Record<string, string | null>) => {
+      const url = dungUrl(duongDan, thamSoNay.current, doi);
+      const sau = url.indexOf("?");
+      thamSoNay.current = new URLSearchParams(sau === -1 ? "" : url.slice(sau + 1));
+      router.replace(url, { scroll: false });
+    },
+    [duongDan, router],
+  );
 
   useEffect(() => {
     if (lanDau.current) {
@@ -78,25 +246,37 @@ export function ThanhBoLoc({
       return;
     }
     const h = setTimeout(() => {
-      router.replace(dungUrl(duongDan, thamSo, { q: q.trim() || null }), { scroll: false });
+      di({
+        q: q.trim() || null,
+        tl_tu: tlTu.trim() || null,
+        tl_den: tlDen.trim() || null,
+      });
     }, 250);
     return () => clearTimeout(h);
-    // thamSo doi moi lan loc -> khong dua vao day, neu khong se tu kich hoat lai.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q]);
+  }, [q, tlTu, tlDen, di]);
 
-  function dat(khoa: string, gia_tri: string | null) {
-    router.replace(dungUrl(duongDan, thamSo, { [khoa]: gia_tri }), { scroll: false });
+  function xoaHet() {
+    setQ("");
+    setTlTu("");
+    setTlDen("");
+    const rong: Record<string, null> = { q: null, tl_tu: null, tl_den: null };
+    for (const chieu of MOI_CHIEU) rong[thamSoCua(chieu)] = null;
+    di(rong);
   }
 
+  // Moi muc dang chon, phang ra thanh mot day the go bo duoc. Khong co day nay
+  // thi bo loc dang bat bi giau kin trong cac o tha xuong dang dong.
+  const dangChon = MOI_CHIEU.flatMap((chieu) =>
+    (hienTai[chieu] as readonly string[]).map((gia_tri) => ({ chieu, gia_tri })),
+  );
   const coLoc =
+    dangChon.length > 0 ||
     hienTai.q !== null ||
-    hienTai.chatLieu.length > 0 ||
-    hienTai.loaiXoan.length > 0 ||
-    hienTai.chiCanhBao;
+    hienTai.tlTu !== null ||
+    hienTai.tlDen !== null;
 
   return (
-    <div className="mb-10 space-y-6">
+    <div className="mb-10 space-y-5">
       <div className="max-w-md">
         <label className={NHAN} htmlFor="q">
           {vi.catalogue_sheet.tim_kiem_nhan}
@@ -112,71 +292,79 @@ export function ThanhBoLoc({
         />
       </div>
 
-      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-3">
-        <span className={`${NHAN} w-24`}>{vi.catalogue_sheet.chat_lieu}</span>
-        <MucChon
-          nhan={vi.catalogue_sheet.tat_ca}
-          soLuong={thongKe.tong}
-          dangBat={hienTai.chatLieu.length === 0}
-          khiBam={() => dat("chat_lieu", null)}
-        />
-        {thongKe.theoChatLieu.map((m) => (
-          <MucChon
-            key={m.gia_tri}
-            nhan={m.gia_tri}
-            soLuong={m.soLuong}
-            dangBat={hienTai.chatLieu.includes(m.gia_tri)}
-            khiBam={() => dat("chat_lieu", daoGiaTri(hienTai.chatLieu, m.gia_tri))}
-          />
+      <div className="flex flex-wrap items-end gap-x-3 gap-y-3">
+        {MOI_CHIEU.map((chieu) => (
+          <div key={chieu} className="w-44">
+            <ThaXuong
+              chieu={chieu}
+              muc={dem[chieu]}
+              daChon={hienTai[chieu]}
+              khiDao={(gia_tri) =>
+                di({ [thamSoCua(chieu)]: daoGiaTri(hienTai[chieu], gia_tri) })
+              }
+            />
+          </div>
         ))}
+
+        <div className="flex items-baseline gap-2">
+          <span className={NHAN}>{vi.catalogue_sheet.tl_vang_khoang}</span>
+          <label className="sr-only" htmlFor="tl_tu">
+            {vi.catalogue_sheet.tl_tu}
+          </label>
+          <input
+            id="tl_tu"
+            inputMode="decimal"
+            placeholder={vi.catalogue_sheet.tl_tu}
+            value={tlTu}
+            onChange={(e) => setTlTu(e.target.value)}
+            className={O_SO}
+          />
+          <span className="text-hp-muted">–</span>
+          <label className="sr-only" htmlFor="tl_den">
+            {vi.catalogue_sheet.tl_den}
+          </label>
+          <input
+            id="tl_den"
+            inputMode="decimal"
+            placeholder={vi.catalogue_sheet.tl_den}
+            value={tlDen}
+            onChange={(e) => setTlDen(e.target.value)}
+            className={O_SO}
+          />
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-baseline gap-x-6 gap-y-3">
-        <span className={`${NHAN} w-24`}>{vi.catalogue_sheet.loai_xoan}</span>
-        <MucChon
-          nhan={vi.catalogue_sheet.tat_ca}
-          dangBat={hienTai.loaiXoan.length === 0}
-          khiBam={() => dat("loai_xoan", null)}
-        />
-        {thongKe.theoLoaiXoan.map((m) => (
-          <MucChon
-            key={m.gia_tri}
-            nhan={
-              m.gia_tri === "lab"
-                ? vi.catalogue_sheet.xoan_lab
-                : vi.catalogue_sheet.xoan_tu_nhien
-            }
-            soLuong={m.soLuong}
-            dangBat={hienTai.loaiXoan.includes(m.gia_tri as LoaiXoan)}
-            khiBam={() => dat("loai_xoan", daoGiaTri(hienTai.loaiXoan, m.gia_tri))}
-          />
-        ))}
-      </div>
-
-      <div className="flex flex-wrap items-center gap-6">
-        <MucChon
-          nhan={vi.catalogue_sheet.chi_canh_bao}
-          dangBat={hienTai.chiCanhBao}
-          khiBam={() => dat("canh_bao", hienTai.chiCanhBao ? null : "1")}
-        />
-        {coLoc && (
+      {coLoc && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-hp-rule pt-4">
+          <span className={NHAN}>{vi.catalogue_sheet.dang_loc_theo}</span>
+          {dangChon.map(({ chieu, gia_tri }) => (
+            <button
+              key={`${chieu}:${gia_tri}`}
+              type="button"
+              onClick={() => di({ [thamSoCua(chieu)]: daoGiaTri(hienTai[chieu], gia_tri) })}
+              aria-label={vi.catalogue_sheet.bo_muc.replace(
+                "{nhan}",
+                `${NHAN_CHIEU[chieu]}: ${nhanGiaTri(chieu, gia_tri)}`,
+              )}
+              className="border border-hp-rule px-2.5 py-1 text-xs text-hp-body
+                         transition-colors duration-150 hover:border-hp-ink hover:text-hp-ink"
+            >
+              {nhanGiaTri(chieu, gia_tri)}
+              <span aria-hidden="true" className="ml-2 text-hp-muted">
+                ✕
+              </span>
+            </button>
+          ))}
           <button
             type="button"
-            onClick={() =>
-              router.replace(
-                dungUrl(duongDan, thamSo, {
-                  q: null, chat_lieu: null, loai_xoan: null, canh_bao: null,
-                }),
-                { scroll: false },
-              )
-            }
-            className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
+            onClick={xoaHet}
+            className="ml-auto text-[11px] uppercase tracking-[0.14em] text-hp-muted
                        transition-colors duration-150 hover:text-hp-ink hover:underline"
           >
             {vi.catalogue_sheet.xoa_loc}
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
