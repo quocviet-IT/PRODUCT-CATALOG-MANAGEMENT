@@ -21,3 +21,35 @@ body {
   font-family: var(--font-body);
   font-optical-sizing: auto;
 }
+
+/*
+ * Ban in cua trang khach xem (/c/<slug>). "Tai PDF" chinh la hop thoai in cua
+ * trinh duyet, nen moi thu duoi day quyet dinh tep PDF khach nhan duoc trong nhu
+ * the nao.
+ */
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
+@media print {
+  /* Nen be va cac duong ke la mot phan cua thuong hieu — khong co dong nay thi
+     trinh duyet in ra chu den tren giay trang, mat het cai chat cua catalogue. */
+  body {
+    background: #fff;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Anh khong duoc cao hon nua trang giay: mot anh vuong 1400px se an het mot
+     trang A4 va day thong so sang trang sau, tach roi khoi chinh mau cua no. */
+  img {
+    max-height: 11cm;
+    object-fit: contain;
+  }
+
+  /* Lien ket trong ban giay khong bam duoc; gach chan chi lam roi mat. */
+  a {
+    text-decoration: none;
+  }
+}

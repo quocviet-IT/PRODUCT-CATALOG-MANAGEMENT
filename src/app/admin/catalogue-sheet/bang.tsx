@@ -1,4 +1,6 @@
 import type { CoBatThuong, DongCatalogue } from "@/modules/sheet/catalogue.mapper";
+import { khoaMau } from "@/modules/catalogue-share/chia-se.model";
+import { OTich } from "./chon-mau";
 import { vi } from "@/messages/vi";
 
 const NHAN_CO: Record<CoBatThuong, string> = {
@@ -38,6 +40,9 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="bg-hp-inset">
+            {/* Cot o tich khong co tieu de chu: mot chu "Chon" o day chi lam
+                hang tieu de nang them ma khong noi gi hon chinh cai o tich. */}
+            <th className={O_TIEU_DE} aria-label={vi.chia_se.tao_catalogue} />
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_anh}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_sku}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_so}</th>
@@ -62,6 +67,9 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
               data-dong={d.dongSheet}
               className="cursor-pointer bg-hp-card transition-colors duration-150 hover:bg-hp-inset"
             >
+              <td className={`${O_DU_LIEU} w-px`}>
+                <OTich ma={khoaMau(d)} />
+              </td>
               <td className={O_DU_LIEU}>
                 <div className="flex h-14 w-14 items-center justify-center bg-hp-inset">
                   {d.fileIdAnh ? (
