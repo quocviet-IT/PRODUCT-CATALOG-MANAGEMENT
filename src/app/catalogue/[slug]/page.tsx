@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { layTheoSlug } from "@/modules/catalogue-share/chia-se.service";
 import type { MucCatalogue } from "@/modules/catalogue-share/chia-se.model";
-import { NutInPdf } from "./nut-in";
+import { MoHopThoaiIn } from "./nut-in";
 import { PhongToAnh } from "./phong-to";
 import { vi } from "@/messages/vi";
 
@@ -98,10 +98,17 @@ function Muc({ m, thuTu }: { m: MucCatalogue; thuTu: number }) {
   );
 }
 
-export default async function TrangKhachXem(
-  { params }: { params: Promise<{ slug: string }> },
-) {
+export default async function TrangKhachXem({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const { slug } = await params;
+  // "?in=1" chi sale moi gan vao (tu man hinh cua ho). Link gui khach la link
+  // tran, nen khach khong bao gio thay hop thoai in.
+  const moIn = (await searchParams).in === "1";
   if (!slugHopLe(slug)) notFound();
 
   const c = await layTheoSlug(slug);
@@ -110,15 +117,9 @@ export default async function TrangKhachXem(
   return (
     <main className="mx-auto min-h-screen max-w-4xl px-6 py-10 print:max-w-none print:py-0">
       <header className="mb-10">
-        <div className="flex flex-wrap items-baseline gap-x-6 gap-y-2">
-          <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-            {vi.catalogue_sheet.thuong_hieu}
-          </span>
-          {/* Nut in khong duoc xuat hien trong chinh ban in. */}
-          <div className="ml-auto print:hidden">
-            <NutInPdf />
-          </div>
-        </div>
+        <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+          {vi.catalogue_sheet.thuong_hieu}
+        </span>
         <h1 className="mt-2 font-title text-[32px] leading-tight tracking-[0.02em] text-hp-ink">
           {c.ten}
         </h1>
@@ -136,6 +137,8 @@ export default async function TrangKhachXem(
           ))}
         </ul>
       </PhongToAnh>
+
+      {moIn && <MoHopThoaiIn />}
 
       <footer className="mt-14 border-t border-hp-rule pt-6 text-xs text-hp-muted">
         {vi.chia_se.lien_he}

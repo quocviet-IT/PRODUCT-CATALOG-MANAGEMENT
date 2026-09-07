@@ -287,6 +287,7 @@ function DaXong({ slug }: { slug: string }) {
         {vi.chia_se.xong_tieu_de}
       </h2>
       <p className="mt-3 text-sm text-hp-body">{vi.chia_se.xong_mo_ta}</p>
+      <p className="mt-1 text-xs text-hp-muted">{vi.chia_se.tai_pdf_giai_thich}</p>
 
       <p className="mt-6 border border-hp-rule bg-hp-card px-4 py-3 text-sm break-all text-hp-body">
         {link}
@@ -304,6 +305,16 @@ function DaXong({ slug }: { slug: string }) {
         </button>
         <a href={`/catalogue/${slug}`} target="_blank" rel="noreferrer" className={NUT_PHU}>
           {vi.chia_se.mo_thu}
+        </a>
+        {/* PDF la viec CUA SALE, khong phai cua khach. Duong dan kem ?in=1 mo
+            san hop thoai in; link gui khach la link tran nen ho khong gap no. */}
+        <a
+          href={`/catalogue/${slug}?in=1`}
+          target="_blank"
+          rel="noreferrer"
+          className={NUT_PHU}
+        >
+          {vi.chia_se.tai_pdf_sale}
         </a>
         <Link href="/admin/catalogue-sheet" className={NUT_PHU}>
           {vi.chia_se.tao_tiep}
