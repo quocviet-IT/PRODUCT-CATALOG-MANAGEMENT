@@ -34,3 +34,23 @@ export async function layUrlCoKy(khoa: string, hanGiay = 3600): Promise<string> 
   if (error || !data) throw new Error(`Không ký được URL cho ${khoa}: ${error?.message}`);
   return data.signedUrl;
 }
+
+/** Tien to rieng, tach khoi anh san pham do nguoi dung tai len. */
+export function dungKhoaAnhSheet(fileId: string, canhDai: number): string {
+  return `sheet-cache/${fileId}-${canhDai}.webp`;
+}
+
+export async function tepTonTai(khoa: string): Promise<boolean> {
+  const cat = khoa.lastIndexOf("/");
+  const thuMuc = cat === -1 ? "" : khoa.slice(0, cat);
+  const ten = cat === -1 ? khoa : khoa.slice(cat + 1);
+  const { data, error } = await kho.list(thuMuc, { search: ten, limit: 100 });
+  if (error) throw new Error(`Không liệt kê được ${thuMuc}: ${error.message}`);
+  return (data ?? []).some((t) => t.name === ten);
+}
+
+export async function taiVe(khoa: string): Promise<Buffer> {
+  const { data, error } = await kho.download(khoa);
+  if (error || !data) throw new Error(`Không tải được tệp ${khoa}: ${error?.message}`);
+  return Buffer.from(await data.arrayBuffer());
+}
