@@ -132,7 +132,7 @@ describe("token thiet ke Hung Phat", () => {
 - [ ] **Step 2: Chạy test để chắc chắn nó đỏ**
 
 Run: `npx vitest run tests/app/thiet-ke.test.ts`
-Expected: FAIL — cả 5 test đỏ, `globals.css` chưa có `@theme` với token `hp-*`.
+Expected: FAIL — 4 test đỏ, `globals.css` chưa có `@theme` với token `hp-*`. Test thứ ba (`không dùng màu muted gốc`) xanh ngay từ đầu: boilerplate chưa bao giờ chứa `#8A8178`. Nó là chốt chặn hồi quy cho tương lai, không phải khẳng định do TDD dẫn ra.
 
 - [ ] **Step 3: Thay `src/app/globals.css`**
 
