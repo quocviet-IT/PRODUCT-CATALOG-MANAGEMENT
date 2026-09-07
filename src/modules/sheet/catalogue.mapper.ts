@@ -13,6 +13,12 @@ export type DongCatalogue = {
   sku: string | null;
   maMau: string | null;
   mo: string | null;
+  so: string | null;
+  /** Cot LOAI cua bang tinh, vi du "Complete". */
+  loai: string | null;
+  /** Cot DONG — dong san pham, vi du "NHAN". KHAC hoan toan voi dongSheet. */
+  dongSp: string | null;
+  oChu: string | null;
   chiTiet: string | null;
   chatLieu: string | null;
   loaiXoan: "lab" | "tu-nhien" | null;
@@ -54,6 +60,10 @@ const COT = {
   tlVang:   { ten: "TL VÀNG",     batBuoc: true,  nhan: ["tl vàng (gr)", "tl vàng"] },
   hinh:     { ten: "HÌNH",        batBuoc: true,  nhan: ["hình"] },
   size:     { ten: "SIZE",        batBuoc: false, nhan: ["size"] },
+  so:       { ten: "SO",          batBuoc: false, nhan: ["so"] },
+  loai:     { ten: "LOẠI",        batBuoc: false, nhan: ["loại"] },
+  dongSp:   { ten: "DÒNG",        batBuoc: false, nhan: ["dòng"] },
+  oChu:     { ten: "Ổ chủ",       batBuoc: false, nhan: ["ổ chủ"] },
   thuMuc:   { ten: "FOLDER HÌNH", batBuoc: false, nhan: ["folder hình"] },
 } as const;
 
@@ -136,6 +146,10 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
       sku,
       maMau,
       mo,
+      so: chu(lay(h, "so")),
+      loai: chu(lay(h, "loai")),
+      dongSp: chu(lay(h, "dongSp")),
+      oChu: chu(lay(h, "oChu")),
       chiTiet,
       chatLieu: chu(lay(h, "chatLieu")),
       loaiXoan: chiTiet === null ? null

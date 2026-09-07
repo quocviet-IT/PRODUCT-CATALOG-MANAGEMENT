@@ -18,10 +18,16 @@ const O_TIEU_DE =
   "whitespace-nowrap border-b border-hp-rule px-4 py-3 text-left " +
   "text-[11px] uppercase tracking-[0.14em] text-hp-muted";
 const O_DU_LIEU = "border-b border-hp-rule px-4 py-3 align-top text-hp-body";
+const O_GON = `${O_DU_LIEU} whitespace-nowrap`;
+const O_SO = `${O_GON} tabular-nums`;
 
-/** O rong hien dau gach thay vi de trong, de nguoi doc phan biet voi loi trinh bay. */
+/** O rong hien dau gach thay vi de trong, de phan biet voi loi trinh bay. */
 function Trong() {
   return <span className="text-hp-muted">{vi.catalogue_sheet.o_trong}</span>;
+}
+
+function Chu({ v }: { v: string | null }) {
+  return v === null ? <Trong /> : <>{v}</>;
 }
 
 export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
@@ -35,12 +41,17 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_dong}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_anh}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_sku}</th>
+            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_so}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_mo}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_ma_mau}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_chi_tiet}</th>
+            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_ma_mau}</th>
+            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_loai}</th>
+            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_dong_sp}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_chat_lieu}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_tl_vang}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_size}</th>
+            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_o_chu}</th>
+            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_thu_muc}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_canh_bao}</th>
           </tr>
         </thead>
@@ -51,7 +62,7 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
               className="bg-hp-card transition-colors duration-150 hover:bg-hp-inset"
             >
               {/* So dong that cua bang tinh — de nguoi doc tim dung dong ma sua. */}
-              <td className={`${O_DU_LIEU} tabular-nums text-hp-muted`}>{d.dongSheet}</td>
+              <td className={`${O_SO} text-hp-muted`}>{d.dongSheet}</td>
 
               <td className={O_DU_LIEU}>
                 <div className="flex h-14 w-14 items-center justify-center bg-hp-inset">
@@ -67,22 +78,32 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
                 </div>
               </td>
 
-              <td className={`${O_DU_LIEU} whitespace-nowrap tabular-nums`}>
-                {d.sku ?? <Trong />}
-              </td>
-              <td className={`${O_DU_LIEU} whitespace-nowrap tabular-nums`}>
-                {d.mo ?? <Trong />}
-              </td>
-              <td className={`${O_DU_LIEU} whitespace-nowrap text-hp-ink`}>
-                {d.maMau ?? <Trong />}
-              </td>
-              <td className={`${O_DU_LIEU} min-w-[24rem]`}>{d.chiTiet ?? <Trong />}</td>
-              <td className={`${O_DU_LIEU} whitespace-nowrap`}>{d.chatLieu ?? <Trong />}</td>
-              <td className={`${O_DU_LIEU} whitespace-nowrap tabular-nums`}>
-                {dinhDangGam(d.tlVang) ?? <Trong />}
-              </td>
-              <td className={`${O_DU_LIEU} whitespace-nowrap tabular-nums`}>
-                {d.size ?? <Trong />}
+              <td className={O_SO}><Chu v={d.sku} /></td>
+              <td className={O_SO}><Chu v={d.so} /></td>
+              <td className={O_SO}><Chu v={d.mo} /></td>
+              <td className={`${O_DU_LIEU} min-w-[24rem]`}><Chu v={d.chiTiet} /></td>
+              <td className={`${O_GON} text-hp-ink`}><Chu v={d.maMau} /></td>
+              <td className={O_GON}><Chu v={d.loai} /></td>
+              <td className={O_GON}><Chu v={d.dongSp} /></td>
+              <td className={O_GON}><Chu v={d.chatLieu} /></td>
+              <td className={O_SO}>{dinhDangGam(d.tlVang) ?? <Trong />}</td>
+              <td className={O_SO}><Chu v={d.size} /></td>
+              <td className={O_GON}><Chu v={d.oChu} /></td>
+
+              <td className={O_GON}>
+                {d.urlThuMuc ? (
+                  <a
+                    href={d.urlThuMuc}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[10px] uppercase tracking-[0.14em] text-hp-muted
+                               transition-colors duration-150 hover:text-hp-ink hover:underline"
+                  >
+                    {vi.catalogue_sheet.mo_thu_muc}
+                  </a>
+                ) : (
+                  <Trong />
+                )}
               </td>
 
               <td className={`${O_DU_LIEU} text-[10px] uppercase tracking-[0.14em] text-hp-muted`}>
