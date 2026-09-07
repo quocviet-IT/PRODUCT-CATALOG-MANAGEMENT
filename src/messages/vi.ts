@@ -77,7 +77,9 @@ export const vi = {
   },
   catalogue_sheet: {
     tieu_de: "Catalogue Online",
-    thuong_hieu: "Hùng Phát",
+    // Ten thuong hieu viet KHONG DAU va co "USA" — day la cach thuong hieu tu
+    // xung o thi truong My, khong phai loi thieu dau tieng Viet.
+    thuong_hieu: "HUNG PHAT USA",
     nguon_bang_tinh: "Đọc trực tiếp từ bảng tính, làm mới mỗi 60 giây",
     nguon_mau: "Dữ liệu mẫu — chưa nối với bảng tính",
     tim_kiem_nhan: "Tìm mã mẫu, SKU hoặc mô tả",
