@@ -11,4 +11,4 @@ next-env.d.ts
 *.tsbuildinfo
 
 # Du lieu mau de xem thu khi chua co service account — KHONG commit
-du-lieu-mau.local.json
+*.local.json
