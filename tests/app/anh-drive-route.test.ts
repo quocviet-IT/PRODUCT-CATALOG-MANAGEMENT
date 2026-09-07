@@ -3,7 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const getSessionUser = vi.fn();
 const layUrlAnhSheet = vi.fn();
 vi.mock("@/auth/guard", () => ({ getSessionUser }));
-vi.mock("@/modules/media/anh-drive", () => ({ layUrlAnhSheet }));
+// Ban gia phai khai DU nhung gi tuyen thuc su import. Tuyen doc CO_ANH_HOP_LE
+// de doi chieu tham so ?w= — thieu no thi tuyen no ngay khi chay.
+vi.mock("@/modules/media/anh-drive", () => ({
+  layUrlAnhSheet,
+  CANH_DAI_ANH_SHEET: 600,
+  CANH_DAI_ANH_LON: 1400,
+  CO_ANH_HOP_LE: [600, 1400],
+}));
 
 const { GET } = await import("@/app/api/anh-drive/[fileId]/route");
 

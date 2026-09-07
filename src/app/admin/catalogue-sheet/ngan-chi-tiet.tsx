@@ -1,0 +1,152 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import type { DuLieuChiTiet } from "@/app/api/catalogue-sheet/[dong]/route";
+import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
+import { ChiTietMau } from "./chi-tiet-mau";
+import { vi } from "@/messages/vi";
+
+/**
+ * Boc danh sach (bang hoac luoi) va mo ngan chi tiet khi bam vao mot dong.
+ *
+ * Dung uy quyen su kien tren mot boc ngoai thay vi gan onClick vao tung dong:
+ * bang va luoi deu la server component, khong the nhan ham callback. Moi dong
+ * chi can mang data-dong.
+ */
+export function NganChiTiet({ children }: { children: ReactNode }) {
+  const [dong, setDong] = useState<number | null>(null);
+  const [dl, setDl] = useState<DuLieuChiTiet | null>(null);
+  const [dangTai, setDangTai] = useState(false);
+  const [loi, setLoi] = useState(false);
+  const [anhLon, setAnhLon] = useState<AnhTrongThuMuc | null>(null);
+  const nutDong = useRef<HTMLButtonElement>(null);
+
+  const dongNgan = useCallback(() => {
+    setDong(null);
+    setDl(null);
+    setLoi(false);
+    setAnhLon(null);
+  }, []);
+
+  // Escape dong lop tren cung truoc: dang phong to anh thi tra ve ngan, chua
+  // phong to thi moi dong han ngan.
+  useEffect(() => {
+    if (dong === null) return;
+    function batPhim(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      setAnhLon((truoc) => {
+        if (truoc !== null) return null;
+        dongNgan();
+        return null;
+      });
+    }
+    window.addEventListener("keydown", batPhim);
+    return () => window.removeEventListener("keydown", batPhim);
+  }, [dong, dongNgan]);
+
+  useEffect(() => {
+    if (dong !== null) nutDong.current?.focus();
+  }, [dong, dl]);
+
+  // Trang thai "dang tai" duoc dat ngay o cho bam, khong dat trong effect:
+  // goi setState dong bo trong than effect gay render day chuyen.
+  useEffect(() => {
+    if (dong === null) return;
+    let con = true;
+    fetch(`/api/catalogue-sheet/${dong}`)
+      .then((r) => (r.ok ? (r.json() as Promise<DuLieuChiTiet>) : Promise.reject(r.status)))
+      .then((d) => con && setDl(d))
+      .catch(() => con && setLoi(true))
+      .finally(() => con && setDangTai(false));
+    return () => {
+      con = false;
+    };
+  }, [dong]);
+
+  function batClick(e: React.MouseEvent) {
+    const dich = e.target as HTMLElement;
+    // Lien ket that (mo thu muc Drive) van phai hoat dong binh thuong.
+    if (dich.closest("a")) return;
+    const o = dich.closest<HTMLElement>("[data-dong]");
+    if (!o) return;
+    e.preventDefault();
+    setDl(null);
+    setLoi(false);
+    setDangTai(true);
+    setDong(Number(o.dataset.dong));
+  }
+
+  return (
+    <>
+      <div onClick={batClick}>{children}</div>
+
+      {dong !== null && (
+        <>
+          {/* Nen mo: lop phu phang theo huong dan cho anh/nen ban, khong dung
+              hieu ung truot vi he thiet ke chi cho phep chuyen dong mau. */}
+          <div
+            onClick={dongNgan}
+            className="fixed inset-0 z-40 bg-hp-ink/50 transition-opacity duration-150"
+            aria-hidden="true"
+          />
+
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-label={vi.catalogue_sheet.chi_tiet_mau}
+            className="fixed inset-y-0 right-0 z-50 w-full max-w-2xl overflow-y-auto
+                       border-l border-hp-rule bg-hp-foundation p-8
+                       transition-opacity duration-150"
+          >
+            <button
+              ref={nutDong}
+              type="button"
+              onClick={dongNgan}
+              className="mb-6 text-[11px] uppercase tracking-[0.14em] text-hp-muted
+                         transition-colors duration-150 hover:text-hp-ink hover:underline"
+            >
+              {vi.catalogue_sheet.dong_ngan}
+            </button>
+
+            {dangTai && !dl ? (
+              <div className="bg-hp-inset px-4 py-3 text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+                {vi.catalogue_sheet.dang_tai}
+              </div>
+            ) : loi ? (
+              <p className="text-sm text-hp-pink-strong">{vi.catalogue_sheet.loi_tai_chi_tiet}</p>
+            ) : dl ? (
+              <ChiTietMau
+                d={dl.dong}
+                anh={dl.anh}
+                loiAnh={dl.loiAnh}
+                nguon={dl.nguon}
+                khiBamAnh={setAnhLon}
+              />
+            ) : null}
+          </aside>
+        </>
+      )}
+
+      {anhLon && (
+        <div
+          onClick={() => setAnhLon(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={anhLon.ten}
+          className="fixed inset-0 z-[60] flex cursor-zoom-out flex-col items-center
+                     justify-center gap-4 bg-hp-ink/90 p-8 transition-opacity duration-150"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={`/api/anh-drive/${anhLon.fileId}?w=1400`}
+            alt={anhLon.ten}
+            className="max-h-[85vh] max-w-full object-contain"
+          />
+          <p className="text-[11px] uppercase tracking-[0.14em] text-hp-foundation/80">
+            {anhLon.ten}
+          </p>
+        </div>
+      )}
+    </>
+  );
+}
