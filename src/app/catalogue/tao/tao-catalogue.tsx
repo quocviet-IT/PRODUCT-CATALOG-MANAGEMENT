@@ -109,8 +109,10 @@ export function TaoCatalogue() {
         setLoiTao(vi.chia_se.loi_tao);
         return;
       }
-      const d = (await res.json()) as { slug: string };
-      themVuaTao({ slug: d.slug, ten: ten.trim() || vi.chia_se.tao_tieu_de, luc: Date.now() });
+      // Lay ten do MAY CHU tra ve, khong tu dung lai o day: khi sale khong dat
+      // ten thi ten la "Catalogue #<so>", ma so do chi co so du lieu biet.
+      const d = (await res.json()) as { slug: string; ten: string };
+      themVuaTao({ slug: d.slug, ten: d.ten, luc: Date.now() });
       // Gio da dung xong — khong xoa thi lan tao sau sale lai thay nguyen cai cu.
       datGio([]);
       setSlug(d.slug);
@@ -152,6 +154,7 @@ export function TaoCatalogue() {
         <label className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted" htmlFor="ten">
           {vi.chia_se.ten_nhan}
         </label>
+        <p className="mt-1 text-xs text-hp-muted">{vi.chia_se.ten_tuy_chon}</p>
         <input
           id="ten"
           value={ten}

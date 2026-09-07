@@ -97,6 +97,21 @@ export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogu
   return { phienBan: 1, muc };
 }
 
+/**
+ * Ten hien cho nguoi doc.
+ *
+ * Sale duoc quyen khong dat ten — luc tu van gap gap, go them mot cai ten la
+ * mot buoc thua. Khi do he thong goi no bang SO THU TU do co so du lieu cap.
+ *
+ * Truoc day ten mac dinh la "Catalogue <ngay>", va hai catalogue tao cung mot
+ * ngay mang y het mot cai ten: mo danh sach ra khong biet cai nao la cai nao.
+ * So thu tu thi khong bao gio trung, ke ca khi hai nguoi bam cung mot luc.
+ */
+export function tenHienThi(ten: string, so: number): string {
+  const t = ten.trim();
+  return t === "" ? `Catalogue #${so}` : t;
+}
+
 /** Mot muc tren man hinh tao catalogue: nhu muc khach xem, kem TOAN BO thu vien. */
 export type MucDeChon = MucCatalogue & { ma: string };
 

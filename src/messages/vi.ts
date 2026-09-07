@@ -161,6 +161,7 @@ export const vi = {
     tao_mo_ta: "Bỏ tích những ảnh không muốn gửi. Mẫu nào không cần thì gỡ khỏi danh sách.",
     ten_nhan: "Tên catalogue",
     ten_goi_y: "Ví dụ: Chị Lan — nhẫn cưới 18K",
+    ten_tuy_chon: "Không bắt buộc. Bỏ trống thì hệ thống đánh số, ví dụ “Catalogue #12”.",
     go_mau: "Gỡ mẫu này",
     dang_tai: "Đang tải danh sách đã chọn",
     chua_chon_gi: "Chưa chọn mẫu nào. Về danh sách catalogue và tích chọn mẫu trước.",

@@ -15,6 +15,13 @@
       "when": 1788777556385,
       "tag": "0001_wakeful_annihilus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788780474158,
+      "tag": "0002_pale_iron_fist",
+      "breakpoints": true
     }
   ]
 }

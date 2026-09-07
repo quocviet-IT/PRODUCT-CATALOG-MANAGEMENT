@@ -8,6 +8,7 @@ import {
   docNoiDung,
   dungNoiDung,
   khoaMau,
+  tenHienThi,
   type LuaChon,
   type NguonMau,
   type NoiDungCatalogue,
@@ -64,7 +65,9 @@ export async function layNguonTheoMa(ma: string[]): Promise<NguonMau[]> {
 
 export type CatalogueDaLuu = {
   slug: string;
+  /** Da qua tenHienThi() — noi nao hien ten thi dung thang cai nay. */
   ten: string;
+  so: number;
   taoLuc: Date;
   noiDung: NoiDungCatalogue;
 };
@@ -76,24 +79,24 @@ export type CatalogueDaLuu = {
  * trinh duyet chi noi CHON MAU NAO va GIU ANH NAO. Nho vay khong ai gui len
  * duoc mot catalogue ghi sai trong luong vang hay bia ra mot ma mau.
  */
-export async function taoCatalogue(ten: string, chon: LuaChon[]): Promise<string> {
+export async function taoCatalogue(
+  ten: string,
+  chon: LuaChon[],
+): Promise<{ slug: string; ten: string }> {
   const nguon = await layNguonTheoMa(chon.map((c) => c.ma));
   const noiDung = dungNoiDung(nguon, chon);
   if (noiDung.muc.length === 0) throw new LoiCatalogueRong();
 
   const slug = sinhSlug();
-  await db.insert(catalogues).values({
-    slug,
-    ten: ten.trim().slice(0, DAI_TEN_TOI_DA) || tenMacDinh(),
-    noiDung,
-  });
-  return slug;
-}
-
-/** Ten goi y khi sale khong dat ten — van phai phan biet duoc trong danh sach. */
-export function tenMacDinh(luc: Date = new Date()): string {
-  const p = (n: number) => String(n).padStart(2, "0");
-  return `Catalogue ${p(luc.getDate())}/${p(luc.getMonth() + 1)}/${luc.getFullYear()}`;
+  // Ten RONG duoc phep luu nguyen: khong bia ten thay sale o day. Cho hien thi
+  // se goi no theo so thu tu — xem tenHienThi().
+  // Tra ve `so` ngay trong lenh them de trinh duyet biet goi catalogue vua tao
+  // la gi, khong phai hoi lai mot vong nua.
+  const [moi] = await db
+    .insert(catalogues)
+    .values({ slug, ten: ten.trim().slice(0, DAI_TEN_TOI_DA), noiDung })
+    .returning({ so: catalogues.so, ten: catalogues.ten });
+  return { slug, ten: tenHienThi(moi.ten, moi.so) };
 }
 
 export async function layTheoSlug(slug: string): Promise<CatalogueDaLuu | null> {
@@ -104,5 +107,11 @@ export async function layTheoSlug(slug: string): Promise<CatalogueDaLuu | null> 
     console.error(`[chia-se] noi dung catalogue ${slug} khong doc duoc`);
     return null;
   }
-  return { slug: d.slug, ten: d.ten, taoLuc: d.createdAt, noiDung };
+  return {
+    slug: d.slug,
+    ten: tenHienThi(d.ten, d.so),
+    so: d.so,
+    taoLuc: d.createdAt,
+    noiDung,
+  };
 }

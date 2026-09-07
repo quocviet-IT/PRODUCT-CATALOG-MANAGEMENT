@@ -98,7 +98,17 @@ export const catalogues = pgTable("catalogues", {
   id: uuid("id").primaryKey().defaultRandom(),
   /** Phan xuat hien trong link /c/<slug>. Ngau nhien, khong doan duoc. */
   slug: text("slug").notNull(),
-  ten: text("ten").notNull(),
+  /**
+   * So thu tu de nguoi doc goi ten: "Catalogue #7". Do Postgres cap nen khong
+   * bao gio trung, ke ca khi hai sale bam Tao cung mot luc.
+   *
+   * Vi sao khong dung ngay thang lam ten mac dinh: hai catalogue tao cung mot
+   * ngay se mang y het mot cai ten, sale mo danh sach ra khong biet cai nao la
+   * cai nao.
+   */
+  so: bigint("so", { mode: "number" }).notNull().generatedAlwaysAsIdentity(),
+  /** Ten sale dat. RONG la hop le — luc do hien thi lay theo `so`. */
+  ten: text("ten").notNull().default(""),
   /** Xem KieuNoiDung trong catalogue-share/chia-se.model.ts */
   noiDung: jsonb("noi_dung").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
