@@ -149,4 +149,43 @@ export const vi = {
     anh_chua_co_ma_mau: "Ảnh sản phẩm chưa có mã mẫu",
     size_nhan: "Size",
   },
+  chia_se: {
+    // Thanh chon noi duoi day danh sach
+    chon_o_nhan: "Chọn {ma} để đưa vào catalogue",
+    da_chon: "Đã chọn {n} mẫu",
+    bo_chon_het: "Bỏ chọn hết",
+    tao_catalogue: "Tạo catalogue",
+
+    // Man hinh tao
+    tao_tieu_de: "Tạo catalogue gửi khách",
+    tao_mo_ta: "Bỏ tích những ảnh không muốn gửi. Mẫu nào không cần thì gỡ khỏi danh sách.",
+    ten_nhan: "Tên catalogue",
+    ten_goi_y: "Ví dụ: Chị Lan — nhẫn cưới 18K",
+    go_mau: "Gỡ mẫu này",
+    dang_tai: "Đang tải danh sách đã chọn",
+    chua_chon_gi: "Chưa chọn mẫu nào. Về danh sách catalogue và tích chọn mẫu trước.",
+    ve_danh_sach: "← Về danh sách catalogue",
+    nut_tao: "Tạo link gửi khách",
+    dang_tao: "Đang tạo",
+    loi_tai_chon: "Không tải được danh sách đã chọn. Thử lại giúp em.",
+    loi_tao: "Không tạo được catalogue. Thử lại giúp em.",
+    loi_tao_rong: "Những mẫu đã chọn không còn trên bảng tính. Chọn lại giúp em.",
+    dem_anh_chon: "{n}/{t} ảnh",
+    khong_co_anh: "Mẫu này chưa có ảnh nào.",
+
+    // Sau khi tao
+    xong_tieu_de: "Đã tạo xong",
+    xong_mo_ta: "Gửi link này cho khách. Link không hết hạn.",
+    chep_link: "Chép link",
+    da_chep: "Đã chép",
+    mo_thu: "Mở thử",
+    tao_tiep: "Tạo catalogue khác",
+    vua_tao: "Catalogue vừa tạo trên máy này",
+
+    // Trang khach xem
+    khach_gom: "{n} mẫu",
+    tai_pdf: "Tải PDF",
+    khong_thay: "Không tìm thấy catalogue này. Có thể link bị sao chép thiếu.",
+    lien_he: "Liên hệ nhân viên tư vấn để biết thêm chi tiết.",
+  },
 } as const;

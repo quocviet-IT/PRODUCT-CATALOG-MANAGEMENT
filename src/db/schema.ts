@@ -81,3 +81,25 @@ export const productImages = pgTable("product_images", {
   index("product_images_product_idx").on(t.productId),
   index("product_images_hash_idx").on(t.contentHash),
 ]);
+
+/**
+ * Mot catalogue sale gui khach.
+ *
+ * noiDung la anh chup DONG CUNG luc tao, khong phai con tro toi bang tinh:
+ * bang tinh sua moi ngay, con link da gui thi nam trong may khach hang tuan.
+ * Khach phai luon thay dung cai sale gui — khong bao gio co chuyen mo ra thay
+ * so lieu khac luc tu van, hay mau bien mat vi ai do xoa dong.
+ *
+ * Chua co owner: he thong dang khong bat dang nhap (quyet dinh 07/09/2026),
+ * sale giu danh sach catalogue cua minh trong trinh duyet. Khi nao bat dang
+ * nhap thi them mot cot owner_id, khong phai dung lai bang.
+ */
+export const catalogues = pgTable("catalogues", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  /** Phan xuat hien trong link /c/<slug>. Ngau nhien, khong doan duoc. */
+  slug: text("slug").notNull(),
+  ten: text("ten").notNull(),
+  /** Xem KieuNoiDung trong catalogue-share/chia-se.model.ts */
+  noiDung: jsonb("noi_dung").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [uniqueIndex("catalogues_slug_idx").on(t.slug)]);

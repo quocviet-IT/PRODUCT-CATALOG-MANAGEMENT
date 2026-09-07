@@ -9,6 +9,8 @@ import {
   tinhThongKe,
 } from "@/modules/sheet/catalogue.view";
 import type { CoBatThuong, DongCatalogue } from "@/modules/sheet/catalogue.mapper";
+import { khoaMau } from "@/modules/catalogue-share/chia-se.model";
+import { ChonMau, OTich } from "./chon-mau";
 import { BangCatalogue } from "./bang";
 import { ThanhBoLoc } from "./bo-loc";
 import { NganChiTiet } from "./ngan-chi-tiet";
@@ -114,6 +116,9 @@ function The({ d }: { d: DongCatalogue }) {
       </div>
 
       <div className="p-5">
+        <div className="mb-3">
+          <OTich ma={khoaMau(d)} />
+        </div>
         {d.chatLieu && (
           <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
             {d.chatLieu}
@@ -238,15 +243,17 @@ export default async function TrangCatalogueSheet({
       {ds.length === 0 ? (
         <p className="text-sm text-hp-muted">{vi.catalogue_sheet.khong_khop}</p>
       ) : (
-        <NganChiTiet>
-          {kieuXem === "bang" ? (
-            <BangCatalogue ds={ds} />
-          ) : (
-            <ul className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-              {ds.map((d) => <The key={d.dongSheet} d={d} />)}
-            </ul>
-          )}
-        </NganChiTiet>
+        <ChonMau>
+          <NganChiTiet>
+            {kieuXem === "bang" ? (
+              <BangCatalogue ds={ds} />
+            ) : (
+              <ul className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+                {ds.map((d) => <The key={d.dongSheet} d={d} />)}
+              </ul>
+            )}
+          </NganChiTiet>
+        </ChonMau>
       )}
 
       {daLoc.length > 0 && (

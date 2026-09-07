@@ -67,6 +67,9 @@ export function NganChiTiet({ children }: { children: ReactNode }) {
     const dich = e.target as HTMLElement;
     // Lien ket that (mo thu muc Drive) van phai hoat dong binh thuong.
     if (dich.closest("a")) return;
+    // O tich chon mau nam ngay trong dong: bam vao no la y dinh "chon mau nay",
+    // khong phai "mo chi tiet". Thieu dong nay thi moi lan tich la ngan bat ra.
+    if (dich.closest("[data-chon]")) return;
     const o = dich.closest<HTMLElement>("[data-dong]");
     if (!o) return;
     e.preventDefault();
