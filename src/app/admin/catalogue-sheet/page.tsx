@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireUser } from "@/auth/guard";
-import { layDanhSachCatalogue } from "@/modules/sheet/catalogue.service";
+import { layDanhSachCatalogue, nguonDangDung } from "@/modules/sheet/catalogue.service";
 import { docBoLocTuUrl, locDanhSach, tinhThongKe } from "@/modules/sheet/catalogue.view";
 import type { CoBatThuong, DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { BangCatalogue } from "./bang";
@@ -127,19 +127,27 @@ export default async function TrangCatalogueSheet({
     );
   }
 
+  const nguon = nguonDangDung();
   const thongKe = tinhThongKe(tatCa);
   const ds = locDanhSach(tatCa, loc);
 
   return (
     <>
-      <div className="mb-8">
+      <div className="mb-10">
         <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-          {vi.catalogue_sheet.nguon}
+          {vi.catalogue_sheet.thuong_hieu}
         </span>
-        <h1 className="mt-2 font-title text-[28px] leading-tight text-hp-ink">
+        {/* Chu hoa nen can gian chu rong hon chu thuong; 0.06em la muc du tho
+            de tung chu tach ra ma chua roi thanh nhan eyebrow. */}
+        <h1 className="mt-2 font-title text-[32px] uppercase leading-none tracking-[0.06em] text-hp-ink">
           {vi.catalogue_sheet.tieu_de}
         </h1>
-        <div className="mt-4 h-px bg-hp-rule" />
+        <p className="mt-3 text-xs text-hp-muted">
+          {nguon === "mau"
+            ? vi.catalogue_sheet.nguon_mau
+            : vi.catalogue_sheet.nguon_bang_tinh}
+        </p>
+        <div className="mt-5 h-px bg-hp-rule" />
       </div>
 
       <div className="mb-10 flex divide-x divide-hp-rule">

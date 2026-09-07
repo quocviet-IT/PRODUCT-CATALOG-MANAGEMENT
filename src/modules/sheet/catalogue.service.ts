@@ -37,6 +37,14 @@ async function docBangTuTep(duongDan: string): Promise<OTho[][]> {
   return JSON.parse(await readFile(duongDan, "utf8")) as OTho[][];
 }
 
+/**
+ * Nguon du lieu dang dung. Trang hien thi cho nguoi dung biet, vi mot man hinh
+ * chay bang du lieu mau ma trong y het ban that la cach de nguoi ta nham nhat.
+ */
+export function nguonDangDung(): "mau" | "bang-tinh" {
+  return getEnv().CATALOGUE_TEP_MAU ? "mau" : "bang-tinh";
+}
+
 export async function layDanhSachCatalogue(): Promise<DongCatalogue[]> {
   if (boDem !== null && Date.now() - boDem.luc < HAN_BO_DEM_MS) return boDem.ds;
 
