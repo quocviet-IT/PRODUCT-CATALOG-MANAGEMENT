@@ -172,7 +172,7 @@ export default async function TrangCatalogueSheet({
         <O so={thongKe.tlVangLech} nhan={vi.catalogue_sheet.dem_tl_vang_lech} />
       </div>
 
-      <ThanhBoLoc thongKe={thongKe} hienTai={loc} kieuXem={kieuXem} />
+      <ThanhBoLoc thongKe={thongKe} hienTai={loc} />
 
       {/* Kieu xem khong dung mau hong: ngan sach hong da chi het cho vien focus
           o tim kiem va gach chan bo loc dang bat. O day phan biet bang ink/muted. */}

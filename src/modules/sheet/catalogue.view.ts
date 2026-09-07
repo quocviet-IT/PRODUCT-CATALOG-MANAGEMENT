@@ -1,10 +1,13 @@
 import { chuanHoaTimKiem } from "@/lib/vietnamese";
 import type { DongCatalogue } from "./catalogue.mapper";
 
+export type LoaiXoan = "lab" | "tu-nhien";
+
 export type BoLocCatalogue = {
   q: string | null;
-  chatLieu: string | null;
-  loaiXoan: "lab" | "tu-nhien" | null;
+  /** Rong = khong rang buoc. Nhieu gia tri = hop (OR) trong cung mot tieu chi. */
+  chatLieu: string[];
+  loaiXoan: LoaiXoan[];
   chiCanhBao: boolean;
 };
 
@@ -24,12 +27,19 @@ function chuoi(v: string | undefined): string | null {
   return s ? s : null;
 }
 
+/** Nhieu gia tri di trong MOT tham so, ngan bang dau phay. Bo trung va bo rong. */
+function danhSach(v: string | undefined): string[] {
+  if (!v) return [];
+  return [...new Set(v.split(",").map((x) => x.trim()).filter(Boolean))];
+}
+
 export function docBoLocTuUrl(sp: Record<string, string | undefined>): BoLocCatalogue {
-  const xoan = chuoi(sp.loai_xoan);
   return {
     q: chuoi(sp.q),
-    chatLieu: chuoi(sp.chat_lieu),
-    loaiXoan: xoan === "lab" || xoan === "tu-nhien" ? xoan : null,
+    chatLieu: danhSach(sp.chat_lieu),
+    loaiXoan: danhSach(sp.loai_xoan).filter(
+      (x): x is LoaiXoan => x === "lab" || x === "tu-nhien",
+    ),
     chiCanhBao: sp.canh_bao === "1",
   };
 }
@@ -57,16 +67,31 @@ export function tinhThongKe(ds: DongCatalogue[]): ThongKe {
   };
 }
 
+/**
+ * Moi cot chu deu tim duoc, khong chi ma mau va mo ta. Nguoi dung go so MO hay
+ * "18KW" thi phai ra ket qua, khong phai doan xem cot nao duoc tim.
+ */
+function khoTimKiem(d: DongCatalogue): string {
+  return chuanHoaTimKiem(
+    [
+      d.maMau, d.sku, d.mo, d.so, d.chiTiet,
+      d.chatLieu, d.size, d.loai, d.dongSp, d.oChu,
+    ]
+      .filter((x): x is string => Boolean(x))
+      .join(" "),
+  );
+}
+
 export function locDanhSach(ds: DongCatalogue[], loc: BoLocCatalogue): DongCatalogue[] {
   const tuKhoa = loc.q === null ? null : chuanHoaTimKiem(loc.q);
   return ds.filter((d) => {
-    if (loc.chatLieu !== null && d.chatLieu !== loc.chatLieu) return false;
-    if (loc.loaiXoan !== null && d.loaiXoan !== loc.loaiXoan) return false;
+    // Danh sach rong nghia la KHONG rang buoc, khong phai "khong khop gi".
+    if (loc.chatLieu.length > 0 && (d.chatLieu === null || !loc.chatLieu.includes(d.chatLieu)))
+      return false;
+    if (loc.loaiXoan.length > 0 && (d.loaiXoan === null || !loc.loaiXoan.includes(d.loaiXoan)))
+      return false;
     if (loc.chiCanhBao && d.co.length === 0) return false;
-    if (tuKhoa !== null) {
-      const kho = chuanHoaTimKiem([d.maMau ?? "", d.sku ?? "", d.chiTiet ?? ""].join(" "));
-      if (!kho.includes(tuKhoa)) return false;
-    }
+    if (tuKhoa !== null && !khoTimKiem(d).includes(tuKhoa)) return false;
     return true;
   });
 }
