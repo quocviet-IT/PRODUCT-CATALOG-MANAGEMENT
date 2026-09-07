@@ -15,6 +15,9 @@ export default async function KhungQuanTri({ children }: { children: React.React
         <Link href="/admin/products" className="rounded px-2 py-1 text-sm hover:bg-neutral-100">
           {vi.dieu_huong.san_pham}
         </Link>
+        <Link href="/admin/catalogue-sheet" className="rounded px-2 py-1 text-sm hover:bg-neutral-100">
+          {vi.dieu_huong.catalogue_sheet}
+        </Link>
         <Link href="/admin/upload" className="rounded px-2 py-1 text-sm hover:bg-neutral-100">
           {vi.dieu_huong.tai_anh}
         </Link>
