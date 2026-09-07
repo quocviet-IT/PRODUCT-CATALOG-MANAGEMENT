@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 import { getEnv } from "@/lib/env";
 import { anhXaBang, type DongCatalogue, type OTho } from "./catalogue.mapper";
 import { docBangTho } from "./sheet.client";
+import { lietKeAnhTrongThuMuc, type AnhTrongThuMuc } from "./drive.client";
 
 // Bang tinh do nguoi sua tay, tan suat thay doi tinh bang gio. 60 giay du de
 // nhieu nguoi mo trang lien tiep khong tao ra nhieu lan goi API.
@@ -61,5 +62,41 @@ export async function layDanhSachCatalogue(): Promise<DongCatalogue[]> {
   const ds = anhXaBang(tho);
   // Chi ghi bo dem SAU khi ca hai buoc thanh cong — khong dem ket qua loi.
   boDem = { luc: Date.now(), ds };
+  return ds;
+}
+
+// ---------------------------------------------------------------------------
+// Anh cua mot mau: toan bo tep trong thu muc ma cot FOLDER HINH tro toi.
+// ---------------------------------------------------------------------------
+
+/** Danh sach thu muc doi cham hon bang tinh nhieu, nen dem lau hon. */
+const HAN_BO_DEM_ANH_MS = 10 * 60_000;
+
+const boDemAnh = new Map<string, { luc: number; ds: AnhTrongThuMuc[] }>();
+
+/** Chi dung trong test. */
+export function xoaBoDemAnh(): void {
+  boDemAnh.clear();
+}
+
+export async function layAnhCuaMau(idThuMuc: string): Promise<AnhTrongThuMuc[]> {
+  const cu = boDemAnh.get(idThuMuc);
+  if (cu && Date.now() - cu.luc < HAN_BO_DEM_ANH_MS) return cu.ds;
+
+  const env = getEnv();
+  let ds: AnhTrongThuMuc[];
+  if (env.CATALOGUE_TEP_ANH_MAU) {
+    // Cung co che voi CATALOGUE_TEP_MAU: xem thu duoc khi chua co service account.
+    // Thu muc khong co trong tep mau thi tra ve rong, khong nem loi — trang chi
+    // tiet van hien thong tin, chi thieu thu vien anh.
+    const bang = JSON.parse(
+      await readFile(env.CATALOGUE_TEP_ANH_MAU, "utf8"),
+    ) as Record<string, AnhTrongThuMuc[]>;
+    ds = bang[idThuMuc] ?? [];
+  } else {
+    ds = await lietKeAnhTrongThuMuc(idThuMuc);
+  }
+
+  boDemAnh.set(idThuMuc, { luc: Date.now(), ds });
   return ds;
 }

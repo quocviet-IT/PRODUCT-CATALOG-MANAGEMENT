@@ -68,7 +68,8 @@ function The({ d }: { d: DongCatalogue }) {
   const coDongTrongLuongSize = trongLuong !== null || d.size !== null;
 
   return (
-    <li className="border border-hp-rule bg-hp-card">
+    <li className="border border-hp-rule bg-hp-card transition-colors duration-150 hover:border-hp-ink">
+      <Link href={`/admin/catalogue-sheet/${d.dongSheet}`} className="block">
       <div className="flex aspect-[4/5] items-center justify-center bg-hp-inset">
         {d.fileIdAnh ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -108,14 +109,8 @@ function The({ d }: { d: DongCatalogue }) {
           </p>
         )}
 
-        {d.urlThuMuc && (
-          <a href={d.urlThuMuc} target="_blank" rel="noreferrer"
-             className="mt-3 inline-block text-[10px] uppercase tracking-[0.14em] text-hp-muted
-                        transition-colors duration-150 hover:text-hp-ink hover:underline">
-            {vi.catalogue_sheet.mo_thu_muc}
-          </a>
-        )}
       </div>
+      </Link>
     </li>
   );
 }
