@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { layTheoSlug } from "@/modules/catalogue-share/chia-se.service";
 import type { MucCatalogue } from "@/modules/catalogue-share/chia-se.model";
 import { NutInPdf } from "./nut-in";
+import { PhongToAnh } from "./phong-to";
 import { vi } from "@/messages/vi";
 
 /** Slug do ta sinh ra: 12 ky tu trong bang chu cai da biet. Chan truoc khi hoi DB. */
@@ -58,7 +59,12 @@ function Muc({ m, thuTu }: { m: MucCatalogue; thuTu: number }) {
         <ul className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {m.anh.map((a, i) => (
             <li key={a.fileId} className="border border-hp-rule bg-hp-card">
-              <div className="flex aspect-square items-center justify-center bg-hp-inset">
+              <div
+                data-anh={a.fileId}
+                title={vi.chia_se.phong_to}
+                className="flex aspect-square cursor-zoom-in items-center justify-center
+                           bg-hp-inset transition-colors duration-150 hover:bg-hp-rule/40"
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/api/anh-drive/${a.fileId}?w=1400`}
@@ -106,11 +112,15 @@ export default async function TrangKhachXem(
         </p>
       </header>
 
-      <ul className="space-y-10">
-        {c.noiDung.muc.map((m, i) => (
-          <Muc key={`${m.maMau ?? "x"}-${i}`} m={m} thuTu={i + 1} />
-        ))}
-      </ul>
+      {/* Thu tu anh o day PHAI trung thu tu tren trang: khung phong to bam
+          qua lai theo chinh mang nay. */}
+      <PhongToAnh anh={c.noiDung.muc.flatMap((m) => m.anh)}>
+        <ul className="space-y-10">
+          {c.noiDung.muc.map((m, i) => (
+            <Muc key={`${m.maMau ?? "x"}-${i}`} m={m} thuTu={i + 1} />
+          ))}
+        </ul>
+      </PhongToAnh>
 
       <footer className="mt-14 border-t border-hp-rule pt-6 text-xs text-hp-muted">
         {vi.chia_se.lien_he}
