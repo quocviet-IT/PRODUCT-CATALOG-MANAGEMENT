@@ -25,12 +25,9 @@ export const vi = {
     danh_muc_goc: "— Danh mục gốc —",
   },
   dieu_huong: {
-    catalogue: "Catalogue",
     danh_muc: "Danh mục",
     san_pham: "Sản phẩm",
     tai_anh: "Tải ảnh lên",
-    thuong_hieu: "Thương hiệu",
-    catalogue_sheet: "Catalogue (bảng tính)",
   },
   trang: {
     tieu_de: "Catalogue & Báo giá",
