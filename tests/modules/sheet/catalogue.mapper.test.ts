@@ -1,0 +1,124 @@
+import { describe, expect, it } from "vitest";
+import {
+  LoiThieuCot, anhXaBang, chuanHoaTieuDe, tachFileIdAnh, tachSize, tinhTlVangSuyRa,
+} from "@/modules/sheet/catalogue.mapper";
+import { bangMau } from "./fixtures/bang-mau";
+
+describe("chuanHoaTieuDe", () => {
+  it("gop xuong dong va khoang trang thanh mot dau cach", () => {
+    expect(chuanHoaTieuDe("TL VÀNG\n (gr)")).toBe("tl vàng (gr)");
+  });
+  it("bo khoang trang dau cuoi va khong phan biet hoa thuong", () => {
+    expect(chuanHoaTieuDe("  Chi Tiết SP  ")).toBe("chi tiết sp");
+  });
+});
+
+describe("tachFileIdAnh", () => {
+  it("tach duoc id tu cong thuc IMAGE", () => {
+    expect(tachFileIdAnh('=IMAGE("https://lh3.google.com/u/0/d/abc-DEF_123")'))
+      .toBe("abc-DEF_123");
+  });
+  it("tra null khi o rong hoac khong phai cong thuc IMAGE", () => {
+    expect(tachFileIdAnh(undefined)).toBeNull();
+    expect(tachFileIdAnh("chu thuong")).toBeNull();
+  });
+});
+
+describe("tachSize", () => {
+  it("lay phan sau chu Size", () => {
+    expect(tachSize("DIARI: 18KW 11RD/0.398cts 4.07gr D11031 Size: 18VN")).toBe("18VN");
+    expect(tachSize("LGDRI: 14KY 7RD/0.326cts 2.85gr D12741 Size: 10")).toBe("10");
+  });
+  it("tra null khi khong co", () => {
+    expect(tachSize("khong co gi")).toBeNull();
+    expect(tachSize(null)).toBeNull();
+  });
+});
+
+describe("tinhTlVangSuyRa", () => {
+  it("tru khoi luong da quy tu carat", () => {
+    // 2.85 - 0.2*0.326 = 2.7848
+    expect(tinhTlVangSuyRa("LGDRI: 14KY 7RD/0.326cts 2.85gr D12741 Size: 10"))
+      .toBeCloseTo(2.7848, 4);
+  });
+  it("cong don MOI cum cts trong mo ta", () => {
+    // 5.18 - 0.2*(0.116+0.441) = 5.0686
+    expect(tinhTlVangSuyRa("LGDRI: 18KY 4RD/0.116cts+6MQ/0.441cts 5.18gr B12741 Size: 7"))
+      .toBeCloseTo(5.0686, 4);
+  });
+  it("tra null khi khong co gr", () => {
+    expect(tinhTlVangSuyRa("khong co so")).toBeNull();
+  });
+});
+
+describe("anhXaBang", () => {
+  const ds = anhXaBang(bangMau);
+
+  it("bo hai dong dau, giu dung so dong du lieu", () => {
+    expect(ds).toHaveLength(9);
+  });
+
+  it("giu so dong that cua bang de doi chieu", () => {
+    expect(ds[0].dongSheet).toBe(3);
+    expect(ds[8].dongSheet).toBe(11);
+  });
+
+  it("doc dung cot du tieu de co ky tu xuong dong", () => {
+    expect(ds[0].tlVang).toBe(2.78);
+  });
+
+  it("tach duoc fileId anh", () => {
+    expect(ds[0].fileIdAnh).toBe("18I_Y9I_tLtnizSbupQclY48QBxG3I3XB");
+  });
+
+  it("lay hyperlink lam duong dan thu muc", () => {
+    expect(ds[0].urlThuMuc).toContain("/drive/folders/");
+  });
+
+  it("uu tien cot SIZE, trong thi tach tu mo ta", () => {
+    expect(ds[0].size).toBe("10");   // co trong cot
+    expect(ds[1].size).toBe("18VN"); // chi co trong mo ta
+  });
+
+  it("suy loai xoan tu tien to LGDRI / DIARI", () => {
+    expect(ds[0].loaiXoan).toBe("lab");
+    expect(ds[1].loaiXoan).toBe("tu-nhien");
+  });
+
+  it("gan co thieu-anh dung dong", () => {
+    expect(ds.filter((d) => d.co.includes("thieu-anh")).map((d) => d.dongSheet)).toEqual([5]);
+  });
+
+  it("gan co thieu-sku dung dong", () => {
+    expect(ds.filter((d) => d.co.includes("thieu-sku")).map((d) => d.dongSheet))
+      .toEqual([6, 7, 9, 10]);
+  });
+
+  it("gan co thieu-mo-ta dung dong", () => {
+    expect(ds.filter((d) => d.co.includes("thieu-mo-ta")).map((d) => d.dongSheet)).toEqual([7]);
+  });
+
+  it("gan co trung cho CA HAI dong trung nhau", () => {
+    expect(ds.filter((d) => d.co.includes("trung")).map((d) => d.dongSheet)).toEqual([9, 10]);
+  });
+
+  it("gan co tl-vang-lech dung dong, va KHONG bao nham dong hop le", () => {
+    expect(ds.filter((d) => d.co.includes("tl-vang-lech")).map((d) => d.dongSheet)).toEqual([8]);
+  });
+
+  it("dong day du khong mang co nao", () => {
+    expect(ds[0].co).toEqual([]);
+  });
+
+  it("nem LoiThieuCot neu thieu cot bat buoc, va neu dich danh cot nao", () => {
+    const thieu = bangMau.map((h) => [...h]);
+    thieu[1][3] = { formattedValue: "Ghi chu" }; // doi ten cot "Chi tiết SP"
+    try {
+      anhXaBang(thieu);
+      throw new Error("le ra phai nem loi");
+    } catch (e) {
+      expect(e).toBeInstanceOf(LoiThieuCot);
+      expect((e as LoiThieuCot).cotThieu).toContain("Chi tiết SP");
+    }
+  });
+});
