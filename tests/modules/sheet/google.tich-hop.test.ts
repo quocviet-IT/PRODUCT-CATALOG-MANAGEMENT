@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { docBangTho } from "@/modules/sheet/sheet.client";
 import { taiTepDrive } from "@/modules/sheet/drive.client";
 import { anhXaBang } from "@/modules/sheet/catalogue.mapper";
+import { getEnv } from "@/lib/env";
 
 // Bo qua khi may chua co khoa, de bo test van chay duoc tren may sach.
 //
@@ -21,15 +22,18 @@ const coKhoa =
 const kiemTra = coKhoa ? describe : describe.skip;
 
 kiemTra("doc that tu Google", () => {
+  // CATALOGUE_SHEET_TAB khong con gia tri mac dinh trong schema (xem
+  // src/lib/env.ts) — doc qua getEnv() de dung chung mot nguon that thay vi
+  // tu suy dien lai "?? \"test\"" o day.
   it("doc duoc bang va anh xa ra dong co du lieu", async () => {
-    const tho = await docBangTho(process.env.CATALOGUE_SHEET_ID!, process.env.CATALOGUE_SHEET_TAB ?? "test");
+    const tho = await docBangTho(process.env.CATALOGUE_SHEET_ID!, getEnv().CATALOGUE_SHEET_TAB);
     const ds = anhXaBang(tho);
     expect(ds.length).toBeGreaterThan(0);
     expect(ds.some((d) => d.fileIdAnh !== null)).toBe(true);
   }, 30000);
 
   it("tai duoc anh rieng tu tu Drive", async () => {
-    const tho = await docBangTho(process.env.CATALOGUE_SHEET_ID!, process.env.CATALOGUE_SHEET_TAB ?? "test");
+    const tho = await docBangTho(process.env.CATALOGUE_SHEET_ID!, getEnv().CATALOGUE_SHEET_TAB);
     const id = anhXaBang(tho).find((d) => d.fileIdAnh !== null)!.fileIdAnh!;
     const bytes = await taiTepDrive(id);
     expect(bytes.byteLength).toBeGreaterThan(1000);

@@ -12,6 +12,14 @@ describe("chuanHoaTieuDe", () => {
   it("bo khoang trang dau cuoi va khong phan biet hoa thuong", () => {
     expect(chuanHoaTieuDe("  Chi Tiết SP  ")).toBe("chi tiết sp");
   });
+  it("khop duoc tieu de dang to hop NFD giong het dang NFC", () => {
+    // Sheets API co the tra Unicode dang NFD (chu cai + dau ghep rieng) thay
+    // vi NFC (mot ky tu san dau). Dung .normalize() de tao fixture thay vi go
+    // tay ky tu to hop — go tay de sai ma khong ai nhin ra bang mat thuong.
+    const nfd = "Chi tiết SP".normalize("NFD");
+    expect(nfd).not.toBe("Chi tiết SP"); // dam bao fixture nay that su la NFD
+    expect(chuanHoaTieuDe(nfd)).toBe("chi tiết sp");
+  });
 });
 
 describe("tachFileIdAnh", () => {
@@ -57,6 +65,16 @@ describe("anhXaBang", () => {
 
   it("bo hai dong dau, giu dung so dong du lieu", () => {
     expect(ds).toHaveLength(9);
+  });
+
+  it("bo qua dong rong nhung con dinh dang, khong bien thanh the gia", () => {
+    // bangMau co them hai dong hoan toan rong o cuoi (dong 12, 13) — mo phong
+    // ket qua includeGridData=true tra ve cho o da to mau nhung chua go du
+    // lieu. Neu khong bi bo qua, tong so the se la 11 va hai the gia do se
+    // dung chung mot khoa trung (null, null) roi bi gan nham co "trung".
+    expect(ds).toHaveLength(9);
+    expect(ds.some((d) => d.sku === null && d.maMau === null && d.mo === null
+      && d.chiTiet === null && d.fileIdAnh === null)).toBe(false);
   });
 
   it("giu so dong that cua bang de doi chieu", () => {
@@ -145,5 +163,30 @@ describe("anhXaBang — khoa trung phai la (MÃ MẪU, MO), khong phai (MÃ MẪ
     const ds = anhXaBang(bang);
 
     expect(ds.filter((d) => d.co.includes("trung"))).toEqual([]);
+  });
+});
+
+describe("anhXaBang — TL VANG doc tu userEnteredValue.numberValue, khong chi tu formattedValue", () => {
+  const o = (v: string): OTho => ({ formattedValue: v });
+  const rong: OTho = {};
+
+  it("locale Viet hien thi dau phay (\"2,78\") van doc dung so nho numberValue", () => {
+    const bang: OTho[][] = [
+      [],
+      [o("SKU"), o("MO"), o("Chi tiết SP"), o("MÃ MẪU"), o("CHẤT LIỆU"), o("TL VÀNG"), o("HÌNH")],
+      [
+        o("SKU-A"), o("MO-001"), o("LGDRI: 14KY TEST-LOCALE"), o("D99999"), o("14KY"),
+        // formattedValue la chuoi hien thi theo locale Viet — Number("2,78")
+        // se ra NaN neu bi doc tu day. userEnteredValue.numberValue moi la
+        // gia tri so goc, khong phu thuoc cach hien thi.
+        { formattedValue: "2,78", userEnteredValue: { numberValue: 2.78 } },
+        rong,
+      ],
+    ];
+
+    const ds = anhXaBang(bang);
+
+    expect(ds[0].tlVang).toBe(2.78);
+    expect(ds[0].co).not.toContain("tl-vang-lech");
   });
 });

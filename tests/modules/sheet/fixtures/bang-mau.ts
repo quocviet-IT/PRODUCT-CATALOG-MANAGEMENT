@@ -66,4 +66,9 @@ export const bangMau: OTho[][] = [
    o("LGDRI: 18KY 4RD/0.116cts+6MQ/0.441cts 5.18gr B12741 Size: 7"), o("B12741"),
    o("Complete"), o("NHẪN"), o("18KY"), o("5.07"), rong, rong,
    anh("1QAIP8HdAFiZMHczOQ7G-dD9ACQJfdqIv"), lien("CQ1", THU_MUC)],
+  // 12 va 13 — DONG RONG NHUNG CON DINH DANG: includeGridData=true tra ca
+  // dong da to mau/ke vien nhung chua go du lieu gi. Khong co sku/maMau/mo/
+  // chiTiet/fileIdAnh — phai bi anhXaBang bo qua, khong duoc bien thanh the.
+  [rong, rong, rong, rong, rong, rong, rong, rong, rong, rong, rong, rong, rong],
+  [rong, rong, rong, rong, rong, rong, rong, rong, rong, rong, rong, rong, rong],
 ];

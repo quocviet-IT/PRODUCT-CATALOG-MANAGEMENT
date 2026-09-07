@@ -16,7 +16,7 @@ function MucLoc({
       <input type="radio" name={ten} value={giaTri} defaultChecked={dangBat} className="sr-only peer" />
       <span
         className={`inline-block border-b-2 pb-0.5 text-[11px] uppercase tracking-[0.14em]
-                    transition-colors duration-150
+                    transition-colors duration-150 peer-checked:border-hp-pink peer-checked:text-hp-ink
                     ${dangBat ? "border-hp-pink text-hp-ink" : "border-transparent text-hp-muted hover:text-hp-ink"}`}
       >
         {nhan}

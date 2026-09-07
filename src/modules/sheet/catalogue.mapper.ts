@@ -1,7 +1,7 @@
 /** Mot o cua Sheets API, chi giu ba truong ma man hinh nay can. */
 export type OTho = {
   formattedValue?: string;
-  userEnteredValue?: { formulaValue?: string };
+  userEnteredValue?: { formulaValue?: string; numberValue?: number };
   hyperlink?: string;
 };
 
@@ -35,7 +35,10 @@ export class LoiThieuCot extends Error {
  * So khop truc tiep se truot, nen phai chuan hoa truoc khi doi chieu.
  */
 export function chuanHoaTieuDe(s: string): string {
-  return s.replace(/\s+/g, " ").trim().toLowerCase();
+  // Chuan NFC truoc: Sheets API co the tra tieu de co dau duoi dang to hop
+  // NFD (chu cai + dau rieng). Khong chuan hoa thi so khop chuoi truot ngay
+  // ca khi mat ky tu nhin giong het nhau.
+  return s.normalize("NFC").replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 /**
@@ -104,15 +107,35 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
   const ds: DongCatalogue[] = [];
   for (let i = DONG_TIEU_DE + 1; i < hang.length; i++) {
     const h = hang[i] ?? [];
+    const sku = chu(lay(h, "sku"));
+    const maMau = chu(lay(h, "maMau"));
+    const mo = chu(lay(h, "mo"));
     const chiTiet = chu(lay(h, "chiTiet"));
-    const tlVangThoc = chu(lay(h, "tlVang"));
-    const tlVang = tlVangThoc === null ? null : Number(tlVangThoc);
+    const fileIdAnh = tachFileIdAnh(lay(h, "hinh")?.userEnteredValue?.formulaValue);
+
+    // includeGridData=true tra ca dong trong nhung con dinh dang (border,
+    // mau nen do da to tu truoc). Bo qua truoc khi gop nhom trung, khong thi
+    // moi dong trong bien thanh mot the toan null va con bi gan nham co "trung"
+    // vi tat ca cung chia se khoa rong giong nhau.
+    if (sku === null && maMau === null && mo === null && chiTiet === null && fileIdAnh === null) {
+      continue;
+    }
+
+    // formattedValue la chuoi DA HIEN THI theo locale bang tinh (vi du "2,78"
+    // o locale Viet). Number("2,78") ra NaN nen phai uu tien userEnteredValue
+    // .numberValue — gia tri so goc, khong phu thuoc cach hien thi — va chi
+    // lui ve doc chuoi khi khong co (o thuc su rong).
+    const oTlVang = lay(h, "tlVang");
+    const tlVangSo = oTlVang?.userEnteredValue?.numberValue;
+    const tlVangThoc = chu(oTlVang);
+    const tlVang = tlVangSo !== undefined ? tlVangSo
+      : tlVangThoc === null ? null : Number(tlVangThoc);
 
     const dong: DongCatalogue = {
       dongSheet: i + 1,
-      sku: chu(lay(h, "sku")),
-      maMau: chu(lay(h, "maMau")),
-      mo: chu(lay(h, "mo")),
+      sku,
+      maMau,
+      mo,
       chiTiet,
       chatLieu: chu(lay(h, "chatLieu")),
       loaiXoan: chiTiet === null ? null
@@ -121,7 +144,7 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
         : null,
       tlVang: tlVang !== null && Number.isFinite(tlVang) ? tlVang : null,
       size: chu(lay(h, "size")) ?? tachSize(chiTiet),
-      fileIdAnh: tachFileIdAnh(lay(h, "hinh")?.userEnteredValue?.formulaValue),
+      fileIdAnh,
       urlThuMuc: lay(h, "thuMuc")?.hyperlink ?? null,
       co: [],
     };
