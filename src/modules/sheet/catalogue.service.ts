@@ -4,6 +4,31 @@ import { anhXaBang, type DongCatalogue, type OTho } from "./catalogue.mapper";
 import { docBangTho } from "./sheet.client";
 import { lietKeAnhTrongThuMuc, type AnhTrongThuMuc } from "./drive.client";
 
+/** Tien to bao rang gia tri la KHOA trong Supabase Storage, khong phai duong dan tep. */
+const TIEN_TO_STORAGE = "storage:";
+
+/**
+ * Doc tep du lieu mau. Chap nhan hai dang nguon:
+ *   - duong dan tep tren dia            -> chay tren may nha
+ *   - "storage:<khoa>" trong Storage    -> chay tren Vercel
+ *
+ * Vi sao khong commit thang tep vao repo: no chua ma hang, trong luong vang va
+ * ID tep Drive cua cong ty — du lieu kinh doanh khong thuoc ve lich su git, va
+ * sua no thi phai deploy lai. De trong Storage thi doi du lieu la xong.
+ *
+ * Nap module storage bang import dong, khong phai import dau tep: storage.ts
+ * dung client Supabase ngay luc nap, nen import tinh se bat MOI nguoi dung
+ * catalogue.service phai co cau hinh Supabase — ke ca khi doc tep tren dia.
+ */
+async function docTepMau(nguon: string): Promise<string> {
+  if (nguon.startsWith(TIEN_TO_STORAGE)) {
+    const { taiVe } = await import("@/modules/media/storage");
+    const buf = await taiVe(nguon.slice(TIEN_TO_STORAGE.length));
+    return buf.toString("utf8");
+  }
+  return readFile(nguon, "utf8");
+}
+
 // Bang tinh do nguoi sua tay, tan suat thay doi tinh bang gio. 60 giay du de
 // nhieu nguoi mo trang lien tiep khong tao ra nhieu lan goi API.
 export const HAN_BO_DEM_MS = 60_000;
@@ -32,10 +57,10 @@ export class LoiThieuSheetId extends Error {
  * account, de xem duoc man hinh that voi du lieu that.
  *
  * Tep nay KHONG duoc commit: no chua ma hang, trong luong vang va ID tep Drive
- * cua cong ty, ma repo thi cong khai. Xem .gitignore.
+ * cua cong ty. Xem .gitignore.
  */
-async function docBangTuTep(duongDan: string): Promise<OTho[][]> {
-  return JSON.parse(await readFile(duongDan, "utf8")) as OTho[][];
+async function docBangTuTep(nguon: string): Promise<OTho[][]> {
+  return JSON.parse(await docTepMau(nguon)) as OTho[][];
 }
 
 /**
@@ -90,7 +115,7 @@ export async function layAnhCuaMau(idThuMuc: string): Promise<AnhTrongThuMuc[]> 
     // Thu muc khong co trong tep mau thi tra ve rong, khong nem loi — trang chi
     // tiet van hien thong tin, chi thieu thu vien anh.
     const bang = JSON.parse(
-      await readFile(env.CATALOGUE_TEP_ANH_MAU, "utf8"),
+      await docTepMau(env.CATALOGUE_TEP_ANH_MAU),
     ) as Record<string, AnhTrongThuMuc[]>;
     ds = bang[idThuMuc] ?? [];
   } else {
