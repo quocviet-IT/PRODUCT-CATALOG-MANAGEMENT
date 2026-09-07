@@ -17,6 +17,9 @@ const schema = z.object({
   // quen khai bao bien nay doc nham tab that su ten "test" ma khong bao loi
   // gi ca — sai du lieu trong im lang con nguy hiem hon la bao loi ro rang.
   CATALOGUE_SHEET_TAB: z.string().min(1),
+  // Duong dan toi tep JSON chua bang tho, dung THAY cho Google khi chua co
+  // service account. De trong thi doc that tu Google. Chi dung de xem thu.
+  CATALOGUE_TEP_MAU: z.string().min(1).optional(),
 });
 
 export type Env = z.infer<typeof schema>;
