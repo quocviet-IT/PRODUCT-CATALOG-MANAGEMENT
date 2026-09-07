@@ -37,6 +37,7 @@ describe("tinhThongKe", () => {
     expect(tk.thieuAnh).toBe(1);
     expect(tk.thieuSku).toBe(4);
     expect(tk.tlVangLech).toBe(1);
+    expect(tk.trung).toBe(2);
   });
   it("dem theo chat lieu, nhieu nhat truoc", () => {
     expect(tk.theoChatLieu).toEqual([

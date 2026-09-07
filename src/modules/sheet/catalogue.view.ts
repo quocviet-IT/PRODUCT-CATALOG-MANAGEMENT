@@ -18,6 +18,7 @@ export type ThongKe = {
   thieuAnh: number;
   thieuSku: number;
   tlVangLech: number;
+  trung: number;
   theoChatLieu: MucDem[];
   theoLoaiXoan: MucDem[];
 };
@@ -62,6 +63,7 @@ export function tinhThongKe(ds: DongCatalogue[]): ThongKe {
     thieuAnh: ds.filter((d) => d.co.includes("thieu-anh")).length,
     thieuSku: ds.filter((d) => d.co.includes("thieu-sku")).length,
     tlVangLech: ds.filter((d) => d.co.includes("tl-vang-lech")).length,
+    trung: ds.filter((d) => d.co.includes("trung")).length,
     theoChatLieu: demTheo(ds, (d) => d.chatLieu),
     theoLoaiXoan: demTheo(ds, (d) => d.loaiXoan),
   };
