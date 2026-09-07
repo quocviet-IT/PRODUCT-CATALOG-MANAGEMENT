@@ -1268,7 +1268,9 @@ Tạo `tests/modules/media/anh-drive.test.ts`:
 
 ```ts
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { randomUUID } from "node:crypto";
 import sharp from "sharp";
+import { LoiAnhKhongHopLe } from "@/modules/media/image-processor";
 
 const taiTepDrive = vi.fn();
 vi.mock("@/modules/sheet/drive.client", () => ({ taiTepDrive }));
@@ -1276,7 +1278,9 @@ vi.mock("@/modules/sheet/drive.client", () => ({ taiTepDrive }));
 const { layUrlAnhSheet, CANH_DAI_ANH_SHEET } = await import("@/modules/media/anh-drive");
 const { dungKhoaAnhSheet, tepTonTai, xoaTep } = await import("@/modules/media/storage");
 
-const FILE_ID = `test-${Date.now()}`;
+// randomUUID, khong dung Date.now(): bucket la that va dung chung giua cac lan
+// chay (ke ca CI), do phan giai mili-giay co the trung nhau. Xem anh-url.test.ts.
+const FILE_ID = `test-${randomUUID()}`;
 const khoa = dungKhoaAnhSheet(FILE_ID, CANH_DAI_ANH_SHEET);
 
 afterEach(async () => {
@@ -1332,6 +1336,12 @@ describe("layUrlAnhSheet", () => {
     expect(meta.height).toBe(300);
     expect(meta.format).toBe("webp");
   }, 30000);
+
+  it("tu choi voi loi mien nguyen khi Drive tra ve du lieu khong phai anh", async () => {
+    taiTepDrive.mockResolvedValue(Buffer.from("khong phai anh"));
+
+    await expect(layUrlAnhSheet(FILE_ID)).rejects.toBeInstanceOf(LoiAnhKhongHopLe);
+  }, 30000);
 });
 ```
 
@@ -1369,9 +1379,9 @@ export async function taiVe(khoa: string): Promise<Buffer> {
 - [ ] **Step 4: Viết `src/modules/media/anh-drive.ts`**
 
 ```ts
-import sharp from "sharp";
+import sharp, { type Metadata } from "sharp";
 import { taiTepDrive } from "@/modules/sheet/drive.client";
-import { tinhKichThuocMoi } from "./image-processor";
+import { LoiAnhKhongHopLe, tinhKichThuocMoi } from "./image-processor";
 import { dungKhoaAnhSheet, ghiTep, layUrlCoKy, tepTonTai } from "./storage";
 
 export const CANH_DAI_ANH_SHEET = 600;
@@ -1386,9 +1396,17 @@ export async function layUrlAnhSheet(fileId: string): Promise<string> {
 
   if (!(await tepTonTai(khoa))) {
     const goc = await taiTepDrive(fileId);
-    const meta = await sharp(goc).metadata();
+    // taiTepDrive chi kiem tra HTTP OK, khong kiem content-type/do dai — Drive co
+    // the tra ve mot than tep cut hoac khong phai anh. Boc metadata() nhu quy uoc
+    // trong image-processor.ts de doi thanh loi mien nguyen, khong phai loi sharp tho.
+    let meta: Metadata;
+    try {
+      meta = await sharp(goc).metadata();
+    } catch (e) {
+      throw new LoiAnhKhongHopLe(e instanceof Error ? e.message : String(e));
+    }
     if (!meta.width || !meta.height) {
-      throw new Error(`Không đọc được kích thước ảnh ${fileId}.`);
+      throw new LoiAnhKhongHopLe("không đọc được kích thước");
     }
     const kt = tinhKichThuocMoi(meta.width, meta.height, CANH_DAI_ANH_SHEET);
     // Chi truyen MOT chieu — truyen ca hai kem fit:"inside" lam sharp lam tron
@@ -1409,7 +1427,7 @@ export async function layUrlAnhSheet(fileId: string): Promise<string> {
 - [ ] **Step 5: Chạy test để chắc chắn nó xanh**
 
 Run: `npx vitest run tests/modules/media/anh-drive.test.ts`
-Expected: PASS — 4 test xanh. Test này chạm Storage thật nên cần `.env.local`.
+Expected: PASS — 5 test xanh. Test này chạm Storage thật nên cần `.env.local`.
 
 - [ ] **Step 6: Commit**
 
