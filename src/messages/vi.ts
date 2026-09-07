@@ -106,7 +106,6 @@ export const vi = {
     xem_bang: "Bảng",
     xem_luoi: "Lưới ảnh",
     o_trong: "—",
-    cot_dong: "Dòng",
     cot_anh: "Ảnh",
     cot_sku: "SKU",
     cot_mo: "MO",
