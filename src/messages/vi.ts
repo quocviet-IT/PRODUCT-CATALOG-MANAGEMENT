@@ -95,6 +95,7 @@ export const vi = {
     dem_thieu_anh: "Thiếu ảnh",
     dem_thieu_sku: "Thiếu SKU",
     dem_tl_vang_lech: "Lệch TL vàng",
+    dem_trung: "Trùng dòng",
     chua_co_anh: "Chưa có ảnh",
     mo_thu_muc: "Mở thư mục ảnh",
     khong_khop: "Không có mẫu nào khớp bộ lọc.",

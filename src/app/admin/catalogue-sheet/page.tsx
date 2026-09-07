@@ -55,11 +55,28 @@ function dinhDangGam(v: number | null): string | null {
   return v === null ? null : `${v.toFixed(2).replace(".", ",")} g`;
 }
 
-function O({ so, nhan }: { so: number; nhan: string }) {
+function O({
+  so, nhan, tong,
+}: {
+  so: number;
+  nhan: string;
+  /** Co gia tri khi dang loc: hien "28 / 64" de van thay duoc tong. */
+  tong?: number;
+}) {
   return (
-    <div className="px-6 first:pl-0">
-      <p className="font-title text-2xl tabular-nums text-hp-ink">{so}</p>
-      <p className="mt-1 text-[11px] uppercase tracking-[0.14em] text-hp-muted">{nhan}</p>
+    <div className="px-7 first:pl-0">
+      {/* So 0 phai TRONG nhu 0: mot con so mau muc dam nhu cac o khac se khien
+          nguoi doc tuong co van de trong khi khong co van de nao. */}
+      <p
+        className={`font-title text-[28px] leading-none tabular-nums
+                    ${so === 0 ? "text-hp-muted" : "text-hp-ink"}`}
+      >
+        {so}
+        {tong !== undefined && (
+          <span className="text-lg text-hp-muted"> / {tong}</span>
+        )}
+      </p>
+      <p className="mt-2 text-[11px] uppercase tracking-[0.14em] text-hp-muted">{nhan}</p>
     </div>
   );
 }
@@ -142,8 +159,15 @@ export default async function TrangCatalogueSheet({
   }
 
   const nguon = nguonDangDung();
-  const thongKe = tinhThongKe(tatCa);
   const daLoc = locDanhSach(tatCa, loc);
+  // HAI bo thong ke, co chu dich:
+  //  - thongKe (toan bo)  -> so dem tren NHAN BO LOC. Neu no theo ket qua da loc
+  //    thi chon 18KW xong, nhan 18KY tut ve 0 va khong ai bam nguoc lai duoc.
+  //  - thongKeHien (da loc) -> DAI SO o dau trang, vi day la thong ke cua cai
+  //    dang xem.
+  const thongKe = tinhThongKe(tatCa);
+  const thongKeHien = tinhThongKe(daLoc);
+  const dangLoc = daLoc.length !== tatCa.length;
   const { ds, trang, soTrang, tu, den } = catTrang(daLoc, docTrang(sp));
 
   return (
@@ -165,11 +189,16 @@ export default async function TrangCatalogueSheet({
         <div className="mt-5 h-px bg-hp-rule" />
       </div>
 
-      <div className="mb-10 flex divide-x divide-hp-rule">
-        <O so={thongKe.tong} nhan={vi.catalogue_sheet.dem_mau} />
-        <O so={thongKe.thieuAnh} nhan={vi.catalogue_sheet.dem_thieu_anh} />
-        <O so={thongKe.thieuSku} nhan={vi.catalogue_sheet.dem_thieu_sku} />
-        <O so={thongKe.tlVangLech} nhan={vi.catalogue_sheet.dem_tl_vang_lech} />
+      <div className="mb-10 flex flex-wrap divide-x divide-hp-rule border border-hp-rule bg-hp-card p-6">
+        <O
+          so={thongKeHien.tong}
+          tong={dangLoc ? thongKe.tong : undefined}
+          nhan={vi.catalogue_sheet.dem_mau}
+        />
+        <O so={thongKeHien.thieuAnh} nhan={vi.catalogue_sheet.dem_thieu_anh} />
+        <O so={thongKeHien.thieuSku} nhan={vi.catalogue_sheet.dem_thieu_sku} />
+        <O so={thongKeHien.tlVangLech} nhan={vi.catalogue_sheet.dem_tl_vang_lech} />
+        <O so={thongKeHien.trung} nhan={vi.catalogue_sheet.dem_trung} />
       </div>
 
       <ThanhBoLoc thongKe={thongKe} hienTai={loc} />
