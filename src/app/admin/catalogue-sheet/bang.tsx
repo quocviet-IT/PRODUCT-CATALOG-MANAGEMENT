@@ -38,7 +38,6 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="bg-hp-inset">
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_dong}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_anh}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_sku}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_so}</th>
@@ -61,9 +60,6 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
               key={d.dongSheet}
               className="bg-hp-card transition-colors duration-150 hover:bg-hp-inset"
             >
-              {/* So dong that cua bang tinh — de nguoi doc tim dung dong ma sua. */}
-              <td className={`${O_SO} text-hp-muted`}>{d.dongSheet}</td>
-
               <td className={O_DU_LIEU}>
                 <div className="flex h-14 w-14 items-center justify-center bg-hp-inset">
                   {d.fileIdAnh ? (
