@@ -1,6 +1,6 @@
-import sharp from "sharp";
+import sharp, { type Metadata } from "sharp";
 import { taiTepDrive } from "@/modules/sheet/drive.client";
-import { tinhKichThuocMoi } from "./image-processor";
+import { LoiAnhKhongHopLe, tinhKichThuocMoi } from "./image-processor";
 import { dungKhoaAnhSheet, ghiTep, layUrlCoKy, tepTonTai } from "./storage";
 
 export const CANH_DAI_ANH_SHEET = 600;
@@ -15,9 +15,14 @@ export async function layUrlAnhSheet(fileId: string): Promise<string> {
 
   if (!(await tepTonTai(khoa))) {
     const goc = await taiTepDrive(fileId);
-    const meta = await sharp(goc).metadata();
+    let meta: Metadata;
+    try {
+      meta = await sharp(goc).metadata();
+    } catch (e) {
+      throw new LoiAnhKhongHopLe(e instanceof Error ? e.message : String(e));
+    }
     if (!meta.width || !meta.height) {
-      throw new Error(`Không đọc được kích thước ảnh ${fileId}.`);
+      throw new LoiAnhKhongHopLe("không đọc được kích thước");
     }
     const kt = tinhKichThuocMoi(meta.width, meta.height, CANH_DAI_ANH_SHEET);
     // Chi truyen MOT chieu — truyen ca hai kem fit:"inside" lam sharp lam tron
