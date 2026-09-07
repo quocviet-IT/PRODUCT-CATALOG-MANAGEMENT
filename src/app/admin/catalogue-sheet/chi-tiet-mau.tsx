@@ -63,9 +63,10 @@ export function ChiTietMau({
         <ThongSo nhan={vi.catalogue_sheet.cot_sku} gia_tri={d.sku} />
         <ThongSo nhan={vi.catalogue_sheet.cot_so} gia_tri={d.so} />
         <ThongSo nhan={vi.catalogue_sheet.cot_mo} gia_tri={d.mo} />
-        <ThongSo nhan={vi.catalogue_sheet.cot_loai} gia_tri={d.loai} />
+        <ThongSo nhan={vi.catalogue_sheet.cot_loai_sp} gia_tri={d.loaiSp} />
         <ThongSo nhan={vi.catalogue_sheet.cot_dong_sp} gia_tri={d.dongSp} />
         <ThongSo nhan={vi.catalogue_sheet.cot_chat_lieu} gia_tri={d.chatLieu} />
+        <ThongSo nhan={vi.catalogue_sheet.cot_mau} gia_tri={d.mau} />
         <ThongSo nhan={vi.catalogue_sheet.cot_tl_vang} gia_tri={dinhDangGam(d.tlVang)} />
         <ThongSo nhan={vi.catalogue_sheet.cot_size} gia_tri={d.size} />
         <ThongSo nhan={vi.catalogue_sheet.cot_o_chu} gia_tri={d.oChu} />

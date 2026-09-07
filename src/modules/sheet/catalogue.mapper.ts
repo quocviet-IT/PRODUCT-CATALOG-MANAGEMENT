@@ -14,10 +14,12 @@ export type DongCatalogue = {
   maMau: string | null;
   mo: string | null;
   so: string | null;
-  /** Cot LOAI cua bang tinh, vi du "Complete". */
-  loai: string | null;
-  /** Cot DONG — dong san pham, vi du "NHAN". KHAC hoan toan voi dongSheet. */
+  /** Cot DONG SP: "Complete", "Trơn". KHAC hoan toan voi dongSheet. */
   dongSp: string | null;
+  /** Cot LOAI SP: "NHẪN", "DÂY CHUYỀN", "LẮC"... */
+  loaiSp: string | null;
+  /** Cot MAU: "Yellow", "White". */
+  mau: string | null;
   oChu: string | null;
   chiTiet: string | null;
   chatLieu: string | null;
@@ -63,10 +65,18 @@ const COT = {
   hinh:     { ten: "HÌNH",        batBuoc: true,  nhan: ["hình"] },
   size:     { ten: "SIZE",        batBuoc: false, nhan: ["size"] },
   so:       { ten: "SO",          batBuoc: false, nhan: ["so"] },
-  loai:     { ten: "LOẠI",        batBuoc: false, nhan: ["loại"] },
-  dongSp:   { ten: "DÒNG",        batBuoc: false, nhan: ["dòng"] },
   oChu:     { ten: "Ổ chủ",       batBuoc: false, nhan: ["ổ chủ"] },
-  thuMuc:   { ten: "FOLDER HÌNH", batBuoc: false, nhan: ["folder hình"] },
+  mau:      { ten: "MÀU",         batBuoc: false, nhan: ["màu"] },
+  // Bang tinh doi ten HAI cot nay va TRAO CHO cho nhau (07/09/2026):
+  //   gia tri "Complete" truoc o cot LOAI, gio o cot DONG SP
+  //   gia tri "NHAN"     truoc o cot DONG, gio o cot LOAI SP
+  // Ten moi dung nghia hon nen dat ten truong theo no. Van nhan ten cu de bang
+  // chua kip doi van doc duoc.
+  dongSp:   { ten: "DÒNG SP",     batBuoc: false, nhan: ["dòng sp", "loại"] },
+  loaiSp:   { ten: "LOẠI SP",     batBuoc: false, nhan: ["loại sp", "dòng"] },
+  // "FOLDER HINH" da doi ten thanh "Hinh raw - luu mau" (07/09/2026). Nhan ca hai
+  // ten: mat cot nay la ca thu vien anh o trang chi tiet chet lang le.
+  thuMuc:   { ten: "FOLDER HÌNH", batBuoc: false, nhan: ["hình raw - lưu mẫu", "folder hình"] },
 } as const;
 
 type TenTruong = keyof typeof COT;
@@ -156,8 +166,9 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
       maMau,
       mo,
       so: chu(lay(h, "so")),
-      loai: chu(lay(h, "loai")),
       dongSp: chu(lay(h, "dongSp")),
+      loaiSp: chu(lay(h, "loaiSp")),
+      mau: chu(lay(h, "mau")),
       oChu: chu(lay(h, "oChu")),
       chiTiet,
       chatLieu: chu(lay(h, "chatLieu")),

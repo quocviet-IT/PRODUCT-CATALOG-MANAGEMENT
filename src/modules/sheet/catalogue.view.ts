@@ -77,7 +77,7 @@ function khoTimKiem(d: DongCatalogue): string {
   return chuanHoaTimKiem(
     [
       d.maMau, d.sku, d.mo, d.so, d.chiTiet,
-      d.chatLieu, d.size, d.loai, d.dongSp, d.oChu,
+      d.chatLieu, d.size, d.dongSp, d.loaiSp, d.mau, d.oChu,
     ]
       .filter((x): x is string => Boolean(x))
       .join(" "),
