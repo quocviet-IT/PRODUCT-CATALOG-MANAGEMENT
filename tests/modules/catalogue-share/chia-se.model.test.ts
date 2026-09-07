@@ -5,6 +5,7 @@ import {
   docNoiDung,
   dungNoiDung,
   khoaMau,
+  tenHienThi,
   type NguonMau,
 } from "@/modules/catalogue-share/chia-se.model";
 
@@ -119,5 +120,22 @@ describe("docNoiDung", () => {
     for (const xau of [null, undefined, 42, "x", {}, { phienBan: 2, muc: [] }, { phienBan: 1 }]) {
       expect(docNoiDung(xau)).toBeNull();
     }
+  });
+});
+
+describe("tenHienThi", () => {
+  it("dung ten sale dat khi co", () => {
+    expect(tenHienThi("Chị Lan — nhẫn cưới", 7)).toBe("Chị Lan — nhẫn cưới");
+  });
+  it("bo trong thi goi theo so thu tu", () => {
+    // Truoc day cho nay tra ve "Catalogue <ngay>", va hai catalogue tao cung
+    // ngay mang y het mot ten. So thu tu thi khong bao gio trung.
+    expect(tenHienThi("", 12)).toBe("Catalogue #12");
+  });
+  it("chuoi chi co khoang trang cung tinh la bo trong", () => {
+    expect(tenHienThi("   ", 3)).toBe("Catalogue #3");
+  });
+  it("cat khoang trang thua o hai dau ten that", () => {
+    expect(tenHienThi("  Anh Minh  ", 3)).toBe("Anh Minh");
   });
 });

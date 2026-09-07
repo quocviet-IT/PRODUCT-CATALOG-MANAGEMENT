@@ -33,8 +33,8 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   try {
-    const slug = await taoCatalogue(than.ten, than.chon);
-    return Response.json({ slug }, { status: 201, headers: KHONG_LUU_DEM });
+    const kq = await taoCatalogue(than.ten, than.chon);
+    return Response.json(kq, { status: 201, headers: KHONG_LUU_DEM });
   } catch (loi) {
     // Chon toan ma khong con tren bang tinh -> khong phai loi he thong, phai
     // noi ro cho sale biet ma chon lai.
