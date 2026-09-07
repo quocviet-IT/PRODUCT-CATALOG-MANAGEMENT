@@ -70,3 +70,36 @@ export function locDanhSach(ds: DongCatalogue[], loc: BoLocCatalogue): DongCatal
     return true;
   });
 }
+
+/** So dong moi trang. 20 vua man hinh ma khong bat nguoi dung cuon dai. */
+export const MOI_TRANG = 20;
+
+export type KetQuaTrang = {
+  ds: DongCatalogue[];
+  trang: number;
+  soTrang: number;
+  tu: number;
+  den: number;
+};
+
+export function docTrang(sp: Record<string, string | undefined>): number {
+  const n = Number(sp.trang);
+  return Number.isFinite(n) && n >= 1 ? Math.trunc(n) : 1;
+}
+
+/**
+ * Cat mot trang. Trang vuot khoang hop le bi GHIM ve dau hoac cuoi thay vi tra
+ * danh sach rong — nguoi go tay ?trang=999 nen thay trang cuoi, khong phai
+ * mot man hinh trong khong giai thich gi.
+ */
+export function catTrang(
+  ds: DongCatalogue[],
+  trang: number,
+  moiTrang: number = MOI_TRANG,
+): KetQuaTrang {
+  const soTrang = Math.max(1, Math.ceil(ds.length / moiTrang));
+  const t = Math.min(Math.max(1, Math.trunc(trang)), soTrang);
+  const dau = (t - 1) * moiTrang;
+  const lat = ds.slice(dau, dau + moiTrang);
+  return { ds: lat, trang: t, soTrang, tu: ds.length === 0 ? 0 : dau + 1, den: dau + lat.length };
+}
