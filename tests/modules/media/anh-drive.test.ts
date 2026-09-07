@@ -73,4 +73,16 @@ describe("layUrlAnhSheet", () => {
 
     await expect(layUrlAnhSheet(FILE_ID)).rejects.toBeInstanceOf(LoiAnhKhongHopLe);
   }, 30000);
+
+  it("tu choi voi loi mien nguyen khi anh bi cat ngang giua chung (metadata doc duoc nhung toBuffer vo)", async () => {
+    const to = await sharp({
+      create: { width: 800, height: 600, channels: 3, background: "#ffffff" },
+    }).jpeg().toBuffer();
+    // Cat con khoang nua: header JPEG van doc duoc kich thuoc (metadata() pass)
+    // nhung du lieu quet dong bi thieu, lam toBuffer() nem loi libvips tho.
+    const catNgang = to.subarray(0, Math.floor(to.length / 2));
+    taiTepDrive.mockResolvedValue(catNgang);
+
+    await expect(layUrlAnhSheet(FILE_ID)).rejects.toBeInstanceOf(LoiAnhKhongHopLe);
+  }, 30000);
 });
