@@ -94,6 +94,56 @@ describe("anhXaBang", () => {
     expect(ds[0].urlThuMuc).toContain("/drive/folders/");
   });
 
+  describe("thu muc dat bang chip Drive", () => {
+    // Bang tinh dung CA HAI kieu trong cung cot FOLDER HINH: dong cu la
+    // hyperlink, dong moi la chip (chen bang @ hoac keo tep tu Drive). Google
+    // KHONG dat lien ket cua chip vao hyperlink — doc mot kieu thoi thi nhung
+    // dong dung chip mat thu vien anh ma khong bao loi gi.
+    const chip = (v: string, uri: string): OTho => ({
+      formattedValue: v,
+      chipRuns: [
+        { chip: { richLinkProperties: { mimeType: "application/vnd.google-apps.folder", uri } } },
+      ],
+    });
+    const URI = "https://drive.google.com/drive/folders/1AbcDefGhiJklMnoPqr?usp=drive_link";
+
+    // Tim cot theo TIEU DE, khong ghi cung so thu tu: bang tinh doi cot lien
+    // tuc, mot con so cung o day se lang le thay the nham cot khac.
+    const cotThuMuc = bangMau[1].findIndex((o) =>
+      ["hình raw - lưu mẫu", "folder hình"].includes(
+        chuanHoaTieuDe(o.formattedValue ?? "").toLowerCase(),
+      ),
+    );
+
+    it("fixture co cot thu muc de thay the", () => {
+      expect(cotThuMuc).toBeGreaterThanOrEqual(0);
+    });
+
+    function dungBang(oThuMuc: OTho): OTho[][] {
+      const h = [...bangMau[2]];
+      h[cotThuMuc] = oThuMuc;
+      return [bangMau[0], bangMau[1], h];
+    }
+
+    it("doc duoc lien ket khi o chi co chip, khong co hyperlink", () => {
+      const [d] = anhXaBang(dungBang(chip("N10145", URI)));
+      expect(d.urlThuMuc).toBe(URI);
+      // Duoi cuoi phai ra id sach, khong dinh "?usp=drive_link".
+      expect(d.idThuMuc).toBe("1AbcDefGhiJklMnoPqr");
+    });
+
+    it("hyperlink duoc uu tien khi o co ca hai", () => {
+      const ca_hai: OTho = { ...chip("N10145", URI), hyperlink: "https://drive.google.com/drive/folders/1XXlienketthuong" };
+      expect(anhXaBang(dungBang(ca_hai))[0].idThuMuc).toBe("1XXlienketthuong");
+    });
+
+    it("chipRuns rong hoac khong co uri thi coi nhu khong co thu muc", () => {
+      for (const o of [{ formattedValue: "x", chipRuns: [] }, { formattedValue: "x", chipRuns: [{}] }]) {
+        expect(anhXaBang(dungBang(o))[0].urlThuMuc).toBeNull();
+      }
+    });
+  });
+
   it("uu tien cot SIZE, trong thi tach tu mo ta", () => {
     expect(ds[0].size).toBe("10");   // co trong cot
     expect(ds[1].size).toBe("18VN"); // chi co trong mo ta
