@@ -27,6 +27,7 @@ describe("GET /api/anh-drive/[fileId]", () => {
   it("tu choi khi tai khoan bi vo hieu hoa", async () => {
     getSessionUser.mockResolvedValue({ ...NGUOI_DUNG, isActive: false });
     expect((await goi("1AbcDefGhiJkl")).status).toBe(401);
+    expect(layUrlAnhSheet).not.toHaveBeenCalled();
   });
 
   it("tu choi fileId khong hop le — gia tri nay den tu URL", async () => {

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { DanhMuc } from "@/modules/catalog/categories.service";
 import type { TrangThaiSanPham } from "@/modules/catalog/search-query";
 import { vi } from "@/messages/vi";
@@ -66,9 +67,9 @@ export function ThanhBoLoc({
       </label>
 
       <button className="rounded bg-teal-800 px-4 py-2 text-sm text-white">{vi.san_pham.loc}</button>
-      <a href="/admin/products" className="px-2 py-2 text-sm text-neutral-600 hover:underline">
+      <Link href="/admin/products" className="px-2 py-2 text-sm text-neutral-600 hover:underline">
         {vi.san_pham.xoa_loc}
-      </a>
+      </Link>
     </form>
   );
 }

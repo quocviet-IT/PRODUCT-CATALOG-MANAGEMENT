@@ -9,9 +9,14 @@ config({ path: ".env.local" });
 const { docBangTho } = await import("../src/modules/sheet/sheet.client");
 const { taiTepDrive } = await import("../src/modules/sheet/drive.client");
 const { anhXaBang } = await import("../src/modules/sheet/catalogue.mapper");
+const { getEnv } = await import("../src/lib/env");
 
-const id = process.env.CATALOGUE_SHEET_ID!;
-const tab = process.env.CATALOGUE_SHEET_TAB ?? "test";
+// CATALOGUE_SHEET_TAB khong con gia tri mac dinh trong schema (xem
+// src/lib/env.ts) — doc qua getEnv() de dung chung mot nguon that thay vi tu
+// suy dien lai "?? \"test\"" o day.
+const env = getEnv();
+const id = env.CATALOGUE_SHEET_ID!;
+const tab = env.CATALOGUE_SHEET_TAB;
 
 const tho = await docBangTho(id, tab);
 const ds = anhXaBang(tho);

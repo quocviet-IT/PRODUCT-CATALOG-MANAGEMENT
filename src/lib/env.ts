@@ -6,10 +6,17 @@ const schema = z.object({
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   SUPABASE_SECRET_KEY: z.string().min(1),
   SUPABASE_STORAGE_BUCKET: z.string().min(1).default("catalogue"),
-  GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().min(1),
-  GOOGLE_SERVICE_ACCOUNT_KEY: z.string().min(1),
-  CATALOGUE_SHEET_ID: z.string().min(1),
-  CATALOGUE_SHEET_TAB: z.string().min(1).default("test"),
+  // Ba bien Google la TUY CHON o day: mot tinh nang catalogue chua ai dung
+  // toi khong duoc phep khien ca ung dung (vi du /login) khong khoi dong noi
+  // chi vi thieu cau hinh cua no. google-auth.ts va catalogue.service.ts tu
+  // nem loi rieng khi thuc su can toi ma khong co.
+  GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().min(1).optional(),
+  GOOGLE_SERVICE_ACCOUNT_KEY: z.string().min(1).optional(),
+  CATALOGUE_SHEET_ID: z.string().min(1).optional(),
+  // KHONG dat gia tri mac dinh: mac dinh "test" tung khien mot ban trien khai
+  // quen khai bao bien nay doc nham tab that su ten "test" ma khong bao loi
+  // gi ca — sai du lieu trong im lang con nguy hiem hon la bao loi ro rang.
+  CATALOGUE_SHEET_TAB: z.string().min(1),
 });
 
 export type Env = z.infer<typeof schema>;
