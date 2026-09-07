@@ -7,6 +7,7 @@ import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 import {
   docNoiDung,
   dungNoiDung,
+  dungSlug,
   khoaMau,
   tenHienThi,
   type LuaChon,
@@ -19,13 +20,19 @@ import {
  * lai bang tay, mot cap ky tu nhin giong nhau la mot cu goi lai cho sale.
  */
 const CHU_CAI = "23456789abcdefghjkmnpqrstuvwxyz";
-const DAI_SLUG = 12;
+const DAI_DUOI = 8;
 
-/** 12 ky tu tren 31 chu cai ~ 59 bit — khong ai do trung duoc. */
-export function sinhSlug(): string {
-  const b = randomBytes(DAI_SLUG);
+/**
+ * Duoi ngau nhien gan sau phan ten trong duong dan.
+ *
+ * 8 ky tu tren 31 chu cai ~ 40 bit. Ke muon do phai thu hang ty lan de trung
+ * MOT catalogue — trong khi phan ten dung truoc lai giup nguoi nhan doc hieu
+ * link. Do la ly do co ca hai phan.
+ */
+export function sinhDuoi(): string {
+  const b = randomBytes(DAI_DUOI);
   let s = "";
-  for (let i = 0; i < DAI_SLUG; i++) s += CHU_CAI[b[i] % CHU_CAI.length];
+  for (let i = 0; i < DAI_DUOI; i++) s += CHU_CAI[b[i] % CHU_CAI.length];
   return s;
 }
 
@@ -87,15 +94,26 @@ export async function taoCatalogue(
   const noiDung = dungNoiDung(nguon, chon);
   if (noiDung.muc.length === 0) throw new LoiCatalogueRong();
 
-  const slug = sinhSlug();
   // Ten RONG duoc phep luu nguyen: khong bia ten thay sale o day. Cho hien thi
   // se goi no theo so thu tu — xem tenHienThi().
-  // Tra ve `so` ngay trong lenh them de trinh duyet biet goi catalogue vua tao
-  // la gi, khong phai hoi lai mot vong nua.
+  //
+  // Ghi TRUOC roi moi dat duong dan, vi duong dan cua catalogue khong ten can
+  // biet `so` — ma `so` chi co sau khi Postgres cap. Duoi ngau nhien duoc dung
+  // lam duong dan tam: no da duy nhat va da khong doan duoc, nen neu buoc dat
+  // ten ben duoi that bai thi link van chay, chi la kem dep.
+  const duoi = sinhDuoi();
   const [moi] = await db
     .insert(catalogues)
-    .values({ slug, ten: ten.trim().slice(0, DAI_TEN_TOI_DA), noiDung })
-    .returning({ so: catalogues.so, ten: catalogues.ten });
+    .values({ slug: duoi, ten: ten.trim().slice(0, DAI_TEN_TOI_DA), noiDung })
+    .returning({ id: catalogues.id, so: catalogues.so, ten: catalogues.ten });
+
+  const slug = dungSlug(moi.ten, moi.so, duoi);
+  try {
+    await db.update(catalogues).set({ slug }).where(eq(catalogues.id, moi.id));
+  } catch (loi) {
+    console.error(`[chia-se] khong dat duoc duong dan cho catalogue #${moi.so}:`, loi);
+    return { slug: duoi, ten: tenHienThi(moi.ten, moi.so) };
+  }
   return { slug, ten: tenHienThi(moi.ten, moi.so) };
 }
 
