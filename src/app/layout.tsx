@@ -25,6 +25,11 @@ const fontThanBai = EB_Garamond({
 export const metadata: Metadata = {
   title: vi.trang.tieu_de,
   description: vi.trang.mo_ta,
+  // Catalogue dang mo cong khai (chua co cong dang nhap) nhung KHONG duoc
+  // len ket qua tim kiem: no chua ma hang va trong luong vang. robots.txt
+  // chi xin bot dung thu thap — the noindex nay moi la thu ngan trang da
+  // biet duong dan khoi vao chi muc. Can ca hai.
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

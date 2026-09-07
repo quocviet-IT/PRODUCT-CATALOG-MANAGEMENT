@@ -1,7 +1,13 @@
 import Link from "next/link";
-import { requireUser } from "@/auth/guard";
 import { layDanhSachCatalogue, nguonDangDung } from "@/modules/sheet/catalogue.service";
-import { catTrang, docBoLocTuUrl, docTrang, locDanhSach, tinhThongKe } from "@/modules/sheet/catalogue.view";
+import {
+  catTrang,
+  docBoLocTuUrl,
+  docTrang,
+  locDanhSach,
+  tinhDemLoc,
+  tinhThongKe,
+} from "@/modules/sheet/catalogue.view";
 import type { CoBatThuong, DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { BangCatalogue } from "./bang";
 import { ThanhBoLoc } from "./bo-loc";
@@ -140,7 +146,6 @@ export default async function TrangCatalogueSheet({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
-  await requireUser();
   const sp = await searchParams;
   const loc = docBoLocTuUrl(sp);
   const kieuXem = docKieuXem(sp.xem);
@@ -160,11 +165,13 @@ export default async function TrangCatalogueSheet({
 
   const nguon = nguonDangDung();
   const daLoc = locDanhSach(tatCa, loc);
-  // HAI bo thong ke, co chu dich:
-  //  - thongKe (toan bo)  -> so dem tren NHAN BO LOC. Neu no theo ket qua da loc
-  //    thi chon 18KW xong, nhan 18KY tut ve 0 va khong ai bam nguoc lai duoc.
-  //  - thongKeHien (da loc) -> DAI SO o dau trang, vi day la thong ke cua cai
-  //    dang xem.
+  // Ba con so khac nhau, ba chu dich khac nhau — dung gop lai:
+  //  - dem (theo tung chieu) -> so ben canh moi muc trong o tha xuong. Moi
+  //    chieu tinh tren tap da loc boi cac chieu KHAC, nen con so tra loi dung
+  //    cau hoi "bam vao day thi con bao nhieu".
+  //  - thongKeHien (da loc) -> DAI SO o dau trang: thong ke cua cai dang xem.
+  //  - thongKe.tong (toan bo) -> chi de hien mau so "28 / 71".
+  const dem = tinhDemLoc(tatCa, loc);
   const thongKe = tinhThongKe(tatCa);
   const thongKeHien = tinhThongKe(daLoc);
   const dangLoc = daLoc.length !== tatCa.length;
@@ -201,7 +208,7 @@ export default async function TrangCatalogueSheet({
         <O so={thongKeHien.trung} nhan={vi.catalogue_sheet.dem_trung} />
       </div>
 
-      <ThanhBoLoc thongKe={thongKe} hienTai={loc} />
+      <ThanhBoLoc dem={dem} hienTai={loc} />
 
       {/* Kieu xem khong dung mau hong: ngan sach hong da chi het cho vien focus
           o tim kiem va gach chan bo loc dang bat. O day phan biet bang ink/muted. */}

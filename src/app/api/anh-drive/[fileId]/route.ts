@@ -1,4 +1,3 @@
-import { getSessionUser } from "@/auth/guard";
 import { CANH_DAI_ANH_SHEET, CO_ANH_HOP_LE, layUrlAnhSheet } from "@/modules/media/anh-drive";
 
 // fileId den tu duong dan URL nen khong tin duoc. Chan truoc khi dung no
@@ -6,9 +5,10 @@ import { CANH_DAI_ANH_SHEET, CO_ANH_HOP_LE, layUrlAnhSheet } from "@/modules/med
 const DANG_FILE_ID = /^[A-Za-z0-9_-]{10,80}$/;
 
 // URL co ky tra ve chi dung mot lan cho MOT phien va het han sau mot gio
-// (xem HAN_URL_GIAY trong anh-drive.ts). Khong gi lien quan toi tuyen nay —
-// ke ca trang thai dang nhap — duoc phep nam trong bat ky bo dem trung gian
-// nao; mot Location bi cache qua thoi han se tra ra anh vo lang le.
+// (xem HAN_URL_GIAY trong anh-drive.ts). Vi vay chinh chuyen huong nay khong
+// duoc phep nam trong bat ky bo dem trung gian nao: mot Location bi cache qua
+// thoi han se tra ra anh vo lang le. Anh o dau ben kia van duoc cache binh
+// thuong theo header cua Supabase Storage.
 const KHONG_LUU_DEM = "private, no-store";
 
 function phanHoiRong(status: number, headers?: HeadersInit): Response {
@@ -22,11 +22,9 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ fileId: string }> },
 ): Promise<Response> {
-  const user = await getSessionUser();
-  if (user === null || !user.isActive) {
-    return phanHoiRong(401);
-  }
-
+  // Khong gac dang nhap: catalogue dang mo cong khai theo yeu cau, cong dang
+  // nhap se lam sau. Hai chan con lai (dang fileId, danh sach co cho phep)
+  // VAN CAN THIET — chung khong gac nguoi, chung gac dau vao tu URL.
   const { fileId } = await params;
   if (!DANG_FILE_ID.test(fileId)) {
     return phanHoiRong(400);

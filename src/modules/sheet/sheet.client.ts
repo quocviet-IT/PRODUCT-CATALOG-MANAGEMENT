@@ -2,8 +2,13 @@ import { layAccessToken } from "./google-auth";
 import type { OTho } from "./catalogue.mapper";
 
 // values.get chi tra chu da dinh dang, khong thay cong thuc IMAGE lan hyperlink.
-// spreadsheets.get kem field mask nay lay du ca ba tang trong MOT lan goi.
-const FIELD_MASK = "sheets.data.rowData.values(formattedValue,userEnteredValue,hyperlink)";
+// spreadsheets.get kem field mask nay lay du moi tang trong MOT lan goi.
+//
+// chipRuns la bat buoc: lien ket cua "chip" Drive (chen bang @ hoac keo tep tu
+// Drive vao o) KHONG nam trong hyperlink. Cot FOLDER HINH dung ca hai kieu, bo
+// chipRuns ra thi nhung dong dung chip mat thu vien anh ma khong bao loi gi.
+const FIELD_MASK =
+  "sheets.data.rowData.values(formattedValue,userEnteredValue,hyperlink,chipRuns)";
 
 /**
  * Boc ten tab theo cu phap pham vi A1: dat trong dau nhay don, moi dau nhay

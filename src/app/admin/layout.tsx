@@ -1,4 +1,4 @@
-import { requireUser } from "@/auth/guard";
+import { getSessionUser } from "@/auth/guard";
 import { dangXuat } from "@/auth/actions";
 import { vi } from "@/messages/vi";
 
@@ -7,26 +7,34 @@ import { vi } from "@/messages/vi";
  * Vi vay khong co thanh dieu huong sang cac module khac — chi mot dai mong mang
  * danh tinh nguoi dang dung va loi ra.
  *
- * Cac trang /admin/products, /admin/categories, /admin/upload VAN TON TAI va
- * van vao duoc bang duong dan truc tiep; chi la khong con lien ket tro toi.
+ * Khung nay KHONG con ep dang nhap. Catalogue dang mo cong khai theo yeu cau;
+ * cong dang nhap se lam sau. Cac trang /admin/products, /admin/categories,
+ * /admin/upload VAN GOI requireUser() o chinh chung nen van duoc gac — dung
+ * bo loi goi do khi sua khung nay.
  */
 export default async function KhungQuanTri({ children }: { children: React.ReactNode }) {
-  const user = await requireUser();
+  const user = await getSessionUser();
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-baseline justify-end gap-6 border-b border-hp-rule px-8 py-3">
-        <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-          {user.fullName}
-        </span>
-        <form action={dangXuat}>
-          <button
-            type="submit"
-            className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
-                       transition-colors duration-150 hover:text-hp-ink hover:underline"
-          >
-            {vi.dang_nhap.dang_xuat}
-          </button>
-        </form>
+        {/* Chua dang nhap thi dai nay trong — giu lai de duong ke duoi khong
+            bien mat, bo cuc khong nhay khi dang nhap tro lai. */}
+        {user && (
+          <>
+            <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+              {user.fullName}
+            </span>
+            <form action={dangXuat}>
+              <button
+                type="submit"
+                className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
+                           transition-colors duration-150 hover:text-hp-ink hover:underline"
+              >
+                {vi.dang_nhap.dang_xuat}
+              </button>
+            </form>
+          </>
+        )}
       </header>
 
       {/* min-w-0: flex item mac dinh co min-width:auto nen KHONG chiu co nho hon

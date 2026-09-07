@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/auth/guard";
 import {
   layAnhCuaMau,
   layDanhSachCatalogue,
@@ -16,7 +15,6 @@ export default async function TrangChiTietMau({
 }: {
   params: Promise<{ dong: string }>;
 }) {
-  await requireUser();
   const { dong } = await params;
 
   let tatCa: DongCatalogue[];
