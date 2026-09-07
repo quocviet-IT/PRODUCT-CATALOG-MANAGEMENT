@@ -44,9 +44,10 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_mo}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_chi_tiet}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_ma_mau}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_loai}</th>
+            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_loai_sp}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_dong_sp}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_chat_lieu}</th>
+            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_mau}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_tl_vang}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_size}</th>
             <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_o_chu}</th>
@@ -82,9 +83,10 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
               <td className={`${O_GON} text-hp-ink`}>
                 {d.maMau ?? vi.catalogue_sheet.chua_co_ma_mau}
               </td>
-              <td className={O_GON}><Chu v={d.loai} /></td>
+              <td className={O_GON}><Chu v={d.loaiSp} /></td>
               <td className={O_GON}><Chu v={d.dongSp} /></td>
               <td className={O_GON}><Chu v={d.chatLieu} /></td>
+              <td className={O_GON}><Chu v={d.mau} /></td>
               <td className={O_SO}>{dinhDangGam(d.tlVang) ?? <Trong />}</td>
               <td className={O_SO}><Chu v={d.size} /></td>
               <td className={O_GON}><Chu v={d.oChu} /></td>
