@@ -1532,26 +1532,45 @@ import { layUrlAnhSheet } from "@/modules/media/anh-drive";
 // de dung khoa Storage hay goi Drive.
 const DANG_FILE_ID = /^[A-Za-z0-9_-]{10,80}$/;
 
+// URL co ky tra ve chi dung mot lan cho MOT phien va het han sau mot gio
+// (xem HAN_URL_GIAY trong anh-drive.ts). Khong gi lien quan toi tuyen nay —
+// ke ca trang thai dang nhap — duoc phep nam trong bat ky bo dem trung gian
+// nao; mot Location bi cache qua thoi han se tra ra anh vo lang le.
+const KHONG_LUU_DEM = "private, no-store";
+
+function phanHoiRong(status: number, headers?: HeadersInit): Response {
+  return new Response(null, {
+    status,
+    headers: { "Cache-Control": KHONG_LUU_DEM, ...headers },
+  });
+}
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ fileId: string }> },
 ): Promise<Response> {
   const user = await getSessionUser();
   if (user === null || !user.isActive) {
-    return new Response(null, { status: 401 });
+    return phanHoiRong(401);
   }
 
   const { fileId } = await params;
   if (!DANG_FILE_ID.test(fileId)) {
-    return new Response(null, { status: 400 });
+    return phanHoiRong(400);
   }
 
   try {
     const url = await layUrlAnhSheet(fileId);
-    return new Response(null, { status: 302, headers: { Location: url } });
-  } catch {
-    // Mot anh hong khong duoc lam hong ca luoi.
-    return new Response(null, { status: 502 });
+    return phanHoiRong(302, { Location: url });
+  } catch (loi) {
+    // Mot anh hong khong duoc lam hong ca luoi — nguoi goi (tag <img>) chi
+    // nhan 502 rong, khong bao gio lo van ban loi tho cua libvips/Drive ra
+    // ngoai. Nhung neu khong ghi lai o day thi ca bon nguyen nhan co the xay
+    // ra (Drive thieu/khong truy cap duoc, anh khong hop le tuc LoiAnhKhongHopLe,
+    // Supabase Storage sap, hay sai khoa service account) deu bien mat khong
+    // dau vet — khong con gi de grep khi anh vo xuat hien hang loat tren luoi.
+    console.error(`[anh-drive] loi lay url anh cho fileId=${fileId}:`, loi);
+    return phanHoiRong(502);
   }
 }
 ```
@@ -1559,7 +1578,10 @@ export async function GET(
 - [ ] **Step 4: Chạy test để chắc chắn nó xanh**
 
 Run: `npx vitest run tests/app/anh-drive-route.test.ts`
-Expected: PASS — 5 test xanh.
+Expected: PASS — 7 test xanh (5 gốc + 2 test bổ sung sau review: mọi phản hồi mang
+`Cache-Control: private, no-store`, và lỗi từ `layUrlAnhSheet` được ghi log phía
+server bằng `console.error` kèm `fileId`, trong khi thân phản hồi cho trình duyệt
+vẫn rỗng và status vẫn `502`).
 
 - [ ] **Step 5: Chứng minh chốt đăng nhập thật sự chặn**
 
