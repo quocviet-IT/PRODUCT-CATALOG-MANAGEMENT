@@ -111,5 +111,27 @@ export const catalogues = pgTable("catalogues", {
   ten: text("ten").notNull().default(""),
   /** Xem KieuNoiDung trong catalogue-share/chia-se.model.ts */
   noiDung: jsonb("noi_dung").notNull(),
+  /**
+   * Cach TRINH BAY noi dung tren — bo cuc, tong mau, trang bia, thong so nao
+   * duoc hien. Xem GiaoDienCatalogue trong chia-se.model.ts.
+   *
+   * Tach khoi noi_dung co chu y: noi_dung la DU LIEU dong bang (mau nao, anh
+   * nao), con cot nay la CACH BAY no ra. Tron hai thu vao mot cot thi moi lan
+   * them mot lua chon trinh bay lai phai nang phien ban cua ban chup du lieu,
+   * va moi catalogue cu deu phai doc lai qua duong tuong thich.
+   *
+   * Mac dinh {} — catalogue tao truoc khi co tinh nang nay doc ra gia tri mac
+   * dinh, hien y het luc no duoc gui di.
+   */
+  giaoDien: jsonb("giao_dien").notNull().default({}),
+  /**
+   * Ai tao. NULL cho ca catalogue tao thoi chua bat dang nhap lan catalogue cua
+   * mot tai khoan da bi xoa — link da gui khach thi khong duoc chet theo nguoi
+   * tao no.
+   */
+  ownerId: uuid("owner_id").references(() => users.id, { onDelete: "set null" }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [uniqueIndex("catalogues_slug_idx").on(t.slug)]);
+}, (t) => [
+  uniqueIndex("catalogues_slug_idx").on(t.slug),
+  index("catalogues_owner_idx").on(t.ownerId, t.createdAt),
+]);

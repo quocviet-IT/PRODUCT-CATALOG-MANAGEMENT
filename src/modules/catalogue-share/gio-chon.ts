@@ -19,12 +19,14 @@
  */
 
 const KHOA = "hp-catalogue-chon";
-const KHOA_VUA_TAO = "hp-catalogue-vua-tao";
 
-/** Mot catalogue vua tao tren may nay — thay cho danh sach "cua toi" khi chua co tai khoan. */
-export type CatalogueVuaTao = { slug: string; ten: string; luc: number };
-
-const SO_VUA_TAO_GIU = 20;
+/*
+ * Truoc day tep nay con giu them mot danh sach "catalogue vua tao tren may
+ * nay". No da bi go bo: he thong co dang nhap roi, va bang `catalogues` trong
+ * co so du lieu giu danh sach do THEO NGUOI — xem /admin/catalogue. Danh sach
+ * theo trinh duyet mat khi doi may hay xoa lich su, va de hai danh sach canh
+ * nhau chi lam sale khong biet cai nao moi la that.
+ */
 
 /**
  * Anh chup cho may chu. Phai la MOT hang so dung chung: useSyncExternalStore so
@@ -80,32 +82,4 @@ export function docGio(): readonly string[] {
 /** Bat/tat mot ma. Ma moi duoc THEM VAO CUOI de giu dung thu tu sale chon. */
 export function daoMa(hienTai: readonly string[], ma: string): string[] {
   return hienTai.includes(ma) ? hienTai.filter((x) => x !== ma) : [...hienTai, ma];
-}
-
-/** Cung ly do voi GIO_RONG: hang so dung chung cho anh chup phia may chu. */
-export const VUA_TAO_RONG: readonly CatalogueVuaTao[] = [];
-
-let banVuaTao: readonly CatalogueVuaTao[] | null = null;
-const nguoiNgheVuaTao = new Set<() => void>();
-
-export function dangKyVuaTao(khiDoi: () => void): () => void {
-  nguoiNgheVuaTao.add(khiDoi);
-  return () => {
-    nguoiNgheVuaTao.delete(khiDoi);
-  };
-}
-
-export function chupVuaTao(): readonly CatalogueVuaTao[] {
-  if (banVuaTao === null) {
-    banVuaTao = doc<CatalogueVuaTao[]>(KHOA_VUA_TAO, []).filter(
-      (x) => x && typeof x.slug === "string" && typeof x.ten === "string",
-    );
-  }
-  return banVuaTao;
-}
-
-export function themVuaTao(c: CatalogueVuaTao): void {
-  banVuaTao = [c, ...chupVuaTao().filter((x) => x.slug !== c.slug)].slice(0, SO_VUA_TAO_GIU);
-  ghi(KHOA_VUA_TAO, banVuaTao);
-  for (const f of nguoiNgheVuaTao) f();
 }

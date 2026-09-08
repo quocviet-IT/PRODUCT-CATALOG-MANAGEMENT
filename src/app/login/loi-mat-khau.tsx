@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { vi } from "@/messages/vi";
+import { useChu } from "@/messages/dung-chu";
 
 const NHAN = "block text-[11px] uppercase tracking-[0.14em] text-hp-muted";
 const O_NHAP =
@@ -18,6 +18,7 @@ const O_NHAP =
  * moi la cach dang nhap thong thuong.
  */
 export function LoiMatKhau({ guiForm }: { guiForm: (form: FormData) => void }) {
+  const t = useChu();
   const [mo, setMo] = useState(false);
 
   if (!mo) {
@@ -28,24 +29,24 @@ export function LoiMatKhau({ guiForm }: { guiForm: (form: FormData) => void }) {
         className="mt-6 w-full text-center text-xs text-hp-muted underline
                    transition-colors duration-150 hover:text-hp-ink"
       >
-        {vi.dang_nhap.khong_vao_duoc}
+        {t.dang_nhap.khong_vao_duoc}
       </button>
     );
   }
 
   return (
     <div className="mt-6 border-t border-hp-rule pt-6">
-      <p className={NHAN}>{vi.dang_nhap.dung_mat_khau}</p>
+      <p className={NHAN}>{t.dang_nhap.dung_mat_khau}</p>
       <form action={guiForm} className="mt-4 space-y-4">
         <div>
           <label className={NHAN} htmlFor="email">
-            {vi.dang_nhap.email}
+            {t.dang_nhap.email}
           </label>
           <input id="email" name="email" type="email" required autoComplete="email" className={O_NHAP} />
         </div>
         <div>
           <label className={NHAN} htmlFor="mat_khau">
-            {vi.dang_nhap.mat_khau}
+            {t.dang_nhap.mat_khau}
           </label>
           <input
             id="mat_khau"
@@ -62,7 +63,7 @@ export function LoiMatKhau({ guiForm }: { guiForm: (form: FormData) => void }) {
                      tracking-[0.14em] text-hp-foundation transition-colors duration-150
                      hover:border-hp-pink hover:bg-hp-pink"
         >
-          {vi.dang_nhap.nut}
+          {t.dang_nhap.nut}
         </button>
       </form>
     </div>

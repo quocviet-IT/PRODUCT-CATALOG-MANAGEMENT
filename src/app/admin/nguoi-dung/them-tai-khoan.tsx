@@ -2,7 +2,8 @@
 
 import { useActionState, useState } from "react";
 import { themTaiKhoan } from "./actions";
-import { vi } from "@/messages/vi";
+import { useChu } from "@/messages/dung-chu";
+import type { BoChu } from "@/messages";
 
 const NHAN = "block text-[11px] uppercase tracking-[0.14em] text-hp-muted";
 const O_NHAP =
@@ -10,16 +11,19 @@ const O_NHAP =
   "font-body text-base text-hp-body transition-colors duration-150 " +
   "focus:border-b-2 focus:border-hp-pink focus:pb-[5px] focus:outline-none";
 
-const LOI: Record<string, string> = {
-  email_khong_hop_le: vi.nguoi_dung.email_khong_hop_le,
-  thieu_ho_ten: vi.nguoi_dung.thieu_ho_ten,
-  mat_khau_qua_ngan: vi.nguoi_dung.mat_khau_qua_ngan,
-  mat_khau_qua_dai: vi.nguoi_dung.mat_khau_qua_dai,
-  email_da_ton_tai: vi.nguoi_dung.email_da_ton_tai,
-  loi_he_thong: vi.nguoi_dung.loi_he_thong,
-};
+function loiThanhChu(t: BoChu): Record<string, string> {
+  return {
+    email_khong_hop_le: t.nguoi_dung.email_khong_hop_le,
+    thieu_ho_ten: t.nguoi_dung.thieu_ho_ten,
+    mat_khau_qua_ngan: t.nguoi_dung.mat_khau_qua_ngan,
+    mat_khau_qua_dai: t.nguoi_dung.mat_khau_qua_dai,
+    email_da_ton_tai: t.nguoi_dung.email_da_ton_tai,
+    loi_he_thong: t.nguoi_dung.loi_he_thong,
+  };
+}
 
 export function ThemTaiKhoan() {
+  const t = useChu();
   const [mo, setMo] = useState(false);
   const [loi, guiForm, dangChay] = useActionState(themTaiKhoan, null);
   // Form da gui thanh cong (loi === null) SAU khi tung chay — dung de bao xong.
@@ -35,10 +39,10 @@ export function ThemTaiKhoan() {
                      tracking-[0.14em] text-hp-foundation transition-colors duration-150
                      hover:border-hp-pink hover:bg-hp-pink"
         >
-          {vi.nguoi_dung.them_tieu_de}
+          {t.nguoi_dung.them_tieu_de}
         </button>
         {daGui && (
-          <p className="mt-3 text-sm text-hp-body">{vi.nguoi_dung.da_them}</p>
+          <p className="mt-3 text-sm text-hp-body">{t.nguoi_dung.da_them}</p>
         )}
       </div>
     );
@@ -47,13 +51,13 @@ export function ThemTaiKhoan() {
   return (
     <section className="mb-10 border border-hp-rule bg-hp-card p-6">
       <h2 className="font-title text-xl leading-none text-hp-ink">
-        {vi.nguoi_dung.them_tieu_de}
+        {t.nguoi_dung.them_tieu_de}
       </h2>
-      <p className="mt-2 text-xs text-hp-muted">{vi.nguoi_dung.them_mo_ta}</p>
+      <p className="mt-2 text-xs text-hp-muted">{t.nguoi_dung.them_mo_ta}</p>
 
       {loi && (
         <p role="alert" className="mt-4 border-l-2 border-hp-pink bg-hp-inset px-4 py-3 text-sm text-hp-body">
-          {LOI[loi] ?? vi.nguoi_dung.loi_he_thong}
+          {loiThanhChu(t)[loi] ?? t.nguoi_dung.loi_he_thong}
         </p>
       )}
 
@@ -66,15 +70,15 @@ export function ThemTaiKhoan() {
         className="mt-5 grid gap-5 sm:grid-cols-2"
       >
         <div>
-          <label className={NHAN} htmlFor="email">{vi.nguoi_dung.o_email}</label>
+          <label className={NHAN} htmlFor="email">{t.nguoi_dung.o_email}</label>
           <input id="email" name="email" type="email" required autoComplete="off" className={O_NHAP} />
         </div>
         <div>
-          <label className={NHAN} htmlFor="ho_ten">{vi.nguoi_dung.o_ho_ten}</label>
+          <label className={NHAN} htmlFor="ho_ten">{t.nguoi_dung.o_ho_ten}</label>
           <input id="ho_ten" name="ho_ten" required autoComplete="off" className={O_NHAP} />
         </div>
         <div>
-          <label className={NHAN} htmlFor="mat_khau">{vi.nguoi_dung.o_mat_khau}</label>
+          <label className={NHAN} htmlFor="mat_khau">{t.nguoi_dung.o_mat_khau}</label>
           {/* new-password: khong de trinh duyet dien mat khau CUA ADMIN vao day. */}
           <input
             id="mat_khau"
@@ -85,13 +89,13 @@ export function ThemTaiKhoan() {
             autoComplete="new-password"
             className={O_NHAP}
           />
-          <p className="mt-1 text-xs text-hp-muted">{vi.nguoi_dung.goi_y_mat_khau}</p>
+          <p className="mt-1 text-xs text-hp-muted">{t.nguoi_dung.goi_y_mat_khau}</p>
         </div>
         <div>
-          <label className={NHAN} htmlFor="vai_tro">{vi.nguoi_dung.o_vai_tro}</label>
+          <label className={NHAN} htmlFor="vai_tro">{t.nguoi_dung.o_vai_tro}</label>
           <select id="vai_tro" name="vai_tro" defaultValue="sale" className={`${O_NHAP} cursor-pointer`}>
-            <option value="sale">{vi.nguoi_dung.vai_tro_sale}</option>
-            <option value="admin">{vi.nguoi_dung.vai_tro_admin}</option>
+            <option value="sale">{t.nguoi_dung.vai_tro_sale}</option>
+            <option value="admin">{t.nguoi_dung.vai_tro_admin}</option>
           </select>
         </div>
 
@@ -104,7 +108,7 @@ export function ThemTaiKhoan() {
                        hover:border-hp-pink hover:bg-hp-pink
                        disabled:cursor-not-allowed disabled:opacity-40"
           >
-            {dangChay ? vi.nguoi_dung.dang_luu : vi.nguoi_dung.nut_them}
+            {dangChay ? t.nguoi_dung.dang_luu : t.nguoi_dung.nut_them}
           </button>
           <button
             type="button"
@@ -112,7 +116,7 @@ export function ThemTaiKhoan() {
             className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
                        transition-colors duration-150 hover:text-hp-ink hover:underline"
           >
-            {vi.nguoi_dung.huy}
+            {t.nguoi_dung.huy}
           </button>
         </div>
       </form>

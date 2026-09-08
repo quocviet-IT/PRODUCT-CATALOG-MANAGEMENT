@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "kiem-tra:google": "tsx scripts/kiem-tra-google.mts"
+    "kiem-tra:google": "tsx scripts/kiem-tra-google.mts",
+    "huong-dan:anh": "tsx scripts/chup-huong-dan.mts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
@@ -37,6 +38,7 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
+    "playwright": "^1.63.0",
     "tailwindcss": "^4",
     "tsx": "^4.23.12",
     "typescript": "^5",

@@ -53,3 +53,60 @@ body {
     text-decoration: none;
   }
 }
+
+/*
+ * Tong mau cua trang khach xem. Sale chon luc tao catalogue.
+ *
+ * Moi tong chi dinh nghia lai bo bien --color-hp-* trong pham vi cua no; toan
+ * bo lop tien ich Tailwind ben trong tu doi mau theo. Nho vay khong co mot
+ * bang mau thu hai nao phai giu cho khop — chi co mot bo ten mau, ba gia tri.
+ */
+.tone-trang,
+.tone-toi {
+  background: var(--color-hp-foundation);
+}
+
+.tone-trang {
+  --color-hp-foundation:  #FFFFFF;
+  --color-hp-card:        #FFFFFF;
+  --color-hp-inset:       #F3F2F0;
+  --color-hp-ink:         #1B1A19;
+  --color-hp-body:        #3C3A38;
+  --color-hp-muted:       #6B6864;
+  --color-hp-rule:        #E2E0DC;
+}
+
+.tone-toi {
+  --color-hp-foundation:  #1A1815;
+  --color-hp-card:        #221F1B;
+  --color-hp-inset:       #2B2723;
+  --color-hp-ink:         #F4EEE6;
+  --color-hp-body:        #DAD3C9;
+  --color-hp-muted:       #9B948A;
+  --color-hp-rule:        #3A3630;
+  /* Hong nguyen ban #E91D79 dat tren nen toi bi choi va tut tuong phan. Nhat
+     va sang hon mot bac thi van la hong thuong hieu ma doc duoc. */
+  --color-hp-pink:        #E8559A;
+  --color-hp-pink-strong: #F08BBB;
+}
+
+@media print {
+  /* Ban in LUON la nen sang. Mot catalogue tong toi in ra se ngon nguyen mot
+     hop muc va chu van kho doc — day la ban giay dua tan tay khach. */
+  .tone-toi {
+    --color-hp-foundation:  #FFFFFF;
+    --color-hp-card:        #FFFFFF;
+    --color-hp-inset:       #F3F2F0;
+    --color-hp-ink:         #1B1A19;
+    --color-hp-body:        #3C3A38;
+    --color-hp-muted:       #6B6864;
+    --color-hp-rule:        #E2E0DC;
+    --color-hp-pink:        #E91D79;
+    --color-hp-pink-strong: #C4165F;
+  }
+
+  /* Trang bia dung rieng mot to giay. */
+  .bia-catalogue {
+    break-after: page;
+  }
+}

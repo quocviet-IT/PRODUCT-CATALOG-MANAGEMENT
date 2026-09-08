@@ -1,16 +1,19 @@
 import { redirect } from "next/navigation";
 import { dangNhap, dangNhapGoogle } from "@/auth/actions";
 import { LoiMatKhau } from "./loi-mat-khau";
-import { vi } from "@/messages/vi";
+import { layChu } from "@/messages/may-chu";
+import type { BoChu } from "@/messages";
 
-const LY_DO: Record<string, string> = {
-  chua_dang_nhap: vi.dang_nhap.chua_dang_nhap,
-  bi_vo_hieu_hoa: vi.dang_nhap.bi_vo_hieu_hoa,
-  sai_thong_tin: vi.dang_nhap.sai_thong_tin,
-  khong_du_quyen: vi.dang_nhap.khong_du_quyen,
-  loi_google: vi.dang_nhap.loi_google,
-  sai_ten_mien: vi.dang_nhap.sai_ten_mien,
-};
+function lyDo(t: BoChu): Record<string, string> {
+  return {
+    chua_dang_nhap: t.dang_nhap.chua_dang_nhap,
+    bi_vo_hieu_hoa: t.dang_nhap.bi_vo_hieu_hoa,
+    sai_thong_tin: t.dang_nhap.sai_thong_tin,
+    khong_du_quyen: t.dang_nhap.khong_du_quyen,
+    loi_google: t.dang_nhap.loi_google,
+    sai_ten_mien: t.dang_nhap.sai_ten_mien,
+  };
+}
 
 /** Logo Google. Ve thang bang SVG — mot the <img> se them mot luot tai mang. */
 function LogoGoogle() {
@@ -29,8 +32,9 @@ export default async function TrangDangNhap({
 }: {
   searchParams: Promise<{ loi?: string }>;
 }) {
+  const t = await layChu();
   const { loi } = await searchParams;
-  const thongBao = loi ? LY_DO[loi] : null;
+  const thongBao = loi ? lyDo(t)[loi] : null;
 
   async function guiForm(form: FormData) {
     "use server";
@@ -42,12 +46,12 @@ export default async function TrangDangNhap({
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
       <div className="border border-hp-rule bg-hp-card p-8 sm:p-10">
         <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-          {vi.catalogue_sheet.thuong_hieu}
+          {t.catalogue_sheet.thuong_hieu}
         </span>
         <h1 className="mt-3 font-title text-[28px] leading-none tracking-[0.02em] text-hp-ink">
-          {vi.dang_nhap.tieu_de}
+          {t.dang_nhap.tieu_de}
         </h1>
-        <p className="mt-3 text-sm text-hp-body">{vi.dang_nhap.mo_ta}</p>
+        <p className="mt-3 text-sm text-hp-body">{t.dang_nhap.mo_ta}</p>
 
         {thongBao && (
           // Loi dang nhap la mot trong ba cho duy nhat duoc dung mau hong tren
@@ -68,7 +72,7 @@ export default async function TrangDangNhap({
                        transition-colors duration-150 hover:border-hp-ink"
           >
             <LogoGoogle />
-            {vi.dang_nhap.nut_google}
+            {t.dang_nhap.nut_google}
           </button>
         </form>
 

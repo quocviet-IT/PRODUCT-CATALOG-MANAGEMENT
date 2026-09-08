@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { vi } from "@/messages/vi";
+import { useChu } from "@/messages/dung-chu";
 
 /**
  * Boc danh sach mau va cho khach bam vao anh de phong to.
@@ -22,6 +22,7 @@ export function PhongToAnh({
   anh: { fileId: string; ten: string }[];
   children: ReactNode;
 }) {
+  const t = useChu();
   const [viTri, setViTri] = useState<number | null>(null);
 
   const dong = useCallback(() => setViTri(null), []);
@@ -90,12 +91,12 @@ export function PhongToAnh({
               onClick={(e) => e.stopPropagation()}
               className="flex cursor-default items-center gap-8"
             >
-              <button type="button" onClick={() => di(-1)} aria-label={vi.chia_se.anh_truoc}
+              <button type="button" onClick={() => di(-1)} aria-label={t.chia_se.anh_truoc}
                 className={NUT}>←</button>
               <span className="text-[11px] tabular-nums tracking-[0.14em] text-hp-foundation/70">
                 {viTri! + 1} / {anh.length}
               </span>
-              <button type="button" onClick={() => di(1)} aria-label={vi.chia_se.anh_sau}
+              <button type="button" onClick={() => di(1)} aria-label={t.chia_se.anh_sau}
                 className={NUT}>→</button>
             </div>
           )}
@@ -106,7 +107,7 @@ export function PhongToAnh({
             className="text-[11px] uppercase tracking-[0.14em] text-hp-foundation/70
                        transition-colors duration-150 hover:text-hp-foundation"
           >
-            {vi.chia_se.dong_anh}
+            {t.chia_se.dong_anh}
           </button>
         </div>
       )}

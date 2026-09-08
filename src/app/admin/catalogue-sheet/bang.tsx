@@ -1,15 +1,9 @@
-import type { CoBatThuong, DongCatalogue } from "@/modules/sheet/catalogue.mapper";
+import type { DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { khoaMau } from "@/modules/catalogue-share/chia-se.model";
 import { OTich } from "./chon-mau";
-import { vi } from "@/messages/vi";
+import { layChu } from "@/messages/may-chu";
+import { nhanCo } from "./nhan-co";
 
-const NHAN_CO: Record<CoBatThuong, string> = {
-  "thieu-sku": vi.catalogue_sheet.co_thieu_sku,
-  "thieu-anh": vi.catalogue_sheet.co_thieu_anh,
-  "thieu-mo-ta": vi.catalogue_sheet.co_thieu_mo_ta,
-  "trung": vi.catalogue_sheet.co_trung,
-  "tl-vang-lech": vi.catalogue_sheet.co_tl_vang_lech,
-};
 
 /** Chuan tieng Viet dung dau phay thap phan, du bang tinh ghi dau cham. */
 function dinhDangGam(v: number | null): string | null {
@@ -24,15 +18,18 @@ const O_GON = `${O_DU_LIEU} whitespace-nowrap`;
 const O_SO = `${O_GON} tabular-nums`;
 
 /** O rong hien dau gach thay vi de trong, de phan biet voi loi trinh bay. */
-function Trong() {
-  return <span className="text-hp-muted">{vi.catalogue_sheet.o_trong}</span>;
+async function Trong() {
+  const t = await layChu();
+  return <span className="text-hp-muted">{t.catalogue_sheet.o_trong}</span>;
 }
 
 function Chu({ v }: { v: string | null }) {
   return v === null ? <Trong /> : <>{v}</>;
 }
 
-export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
+export async function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
+  const t = await layChu();
+  const nhan = nhanCo(t);
   return (
     // Bang rong hon man hinh phai tu cuon trong khung cua no, khong day ca trang
     // truot ngang.
@@ -42,22 +39,22 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
           <tr className="bg-hp-inset">
             {/* Cot o tich khong co tieu de chu: mot chu "Chon" o day chi lam
                 hang tieu de nang them ma khong noi gi hon chinh cai o tich. */}
-            <th className={O_TIEU_DE} aria-label={vi.chia_se.tao_catalogue} />
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_anh}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_sku}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_so}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_mo}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_chi_tiet}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_ma_mau}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_loai_sp}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_dong_sp}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_chat_lieu}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_mau}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_tl_vang}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_size}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_o_chu}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_thu_muc}</th>
-            <th className={O_TIEU_DE}>{vi.catalogue_sheet.cot_canh_bao}</th>
+            <th className={O_TIEU_DE} aria-label={t.chia_se.tao_catalogue} />
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_anh}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_sku}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_so}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_mo}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_chi_tiet}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_ma_mau}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_loai_sp}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_dong_sp}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_chat_lieu}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_mau}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_tl_vang}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_size}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_o_chu}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_thu_muc}</th>
+            <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_canh_bao}</th>
           </tr>
         </thead>
         <tbody>
@@ -76,7 +73,7 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={`/api/anh-drive/${d.fileIdAnh}`}
-                      alt={d.maMau ?? vi.catalogue_sheet.anh_chua_co_ma_mau}
+                      alt={d.maMau ?? t.catalogue_sheet.anh_chua_co_ma_mau}
                       loading="lazy"
                       className="h-full w-full object-contain"
                     />
@@ -89,7 +86,7 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
               <td className={O_SO}><Chu v={d.mo} /></td>
               <td className={`${O_DU_LIEU} min-w-[24rem]`}><Chu v={d.chiTiet} /></td>
               <td className={`${O_GON} text-hp-ink`}>
-                {d.maMau ?? vi.catalogue_sheet.chua_co_ma_mau}
+                {d.maMau ?? t.catalogue_sheet.chua_co_ma_mau}
               </td>
               <td className={O_GON}><Chu v={d.loaiSp} /></td>
               <td className={O_GON}><Chu v={d.dongSp} /></td>
@@ -108,7 +105,7 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
                     className="text-[10px] uppercase tracking-[0.14em] text-hp-muted
                                transition-colors duration-150 hover:text-hp-ink hover:underline"
                   >
-                    {vi.catalogue_sheet.mo_thu_muc}
+                    {t.catalogue_sheet.mo_thu_muc}
                   </a>
                 ) : (
                   <Trong />
@@ -116,7 +113,7 @@ export function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
               </td>
 
               <td className={`${O_DU_LIEU} text-[10px] uppercase tracking-[0.14em] text-hp-muted`}>
-                {d.co.length === 0 ? null : d.co.map((c) => NHAN_CO[c]).join(" · ")}
+                {d.co.length === 0 ? null : d.co.map((c) => nhan[c]).join(" · ")}
               </td>
             </tr>
           ))}
