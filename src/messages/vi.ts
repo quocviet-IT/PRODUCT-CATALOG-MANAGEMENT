@@ -26,6 +26,66 @@ export const vi = {
     loi_google: "Đăng nhập bằng Google không thành công. Thử lại giúp em.",
     sai_ten_mien: "Email này không thuộc công ty nên chưa vào được. Dùng Gmail công ty (@ctyhp.vn, @ctyhp.com…) hoặc liên hệ quản trị viên.",
   },
+  nguoi_dung: {
+    tieu_de: "Tài khoản",
+    mo_ta: "Cấp tài khoản cho nhân viên, khoá tài khoản đã nghỉ, đặt lại mật khẩu.",
+    nut_menu: "Tài khoản",
+
+    // Bang
+    cot_email: "Email",
+    cot_ho_ten: "Họ tên",
+    cot_vai_tro: "Vai trò",
+    cot_cach_vao: "Cách đăng nhập",
+    cot_lan_cuoi: "Lần cuối vào",
+    cot_trang_thai: "Trạng thái",
+    cot_thao_tac: "Thao tác",
+    vai_tro_admin: "Quản trị",
+    vai_tro_sale: "Sale",
+    vao_google: "Google",
+    vao_mat_khau: "Mật khẩu",
+    vao_ca_hai: "Google + mật khẩu",
+    vao_khac: "—",
+    chua_vao_lan_nao: "Chưa vào lần nào",
+    dang_hoat_dong: "Đang hoạt động",
+    da_khoa: "Đã khoá",
+    la_ban: "(bạn)",
+
+    // Thao tac
+    khoa: "Khoá",
+    mo_khoa: "Mở khoá",
+    dat_mat_khau: "Đặt mật khẩu",
+    huy: "Huỷ",
+    len_admin: "Nâng lên quản trị",
+    xuong_sale: "Hạ xuống sale",
+
+    // Them tai khoan
+    them_tieu_de: "Cấp tài khoản mới",
+    them_mo_ta: "Người này sẽ đăng nhập bằng email và mật khẩu anh đặt ở đây. Nhớ gửi mật khẩu cho họ qua kênh riêng.",
+    o_email: "Email",
+    o_ho_ten: "Họ tên",
+    o_mat_khau: "Mật khẩu",
+    o_vai_tro: "Vai trò",
+    nut_them: "Cấp tài khoản",
+    dang_luu: "Đang lưu",
+    goi_y_mat_khau: "Tối thiểu 8 ký tự.",
+
+    // Ket qua
+    da_them: "Đã cấp tài khoản.",
+    da_doi_mat_khau: "Đã đặt mật khẩu mới.",
+    da_khoa_xong: "Đã khoá tài khoản.",
+    da_mo_khoa_xong: "Đã mở khoá tài khoản.",
+    da_doi_vai_tro: "Đã đổi vai trò.",
+
+    // Loi
+    email_khong_hop_le: "Email không hợp lệ.",
+    thieu_ho_ten: "Chưa nhập họ tên.",
+    mat_khau_qua_ngan: "Mật khẩu phải từ 8 ký tự trở lên.",
+    mat_khau_qua_dai: "Mật khẩu không quá 72 ký tự.",
+    email_da_ton_tai: "Email này đã có tài khoản. Nếu họ đang đăng nhập bằng Google thì dùng “Đặt mật khẩu” ở dòng của họ.",
+    tu_khoa_chinh_minh: "Không thể tự khoá tài khoản của mình — sẽ không còn ai vào được màn hình này.",
+    tu_ha_quyen_chinh_minh: "Không thể tự hạ quyền của mình — sẽ không còn ai vào được màn hình này.",
+    loi_he_thong: "Không thực hiện được. Thử lại giúp em.",
+  },
   danh_muc: {
     ten_moi_placeholder: "Tên danh mục mới",
     danh_muc_goc: "— Danh mục gốc —",
