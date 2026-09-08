@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
 
 /**
@@ -92,21 +93,26 @@ export function PhongToAnh({
               className="flex cursor-default items-center gap-8"
             >
               <button type="button" onClick={() => di(-1)} aria-label={t.chia_se.anh_truoc}
-                className={NUT}>←</button>
+                className={NUT}>
+                <ChevronLeft aria-hidden strokeWidth={1.5} className="h-6 w-6" />
+              </button>
               <span className="text-[11px] tabular-nums tracking-[0.14em] text-hp-foundation/70">
                 {viTri! + 1} / {anh.length}
               </span>
               <button type="button" onClick={() => di(1)} aria-label={t.chia_se.anh_sau}
-                className={NUT}>→</button>
+                className={NUT}>
+                <ChevronRight aria-hidden strokeWidth={1.5} className="h-6 w-6" />
+              </button>
             </div>
           )}
 
           <button
             type="button"
             onClick={dong}
-            className="text-[11px] uppercase tracking-[0.14em] text-hp-foundation/70
-                       transition-colors duration-150 hover:text-hp-foundation"
+            className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em]
+                       text-hp-foundation/70 transition-colors duration-150 hover:text-hp-foundation"
           >
+            <X aria-hidden strokeWidth={1.5} className="h-4 w-4" />
             {t.chia_se.dong_anh}
           </button>
         </div>

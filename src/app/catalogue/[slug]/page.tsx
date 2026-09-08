@@ -8,6 +8,7 @@ import { NguonNgonNgu } from "@/messages/dung-chu";
 import { MoHopThoaiIn } from "./nut-in";
 import { PhongToAnh } from "./phong-to";
 import { LOP_TONE, ThanCatalogue, TrangBia } from "./bo-cuc";
+import { Logo } from "@/app/thuong-hieu";
 
 /**
  * Dang duong dan hop le: cac cum chu-so noi bang dau gach.
@@ -88,9 +89,7 @@ export default async function TrangKhachXem({
               chi lam khach doc mot cai ten hai lan trong hai co chu khac nhau. */}
           <header className="mb-10">
             {!g.bia && (
-              <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-                {t.catalogue_sheet.thuong_hieu}
-              </span>
+              <Logo alt={t.catalogue_sheet.thuong_hieu} />
             )}
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
               {!g.bia && (

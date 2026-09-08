@@ -11,6 +11,7 @@ import {
   type DemLoc,
   type MucDem,
 } from "@/modules/sheet/catalogue.view";
+import { ChevronDown, Search, X } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
 import type { BoChu } from "@/messages";
 import { nhanCo } from "./nhan-co";
@@ -135,10 +136,12 @@ function ThaXuong({
             </span>
           )}
         </span>
-        {/* Tam giac quay khi mo — dau hieu duy nhat cho biet o nay bam duoc. */}
-        <span aria-hidden="true" className={mo ? "rotate-180" : undefined}>
-          ▾
-        </span>
+        {/* Mui ten quay khi mo — dau hieu duy nhat cho biet o nay bam duoc. */}
+        <ChevronDown
+          aria-hidden
+          strokeWidth={1.5}
+          className={`h-4 w-4 shrink-0 transition-transform duration-150 ${mo ? "rotate-180" : ""}`}
+        />
       </button>
 
       {mo && (
@@ -282,15 +285,21 @@ export function ThanhBoLoc({
         <label className={NHAN} htmlFor="q">
           {t.catalogue_sheet.tim_kiem_nhan}
         </label>
-        <input
-          id="q"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          autoComplete="off"
-          className="mt-2 w-full border-0 border-b border-hp-rule bg-transparent px-0.5 py-1.5
-                     font-body text-base text-hp-body transition-colors duration-150
-                     focus:border-b-2 focus:border-hp-pink focus:pb-[5px] focus:outline-none"
-        />
+        {/* Kinh lup nam TRONG duong gach chan chu khong phai mot o vien rieng:
+            o nhap cua he thiet ke la mot duong ke, khong phai mot cai hop. */}
+        <div className="mt-2 flex items-center gap-2 border-b border-hp-rule
+                        transition-colors duration-150 focus-within:border-b-2
+                        focus-within:border-hp-pink">
+          <Search aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0 text-hp-muted" />
+          <input
+            id="q"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            autoComplete="off"
+            className="w-full bg-transparent py-1.5 font-body text-base text-hp-body
+                       focus:outline-none"
+          />
+        </div>
       </div>
 
       <div className="flex flex-wrap items-end gap-x-3 gap-y-3">
@@ -351,9 +360,7 @@ export function ThanhBoLoc({
                          transition-colors duration-150 hover:border-hp-ink hover:text-hp-ink"
             >
               {nhanGiaTri(chieu, gia_tri, t)}
-              <span aria-hidden="true" className="ml-2 text-hp-muted">
-                ✕
-              </span>
+              <X aria-hidden strokeWidth={1.5} className="ml-1.5 inline-block h-3.5 w-3.5 text-hp-muted" />
             </button>
           ))}
           <button

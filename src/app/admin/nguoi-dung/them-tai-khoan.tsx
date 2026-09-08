@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { themTaiKhoan } from "./actions";
+import { UserPlus } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
 import type { BoChu } from "@/messages";
 
@@ -35,10 +36,11 @@ export function ThemTaiKhoan() {
         <button
           type="button"
           onClick={() => setMo(true)}
-          className="border border-hp-ink bg-hp-ink px-5 py-2.5 text-[11px] uppercase
-                     tracking-[0.14em] text-hp-foundation transition-colors duration-150
-                     hover:border-hp-pink hover:bg-hp-pink"
+          className="flex items-center gap-2 border border-hp-ink bg-hp-ink px-5 py-2.5
+                     text-[11px] uppercase tracking-[0.14em] text-hp-foundation
+                     transition-colors duration-150 hover:border-hp-pink hover:bg-hp-pink"
         >
+          <UserPlus aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
           {t.nguoi_dung.them_tieu_de}
         </button>
         {daGui && (

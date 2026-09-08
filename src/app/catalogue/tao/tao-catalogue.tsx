@@ -6,6 +6,9 @@ import type { MucDeChon } from "@/modules/catalogue-share/chia-se.model";
 import {
   chupGio, datGio,
 } from "@/modules/catalogue-share/gio-chon";
+import {
+  ArrowLeft, Check, Copy, ExternalLink, FolderOpen, Link2, Plus, Printer, X,
+} from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
 import {
   GIAO_DIEN_MAC_DINH, type GiaoDienCatalogue,
@@ -15,8 +18,9 @@ import { ChonGiaoDien } from "./chon-giao-dien";
 type TrangThai = "dang-tai" | "san-sang" | "loi-tai";
 
 const NUT_PHU =
-  "text-[11px] uppercase tracking-[0.14em] text-hp-muted " +
-  "transition-colors duration-150 hover:text-hp-ink hover:underline";
+  "inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] " +
+  "text-hp-muted transition-colors duration-150 hover:text-hp-ink";
+const ICON = { "aria-hidden": true, strokeWidth: 1.5, className: "h-4 w-4 shrink-0" } as const;
 
 function ThongSo({ m }: { m: MucDeChon }) {
   const t = useChu();
@@ -146,9 +150,11 @@ export function TaoCatalogue() {
       <>
         <p className="text-sm text-hp-muted">{t.chia_se.chua_chon_gi}</p>
         <Link href="/admin/catalogue-sheet" className={`mt-4 inline-block ${NUT_PHU}`}>
+          <ArrowLeft {...ICON} />
           {t.chia_se.ve_danh_sach}
         </Link>
         <Link href="/admin/catalogue" className={`ml-6 ${NUT_PHU}`}>
+          <FolderOpen {...ICON} />
           {t.danh_sach_catalogue.nut_menu}
         </Link>
       </>
@@ -196,6 +202,7 @@ export function TaoCatalogue() {
                     .replace("{t}", String(m.anh.length))}
                 </span>
                 <button type="button" onClick={() => goMau(m.ma)} className={`ml-auto ${NUT_PHU}`}>
+                  <X {...ICON} />
                   {t.chia_se.go_mau}
                 </button>
               </div>
@@ -253,17 +260,19 @@ export function TaoCatalogue() {
           <span className="ml-3 tabular-nums">{tongAnh} ảnh</span>
         </span>
         <Link href="/admin/catalogue-sheet" className={NUT_PHU}>
+          <ArrowLeft {...ICON} />
           {t.chia_se.ve_danh_sach}
         </Link>
         <button
           type="button"
           onClick={tao}
           disabled={dangTao}
-          className="ml-auto border border-hp-ink bg-hp-ink px-6 py-2.5 text-[11px]
-                     uppercase tracking-[0.14em] text-hp-foundation transition-colors
-                     duration-150 hover:border-hp-pink hover:bg-hp-pink
+          className="ml-auto flex items-center gap-2 border border-hp-ink bg-hp-ink
+                     px-6 py-2.5 text-[11px] uppercase tracking-[0.14em] text-hp-foundation
+                     transition-colors duration-150 hover:border-hp-pink hover:bg-hp-pink
                      disabled:cursor-not-allowed disabled:opacity-40"
         >
+          <Link2 {...ICON} />
           {dangTao ? t.chia_se.dang_tao : t.chia_se.nut_tao}
         </button>
       </div>
@@ -314,13 +323,15 @@ function DaXong({ slug }: { slug: string }) {
         <button
           type="button"
           onClick={chep}
-          className="border border-hp-ink bg-hp-ink px-5 py-2 text-[11px] uppercase
-                     tracking-[0.14em] text-hp-foundation transition-colors duration-150
-                     hover:border-hp-pink hover:bg-hp-pink"
+          className="flex items-center gap-2 border border-hp-ink bg-hp-ink px-5 py-2
+                     text-[11px] uppercase tracking-[0.14em] text-hp-foundation
+                     transition-colors duration-150 hover:border-hp-pink hover:bg-hp-pink"
         >
+          {daChep ? <Check {...ICON} /> : <Copy {...ICON} />}
           {daChep ? t.chia_se.da_chep : t.chia_se.chep_link}
         </button>
         <a href={`/catalogue/${slug}`} target="_blank" rel="noreferrer" className={NUT_PHU}>
+          <ExternalLink {...ICON} />
           {t.chia_se.mo_thu}
         </a>
         {/* PDF la viec CUA SALE, khong phai cua khach. Duong dan kem ?in=1 mo
@@ -331,12 +342,15 @@ function DaXong({ slug }: { slug: string }) {
           rel="noreferrer"
           className={NUT_PHU}
         >
+          <Printer {...ICON} />
           {t.chia_se.tai_pdf_sale}
         </a>
         <Link href="/admin/catalogue-sheet" className={NUT_PHU}>
+          <Plus {...ICON} />
           {t.chia_se.tao_tiep}
         </Link>
         <Link href="/admin/catalogue" className={NUT_PHU}>
+          <FolderOpen {...ICON} />
           {t.danh_sach_catalogue.nut_menu}
         </Link>
       </div>

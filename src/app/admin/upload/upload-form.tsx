@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { KetQuaMotTep } from "@/modules/media/upload.service";
+import { Check, Upload } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
 
 export function FormTaiAnh() {
@@ -36,7 +37,8 @@ export function FormTaiAnh() {
                accept=".jpg,.jpeg,.png,.webp,.heic"
                className="rounded border p-3 text-sm" />
         <button type="submit" disabled={dangChay}
-                className="w-fit rounded bg-teal-800 px-4 py-2 text-sm text-white disabled:opacity-50">
+                className="flex w-fit items-center gap-2 rounded bg-teal-800 px-4 py-2 text-sm text-white disabled:opacity-50">
+          <Upload aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
           {dangChay ? t.tai_anh.dang_tai_len : t.tai_anh.nut_tai_len}
         </button>
       </form>
@@ -54,7 +56,12 @@ export function FormTaiAnh() {
               <li key={r.tenTep} className="flex items-start justify-between gap-4 px-3 py-2">
                 <span className="truncate">{r.tenTep}</span>
                 <span className="shrink-0 text-neutral-600">
-                  {r.trangThai === "thanh_cong" && t.tai_anh.da_nap}
+                  {r.trangThai === "thanh_cong" && (
+                    <span className="inline-flex items-center gap-1">
+                      <Check aria-hidden strokeWidth={1.5} className="h-3.5 w-3.5" />
+                      {t.tai_anh.da_nap}
+                    </span>
+                  )}
                   {r.trangThai === "trung" && t.tai_anh.da_co_trong_kho}
                   {r.trangThai === "loi" && r.thongBao}
                 </span>

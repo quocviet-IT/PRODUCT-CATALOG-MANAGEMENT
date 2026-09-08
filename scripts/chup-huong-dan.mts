@@ -6,12 +6,17 @@ import { join } from "node:path";
 import { randomBytes } from "node:crypto";
 import postgres from "postgres";
 import { createClient } from "@supabase/supabase-js";
-import { chromium, type Page } from "playwright";
+import { chromium, type Locator, type Page } from "playwright";
 
 /**
  * Chup anh minh hoa cho trang /admin/huong-dan.
  *
- * Chay: npm run huong-dan:anh   (may chu dev phai dang chay o CONG duoi day)
+ * Chay: npm run huong-dan:anh   (may chu phai dang chay o CONG duoi day)
+ *
+ * Script tu DO vi tri cac diem chu thich tu chinh phan tu tren trang roi ghi ra
+ * public/huong-dan/diem.json. Truoc day toa do do bang mat roi go tay vao ma
+ * nguon; moi lan bo cuc xe dich mot chut la mui ten tro vao cho trong ma khong
+ * ai biet. Do tu DOM thi anh va mui ten khong bao gio lech nhau nua.
  *
  * Vi sao phai tao mot tai khoan tam: moi man hinh trong huong dan deu nam sau
  * cong dang nhap. Tai khoan nay bi XOA o cuoi ham, ke ca khi giua chung co loi
@@ -45,6 +50,11 @@ const MAT_KHAU = randomBytes(18).toString("base64url");
 const TEN_HIEN = "Ngọc Anh";
 const EMAIL_HIEN = "ngoc.anh@ctyhp.vn";
 
+type Huong = "trai" | "phai" | "tren" | "duoi";
+type Khung = { x: number; y: number; width: number; height: number };
+/** Mot diem chu thich: chi vao dau, va o so nam ve phia nao. */
+type Diem = { x: number; y: number; huong: Huong };
+
 async function taoTaiKhoanTam(): Promise<string> {
   const { data, error } = await kho.auth.admin.createUser({
     email: EMAIL,
@@ -72,15 +82,47 @@ async function xoaTaiKhoanTam(id: string): Promise<void> {
 }
 
 /**
- * `cao` cat bot phan duoi cua khung nhin. Man hinh "da tao xong" chi cao chung
- * 600px, chup ca khung 900 se cho ra mot tam anh ma nua duoi trong tron.
+ * Doi o chu nhat cua mot phan tu thanh diem mui ten cham vao, tinh theo phan
+ * tram cua vung anh.
+ *
+ * Mui ten cham vao MEP phia o so di toi, khong phai tam phan tu: cham vao tam
+ * thi mui ten nam de len chinh cai no dang chi.
  */
-type Khung = { x: number; y: number; width: number; height: number };
+function diemTu(o: Khung, khung: Khung, huong: Huong): Diem {
+  const pt = (v: number, goc: number, dai: number) => ((v - goc) / dai) * 100;
+  const giua = { x: o.x + o.width / 2, y: o.y + o.height / 2 };
+  const diem =
+    huong === "trai" ? { x: o.x + o.width, y: giua.y }
+    : huong === "phai" ? { x: o.x, y: giua.y }
+    : huong === "tren" ? { x: giua.x, y: o.y + o.height }
+    : { x: giua.x, y: o.y };
+  return {
+    x: Math.round(pt(diem.x, khung.x, khung.width) * 10) / 10,
+    y: Math.round(pt(diem.y, khung.y, khung.height) * 10) / 10,
+    huong,
+  };
+}
 
-async function chup(page: Page, ten: string, khung?: Khung): Promise<void> {
-  const anh = await page.screenshot({ type: "png", ...(khung ? { clip: khung } : {}) });
+const diemTheoAnh: Record<string, Diem[]> = {};
+
+async function chup(
+  page: Page,
+  ten: string,
+  moc: { o: Locator; huong: Huong }[],
+  khungCat?: Khung,
+): Promise<void> {
+  const khung = khungCat ?? { x: 0, y: 0, width: RONG, height: CAO };
+  const anh = await page.screenshot({ type: "png", ...(khungCat ? { clip: khungCat } : {}) });
   await writeFile(join(THU_MUC, `${ten}.png`), anh);
-  console.log(`  ${ten}.png  ${(anh.byteLength / 1024).toFixed(0)} KB`);
+
+  const diem: Diem[] = [];
+  for (const m of moc) {
+    const o = await m.o.first().boundingBox();
+    if (!o) throw new Error(`[chup] ${ten}: không đo được vị trí của một điểm chú thích`);
+    diem.push(diemTu(o, khung, m.huong));
+  }
+  diemTheoAnh[ten] = diem;
+  console.log(`  ${ten}.png  ${(anh.byteLength / 1024).toFixed(0)} KB  ${diem.length} điểm`);
 }
 
 async function dangNhap(page: Page): Promise<void> {
@@ -92,10 +134,19 @@ async function dangNhap(page: Page): Promise<void> {
   // "chup-huong-dan-2c823df3@" chi lam ho phan van.
   await page.fill("#email", "ten.ban@ctyhp.vn");
   await page.fill("#mat_khau", "••••••••••••");
+
   // Anh buoc 1 chup TRUOC khi bam: no phai cho thay man hinh dang nhap, khong
   // phai man hinh sau khi da vao. Cat sat the dang nhap — chup ca khung thi ba
   // phan tu anh la nen trong.
-  await chup(page, "01-dang-nhap", { x: 470, y: 140, width: 500, height: 620 });
+  await chup(
+    page,
+    "01-dang-nhap",
+    [
+      { o: page.getByRole("button", { name: /đăng nhập bằng google/i }), huong: "phai" },
+      { o: page.locator("#email"), huong: "phai" },
+    ],
+    { x: 470, y: 140, width: 500, height: 620 },
+  );
 
   await page.fill("#email", EMAIL);
   await page.fill("#mat_khau", MAT_KHAU);
@@ -107,7 +158,7 @@ async function dangNhap(page: Page): Promise<void> {
 
 async function main(): Promise<void> {
   await mkdir(THU_MUC, { recursive: true });
-  console.log(`Chup anh huong dan tu ${GOC}\n`);
+  console.log(`Chụp ảnh hướng dẫn từ ${GOC}\n`);
 
   const id = await taoTaiKhoanTam();
   const trinhDuyet = await chromium.launch();
@@ -125,16 +176,25 @@ async function main(): Promise<void> {
     await page.goto(`${GOC}/admin/catalogue-sheet`, { waitUntil: "networkidle" });
     await page.fill("#q", "nhan");
     await page.waitForTimeout(800);
-    await chup(page, "02-tim-mau");
+    await chup(page, "02-tim-mau", [
+      { o: page.locator("#q"), huong: "trai" },
+      { o: page.getByRole("button", { name: /^màu/i }), huong: "tren" },
+      { o: page.getByRole("link", { name: /^lưới ảnh$/i }), huong: "trai" },
+      { o: page.getByTitle(/lọc theo thiếu sku/i), huong: "duoi" },
+    ]);
 
     // --- 3. Tich chon ---
     const oTich = page.locator('input[type="checkbox"]');
     const soO = Math.min(await oTich.count(), 3);
     for (let i = 0; i < soO; i++) await oTich.nth(i).check();
     await page.waitForTimeout(400);
-    await chup(page, "03-tich-chon");
+    await chup(page, "03-tich-chon", [
+      { o: oTich.first(), huong: "trai" },
+      { o: page.getByText(/đã chọn \d+ mẫu/i), huong: "duoi" },
+      { o: page.getByRole("link", { name: /^tạo catalogue$/i }), huong: "duoi" },
+    ]);
 
-    // --- 4 + 5. Man hinh tao ---
+    // --- 4. Dat ten va chon kieu ---
     await page.goto(`${GOC}/catalogue/tao`, { waitUntil: "networkidle" });
     await page.waitForTimeout(1500);
     await page.fill("#ten", "Chị Lan — nhẫn cưới 18K");
@@ -142,29 +202,60 @@ async function main(): Promise<void> {
     // khung cao hon de ca bang lot vao mot anh, khong phai cat lam hai.
     await page.setViewportSize({ width: RONG, height: 1500 });
     await page.waitForTimeout(300);
-    await chup(page, "04-dat-ten-va-kieu");
+    await chup(page, "04-dat-ten-va-kieu", [
+      { o: page.locator("#ten"), huong: "trai" },
+      { o: page.getByText(/^danh sách dọc$/i), huong: "phai" },
+      { o: page.getByText(/^be cổ điển$/i), huong: "phai" },
+    ]);
     await page.setViewportSize({ width: RONG, height: CAO });
 
+    // --- 5. Bo bot anh ---
     await page.evaluate(() => window.scrollBy(0, 1400));
     await page.waitForTimeout(400);
-    await chup(page, "05-bo-anh");
+    const the = page.locator("li").filter({ hasText: /gỡ mẫu này/i }).nth(1);
+    await chup(page, "05-bo-anh", [
+      { o: the.locator("li").first(), huong: "phai" },
+      { o: the.getByText(/\d+\/\d+ ảnh/).first(), huong: "trai" },
+      { o: the.getByRole("button", { name: /gỡ mẫu này/i }), huong: "phai" },
+    ]);
 
     // --- 6. Tao link ---
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.getByRole("button", { name: /tạo link gửi khách/i }).click();
     await page.waitForTimeout(2500);
-    await chup(page, "06-tao-link", { x: 0, y: 0, width: RONG, height: 620 });
+    await chup(
+      page,
+      "06-tao-link",
+      [
+        { o: page.getByRole("button", { name: /chép link/i }), huong: "duoi" },
+        { o: page.getByRole("link", { name: /mở thử/i }), huong: "tren" },
+        { o: page.getByRole("link", { name: /tải pdf/i }).first(), huong: "duoi" },
+      ],
+      { x: 0, y: 0, width: RONG, height: 620 },
+    );
 
     // --- 7. Danh sach ---
     await page.goto(`${GOC}/admin/catalogue`, { waitUntil: "networkidle" });
-    await chup(page, "07-danh-sach");
+    const dongDau = page.locator("tbody tr").first();
+    await chup(page, "07-danh-sach", [
+      { o: page.getByRole("link", { name: /catalogue đã tạo/i }).first(), huong: "tren" },
+      { o: dongDau.getByRole("button", { name: /chép link/i }), huong: "tren" },
+      { o: dongDau.getByRole("link", { name: /tải pdf/i }), huong: "duoi" },
+    ]);
+
+    await writeFile(
+      join(THU_MUC, "diem.json"),
+      JSON.stringify(diemTheoAnh, null, 2) + "\n",
+      "utf8",
+    );
+    console.log("\n  diem.json — vị trí mũi tên, đo từ chính trang");
   } finally {
     await trinhDuyet.close();
     await xoaTaiKhoanTam(id);
     await sql.end();
   }
 
-  console.log(`\nXong. Anh nam trong public/huong-dan.`);
+  console.log(`\nXong. Ảnh nằm trong public/huong-dan.`);
 }
 
 await main();

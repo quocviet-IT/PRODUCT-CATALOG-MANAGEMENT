@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import type { DuLieuChiTiet } from "@/app/api/catalogue-sheet/[dong]/route";
 import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 import { ChiTietMau } from "./chi-tiet-mau";
+import { X } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
 
 /**
@@ -106,9 +107,11 @@ export function NganChiTiet({ children }: { children: ReactNode }) {
               ref={nutDong}
               type="button"
               onClick={dongNgan}
-              className="mb-6 text-[11px] uppercase tracking-[0.14em] text-hp-muted
-                         transition-colors duration-150 hover:text-hp-ink hover:underline"
+              className="mb-6 flex items-center gap-1.5 text-[11px] uppercase
+                         tracking-[0.14em] text-hp-muted transition-colors duration-150
+                         hover:text-hp-ink"
             >
+              <X aria-hidden strokeWidth={1.5} className="h-4 w-4" />
               {t.catalogue_sheet.dong_ngan}
             </button>
 
