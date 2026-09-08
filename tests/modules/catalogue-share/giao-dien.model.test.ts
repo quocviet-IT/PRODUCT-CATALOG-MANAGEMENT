@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  BO_CUC,
   GIAO_DIEN_MAC_DINH,
+  MAU_NHAN,
+  NHAN,
+  TONE,
   THONG_SO,
   coThongSo,
   docGiaoDien,
@@ -24,10 +28,13 @@ describe("docGiaoDien", () => {
     }
   });
 
-  it("bo cuc va tone la thi lui ve mac dinh, khong lam hong ca bo", () => {
-    const g = docGiaoDien({ boCuc: "ban-do-kho-bau", tone: "cau-vong", ngonNgu: "fr" });
+  it("bo cuc, tone va mau nhan la thi lui ve mac dinh, khong lam hong ca bo", () => {
+    const g = docGiaoDien({
+      boCuc: "ban-do-kho-bau", tone: "cau-vong", nhan: "#ff0000", ngonNgu: "fr",
+    });
     expect(g.boCuc).toBe("danh-sach");
     expect(g.tone).toBe("beige");
+    expect(g.nhan).toBe("hong");
     expect(g.ngonNgu).toBe("vi");
   });
 
@@ -78,7 +85,7 @@ describe("docGiaoDien", () => {
   it("bo qua khoa la, khong chep no vao ket qua", () => {
     const g = docGiaoDien({ boCuc: "luoi", giaBan: 5_000_000, noiBo: "SO-123" });
     expect(Object.keys(g).sort()).toEqual(
-      ["bia", "boCuc", "hien", "lienHe", "ngonNgu", "phienBan", "tone"],
+      ["bia", "boCuc", "hien", "lienHe", "ngonNgu", "nhan", "phienBan", "tone"],
     );
   });
 
@@ -162,5 +169,36 @@ describe("soGoiDuoc", () => {
     expect(soGoiDuoc("")).toBe("");
     expect(soGoiDuoc("gọi em nhé")).toBe("");
     expect(soGoiDuoc("+")).toBe("");
+  });
+});
+
+describe("bố cục và màu nhấn mới", () => {
+  it("nhận cả sáu bố cục", () => {
+    for (const k of BO_CUC) expect(docGiaoDien({ boCuc: k }).boCuc).toBe(k);
+  });
+
+  it("nhận cả bốn nền và bốn màu nhấn", () => {
+    for (const k of TONE) expect(docGiaoDien({ tone: k }).tone).toBe(k);
+    for (const k of NHAN) expect(docGiaoDien({ nhan: k }).nhan).toBe(k);
+  });
+
+  it("catalogue CŨ không có màu nhấn thì ra hồng thương hiệu", () => {
+    // 27 catalogue tạo trước hôm nay có cột giao_dien rỗng. Chúng phải hiện y
+    // như lúc gửi đi — tức bố cục danh sách, nền kem, hồng thương hiệu.
+    const g = docGiaoDien({});
+    expect(g.boCuc).toBe("danh-sach");
+    expect(g.tone).toBe("beige");
+    expect(g.nhan).toBe("hong");
+  });
+
+  it("mỗi màu nhấn có đủ hai sắc, và sắc đậm khác sắc nhạt", () => {
+    // Sắc đậm dành riêng cho nút có chữ trắng; dùng chung một sắc là chữ trắng
+    // trên hồng thương hiệu, chỉ đạt 3.81:1.
+    for (const k of NHAN) {
+      const m = MAU_NHAN[k];
+      expect(m.nhat).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(m.dam).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(m.dam).not.toBe(m.nhat);
+    }
   });
 });

@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&amp;family=EB+Garamond:wght@400;500&amp;display=swap">
+  <style>
+    body { margin: 0; font-family: "EB Garamond", Georgia, serif; }
+    a { color: #C4165F; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</helmet>
+
+<div style="width: 900px; min-height: 800px; background: #F7F1EB; color: #4A4540; padding: 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 34px; font-family: 'EB Garamond', Georgia, serif">
+
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 30px; line-height: 1.1; color: #2A2725">Bộ màu — nền và nhấn</div>
+    <div style="font-size: 14px; line-height: 1.6; color: #4A4540; max-width: 620px">Sale chọn <strong>một nền</strong> và <strong>một màu nhấn</strong>. Bốn màu nhấn có cùng độ sáng và độ tươi, chỉ khác sắc — nên ghép với nền nào cũng không bị chỏi.</div>
+  </div>
+
+  <!-- Bon nen -->
+  <div style="display: flex; flex-direction: column; gap: 12px">
+    <div style="font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #6E6760">Nền</div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px">
+      <sc-for list="{{nen}}" as="n" hint-placeholder-count="4">
+        <div style="border: 1px solid #D4CFC4; background: {{n.nen}}; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-height: 118px">
+          <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 22px; color: {{n.muc}}">{{n.ten}}</div>
+          <div style="font-size: 12px; color: {{n.than}}">Chữ chính · chữ phụ</div>
+          <div style="margin-top: auto; font-size: 11px; letter-spacing: 0.12em; color: {{n.mo}}">{{n.ma}}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- Bon mau nhan -->
+  <div style="display: flex; flex-direction: column; gap: 12px">
+    <div style="font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #6E6760">Màu nhấn</div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px">
+      <sc-for list="{{nhan}}" as="a" hint-placeholder-count="4">
+        <div style="display: flex; align-items: center; gap: 12px; border: 1px solid #D4CFC4; background: #FBF7F1; padding: 14px">
+          <div style="width: 42px; height: 42px; flex-shrink: 0; background: {{a.ma}}"></div>
+          <div style="display: flex; flex-direction: column; gap: 3px">
+            <div style="font-size: 14px; color: #2A2725">{{a.ten}}</div>
+            <div style="font-size: 11px; letter-spacing: 0.06em; color: #6E6760">{{a.ma}}</div>
+            <div style="font-size: 10px; color: #6E6760">{{a.oklch}}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- Bon cach ghep, moi cach mot manh catalogue thu nho -->
+  <div style="display: flex; flex-direction: column; gap: 12px">
+    <div style="font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: #6E6760">Ghép thử</div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px">
+      <sc-for list="{{ghep}}" as="g" hint-placeholder-count="4">
+        <div style="border: 1px solid #D4CFC4; background: {{g.nen}}; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+          <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 14px; letter-spacing: 0.14em; color: {{g.nhan}}">HUNG PHAT</div>
+          <div style="height: 74px; background: {{g.deAnh}}; display: flex; align-items: center; justify-content: center">
+            <svg viewBox="0 0 200 150" width="86" height="65" aria-hidden="true">
+              <ellipse cx="100" cy="84" rx="45" ry="51" fill="none" stroke="#C9A465" stroke-width="11"></ellipse>
+            </svg>
+          </div>
+          <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 19px; line-height: 1.15; color: {{g.muc}}">Nhẫn cưới 18K</div>
+          <div style="font-size: 11px; color: {{g.than}}">14K · Yellow · 2,78 g</div>
+          <div style="margin-top: 4px; align-self: flex-start; background: {{g.nhan}}; color: #FFFFFF; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; padding: 7px 12px">Gọi đặt mẫu</div>
+          <div style="margin-top: 2px; font-size: 10px; letter-spacing: 0.1em; color: {{g.mo}}">{{g.ten}}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{"$preview": {"width": 900, "height": 820}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      nen: [
+        { ten: "Kem", ma: "#F7F1EB", nen: "#F7F1EB", muc: "#2A2725", than: "#4A4540", mo: "#6E6760" },
+        { ten: "Ngà", ma: "#FBF9F5", nen: "#FBF9F5", muc: "#1B1A19", than: "#3C3A38", mo: "#6B6864" },
+        { ten: "Than", ma: "#17150F", nen: "#17150F", muc: "#F2EBDF", than: "#D8D0C2", mo: "#9A9184" },
+        { ten: "Rêu", ma: "#1B231D", nen: "#1B231D", muc: "#EDF0E9", than: "#CDD4C8", mo: "#8D978A" }
+      ],
+      nhan: [
+        { ten: "Hồng thương hiệu", ma: "#D4436F", oklch: "oklch(0.58 0.19 5)" },
+        { ten: "Vàng đồng", ma: "#A96A00", oklch: "oklch(0.58 0.19 70)" },
+        { ten: "Xanh cổ vịt", ma: "#00806B", oklch: "oklch(0.58 0.19 165)" },
+        { ten: "Mận chín", ma: "#A0439B", oklch: "oklch(0.58 0.19 330)" }
+      ],
+      ghep: [
+        { ten: "Kem + hồng", nen: "#F7F1EB", muc: "#2A2725", than: "#4A4540", mo: "#6E6760", deAnh: "#FCFAF7", nhan: "#C4165F" },
+        { ten: "Ngà + vàng đồng", nen: "#FBF9F5", muc: "#1B1A19", than: "#3C3A38", mo: "#6B6864", deAnh: "#FFFFFF", nhan: "#A96A00" },
+        { ten: "Than + xanh cổ vịt", nen: "#17150F", muc: "#F2EBDF", than: "#D8D0C2", mo: "#9A9184", deAnh: "#FCFAF7", nhan: "#00806B" },
+        { ten: "Rêu + mận", nen: "#1B231D", muc: "#EDF0E9", than: "#CDD4C8", mo: "#8D978A", deAnh: "#FCFAF7", nhan: "#A0439B" }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

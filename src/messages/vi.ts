@@ -318,6 +318,21 @@ export const vi = {
     bo_cuc_lookbook: "Lookbook",
     bo_cuc_lookbook_mo_ta: "Mỗi mẫu một khối lớn, ảnh khổ rộng. Hợp khi gửi ít mẫu.",
 
+    bo_cuc_trien_lam: "Triển lãm",
+    bo_cuc_trien_lam_mo_ta: "Ảnh tràn hết bề ngang, số thứ tự cỡ lớn. Sang nhất — hợp khi gửi ít mẫu.",
+    bo_cuc_khung: "Khung cổ điển",
+    bo_cuc_khung_mo_ta: "Mỗi mẫu một khung kẻ đôi, thông số căn giữa. Trang trọng, dễ đọc thông số.",
+    bo_cuc_tap_chi: "Tạp chí",
+    bo_cuc_tap_chi_mo_ta: "Ảnh một bên, chữ bên kia, so le từng mẫu. Lướt nhanh nhất.",
+
+    tone_reu: "Xanh rêu",
+
+    nhan_mau_nhan: "Màu nhấn",
+    nhan_mau_mo_ta: "Bốn màu cùng độ sáng và độ tươi, chỉ khác sắc — ghép với nền nào cũng không chỏi.",
+    nhan_hong: "Hồng thương hiệu",
+    nhan_dong: "Vàng đồng",
+    nhan_luc: "Xanh cổ vịt",
+    nhan_man: "Mận chín",
     tone_nhan: "Tông màu",
     tone_beige: "Be cổ điển",
     tone_trang: "Trắng tối giản",

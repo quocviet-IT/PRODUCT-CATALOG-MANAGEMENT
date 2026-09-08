@@ -4,8 +4,9 @@ import { useChu } from "@/messages/dung-chu";
 import type { BoChu } from "@/messages";
 import { NGON_NGU, NHAN_NGON_NGU } from "@/messages/ngon-ngu";
 import {
-  BO_CUC, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_TEN_KHACH, DAI_TEN_SALE, THONG_SO, TONE,
-  type BoCuc, type GiaoDienCatalogue, type ThongSo, type Tone,
+  BO_CUC, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_TEN_KHACH, DAI_TEN_SALE,
+  MAU_NHAN, NHAN, THONG_SO, TONE,
+  type BoCuc, type GiaoDienCatalogue, type Nhan, type ThongSo, type Tone,
 } from "@/modules/catalogue-share/giao-dien.model";
 
 /**
@@ -38,6 +39,18 @@ function nhanBoCuc(t: BoChu): Record<BoCuc, { ten: string; moTa: string }> {
       ten: t.mau_giao_dien.bo_cuc_lookbook,
       moTa: t.mau_giao_dien.bo_cuc_lookbook_mo_ta,
     },
+    "trien-lam": {
+      ten: t.mau_giao_dien.bo_cuc_trien_lam,
+      moTa: t.mau_giao_dien.bo_cuc_trien_lam_mo_ta,
+    },
+    "khung-co-dien": {
+      ten: t.mau_giao_dien.bo_cuc_khung,
+      moTa: t.mau_giao_dien.bo_cuc_khung_mo_ta,
+    },
+    "tap-chi": {
+      ten: t.mau_giao_dien.bo_cuc_tap_chi,
+      moTa: t.mau_giao_dien.bo_cuc_tap_chi_mo_ta,
+    },
   };
 }
 
@@ -46,6 +59,16 @@ function nhanTone(t: BoChu): Record<Tone, string> {
     beige: t.mau_giao_dien.tone_beige,
     trang: t.mau_giao_dien.tone_trang,
     toi: t.mau_giao_dien.tone_toi,
+    reu: t.mau_giao_dien.tone_reu,
+  };
+}
+
+function nhanMauNhan(t: BoChu): Record<Nhan, string> {
+  return {
+    hong: t.mau_giao_dien.nhan_hong,
+    dong: t.mau_giao_dien.nhan_dong,
+    luc: t.mau_giao_dien.nhan_luc,
+    man: t.mau_giao_dien.nhan_man,
   };
 }
 
@@ -54,6 +77,7 @@ const O_MAU: Record<Tone, { nen: string; muc: string }> = {
   beige: { nen: "#F7F1EB", muc: "#2A2725" },
   trang: { nen: "#FFFFFF", muc: "#1B1A19" },
   toi: { nen: "#1A1815", muc: "#F4EEE6" },
+  reu: { nen: "#1B231D", muc: "#EDF0E9" },
 };
 
 function nhanThongSo(t: BoChu): Record<ThongSo, string> {
@@ -75,6 +99,46 @@ function nhanThongSo(t: BoChu): Record<ThongSo, string> {
  */
 function HinhBoCuc({ kieu }: { kieu: BoCuc }) {
   const o = "bg-hp-rule";
+  if (kieu === "trien-lam") {
+    return (
+      <div aria-hidden className="mx-auto max-w-[150px] space-y-1.5">
+        <div className={`${o} aspect-[4/3]`} />
+        <div className="h-3 w-8 bg-hp-ink/40" />
+        <div className="h-1 w-2/3 bg-hp-rule" />
+      </div>
+    );
+  }
+  if (kieu === "khung-co-dien") {
+    return (
+      <div aria-hidden className="mx-auto max-w-[150px] border border-hp-rule p-1">
+        <div className="border border-hp-rule p-2">
+          <div className={`${o} aspect-[16/9]`} />
+          <div className="mx-auto mt-2 h-1.5 w-1/2 bg-hp-ink/40" />
+          <div className="mx-auto mt-1.5 h-1 w-3/4 bg-hp-rule" />
+        </div>
+      </div>
+    );
+  }
+  if (kieu === "tap-chi") {
+    return (
+      <div aria-hidden className="mx-auto max-w-[150px] space-y-2">
+        <div className="flex gap-1.5">
+          <div className={`${o} aspect-square w-3/5`} />
+          <div className="flex flex-grow flex-col justify-center gap-1">
+            <div className="h-1.5 w-2/3 bg-hp-ink/40" />
+            <div className="h-1 w-full bg-hp-rule" />
+          </div>
+        </div>
+        <div className="flex flex-row-reverse gap-1.5">
+          <div className={`${o} aspect-square w-3/5`} />
+          <div className="flex flex-grow flex-col justify-center gap-1">
+            <div className="h-1.5 w-2/3 bg-hp-ink/40" />
+            <div className="h-1 w-full bg-hp-rule" />
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (kieu === "luoi") {
     return (
       <div aria-hidden className="mx-auto grid max-w-[150px] grid-cols-3 gap-1">
@@ -124,6 +188,7 @@ export function ChonGiaoDien({
   const t = useChu();
   const boCuc = nhanBoCuc(t);
   const tone = nhanTone(t);
+  const mauNhan = nhanMauNhan(t);
   const thongSo = nhanThongSo(t);
   const bia = gia.bia ?? { tenKhach: "", loiChao: "" };
   const lienHe = gia.lienHe ?? { ten: "", dienThoai: "" };
@@ -214,6 +279,41 @@ export function ChonGiaoDien({
                 <span className="h-2 w-2" style={{ background: O_MAU[k].muc }} />
               </span>
               <span className="text-sm text-hp-body">{tone[k]}</span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
+      {/* --- Mau nhan --- */}
+      <fieldset className="mt-7">
+        <legend className={NHAN_NHOM}>{t.mau_giao_dien.nhan_mau_nhan}</legend>
+        <p className="mt-1 text-xs text-hp-muted">{t.mau_giao_dien.nhan_mau_mo_ta}</p>
+        <div className="mt-3 flex flex-wrap gap-3">
+          {NHAN.map((k) => (
+            <label
+              key={k}
+              className={
+                "flex cursor-pointer items-center gap-3 border px-4 py-2.5 " +
+                "transition-colors duration-150 " +
+                (gia.nhan === k
+                  ? "border-hp-ink bg-hp-inset"
+                  : "border-hp-rule hover:border-hp-ink")
+              }
+            >
+              <input
+                type="radio"
+                name="mau_nhan"
+                value={k}
+                checked={gia.nhan === k}
+                onChange={() => dat({ nhan: k })}
+                className="sr-only"
+              />
+              <span
+                aria-hidden
+                className="h-6 w-6 shrink-0 border border-hp-rule"
+                style={{ background: MAU_NHAN[k].nhat }}
+              />
+              <span className="text-sm text-hp-body">{mauNhan[k]}</span>
             </label>
           ))}
         </div>
