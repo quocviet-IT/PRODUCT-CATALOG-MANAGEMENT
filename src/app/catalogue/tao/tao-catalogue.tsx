@@ -7,13 +7,14 @@ import {
   chupGio, datGio,
 } from "@/modules/catalogue-share/gio-chon";
 import {
-  ArrowLeft, Check, Copy, ExternalLink, FolderOpen, Link2, Plus, Printer, X,
+  ArrowLeft, Check, Copy, Eye, ExternalLink, FolderOpen, Link2, Plus, Printer, X,
 } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
 import {
   GIAO_DIEN_MAC_DINH, type GiaoDienCatalogue,
 } from "@/modules/catalogue-share/giao-dien.model";
 import { ChonGiaoDien } from "./chon-giao-dien";
+import { XemTruoc } from "./xem-truoc";
 
 type TrangThai = "dang-tai" | "san-sang" | "loi-tai";
 
@@ -47,6 +48,7 @@ export function TaoCatalogue() {
   const [anhGiu, setAnhGiu] = useState<Record<string, string[]>>({});
   const [ten, setTen] = useState("");
   const [giaoDien, setGiaoDien] = useState<GiaoDienCatalogue>(GIAO_DIEN_MAC_DINH);
+  const [moXemTruoc, setMoXemTruoc] = useState(false);
   const [dangTao, setDangTao] = useState(false);
   const [loiTao, setLoiTao] = useState<string | null>(null);
   const [slug, setSlug] = useState<string | null>(null);
@@ -263,11 +265,23 @@ export function TaoCatalogue() {
           <ArrowLeft {...ICON} />
           {t.chia_se.ve_danh_sach}
         </Link>
+        {/* Xem truoc dung TRUOC nut tao: thu tu tren man hinh cung la thu tu
+            nen lam — ngo mot cai roi hay bam. */}
+        <button
+          type="button"
+          onClick={() => setMoXemTruoc(true)}
+          className="ml-auto inline-flex items-center gap-2 border border-hp-ink px-6 py-2.5
+                     text-[11px] uppercase tracking-[0.14em] text-hp-ink transition-colors
+                     duration-150 hover:bg-hp-ink hover:text-hp-foundation"
+        >
+          <Eye {...ICON} />
+          {t.chia_se.xem_truoc}
+        </button>
         <button
           type="button"
           onClick={tao}
           disabled={dangTao}
-          className="ml-auto flex items-center gap-2 border border-hp-ink bg-hp-ink
+          className="flex items-center gap-2 border border-hp-ink bg-hp-ink
                      px-6 py-2.5 text-[11px] uppercase tracking-[0.14em] text-hp-foundation
                      transition-colors duration-150 hover:border-hp-pink hover:bg-hp-pink
                      disabled:cursor-not-allowed disabled:opacity-40"
@@ -276,6 +290,16 @@ export function TaoCatalogue() {
           {dangTao ? t.chia_se.dang_tao : t.chia_se.nut_tao}
         </button>
       </div>
+
+      {moXemTruoc && (
+        <XemTruoc
+          muc={muc}
+          anhGiu={anhGiu}
+          gia={giaoDien}
+          ten={ten}
+          khiDong={() => setMoXemTruoc(false)}
+        />
+      )}
     </>
   );
 }

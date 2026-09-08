@@ -11,6 +11,16 @@
   --color-hp-pink:        #E91D79;
   --color-hp-pink-strong: #C4165F;
 
+  /*
+   * Nen dat anh san pham. GAN TRANG chu khong phai mau be cua the.
+   *
+   * Anh trang suc chup studio co nen sang; dat len nen be xam thi lo ra mot
+   * hinh chu nhat giua o va ca luoi trong nhu vá. Mau nay giu nguyen o ca ba
+   * tong — ke ca tong toi — vi doi no sang mau toi la moi tam anh hien ngay
+   * mot khung trang quanh mon hang.
+   */
+  --color-hp-plate:       #FCFAF7;
+
   --font-title: var(--font-title-nap), Georgia, serif;
   --font-body:  var(--font-body-nap), Georgia, serif;
 }
@@ -67,6 +77,8 @@ body {
 }
 
 .tone-trang {
+  /* Nen trang thi plate phai lech mot chut moi thay duoc ranh o anh. */
+  --color-hp-plate:       #F7F5F2;
   --color-hp-foundation:  #FFFFFF;
   --color-hp-card:        #FFFFFF;
   --color-hp-inset:       #F3F2F0;

@@ -4,7 +4,7 @@ import { useChu } from "@/messages/dung-chu";
 import type { BoChu } from "@/messages";
 import { NGON_NGU, NHAN_NGON_NGU } from "@/messages/ngon-ngu";
 import {
-  BO_CUC, DAI_LOI_CHAO, DAI_TEN_KHACH, DAI_TEN_SALE, THONG_SO, TONE,
+  BO_CUC, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_TEN_KHACH, DAI_TEN_SALE, THONG_SO, TONE,
   type BoCuc, type GiaoDienCatalogue, type ThongSo, type Tone,
 } from "@/modules/catalogue-share/giao-dien.model";
 
@@ -125,7 +125,8 @@ export function ChonGiaoDien({
   const boCuc = nhanBoCuc(t);
   const tone = nhanTone(t);
   const thongSo = nhanThongSo(t);
-  const bia = gia.bia ?? { tenKhach: "", loiChao: "", tenSale: "" };
+  const bia = gia.bia ?? { tenKhach: "", loiChao: "" };
+  const lienHe = gia.lienHe ?? { ten: "", dienThoai: "" };
 
   function dat(phan: Partial<GiaoDienCatalogue>) {
     khiDoi({ ...gia, ...phan });
@@ -135,7 +136,12 @@ export function ChonGiaoDien({
     const moi = { ...bia, ...phan };
     // Xoa het chu thi khong con trang bia — dung dung quy tac cua docGiaoDien
     // de cai sale thay o day trung voi cai duoc luu xuong.
-    dat({ bia: moi.tenKhach || moi.loiChao || moi.tenSale ? moi : null });
+    dat({ bia: moi.tenKhach || moi.loiChao ? moi : null });
+  }
+
+  function datLienHe(phan: Partial<typeof lienHe>) {
+    const moi = { ...lienHe, ...phan };
+    dat({ lienHe: moi.ten || moi.dienThoai ? moi : null });
   }
 
   return (
@@ -261,6 +267,35 @@ export function ChonGiaoDien({
         </div>
       </fieldset>
 
+      {/* --- Lien he dat hang --- */}
+      <fieldset className="mt-7">
+        <legend className={NHAN_NHOM}>{t.mau_giao_dien.lien_he_nhan}</legend>
+        <p className="mt-1 text-xs text-hp-muted">{t.mau_giao_dien.lien_he_mo_ta}</p>
+        <div className="mt-3 grid gap-5 sm:grid-cols-2">
+          <label className="block">
+            <span className="text-xs text-hp-muted">{t.mau_giao_dien.lien_he_ten}</span>
+            <input
+              value={lienHe.ten}
+              onChange={(e) => datLienHe({ ten: e.target.value })}
+              maxLength={DAI_TEN_SALE}
+              placeholder={t.mau_giao_dien.lien_he_ten_goi_y}
+              className={O_NHAP}
+            />
+          </label>
+          <label className="block">
+            <span className="text-xs text-hp-muted">{t.mau_giao_dien.lien_he_dien_thoai}</span>
+            <input
+              value={lienHe.dienThoai}
+              onChange={(e) => datLienHe({ dienThoai: e.target.value })}
+              maxLength={DAI_DIEN_THOAI}
+              inputMode="tel"
+              placeholder={t.mau_giao_dien.lien_he_dien_thoai_goi_y}
+              className={O_NHAP}
+            />
+          </label>
+        </div>
+      </fieldset>
+
       {/* --- Trang bia --- */}
       <fieldset className="mt-7">
         <legend className={NHAN_NHOM}>{t.mau_giao_dien.bia_nhan}</legend>
@@ -273,16 +308,6 @@ export function ChonGiaoDien({
               onChange={(e) => datBia({ tenKhach: e.target.value })}
               maxLength={DAI_TEN_KHACH}
               placeholder={t.mau_giao_dien.bia_ten_khach_goi_y}
-              className={O_NHAP}
-            />
-          </label>
-          <label className="block">
-            <span className="text-xs text-hp-muted">{t.mau_giao_dien.bia_ten_sale}</span>
-            <input
-              value={bia.tenSale}
-              onChange={(e) => datBia({ tenSale: e.target.value })}
-              maxLength={DAI_TEN_SALE}
-              placeholder={t.mau_giao_dien.bia_ten_sale_goi_y}
               className={O_NHAP}
             />
           </label>
