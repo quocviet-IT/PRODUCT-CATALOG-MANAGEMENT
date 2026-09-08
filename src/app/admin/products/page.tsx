@@ -6,13 +6,14 @@ import { layTatCa } from "@/modules/catalog/categories.service";
 import { kyNhieuUrl } from "@/modules/media/anh-url";
 import { dinhDangTien } from "@/lib/money";
 import { ThanhBoLoc } from "./bo-loc";
-import { vi } from "@/messages/vi";
+import { layChu } from "@/messages/may-chu";
 
 export default async function TrangSanPham({
   searchParams,
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  const t = await layChu();
   await requireUser();
   const sp = await searchParams;
 
@@ -35,14 +36,14 @@ export default async function TrangSanPham({
 
   return (
     <>
-      <h1 className="mb-4 text-xl font-bold">{vi.dieu_huong.san_pham}</h1>
+      <h1 className="mb-4 text-xl font-bold">{t.dieu_huong.san_pham}</h1>
       <ThanhBoLoc danhMuc={danhMuc} hienTai={sp} />
       <p className="mb-4 text-sm text-neutral-600">
-        {vi.san_pham.tim_thay} {tong} {vi.san_pham.ket_qua}
+        {t.san_pham.tim_thay} {tong} {t.san_pham.ket_qua}
       </p>
 
       {ds.length === 0 ? (
-        <p className="text-sm text-neutral-500">{vi.chung.khong_co_du_lieu}</p>
+        <p className="text-sm text-neutral-500">{t.chung.khong_co_du_lieu}</p>
       ) : (
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {ds.map((s, i) => (
@@ -55,7 +56,7 @@ export default async function TrangSanPham({
                          className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full items-center justify-center text-xs text-neutral-400">
-                      {vi.san_pham.chua_co_anh}
+                      {t.san_pham.chua_co_anh}
                     </div>
                   )}
                 </div>
@@ -65,7 +66,7 @@ export default async function TrangSanPham({
                   <p className="mt-1 text-sm">
                     {s.listPrice
                       ? dinhDangTien(Number(s.listPrice), s.currency === "USD" ? "USD" : "VND")
-                      : <span className="text-neutral-400">{vi.san_pham.chua_co_gia}</span>}
+                      : <span className="text-neutral-400">{t.san_pham.chua_co_gia}</span>}
                   </p>
                   {s.categoryId && (
                     <p className="mt-1 text-[11px] text-neutral-500">

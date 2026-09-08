@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import type { DuLieuChiTiet } from "@/app/api/catalogue-sheet/[dong]/route";
 import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 import { ChiTietMau } from "./chi-tiet-mau";
-import { vi } from "@/messages/vi";
+import { useChu } from "@/messages/dung-chu";
 
 /**
  * Boc danh sach (bang hoac luoi) va mo ngan chi tiet khi bam vao mot dong.
@@ -14,6 +14,7 @@ import { vi } from "@/messages/vi";
  * chi can mang data-dong.
  */
 export function NganChiTiet({ children }: { children: ReactNode }) {
+  const t = useChu();
   const [dong, setDong] = useState<number | null>(null);
   const [dl, setDl] = useState<DuLieuChiTiet | null>(null);
   const [dangTai, setDangTai] = useState(false);
@@ -96,7 +97,7 @@ export function NganChiTiet({ children }: { children: ReactNode }) {
           <aside
             role="dialog"
             aria-modal="true"
-            aria-label={vi.catalogue_sheet.chi_tiet_mau}
+            aria-label={t.catalogue_sheet.chi_tiet_mau}
             className="fixed inset-y-0 right-0 z-50 w-full max-w-2xl overflow-y-auto
                        border-l border-hp-rule bg-hp-foundation p-8
                        transition-opacity duration-150"
@@ -108,17 +109,18 @@ export function NganChiTiet({ children }: { children: ReactNode }) {
               className="mb-6 text-[11px] uppercase tracking-[0.14em] text-hp-muted
                          transition-colors duration-150 hover:text-hp-ink hover:underline"
             >
-              {vi.catalogue_sheet.dong_ngan}
+              {t.catalogue_sheet.dong_ngan}
             </button>
 
             {dangTai && !dl ? (
               <div className="bg-hp-inset px-4 py-3 text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-                {vi.catalogue_sheet.dang_tai}
+                {t.catalogue_sheet.dang_tai}
               </div>
             ) : loi ? (
-              <p className="text-sm text-hp-pink-strong">{vi.catalogue_sheet.loi_tai_chi_tiet}</p>
+              <p className="text-sm text-hp-pink-strong">{t.catalogue_sheet.loi_tai_chi_tiet}</p>
             ) : dl ? (
               <ChiTietMau
+                t={t}
                 d={dl.dong}
                 anh={dl.anh}
                 loiAnh={dl.loiAnh}

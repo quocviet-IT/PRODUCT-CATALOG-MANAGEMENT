@@ -8,13 +8,14 @@ import {
 import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 import type { DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { ChiTietMau } from "../chi-tiet-mau";
-import { vi } from "@/messages/vi";
+import { layChu } from "@/messages/may-chu";
 
 export default async function TrangChiTietMau({
   params,
 }: {
   params: Promise<{ dong: string }>;
 }) {
+  const t = await layChu();
   const { dong } = await params;
 
   let tatCa: DongCatalogue[];
@@ -22,7 +23,7 @@ export default async function TrangChiTietMau({
     tatCa = await layDanhSachCatalogue();
   } catch (loi) {
     console.error("[catalogue-sheet] loi doc bang tinh o trang chi tiet:", loi);
-    return <p className="text-sm text-hp-pink-strong">{vi.catalogue_sheet.loi_doc_bang}</p>;
+    return <p className="text-sm text-hp-pink-strong">{t.catalogue_sheet.loi_doc_bang}</p>;
   }
 
   // Khoa la SO DONG cua bang tinh, khong phai ma mau: ma mau co the trung
@@ -50,12 +51,12 @@ export default async function TrangChiTietMau({
         className="mb-6 inline-block text-[11px] uppercase tracking-[0.14em] text-hp-muted
                    transition-colors duration-150 hover:text-hp-ink hover:underline"
       >
-        {vi.catalogue_sheet.quay_lai}
+        {t.catalogue_sheet.quay_lai}
       </Link>
       {/* Trang rieng nay giu lai cho lien ket truc tiep va cho truong hop khong
           co JavaScript. Anh o day khong phong to duoc — khung phong to nam trong
           ngan truot, la thanh phan phia client. */}
-      <ChiTietMau d={d} anh={anh} loiAnh={loiAnh} nguon={nguonDangDung()} />
+      <ChiTietMau d={d} anh={anh} loiAnh={loiAnh} nguon={nguonDangDung()} t={t} />
     </>
   );
 }

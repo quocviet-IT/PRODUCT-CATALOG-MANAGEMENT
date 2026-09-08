@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   GIO_RONG, chupGio, dangKyGio, daoMa, datGio,
 } from "@/modules/catalogue-share/gio-chon";
-import { vi } from "@/messages/vi";
+import { useChu } from "@/messages/dung-chu";
 
 /**
  * Boc danh sach (bang hoac luoi) va quan ly viec tich chon mau.
@@ -19,6 +19,7 @@ import { vi } from "@/messages/vi";
  * sach tu may chu.
  */
 export function ChonMau({ children }: { children: ReactNode }) {
+  const t = useChu();
   // Doc thang tu kho thay vi useState + useEffect: xem chu thich trong
   // gio-chon.ts. Anh chup phia may chu la GIO_RONG nen HTML may chu tra ve
   // luon co moi o tich o trang thai chua tich — dung voi luc chua biet gi.
@@ -61,7 +62,7 @@ export function ChonMau({ children }: { children: ReactNode }) {
         >
           <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-6 gap-y-3">
             <span className="text-[11px] uppercase tracking-[0.14em] text-hp-ink">
-              {vi.chia_se.da_chon.replace("{n}", String(chon.length))}
+              {t.chia_se.da_chon.replace("{n}", String(chon.length))}
             </span>
             <button
               type="button"
@@ -69,7 +70,7 @@ export function ChonMau({ children }: { children: ReactNode }) {
               className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
                          transition-colors duration-150 hover:text-hp-ink hover:underline"
             >
-              {vi.chia_se.bo_chon_het}
+              {t.chia_se.bo_chon_het}
             </button>
             <Link
               href="/catalogue/tao"
@@ -77,7 +78,7 @@ export function ChonMau({ children }: { children: ReactNode }) {
                          uppercase tracking-[0.14em] text-hp-foundation
                          transition-colors duration-150 hover:border-hp-pink hover:bg-hp-pink"
             >
-              {vi.chia_se.tao_catalogue}
+              {t.chia_se.tao_catalogue}
             </Link>
           </div>
         </div>
@@ -89,12 +90,13 @@ export function ChonMau({ children }: { children: ReactNode }) {
 
 /** O tich cua mot dong. Dung o CA bang lan luoi nen de chung mot cho. */
 export function OTich({ ma }: { ma: string }) {
+  const t = useChu();
   return (
     <input
       type="checkbox"
       data-chon={ma}
       defaultChecked={false}
-      aria-label={vi.chia_se.chon_o_nhan.replace("{ma}", ma)}
+      aria-label={t.chia_se.chon_o_nhan.replace("{ma}", ma)}
       className="h-4 w-4 cursor-pointer accent-hp-ink"
     />
   );

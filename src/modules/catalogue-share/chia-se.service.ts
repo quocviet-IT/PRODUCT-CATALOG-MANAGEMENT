@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { catalogues } from "@/db/schema";
+import { catalogues, users } from "@/db/schema";
 import { layAnhCuaMau, layDanhSachCatalogue } from "@/modules/sheet/catalogue.service";
 import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 import {
@@ -14,6 +14,7 @@ import {
   type NguonMau,
   type NoiDungCatalogue,
 } from "./chia-se.model";
+import { docGiaoDien, type GiaoDienCatalogue } from "./giao-dien.model";
 
 /**
  * Bang chu cai cua slug. Bo 0/O/1/I/l: slug nay duoc doc qua dien thoai va go
@@ -77,6 +78,7 @@ export type CatalogueDaLuu = {
   so: number;
   taoLuc: Date;
   noiDung: NoiDungCatalogue;
+  giaoDien: GiaoDienCatalogue;
 };
 
 /**
@@ -89,6 +91,8 @@ export type CatalogueDaLuu = {
 export async function taoCatalogue(
   ten: string,
   chon: LuaChon[],
+  giaoDien: GiaoDienCatalogue,
+  ownerId: string | null,
 ): Promise<{ slug: string; ten: string }> {
   const nguon = await layNguonTheoMa(chon.map((c) => c.ma));
   const noiDung = dungNoiDung(nguon, chon);
@@ -104,7 +108,13 @@ export async function taoCatalogue(
   const duoi = sinhDuoi();
   const [moi] = await db
     .insert(catalogues)
-    .values({ slug: duoi, ten: ten.trim().slice(0, DAI_TEN_TOI_DA), noiDung })
+    .values({
+      slug: duoi,
+      ten: ten.trim().slice(0, DAI_TEN_TOI_DA),
+      noiDung,
+      giaoDien,
+      ownerId,
+    })
     .returning({ id: catalogues.id, so: catalogues.so, ten: catalogues.ten });
 
   const slug = dungSlug(moi.ten, moi.so, duoi);
@@ -131,5 +141,68 @@ export async function layTheoSlug(slug: string): Promise<CatalogueDaLuu | null> 
     so: d.so,
     taoLuc: d.createdAt,
     noiDung,
+    giaoDien: docGiaoDien(d.giaoDien),
   };
+}
+
+/** Mot dong tren man hinh "catalogue da tao". */
+export type DongDanhSach = {
+  slug: string;
+  ten: string;
+  so: number;
+  taoLuc: Date;
+  soMuc: number;
+  soAnh: number;
+  /** Email nguoi tao. null khi catalogue tao thoi chua bat dang nhap. */
+  nguoiTao: string | null;
+};
+
+/** Toi da mot trang danh sach. Sale nao vuot con so nay thi tinh tiep. */
+export const MOI_TRANG = 200;
+
+/**
+ * Danh sach catalogue da tao.
+ *
+ * `xemHet` la quyen, khong phai tuy chon giao dien: admin thay moi catalogue,
+ * sale chi thay cua minh. Loc ngay trong cau truy van chu khong loc sau khi
+ * lay ve — lay het roi mai an di la mot cach ro ri du lieu.
+ *
+ * Dem so muc va so anh doc tu ban chup nen luon dung voi cai khach dang thay,
+ * ke ca khi bang tinh da doi tu do den nay.
+ */
+export async function danhSachCatalogue(
+  idNguoi: string,
+  xemHet: boolean,
+): Promise<DongDanhSach[]> {
+  const truyVan = db
+    .select({
+      slug: catalogues.slug,
+      ten: catalogues.ten,
+      so: catalogues.so,
+      taoLuc: catalogues.createdAt,
+      noiDung: catalogues.noiDung,
+      nguoiTao: users.email,
+    })
+    .from(catalogues)
+    .leftJoin(users, eq(users.id, catalogues.ownerId))
+    .orderBy(desc(catalogues.createdAt))
+    .limit(MOI_TRANG);
+
+  const ds = xemHet
+    ? await truyVan
+    : await truyVan.where(eq(catalogues.ownerId, idNguoi));
+
+  return ds.map((d) => {
+    const nd = docNoiDung(d.noiDung);
+    const muc = nd?.muc ?? [];
+    return {
+      slug: d.slug,
+      ten: tenHienThi(d.ten, d.so),
+      so: d.so,
+      taoLuc: d.taoLuc,
+      soMuc: muc.length,
+      soAnh: muc.reduce((t, m) => t + m.anh.length, 0),
+      nguoiTao: d.nguoiTao,
+    };
+  });
 }

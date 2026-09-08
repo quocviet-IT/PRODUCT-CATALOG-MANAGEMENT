@@ -2,9 +2,12 @@ import { requireAdmin } from "@/auth/guard";
 import { danhSachNguoiDung } from "@/modules/nguoi-dung/nguoi-dung.service";
 import { BangTaiKhoan } from "./bang-tai-khoan";
 import { ThemTaiKhoan } from "./them-tai-khoan";
-import { vi } from "@/messages/vi";
+import { layChu } from "@/messages/may-chu";
 
-export const metadata = { title: vi.nguoi_dung.tieu_de };
+export async function generateMetadata() {
+  const t = await layChu();
+  return { title: t.nguoi_dung.tieu_de };
+}
 
 /**
  * Man hinh quan tri tai khoan. CHI admin vao duoc.
@@ -14,6 +17,7 @@ export const metadata = { title: vi.nguoi_dung.tieu_de };
  * server action.
  */
 export default async function TrangNguoiDung() {
+  const t = await layChu();
   const toi = await requireAdmin();
   const ds = await danhSachNguoiDung();
 
@@ -21,12 +25,12 @@ export default async function TrangNguoiDung() {
     <>
       <div className="mb-8">
         <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-          {vi.catalogue_sheet.thuong_hieu}
+          {t.catalogue_sheet.thuong_hieu}
         </span>
         <h1 className="mt-2 font-title text-[32px] leading-none tracking-[0.02em] text-hp-ink">
-          {vi.nguoi_dung.tieu_de}
+          {t.nguoi_dung.tieu_de}
         </h1>
-        <p className="mt-3 text-sm text-hp-muted">{vi.nguoi_dung.mo_ta}</p>
+        <p className="mt-3 text-sm text-hp-muted">{t.nguoi_dung.mo_ta}</p>
         <div className="mt-5 h-px bg-hp-rule" />
       </div>
 

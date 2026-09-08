@@ -4,7 +4,9 @@ import { useActionState, useState } from "react";
 import type { CachDangNhap } from "@/modules/nguoi-dung/nguoi-dung.model";
 import type { NguoiDungHang } from "@/modules/nguoi-dung/nguoi-dung.service";
 import { datLaiMatKhau, doiTrangThai, doiVaiTro } from "./actions";
-import { vi } from "@/messages/vi";
+import { useChu, useNgonNgu } from "@/messages/dung-chu";
+import type { BoChu } from "@/messages";
+import { MA_HTML, type NgonNgu } from "@/messages/ngon-ngu";
 
 const O_TIEU_DE =
   "whitespace-nowrap border-b border-hp-rule px-4 py-3 text-left " +
@@ -15,23 +17,30 @@ const NUT =
   "transition-colors duration-150 hover:text-hp-ink hover:underline " +
   "disabled:cursor-not-allowed disabled:opacity-40";
 
-const NHAN_CACH: Record<CachDangNhap, string> = {
-  google: vi.nguoi_dung.vao_google,
-  "mat-khau": vi.nguoi_dung.vao_mat_khau,
-  "ca-hai": vi.nguoi_dung.vao_ca_hai,
-  khac: vi.nguoi_dung.vao_khac,
-};
+function nhanCach(t: BoChu): Record<CachDangNhap, string> {
+  return {
+    google: t.nguoi_dung.vao_google,
+    "mat-khau": t.nguoi_dung.vao_mat_khau,
+    "ca-hai": t.nguoi_dung.vao_ca_hai,
+    khac: t.nguoi_dung.vao_khac,
+  };
+}
 
-const LOI: Record<string, string> = {
-  mat_khau_qua_ngan: vi.nguoi_dung.mat_khau_qua_ngan,
-  mat_khau_qua_dai: vi.nguoi_dung.mat_khau_qua_dai,
-  tu_khoa_chinh_minh: vi.nguoi_dung.tu_khoa_chinh_minh,
-  tu_ha_quyen_chinh_minh: vi.nguoi_dung.tu_ha_quyen_chinh_minh,
-  loi_he_thong: vi.nguoi_dung.loi_he_thong,
-};
+function loiThanhChu(t: BoChu): Record<string, string> {
+  return {
+    mat_khau_qua_ngan: t.nguoi_dung.mat_khau_qua_ngan,
+    mat_khau_qua_dai: t.nguoi_dung.mat_khau_qua_dai,
+    tu_khoa_chinh_minh: t.nguoi_dung.tu_khoa_chinh_minh,
+    tu_ha_quyen_chinh_minh: t.nguoi_dung.tu_ha_quyen_chinh_minh,
+    loi_he_thong: t.nguoi_dung.loi_he_thong,
+  };
+}
 
-function ngay(d: Date | null): string {
-  return d ? new Date(d).toLocaleDateString("vi-VN") : vi.nguoi_dung.chua_vao_lan_nao;
+/** Ngay theo dung ngon ngu dang xem: 7/9/2026 o tieng Viet, 9/7/2026 o tieng Anh. */
+function ngay(d: Date | null, nn: NgonNgu, t: BoChu): string {
+  return d
+    ? new Date(d).toLocaleDateString(MA_HTML[nn])
+    : t.nguoi_dung.chua_vao_lan_nao;
 }
 
 /** Mot form mot nut — dung cho khoa/mo khoa va doi vai tro. */
@@ -46,6 +55,7 @@ function NutHanhDong({
   nhan: string;
   tat?: boolean;
 }) {
+  const t = useChu();
   const [loi, gui, dangChay] = useActionState(hanhDong, null);
   return (
     <form action={gui} className="inline">
@@ -55,12 +65,13 @@ function NutHanhDong({
       <button type="submit" disabled={tat || dangChay} className={NUT}>
         {nhan}
       </button>
-      {loi && <span className="ml-2 text-xs text-hp-pink-strong">{LOI[loi] ?? loi}</span>}
+      {loi && <span className="ml-2 text-xs text-hp-pink-strong">{loiThanhChu(t)[loi] ?? loi}</span>}
     </form>
   );
 }
 
 function DatMatKhau({ id, tenHien }: { id: string; tenHien: string }) {
+  const t = useChu();
   const [mo, setMo] = useState(false);
   const [loi, gui, dangChay] = useActionState(datLaiMatKhau, null);
   const [xong, setXong] = useState(false);
@@ -69,9 +80,9 @@ function DatMatKhau({ id, tenHien }: { id: string; tenHien: string }) {
     return (
       <>
         <button type="button" onClick={() => setMo(true)} className={NUT}>
-          {vi.nguoi_dung.dat_mat_khau}
+          {t.nguoi_dung.dat_mat_khau}
         </button>
-        {xong && <span className="ml-2 text-xs text-hp-muted">{vi.nguoi_dung.da_doi_mat_khau}</span>}
+        {xong && <span className="ml-2 text-xs text-hp-muted">{t.nguoi_dung.da_doi_mat_khau}</span>}
       </>
     );
   }
@@ -91,35 +102,38 @@ function DatMatKhau({ id, tenHien }: { id: string; tenHien: string }) {
         required
         minLength={8}
         autoComplete="new-password"
-        aria-label={`${vi.nguoi_dung.dat_mat_khau} — ${tenHien}`}
+        aria-label={`${t.nguoi_dung.dat_mat_khau} — ${tenHien}`}
         className="w-40 border-0 border-b border-hp-rule bg-transparent px-0.5 py-1 text-sm
                    text-hp-body transition-colors duration-150 focus:border-b-2
                    focus:border-hp-pink focus:pb-[3px] focus:outline-none"
       />
       <button type="submit" disabled={dangChay} className={NUT}>
-        {dangChay ? vi.nguoi_dung.dang_luu : vi.nguoi_dung.dat_mat_khau}
+        {dangChay ? t.nguoi_dung.dang_luu : t.nguoi_dung.dat_mat_khau}
       </button>
       <button type="button" onClick={() => setMo(false)} className={NUT}>
-        {vi.nguoi_dung.huy}
+        {t.nguoi_dung.huy}
       </button>
-      {loi && <span className="text-xs text-hp-pink-strong">{LOI[loi] ?? loi}</span>}
+      {loi && <span className="text-xs text-hp-pink-strong">{loiThanhChu(t)[loi] ?? loi}</span>}
     </form>
   );
 }
 
 export function BangTaiKhoan({ ds, idCuaToi }: { ds: NguoiDungHang[]; idCuaToi: string }) {
+  const t = useChu();
+  const nn = useNgonNgu();
+  const cach = nhanCach(t);
   return (
     <div className="overflow-x-auto border border-hp-rule">
       <table className="w-full border-collapse">
         <thead>
           <tr className="bg-hp-inset">
-            <th className={O_TIEU_DE}>{vi.nguoi_dung.cot_email}</th>
-            <th className={O_TIEU_DE}>{vi.nguoi_dung.cot_ho_ten}</th>
-            <th className={O_TIEU_DE}>{vi.nguoi_dung.cot_vai_tro}</th>
-            <th className={O_TIEU_DE}>{vi.nguoi_dung.cot_cach_vao}</th>
-            <th className={O_TIEU_DE}>{vi.nguoi_dung.cot_lan_cuoi}</th>
-            <th className={O_TIEU_DE}>{vi.nguoi_dung.cot_trang_thai}</th>
-            <th className={O_TIEU_DE}>{vi.nguoi_dung.cot_thao_tac}</th>
+            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_email}</th>
+            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_ho_ten}</th>
+            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_vai_tro}</th>
+            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_cach_vao}</th>
+            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_lan_cuoi}</th>
+            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_trang_thai}</th>
+            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_thao_tac}</th>
           </tr>
         </thead>
         <tbody>
@@ -129,21 +143,21 @@ export function BangTaiKhoan({ ds, idCuaToi }: { ds: NguoiDungHang[]; idCuaToi: 
               <tr key={u.id} className="bg-hp-card">
                 <td className={`${O} whitespace-nowrap text-hp-ink`}>
                   {u.email}
-                  {laToi && <span className="ml-2 text-xs text-hp-muted">{vi.nguoi_dung.la_ban}</span>}
+                  {laToi && <span className="ml-2 text-xs text-hp-muted">{t.nguoi_dung.la_ban}</span>}
                 </td>
                 <td className={O}>{u.hoTen}</td>
                 <td className={`${O} whitespace-nowrap`}>
-                  {u.vaiTro === "admin" ? vi.nguoi_dung.vai_tro_admin : vi.nguoi_dung.vai_tro_sale}
+                  {u.vaiTro === "admin" ? t.nguoi_dung.vai_tro_admin : t.nguoi_dung.vai_tro_sale}
                 </td>
                 <td className={`${O} whitespace-nowrap`}>
-                  {u.cachDangNhap ? NHAN_CACH[u.cachDangNhap] : vi.nguoi_dung.vao_khac}
+                  {u.cachDangNhap ? cach[u.cachDangNhap] : t.nguoi_dung.vao_khac}
                 </td>
-                <td className={`${O} whitespace-nowrap tabular-nums`}>{ngay(u.lanCuoiDangNhap)}</td>
+                <td className={`${O} whitespace-nowrap tabular-nums`}>{ngay(u.lanCuoiDangNhap, nn, t)}</td>
                 <td className={`${O} whitespace-nowrap`}>
                   {u.dangHoatDong ? (
-                    vi.nguoi_dung.dang_hoat_dong
+                    t.nguoi_dung.dang_hoat_dong
                   ) : (
-                    <span className="text-hp-pink-strong">{vi.nguoi_dung.da_khoa}</span>
+                    <span className="text-hp-pink-strong">{t.nguoi_dung.da_khoa}</span>
                   )}
                 </td>
                 <td className={O}>
@@ -152,7 +166,7 @@ export function BangTaiKhoan({ ds, idCuaToi }: { ds: NguoiDungHang[]; idCuaToi: 
                     <NutHanhDong
                       hanhDong={doiTrangThai}
                       truong={{ id: u.id, bat: u.dangHoatDong ? "0" : "1" }}
-                      nhan={u.dangHoatDong ? vi.nguoi_dung.khoa : vi.nguoi_dung.mo_khoa}
+                      nhan={u.dangHoatDong ? t.nguoi_dung.khoa : t.nguoi_dung.mo_khoa}
                       // Tu khoa chinh minh la khong con ai vao duoc man hinh
                       // nay. Server van chan lan nua — day chi la de nut khong
                       // moi nguoi bam vao mot viec chac chan that bai.
@@ -161,7 +175,7 @@ export function BangTaiKhoan({ ds, idCuaToi }: { ds: NguoiDungHang[]; idCuaToi: 
                     <NutHanhDong
                       hanhDong={doiVaiTro}
                       truong={{ id: u.id, vai_tro: u.vaiTro === "admin" ? "sale" : "admin" }}
-                      nhan={u.vaiTro === "admin" ? vi.nguoi_dung.xuong_sale : vi.nguoi_dung.len_admin}
+                      nhan={u.vaiTro === "admin" ? t.nguoi_dung.xuong_sale : t.nguoi_dung.len_admin}
                       tat={laToi && u.vaiTro === "admin"}
                     />
                   </div>

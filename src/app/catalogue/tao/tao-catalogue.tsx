@@ -4,9 +4,13 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import type { MucDeChon } from "@/modules/catalogue-share/chia-se.model";
 import {
-  VUA_TAO_RONG, chupGio, chupVuaTao, dangKyVuaTao, datGio, themVuaTao,
+  chupGio, datGio,
 } from "@/modules/catalogue-share/gio-chon";
-import { vi } from "@/messages/vi";
+import { useChu } from "@/messages/dung-chu";
+import {
+  GIAO_DIEN_MAC_DINH, type GiaoDienCatalogue,
+} from "@/modules/catalogue-share/giao-dien.model";
+import { ChonGiaoDien } from "./chon-giao-dien";
 
 type TrangThai = "dang-tai" | "san-sang" | "loi-tai";
 
@@ -15,7 +19,8 @@ const NUT_PHU =
   "transition-colors duration-150 hover:text-hp-ink hover:underline";
 
 function ThongSo({ m }: { m: MucDeChon }) {
-  const phan = [m.loaiSp, m.chatLieu, m.mau, m.size && `Size ${m.size}`]
+  const t = useChu();
+  const phan = [m.loaiSp, m.chatLieu, m.mau, m.size && `${t.catalogue_sheet.size_nhan} ${m.size}`]
     .filter((x): x is string => Boolean(x));
   return (
     <p className="mt-1 text-xs text-hp-muted">
@@ -31,11 +36,13 @@ function ThongSo({ m }: { m: MucDeChon }) {
 }
 
 export function TaoCatalogue() {
+  const t = useChu();
   const [trangThai, setTrangThai] = useState<TrangThai>("dang-tai");
   const [muc, setMuc] = useState<MucDeChon[]>([]);
   /** ma -> tap fileId dang giu. Mac dinh giu HET, sale bo bot. */
   const [anhGiu, setAnhGiu] = useState<Record<string, string[]>>({});
   const [ten, setTen] = useState("");
+  const [giaoDien, setGiaoDien] = useState<GiaoDienCatalogue>(GIAO_DIEN_MAC_DINH);
   const [dangTao, setDangTao] = useState(false);
   const [loiTao, setLoiTao] = useState<string | null>(null);
   const [slug, setSlug] = useState<string | null>(null);
@@ -99,25 +106,25 @@ export function TaoCatalogue() {
         body: JSON.stringify({
           ten,
           chon: muc.map((m) => ({ ma: m.ma, anh: anhGiu[m.ma] ?? [] })),
+          giaoDien,
         }),
       });
       if (res.status === 422) {
-        setLoiTao(vi.chia_se.loi_tao_rong);
+        setLoiTao(t.chia_se.loi_tao_rong);
         return;
       }
       if (!res.ok) {
-        setLoiTao(vi.chia_se.loi_tao);
+        setLoiTao(t.chia_se.loi_tao);
         return;
       }
       // Lay ten do MAY CHU tra ve, khong tu dung lai o day: khi sale khong dat
       // ten thi ten la "Catalogue #<so>", ma so do chi co so du lieu biet.
       const d = (await res.json()) as { slug: string; ten: string };
-      themVuaTao({ slug: d.slug, ten: d.ten, luc: Date.now() });
       // Gio da dung xong — khong xoa thi lan tao sau sale lai thay nguyen cai cu.
       datGio([]);
       setSlug(d.slug);
     } catch {
-      setLoiTao(vi.chia_se.loi_tao);
+      setLoiTao(t.chia_se.loi_tao);
     } finally {
       setDangTao(false);
     }
@@ -126,46 +133,52 @@ export function TaoCatalogue() {
   if (trangThai === "dang-tai") {
     return (
       <p className="bg-hp-inset px-4 py-3 text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-        {vi.chia_se.dang_tai}
+        {t.chia_se.dang_tai}
       </p>
     );
   }
   if (trangThai === "loi-tai") {
-    return <p className="text-sm text-hp-pink-strong">{vi.chia_se.loi_tai_chon}</p>;
+    return <p className="text-sm text-hp-pink-strong">{t.chia_se.loi_tai_chon}</p>;
   }
   if (slug !== null) return <DaXong slug={slug} />;
   if (muc.length === 0) {
     return (
       <>
-        <p className="text-sm text-hp-muted">{vi.chia_se.chua_chon_gi}</p>
+        <p className="text-sm text-hp-muted">{t.chia_se.chua_chon_gi}</p>
         <Link href="/admin/catalogue-sheet" className={`mt-4 inline-block ${NUT_PHU}`}>
-          {vi.chia_se.ve_danh_sach}
+          {t.chia_se.ve_danh_sach}
         </Link>
-        <VuaTao />
+        <Link href="/admin/catalogue" className={`ml-6 ${NUT_PHU}`}>
+          {t.danh_sach_catalogue.nut_menu}
+        </Link>
       </>
     );
   }
 
-  const tongAnh = muc.reduce((t, m) => t + (anhGiu[m.ma]?.length ?? 0), 0);
+  const tongAnh = muc.reduce((n, m) => n + (anhGiu[m.ma]?.length ?? 0), 0);
 
   return (
     <>
       <div className="mb-8 max-w-md">
         <label className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted" htmlFor="ten">
-          {vi.chia_se.ten_nhan}
+          {t.chia_se.ten_nhan}
         </label>
-        <p className="mt-1 text-xs text-hp-muted">{vi.chia_se.ten_tuy_chon}</p>
+        <p className="mt-1 text-xs text-hp-muted">{t.chia_se.ten_tuy_chon}</p>
         <input
           id="ten"
           value={ten}
           onChange={(e) => setTen(e.target.value)}
-          placeholder={vi.chia_se.ten_goi_y}
+          placeholder={t.chia_se.ten_goi_y}
           maxLength={120}
           className="mt-2 w-full border-0 border-b border-hp-rule bg-transparent px-0.5 py-1.5
                      font-body text-base text-hp-body transition-colors duration-150
                      placeholder:text-hp-rule focus:border-b-2 focus:border-hp-pink
                      focus:pb-[5px] focus:outline-none"
         />
+      </div>
+
+      <div className="mb-10">
+        <ChonGiaoDien gia={giaoDien} khiDoi={setGiaoDien} />
       </div>
 
       <ul className="space-y-8">
@@ -178,18 +191,18 @@ export function TaoCatalogue() {
                   {m.maMau ?? m.ma}
                 </h2>
                 <span className="text-xs tabular-nums text-hp-muted">
-                  {vi.chia_se.dem_anh_chon
+                  {t.chia_se.dem_anh_chon
                     .replace("{n}", String(giu.length))
                     .replace("{t}", String(m.anh.length))}
                 </span>
                 <button type="button" onClick={() => goMau(m.ma)} className={`ml-auto ${NUT_PHU}`}>
-                  {vi.chia_se.go_mau}
+                  {t.chia_se.go_mau}
                 </button>
               </div>
               <ThongSo m={m} />
 
               {m.anh.length === 0 ? (
-                <p className="mt-4 text-sm text-hp-muted">{vi.chia_se.khong_co_anh}</p>
+                <p className="mt-4 text-sm text-hp-muted">{t.chia_se.khong_co_anh}</p>
               ) : (
                 <ul className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
                   {m.anh.map((a) => {
@@ -236,11 +249,11 @@ export function TaoCatalogue() {
       <div className="sticky bottom-0 mt-8 flex flex-wrap items-center gap-x-6 gap-y-3
                       border-t border-hp-rule bg-hp-foundation/95 py-4 backdrop-blur">
         <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-          {vi.chia_se.da_chon.replace("{n}", String(muc.length))}
+          {t.chia_se.da_chon.replace("{n}", String(muc.length))}
           <span className="ml-3 tabular-nums">{tongAnh} ảnh</span>
         </span>
         <Link href="/admin/catalogue-sheet" className={NUT_PHU}>
-          {vi.chia_se.ve_danh_sach}
+          {t.chia_se.ve_danh_sach}
         </Link>
         <button
           type="button"
@@ -251,7 +264,7 @@ export function TaoCatalogue() {
                      duration-150 hover:border-hp-pink hover:bg-hp-pink
                      disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {dangTao ? vi.chia_se.dang_tao : vi.chia_se.nut_tao}
+          {dangTao ? t.chia_se.dang_tao : t.chia_se.nut_tao}
         </button>
       </div>
     </>
@@ -259,6 +272,7 @@ export function TaoCatalogue() {
 }
 
 function DaXong({ slug }: { slug: string }) {
+  const t = useChu();
   const [daChep, setDaChep] = useState(false);
 
   // Link tuyet doi phai dung o phia trinh duyet: may chu khong biet ten mien
@@ -269,7 +283,10 @@ function DaXong({ slug }: { slug: string }) {
     () => window.location.origin,
     () => "",
   );
-  const link = `${origin}/c/${slug}`;
+  // Duong dan day du, khong dung /c/: /c/ van song de nhung link da gui khong
+  // chet, nhung no la duong CHUYEN HUONG. Chep no cho khach la vut di chinh
+  // cai ten sale vua dat — khach nhan mot day ky tu roi moi bi day sang ten.
+  const link = `${origin}/catalogue/${slug}`;
 
   async function chep() {
     try {
@@ -284,10 +301,10 @@ function DaXong({ slug }: { slug: string }) {
   return (
     <div className="max-w-2xl">
       <h2 className="font-title text-[28px] leading-none text-hp-ink">
-        {vi.chia_se.xong_tieu_de}
+        {t.chia_se.xong_tieu_de}
       </h2>
-      <p className="mt-3 text-sm text-hp-body">{vi.chia_se.xong_mo_ta}</p>
-      <p className="mt-1 text-xs text-hp-muted">{vi.chia_se.tai_pdf_giai_thich}</p>
+      <p className="mt-3 text-sm text-hp-body">{t.chia_se.xong_mo_ta}</p>
+      <p className="mt-1 text-xs text-hp-muted">{t.chia_se.tai_pdf_giai_thich}</p>
 
       <p className="mt-6 border border-hp-rule bg-hp-card px-4 py-3 text-sm break-all text-hp-body">
         {link}
@@ -301,10 +318,10 @@ function DaXong({ slug }: { slug: string }) {
                      tracking-[0.14em] text-hp-foundation transition-colors duration-150
                      hover:border-hp-pink hover:bg-hp-pink"
         >
-          {daChep ? vi.chia_se.da_chep : vi.chia_se.chep_link}
+          {daChep ? t.chia_se.da_chep : t.chia_se.chep_link}
         </button>
         <a href={`/catalogue/${slug}`} target="_blank" rel="noreferrer" className={NUT_PHU}>
-          {vi.chia_se.mo_thu}
+          {t.chia_se.mo_thu}
         </a>
         {/* PDF la viec CUA SALE, khong phai cua khach. Duong dan kem ?in=1 mo
             san hop thoai in; link gui khach la link tran nen ho khong gap no. */}
@@ -314,51 +331,16 @@ function DaXong({ slug }: { slug: string }) {
           rel="noreferrer"
           className={NUT_PHU}
         >
-          {vi.chia_se.tai_pdf_sale}
+          {t.chia_se.tai_pdf_sale}
         </a>
         <Link href="/admin/catalogue-sheet" className={NUT_PHU}>
-          {vi.chia_se.tao_tiep}
+          {t.chia_se.tao_tiep}
+        </Link>
+        <Link href="/admin/catalogue" className={NUT_PHU}>
+          {t.danh_sach_catalogue.nut_menu}
         </Link>
       </div>
     </div>
   );
 }
 
-/**
- * Danh sach catalogue vua tao TREN MAY NAY.
- *
- * Day la thu thay the cho "catalogue cua toi" khi he thong chua co tai khoan:
- * no khong theo nguoi, no theo trinh duyet. Xoa lich su hoac doi may la mat
- * danh sach — nhung link da gui cho khach thi van song, nen mat o day khong
- * hong viec gi.
- */
-function VuaTao() {
-  const ds = useSyncExternalStore(dangKyVuaTao, chupVuaTao, () => VUA_TAO_RONG);
-  if (ds.length === 0) return null;
-
-  return (
-    <section className="mt-12 border-t border-hp-rule pt-6">
-      <h2 className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-        {vi.chia_se.vua_tao}
-      </h2>
-      <ul className="mt-4 space-y-2">
-        {ds.map((c) => (
-          <li key={c.slug}>
-            <a
-              href={`/catalogue/${c.slug}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-sm text-hp-body transition-colors duration-150
-                         hover:text-hp-ink hover:underline"
-            >
-              {c.ten}
-            </a>
-            <span className="ml-3 text-xs tabular-nums text-hp-muted">
-              {new Date(c.luc).toLocaleDateString("vi-VN")}
-            </span>
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}

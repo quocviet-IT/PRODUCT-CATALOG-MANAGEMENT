@@ -8,13 +8,14 @@ import {
   tinhDemLoc,
   tinhThongKe,
 } from "@/modules/sheet/catalogue.view";
-import type { CoBatThuong, DongCatalogue } from "@/modules/sheet/catalogue.mapper";
+import type { DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { khoaMau } from "@/modules/catalogue-share/chia-se.model";
 import { ChonMau, OTich } from "./chon-mau";
 import { BangCatalogue } from "./bang";
 import { ThanhBoLoc } from "./bo-loc";
 import { NganChiTiet } from "./ngan-chi-tiet";
-import { vi } from "@/messages/vi";
+import { layChu } from "@/messages/may-chu";
+import { nhanCo } from "./nhan-co";
 
 /**
  * Hai kieu xem chung mot bo loc. Bang la mac dinh vi nguoi dung doi chieu voi
@@ -50,14 +51,6 @@ const NUT_TRANG =
   "text-[11px] uppercase tracking-[0.14em] text-hp-muted " +
   "transition-colors duration-150 hover:text-hp-ink hover:underline";
 
-const NHAN_CO: Record<CoBatThuong, string> = {
-  "thieu-sku": vi.catalogue_sheet.co_thieu_sku,
-  "thieu-anh": vi.catalogue_sheet.co_thieu_anh,
-  "thieu-mo-ta": vi.catalogue_sheet.co_thieu_mo_ta,
-  "trung": vi.catalogue_sheet.co_trung,
-  "tl-vang-lech": vi.catalogue_sheet.co_tl_vang_lech,
-};
-
 /** Chuan tieng Viet dung dau phay thap phan, du bang tinh ghi dau cham. */
 function dinhDangGam(v: number | null): string | null {
   return v === null ? null : `${v.toFixed(2).replace(".", ",")} g`;
@@ -89,7 +82,8 @@ function O({
   );
 }
 
-function The({ d }: { d: DongCatalogue }) {
+async function The({ d }: { d: DongCatalogue }) {
+  const t = await layChu();
   const trongLuong = dinhDangGam(d.tlVang);
   const coDongTrongLuongSize = trongLuong !== null || d.size !== null;
 
@@ -104,13 +98,13 @@ function The({ d }: { d: DongCatalogue }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={`/api/anh-drive/${d.fileIdAnh}`}
-            alt={d.maMau ?? vi.catalogue_sheet.anh_chua_co_ma_mau}
+            alt={d.maMau ?? t.catalogue_sheet.anh_chua_co_ma_mau}
             loading="lazy"
             className="h-full w-full object-contain"
           />
         ) : (
           <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-            {vi.catalogue_sheet.chua_co_anh}
+            {t.catalogue_sheet.chua_co_anh}
           </span>
         )}
       </div>
@@ -125,19 +119,19 @@ function The({ d }: { d: DongCatalogue }) {
           </span>
         )}
         <h3 className="mt-1 font-title text-xl leading-tight text-hp-ink">
-          {d.maMau ?? vi.catalogue_sheet.chua_co_ma_mau}
+          {d.maMau ?? t.catalogue_sheet.chua_co_ma_mau}
         </h3>
 
         {coDongTrongLuongSize && (
           <p className="mt-2 flex flex-wrap gap-x-4 text-sm tabular-nums text-hp-body">
             {trongLuong && <span>{trongLuong}</span>}
-            {d.size && <span>{vi.catalogue_sheet.size_nhan} {d.size}</span>}
+            {d.size && <span>{t.catalogue_sheet.size_nhan} {d.size}</span>}
           </p>
         )}
 
         {d.co.length > 0 && (
           <p className="mt-3 text-[10px] uppercase tracking-[0.14em] text-hp-muted">
-            {d.co.map((c) => NHAN_CO[c]).join(" · ")}
+            {d.co.map((c) => nhanCo(t)[c]).join(" · ")}
           </p>
         )}
 
@@ -151,6 +145,7 @@ export default async function TrangCatalogueSheet({
 }: {
   searchParams: Promise<Record<string, string | undefined>>;
 }) {
+  const t = await layChu();
   const sp = await searchParams;
   const loc = docBoLocTuUrl(sp);
   const kieuXem = docKieuXem(sp.xem);
@@ -164,7 +159,7 @@ export default async function TrangCatalogueSheet({
     // nhung server phai giu lai chi tiet de con grep khi trang trang hang loat.
     console.error("[catalogue-sheet] loi doc bang tinh catalogue:", loi);
     return (
-      <p className="text-sm text-hp-pink-strong">{vi.catalogue_sheet.loi_doc_bang}</p>
+      <p className="text-sm text-hp-pink-strong">{t.catalogue_sheet.loi_doc_bang}</p>
     );
   }
 
@@ -186,17 +181,17 @@ export default async function TrangCatalogueSheet({
     <>
       <div className="mb-10">
         <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-          {vi.catalogue_sheet.thuong_hieu}
+          {t.catalogue_sheet.thuong_hieu}
         </span>
         {/* Chu hoa nen can gian chu rong hon chu thuong; 0.06em la muc du tho
             de tung chu tach ra ma chua roi thanh nhan eyebrow. */}
         <h1 className="mt-2 font-title text-[32px] uppercase leading-none tracking-[0.06em] text-hp-ink">
-          {vi.catalogue_sheet.tieu_de}
+          {t.catalogue_sheet.tieu_de}
         </h1>
         <p className="mt-3 text-xs text-hp-muted">
           {nguon === "mau"
-            ? vi.catalogue_sheet.nguon_mau
-            : vi.catalogue_sheet.nguon_bang_tinh}
+            ? t.catalogue_sheet.nguon_mau
+            : t.catalogue_sheet.nguon_bang_tinh}
         </p>
         <div className="mt-5 h-px bg-hp-rule" />
       </div>
@@ -205,12 +200,12 @@ export default async function TrangCatalogueSheet({
         <O
           so={thongKeHien.tong}
           tong={dangLoc ? thongKe.tong : undefined}
-          nhan={vi.catalogue_sheet.dem_mau}
+          nhan={t.catalogue_sheet.dem_mau}
         />
-        <O so={thongKeHien.thieuAnh} nhan={vi.catalogue_sheet.dem_thieu_anh} />
-        <O so={thongKeHien.thieuSku} nhan={vi.catalogue_sheet.dem_thieu_sku} />
-        <O so={thongKeHien.tlVangLech} nhan={vi.catalogue_sheet.dem_tl_vang_lech} />
-        <O so={thongKeHien.trung} nhan={vi.catalogue_sheet.dem_trung} />
+        <O so={thongKeHien.thieuAnh} nhan={t.catalogue_sheet.dem_thieu_anh} />
+        <O so={thongKeHien.thieuSku} nhan={t.catalogue_sheet.dem_thieu_sku} />
+        <O so={thongKeHien.tlVangLech} nhan={t.catalogue_sheet.dem_tl_vang_lech} />
+        <O so={thongKeHien.trung} nhan={t.catalogue_sheet.dem_trung} />
       </div>
 
       <ThanhBoLoc dem={dem} hienTai={loc} />
@@ -219,11 +214,11 @@ export default async function TrangCatalogueSheet({
           o tim kiem va gach chan bo loc dang bat. O day phan biet bang ink/muted. */}
       <div className="mb-6 flex items-baseline gap-6">
         <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-          {vi.catalogue_sheet.xem_nhan}
+          {t.catalogue_sheet.xem_nhan}
         </span>
         {([
-          ["bang", vi.catalogue_sheet.xem_bang],
-          ["luoi", vi.catalogue_sheet.xem_luoi],
+          ["bang", t.catalogue_sheet.xem_bang],
+          ["luoi", t.catalogue_sheet.xem_luoi],
         ] as const).map(([gia_tri, nhan]) => (
           <Link
             key={gia_tri}
@@ -241,7 +236,7 @@ export default async function TrangCatalogueSheet({
       </div>
 
       {ds.length === 0 ? (
-        <p className="text-sm text-hp-muted">{vi.catalogue_sheet.khong_khop}</p>
+        <p className="text-sm text-hp-muted">{t.catalogue_sheet.khong_khop}</p>
       ) : (
         <ChonMau>
           <NganChiTiet>
@@ -259,22 +254,22 @@ export default async function TrangCatalogueSheet({
       {daLoc.length > 0 && (
         <nav className="mt-8 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-t border-hp-rule pt-5">
           <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-            {vi.catalogue_sheet.trang_nhan} {trang}/{soTrang}
+            {t.catalogue_sheet.trang_nhan} {trang}/{soTrang}
           </span>
 
           {trang > 1 && (
             <Link href={urlDoi(sp, "trang", String(trang - 1))} className={NUT_TRANG}>
-              {vi.catalogue_sheet.trang_truoc}
+              {t.catalogue_sheet.trang_truoc}
             </Link>
           )}
           {trang < soTrang && (
             <Link href={urlDoi(sp, "trang", String(trang + 1))} className={NUT_TRANG}>
-              {vi.catalogue_sheet.trang_sau}
+              {t.catalogue_sheet.trang_sau}
             </Link>
           )}
 
           <span className="ml-auto text-xs tabular-nums text-hp-muted">
-            {vi.catalogue_sheet.pham_vi
+            {t.catalogue_sheet.pham_vi
               .replace("{tu}", String(tu))
               .replace("{den}", String(den))
               .replace("{tong}", String(daLoc.length))}

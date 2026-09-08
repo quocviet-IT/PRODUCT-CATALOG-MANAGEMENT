@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { requireUser } from "@/auth/guard";
 import { dangXuat } from "@/auth/actions";
-import { vi } from "@/messages/vi";
+import { layChu } from "@/messages/may-chu";
+import { DoiNgonNgu } from "@/messages/dung-chu";
 
 /**
  * Man hinh nay phuc vu dung mot viec: nhan vien kinh doanh tra cuu catalogue.
@@ -14,6 +15,7 @@ import { vi } from "@/messages/vi";
  */
 export default async function KhungQuanTri({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
+  const t = await layChu();
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-baseline justify-end gap-6 border-b border-hp-rule px-8 py-3">
@@ -27,7 +29,7 @@ export default async function KhungQuanTri({ children }: { children: React.React
             className="mr-auto text-[11px] uppercase tracking-[0.14em] text-hp-muted
                        transition-colors duration-150 hover:text-hp-ink hover:underline"
           >
-            {vi.nguoi_dung.nut_menu}
+            {t.nguoi_dung.nut_menu}
           </Link>
         )}
         <Link
@@ -35,18 +37,33 @@ export default async function KhungQuanTri({ children }: { children: React.React
           className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
                      transition-colors duration-150 hover:text-hp-ink hover:underline"
         >
-          {vi.catalogue_sheet.tieu_de}
+          {t.catalogue_sheet.tieu_de}
+        </Link>
+        <Link
+          href="/admin/catalogue"
+          className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
+                     transition-colors duration-150 hover:text-hp-ink hover:underline"
+        >
+          {t.danh_sach_catalogue.nut_menu}
+        </Link>
+        <Link
+          href="/admin/huong-dan"
+          className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
+                     transition-colors duration-150 hover:text-hp-ink hover:underline"
+        >
+          {t.huong_dan.nut_menu}
         </Link>
         <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
           {user.fullName}
         </span>
+        <DoiNgonNgu />
         <form action={dangXuat}>
           <button
             type="submit"
             className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
                        transition-colors duration-150 hover:text-hp-ink hover:underline"
           >
-            {vi.dang_nhap.dang_xuat}
+            {t.dang_nhap.dang_xuat}
           </button>
         </form>
       </header>
