@@ -2,11 +2,13 @@ import { MessageCircle, Phone } from "lucide-react";
 import type { BoChu } from "@/messages";
 import type { MucCatalogue } from "@/modules/catalogue-share/chia-se.model";
 import {
+  MAU_NHAN,
   soGoiDuoc,
   type Bia,
   type BoCuc,
   type GiaoDienCatalogue,
   type LienHe,
+  type Nhan,
   type Tone,
 } from "@/modules/catalogue-share/giao-dien.model";
 import { Logo } from "@/app/thuong-hieu";
@@ -36,7 +38,23 @@ export const LOP_TONE: Record<Tone, string> = {
   beige: "",
   trang: "tone-trang",
   toi: "tone-toi",
+  reu: "tone-reu",
 };
+
+/**
+ * Mau nhan cua catalogue, dat bang cach GHI DE hai bien mau hong.
+ *
+ * Nho vay moi cho dang dung `text-hp-pink` hay `bg-hp-pink-strong` deu doi theo
+ * ma khong phai sua tung noi — va catalogue khong chon gi van ra dung hong
+ * thuong hieu, vi mac dinh la "hong".
+ */
+export function bienMauNhan(nhan: Nhan): React.CSSProperties {
+  const m = MAU_NHAN[nhan] ?? MAU_NHAN.hong;
+  return {
+    "--color-hp-pink": m.nhat,
+    "--color-hp-pink-strong": m.dam,
+  } as React.CSSProperties;
+}
 
 function gam(v: number | null): string | null {
   return v === null ? null : `${v.toFixed(2).replace(".", ",")} g`;
@@ -305,10 +323,200 @@ function Lookbook({ muc, g, t }: DoiSo) {
   );
 }
 
+/**
+ * Bo cuc 4 — trien lam.
+ *
+ * Anh tran het be ngang, ke ca ra ngoai le trang; so thu tu co lon de len mep
+ * anh. Sang nhat trong sau, danh cho catalogue it mau — moi mau chiem gan mot
+ * man hinh dien thoai.
+ */
+function TrienLam({ muc, g, t }: DoiSo) {
+  const moc = mocAnh(muc);
+  return (
+    <ul className="space-y-20 print:space-y-0">
+      {muc.map((m, i) => {
+        const dau = moc[i];
+        const [chinh, ...phu] = m.anh;
+        return (
+          <li key={`${m.maMau ?? "x"}-${i}`} className="break-inside-avoid print:break-after-page">
+            {chinh && (
+              <div className="relative">
+                {/* -mx-6 huy le trang: anh cham hai mep man hinh dien thoai. */}
+                <div className="-mx-6">
+                  <Anh
+                    m={m}
+                    fileId={chinh.fileId}
+                    ten={chinh.ten}
+                    rong={2000}
+                    tyLe="aspect-[4/3]"
+                    uuTien={dau === 0}
+                  />
+                </div>
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -bottom-6 left-0 font-title
+                             text-[64px] leading-none text-hp-pink sm:text-[76px]"
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              </div>
+            )}
+
+            <div className="mt-11 flex flex-col gap-2">
+              <MaMau m={m} t={t} />
+              <ThongSoDong ds={thongSo(m, g, t)} />
+            </div>
+
+            {phu.length > 0 && (
+              <ul className="mt-6 grid grid-cols-3 gap-3 sm:grid-cols-4">
+                {phu.map((a) => (
+                  <li key={a.fileId}>
+                    <Anh m={m} fileId={a.fileId} ten={a.ten} rong={800}
+                         tyLe="aspect-[4/3]" uuTien={false} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/**
+ * Bo cuc 5 — khung co dien.
+ *
+ * Moi mau nam trong mot khung ke doi, thong so xep can giua nhu mot tam chung
+ * nhan. De doc thong so nhat trong sau; doi lai anh phai nho hon vi duong ke va
+ * le chiem cho.
+ */
+function KhungCoDien({ muc, g, t }: DoiSo) {
+  const moc = mocAnh(muc);
+  return (
+    <ul className="space-y-8">
+      {muc.map((m, i) => {
+        const dau = moc[i];
+        const ct = thongSo(m, g, t);
+        return (
+          <li key={`${m.maMau ?? "x"}-${i}`} className="break-inside-avoid border border-hp-rule p-2">
+            <div className="flex flex-col items-center gap-5 border border-hp-rule px-5 py-6">
+              {m.anh.length > 0 && (
+                <ul className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2">
+                  {m.anh.slice(0, 2).map((a, j) => (
+                    <li key={a.fileId}>
+                      <Anh m={m} fileId={a.fileId} ten={a.ten} rong={1200}
+                           tyLe="aspect-[4/3]" uuTien={dau + j === 0} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <span className="font-title text-[26px] leading-none tracking-[0.06em] text-hp-ink">
+                {m.maMau ?? t.catalogue_sheet.chua_co_ma_mau}
+              </span>
+
+              {/* Duong phan cach co mot vien kim cuong o giua. */}
+              <div aria-hidden className="flex w-full items-center gap-3">
+                <span className="h-px flex-grow bg-hp-rule" />
+                <span className="h-1.5 w-1.5 rotate-45 bg-hp-pink" />
+                <span className="h-px flex-grow bg-hp-rule" />
+              </div>
+
+              {ct.length > 0 && (
+                <dl className="flex flex-wrap justify-center gap-x-8 gap-y-4">
+                  {ct.map(([nhan, v]) => (
+                    <div key={nhan} className="flex flex-col items-center gap-1">
+                      <dt className="text-[10px] uppercase tracking-[0.18em] text-hp-muted">{nhan}</dt>
+                      <dd className="text-sm text-hp-body">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+
+              {m.anh.length > 2 && (
+                <ul className="grid w-full grid-cols-3 gap-3 sm:grid-cols-4">
+                  {m.anh.slice(2).map((a) => (
+                    <li key={a.fileId}>
+                      <Anh m={m} fileId={a.fileId} ten={a.ten} rong={700}
+                           tyLe="aspect-[4/3]" uuTien={false} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/**
+ * Bo cuc 6 — tap chi.
+ *
+ * Anh mot ben, chu ben kia, doi ben so le tung mau. Luot nhanh nhat trong sau,
+ * hop khi gui nhieu mau mot luc; doi lai anh nho nhat.
+ */
+function TapChi({ muc, g, t }: DoiSo) {
+  const moc = mocAnh(muc);
+  return (
+    <ul className="space-y-10">
+      {muc.map((m, i) => {
+        const dau = moc[i];
+        const ct = thongSo(m, g, t);
+        const [chinh] = m.anh;
+        // So le tung mau: mau chan anh ben trai, mau le anh ben phai.
+        const nghich = i % 2 === 1;
+        return (
+          <li key={`${m.maMau ?? "x"}-${i}`} className="break-inside-avoid">
+            <div className={`flex items-stretch gap-4 ${nghich ? "flex-row-reverse" : "flex-row"}`}>
+              {chinh && (
+                <div className="w-3/5 shrink-0">
+                  <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={1200}
+                       tyLe="aspect-square" uuTien={dau === 0} />
+                </div>
+              )}
+              <div className="flex flex-grow flex-col justify-center gap-2.5">
+                <span className="font-title text-3xl leading-none text-hp-pink">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <span aria-hidden className="h-px w-7 bg-hp-rule" />
+                <MaMau m={m} t={t} />
+                {ct.length > 0 && (
+                  <div className="flex flex-col gap-0.5">
+                    {ct.map(([nhan, v]) => (
+                      <span key={nhan} className="text-sm leading-relaxed text-hp-body">{v}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {m.anh.length > 1 && (
+              <ul className="mt-3 grid grid-cols-4 gap-2">
+                {m.anh.slice(1).map((a) => (
+                  <li key={a.fileId}>
+                    <Anh m={m} fileId={a.fileId} ten={a.ten} rong={600}
+                         tyLe="aspect-square" uuTien={false} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 const BANG: Record<BoCuc, (p: DoiSo) => React.ReactElement> = {
   "danh-sach": DanhSach,
   luoi: Luoi,
   lookbook: Lookbook,
+  "trien-lam": TrienLam,
+  "khung-co-dien": KhungCoDien,
+  "tap-chi": TapChi,
 };
 
 export function ThanCatalogue(p: DoiSo) {
@@ -337,7 +545,7 @@ export function TrangBia({
 }) {
   return (
     <section className="bia-catalogue mb-20 border border-hp-rule px-6 py-16 text-center sm:px-12 sm:py-24">
-      <Logo co="lon" alt={thuongHieu} lop="mx-auto" />
+      <Logo co="lon" alt={thuongHieu} theoMau lop="mx-auto text-hp-pink" />
 
       {bia.tenKhach && (
         <p className="mt-12 text-[11px] uppercase tracking-[0.22em] text-hp-muted">

@@ -1,0 +1,91 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "title": "Triển lãm — điện thoại",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "KhungCoDien.dc.html",
+      "title": "Khung cổ điển — điện thoại",
+      "x": 490,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "TapChi.dc.html",
+      "title": "Tạp chí — điện thoại",
+      "x": 980,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    {
+      "file": "MauSac.dc.html",
+      "title": "Bộ màu — nền × nhấn",
+      "x": 0,
+      "y": 1080,
+      "w": 900,
+      "h": 820
+    },
+    {
+      "file": "TrenMayTinh.dc.html",
+      "title": "Triển lãm — trên máy tính",
+      "x": 1000,
+      "y": 1080,
+      "w": 1040,
+      "h": 1020
+    }
+  ],
+  "annotations": [
+    {
+      "id": "gioi-thieu",
+      "x": -640,
+      "y": 0,
+      "w": 560,
+      "text": "Ba template mới cho catalogue gửi khách.\n\nCả ba vẽ ở khổ điện thoại 390px vì khách hầu như mở bằng điện thoại. Mỗi ô có hai nút chỉnh ở phía trên: Nền và Màu nhấn — bấm để trộn thử.\n\nẢnh nhẫn là hình vẽ tạm thay cho ảnh thật trên Drive."
+    },
+    {
+      "id": "note-trien-lam",
+      "x": 0,
+      "y": -300,
+      "w": 390,
+      "text": "TRIỂN LÃM — ảnh tràn hết bề ngang, số thứ tự cỡ lớn đè lên mép ảnh.\n\nSang nhất trong ba. Hợp khi gửi ít mẫu và muốn gây ấn tượng.\n\nĐánh đổi: mỗi mẫu chiếm gần một màn hình, khách phải cuộn nhiều."
+    },
+    {
+      "id": "note-khung",
+      "x": 490,
+      "y": -300,
+      "w": 390,
+      "text": "KHUNG CỔ ĐIỂN — mỗi mẫu nằm trong khung kẻ đôi, thông số xếp cột cân giữa như một tấm chứng nhận.\n\nTrang trọng, và đọc thông số dễ nhất trong ba.\n\nĐánh đổi: nhiều đường kẻ nên ảnh phải nhỏ lại."
+    },
+    {
+      "id": "note-tap-chi",
+      "x": 980,
+      "y": -300,
+      "w": 390,
+      "text": "TẠP CHÍ — ảnh tràn một mép, chữ ở mép còn lại, so le trái phải.\n\nLướt nhanh nhất. Hợp khi gửi nhiều mẫu một lúc.\n\nĐánh đổi: ảnh nhỏ nhất trong ba, món hàng ít nổi hơn."
+    },
+    {
+      "id": "note-mau",
+      "x": 0,
+      "y": 1950,
+      "w": 900,
+      "text": "Sale chọn MỘT nền và MỘT màu nhấn — không phải chọn từng chỗ một.\n\nBốn màu nhấn cùng độ sáng và độ tươi (oklch L .58 / C .19), chỉ khác sắc, nên ghép với nền nào cũng không chỏi. Nút bấm dùng bản đậm hơn để chữ trắng đủ tương phản.\n\nMặc định vẫn là Kem + hồng thương hiệu: không chọn gì thì catalogue ra đúng như bây giờ."
+    },
+    {
+      "id": "note-desktop",
+      "x": 1000,
+      "y": 2150,
+      "w": 1040,
+      "text": "Cùng template Triển lãm mở trên máy tính: một cột thành hai cột, chữ và ảnh lớn theo. Không phải bản thiết kế riêng — cùng một bố cục co giãn."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

@@ -318,6 +318,21 @@ export const en: BoChu = {
     bo_cuc_lookbook: "Lookbook",
     bo_cuc_lookbook_mo_ta: "One large block per model, wide images. Good for a short selection.",
 
+    bo_cuc_trien_lam: "Gallery",
+    bo_cuc_trien_lam_mo_ta: "Full-bleed images with an oversized index number. The most striking — best for a short selection.",
+    bo_cuc_khung: "Classic frame",
+    bo_cuc_khung_mo_ta: "Each model in a double-ruled frame, details centred. Formal, and the easiest to read.",
+    bo_cuc_tap_chi: "Magazine",
+    bo_cuc_tap_chi_mo_ta: "Image one side, text the other, alternating. The quickest to skim.",
+
+    tone_reu: "Deep green",
+
+    nhan_mau_nhan: "Accent colour",
+    nhan_mau_mo_ta: "Four colours at the same lightness and saturation, differing only in hue — none of them clash with any background.",
+    nhan_hong: "Brand pink",
+    nhan_dong: "Antique gold",
+    nhan_luc: "Teal",
+    nhan_man: "Plum",
     tone_nhan: "Colour",
     tone_beige: "Classic beige",
     tone_trang: "Minimal white",

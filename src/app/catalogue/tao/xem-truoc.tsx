@@ -10,6 +10,7 @@ import {
   LOP_TONE,
   ThanCatalogue,
   TrangBia,
+  bienMauNhan,
 } from "@/app/catalogue/[slug]/bo-cuc";
 
 /**
@@ -107,7 +108,7 @@ export function XemTruoc({
       </header>
 
       {/* Khung cuon rieng, mang dung lop tong mau cua trang khach. */}
-      <div className={`flex-1 overflow-y-auto ${LOP_TONE[gia.tone]}`}>
+      <div className={`flex-1 overflow-y-auto ${LOP_TONE[gia.tone]}`} style={bienMauNhan(gia.nhan)}>
         <main className="mx-auto max-w-4xl px-6 py-10">
           {danhSach.length === 0 ? (
             <p className="text-sm text-hp-muted">{t.chia_se.xem_truoc_chua_co_mau}</p>
