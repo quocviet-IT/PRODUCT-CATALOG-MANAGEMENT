@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireUser } from "@/auth/guard";
 import { dangXuat } from "@/auth/actions";
 import { vi } from "@/messages/vi";
@@ -16,6 +17,26 @@ export default async function KhungQuanTri({ children }: { children: React.React
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-baseline justify-end gap-6 border-b border-hp-rule px-8 py-3">
+        {/* Chi admin moi thay loi vao man hinh tai khoan. Day KHONG phai lop
+            gac — trang do va moi server action cua no deu tu goi requireAdmin();
+            giau nut di chi de sale khong bam vao mot cho ho chac chan bi tu
+            choi. */}
+        {user.role === "admin" && (
+          <Link
+            href="/admin/nguoi-dung"
+            className="mr-auto text-[11px] uppercase tracking-[0.14em] text-hp-muted
+                       transition-colors duration-150 hover:text-hp-ink hover:underline"
+          >
+            {vi.nguoi_dung.nut_menu}
+          </Link>
+        )}
+        <Link
+          href="/admin/catalogue-sheet"
+          className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
+                     transition-colors duration-150 hover:text-hp-ink hover:underline"
+        >
+          {vi.catalogue_sheet.tieu_de}
+        </Link>
         <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
           {user.fullName}
         </span>
