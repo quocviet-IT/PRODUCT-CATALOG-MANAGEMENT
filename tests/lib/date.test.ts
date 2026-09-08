@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { dinhDangNgay } from "@/lib/date";
+import { dinhDangLuc, dinhDangNgay } from "@/lib/date";
 
 describe("dinhDangNgay", () => {
   it("dinh dang dd/mm/yyyy", () => {
@@ -22,5 +22,17 @@ describe("dinhDangNgay", () => {
 
   it("dung gio UTC chu khong dung gio may — moc dau ngay", () => {
     expect(dinhDangNgay(new Date(Date.UTC(2026, 0, 5, 0, 30)))).toBe("05/01/2026");
+  });
+});
+
+describe("dinhDangLuc", () => {
+  it("doc theo gio Viet Nam chu khong phai gio may chu", () => {
+    // 03:20 UTC la 10:20 o Viet Nam. May chu chay o UTC, con nguoi doc dong
+    // chu nay dang doi chieu voi bang tinh ho vua sua.
+    expect(dinhDangLuc(new Date("2026-09-08T03:20:00.000Z"))).toBe("10:20 08/09/2026");
+  });
+
+  it("sang ngay hom sau khi qua 17:00 UTC", () => {
+    expect(dinhDangLuc(new Date("2026-09-08T17:05:00.000Z"))).toBe("00:05 09/09/2026");
   });
 });

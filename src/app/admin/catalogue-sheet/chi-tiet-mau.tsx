@@ -1,4 +1,5 @@
 import type { DongCatalogue } from "@/modules/sheet/catalogue.mapper";
+import type { NguonDuLieu } from "@/modules/sheet/catalogue.service";
 import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 import { FolderOpen, Images, Video } from "lucide-react";
 import type { BoChu } from "@/messages";
@@ -37,7 +38,7 @@ export function ChiTietMau({
   d: DongCatalogue;
   anh: AnhTrongThuMuc[];
   loiAnh: boolean;
-  nguon: "mau" | "bang-tinh";
+  nguon: NguonDuLieu;
   /** Co ham nay thi anh bam duoc de phong to; khong co thi anh chi de xem. */
   khiBamAnh?: (a: AnhTrongThuMuc) => void;
   /**
