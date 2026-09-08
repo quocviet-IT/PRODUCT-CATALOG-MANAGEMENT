@@ -3,18 +3,23 @@ import { join } from "node:path";
 import sharp from "sharp";
 
 /**
- * Dung hai tep thuong hieu tu logo goc tren hungphatusa.com.
+ * Dung cac tep thuong hieu tu logo goc tren hungphatusa.com.
  *
  * Chay: npm run logo
  *
  * Vi sao la mot script chu khong phai chep tay mot lan: no ghi lai NGUON cua
  * logo. Sau nay cong ty doi logo tren web chinh, chay lai lenh nay la xong,
- * khong phai do lai xem hai tep trong public/ tu dau ma co.
+ * khong phai do lai xem may tep bieu tuong tu dau ma co.
  *
- * Ra hai tep:
+ * Ra ba tep:
  *   public/logo-hung-phat.png  chu "HUNG PHAT", da cat sach le trong suot
- *   src/app/icon.png           bieu tuong tren thanh trinh duyet: hai chu H va P
- *                              cat tu CHINH kieu chu do, khong phai font khac ve lai
+ *   src/app/icon.png           bieu tuong: hai chu H va P cat tu CHINH kieu chu
+ *                              do, khong phai font khac ve lai
+ *   src/app/favicon.ico        cung hinh do, dong goi .ico
+ *
+ * VI SAO PHAI CO CA HAI tep bieu tuong: Next uu tien favicon.ico hon icon.png.
+ * Chi them icon.png ma de nguyen favicon.ico mac dinh cua Next thi thanh trinh
+ * duyet VAN hien bieu tuong cu — da mac dung loi nay mot lan.
  */
 
 const NGUON =
@@ -26,6 +31,36 @@ const RONG_LOGO = 600;
 
 /** Thanh trinh duyet chi ve o 16-32px, nhung tep goc de to de con dung cho PWA. */
 const CANH_ICON = 512;
+
+/** Canh cua anh trong tep .ico. 256 la muc lon nhat dinh dang nay cho phep. */
+const CANH_ICO = 256;
+
+/**
+ * Dong goi mot anh PNG thanh tep .ico.
+ *
+ * Dinh dang ICO cho phep nhet thang mot khoi PNG vao (tu Windows Vista) nen
+ * khong can ve lai tung diem anh: chi can 6 byte tieu de + 16 byte muc luc roi
+ * den nguyen ban PNG. sharp khong xuat duoc .ico nen phai tu ghep o day.
+ */
+function dongGoiIco(png: Buffer): Buffer {
+  const tieuDe = Buffer.alloc(6);
+  tieuDe.writeUInt16LE(0, 0); // du phong, luon 0
+  tieuDe.writeUInt16LE(1, 2); // kieu 1 = icon
+  tieuDe.writeUInt16LE(1, 4); // so anh trong tep
+
+  const muc = Buffer.alloc(16);
+  // 0 nghia la 256: mot byte khong chua noi so 256.
+  muc.writeUInt8(CANH_ICO >= 256 ? 0 : CANH_ICO, 0);
+  muc.writeUInt8(CANH_ICO >= 256 ? 0 : CANH_ICO, 1);
+  muc.writeUInt8(0, 2); // so mau trong bang mau — 0 vi anh mau that
+  muc.writeUInt8(0, 3); // du phong
+  muc.writeUInt16LE(1, 4); // so mat phang mau
+  muc.writeUInt16LE(32, 6); // bit moi diem anh
+  muc.writeUInt32LE(png.byteLength, 8);
+  muc.writeUInt32LE(tieuDe.byteLength + muc.byteLength, 12); // vi tri khoi anh
+
+  return Buffer.concat([tieuDe, muc, png]);
+}
 
 /**
  * Toa do hai chu trong anh goc 1826x490, do bang cach quet cot nao co pixel dac.
@@ -95,6 +130,10 @@ async function main(): Promise<void> {
 
   await writeFile(join(process.cwd(), "src", "app", "icon.png"), ghep);
   console.log(`src/app/icon.png  ${CANH_ICON}x${CANH_ICON}  ${(ghep.byteLength / 1024).toFixed(0)} KB`);
+
+  const ico = dongGoiIco(await sharp(ghep).resize(CANH_ICO, CANH_ICO).png().toBuffer());
+  await writeFile(join(process.cwd(), "src", "app", "favicon.ico"), ico);
+  console.log(`src/app/favicon.ico  ${CANH_ICO}x${CANH_ICO}  ${(ico.byteLength / 1024).toFixed(0)} KB`);
 }
 
 await main();
