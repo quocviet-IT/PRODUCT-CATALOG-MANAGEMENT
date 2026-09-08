@@ -3,8 +3,11 @@ import { requireUser } from "@/auth/guard";
 import { danhSachCatalogue } from "@/modules/catalogue-share/chia-se.service";
 import { layChu, layNgonNgu } from "@/messages/may-chu";
 import { MA_HTML } from "@/messages/ngon-ngu";
+import type { BoChu } from "@/messages";
 import { ExternalLink, Plus, Printer } from "lucide-react";
+import { SO_NGAY_SONG, soNgayConLai, type TrangThaiLink } from "@/modules/catalogue-share/hieu-luc.model";
 import { NutChep } from "./nut-chep";
+import { NutKhoa } from "./nut-khoa";
 
 export async function generateMetadata() {
   const t = await layChu();
@@ -31,12 +34,47 @@ const ICON = { "aria-hidden": true, strokeWidth: 1.5, className: "h-4 w-4 shrink
  * DUYET: doi may hay xoa lich su la mat. Bang nay theo NGUOI, va vi vay chi co
  * duoc sau khi he thong bat dang nhap.
  */
+/** Nhan trang thai. Chi "Dang mo" moi khong phai canh bao, nen chi no dung mau chu thuong. */
+function NhanTrangThai({
+  trangThai,
+  hetHanLuc,
+  bayGio,
+  t,
+}: {
+  trangThai: TrangThaiLink;
+  hetHanLuc: Date;
+  bayGio: Date;
+  t: BoChu;
+}) {
+  if (trangThai === "mo") {
+    return (
+      <>
+        <span className="block text-hp-body">{t.danh_sach_catalogue.trang_thai_mo}</span>
+        <span className="mt-0.5 block text-xs tabular-nums text-hp-muted">
+          {t.danh_sach_catalogue.con_ngay.replace(
+            "{n}",
+            String(soNgayConLai(hetHanLuc, bayGio)),
+          )}
+        </span>
+      </>
+    );
+  }
+  return (
+    <span className="text-hp-pink-strong">
+      {trangThai === "khoa"
+        ? t.danh_sach_catalogue.trang_thai_khoa
+        : t.danh_sach_catalogue.trang_thai_het_han}
+    </span>
+  );
+}
+
 export default async function TrangDanhSachCatalogue() {
   const user = await requireUser();
   const t = await layChu();
   const nn = await layNgonNgu();
   const laAdmin = user.role === "admin";
   const ds = await danhSachCatalogue(user.id, laAdmin);
+  const bayGio = new Date();
 
   return (
     <>
@@ -46,6 +84,9 @@ export default async function TrangDanhSachCatalogue() {
         </h1>
         <p className="mt-3 text-sm text-hp-muted">
           {laAdmin ? t.danh_sach_catalogue.mo_ta_admin : t.danh_sach_catalogue.mo_ta_sale}
+        </p>
+        <p className="mt-1 text-sm text-hp-muted">
+          {t.danh_sach_catalogue.giai_thich_han.replace("{n}", String(SO_NGAY_SONG))}
         </p>
         <div className="mt-5 h-px bg-hp-rule" />
       </div>
@@ -70,6 +111,7 @@ export default async function TrangDanhSachCatalogue() {
                 <th className={O_TIEU_DE}>{t.danh_sach_catalogue.cot_ten}</th>
                 <th className={O_TIEU_DE}>{t.danh_sach_catalogue.cot_noi_dung}</th>
                 <th className={O_TIEU_DE}>{t.danh_sach_catalogue.cot_ngay}</th>
+                <th className={O_TIEU_DE}>{t.danh_sach_catalogue.cot_hieu_luc}</th>
                 {/* Cot nguoi tao chi co nghia voi admin: sale chi thay cua
                     chinh minh nen mot cot lap lai ten ho la cot thua. */}
                 {laAdmin && (
@@ -98,6 +140,14 @@ export default async function TrangDanhSachCatalogue() {
                   <td className={`${O} whitespace-nowrap tabular-nums`}>
                     {c.taoLuc.toLocaleDateString(MA_HTML[nn])}
                   </td>
+                  <td className={`${O} whitespace-nowrap`}>
+                    <NhanTrangThai
+                      trangThai={c.trangThai}
+                      hetHanLuc={c.hetHanLuc}
+                      bayGio={bayGio}
+                      t={t}
+                    />
+                  </td>
                   {laAdmin && (
                     <td className={`${O} whitespace-nowrap`}>
                       {c.nguoiTao ?? t.danh_sach_catalogue.khong_ro_nguoi_tao}
@@ -115,6 +165,7 @@ export default async function TrangDanhSachCatalogue() {
                         {t.danh_sach_catalogue.mo}
                       </Link>
                       <NutChep slug={c.slug} />
+                      <NutKhoa slug={c.slug} trangThai={c.trangThai} />
                       {/* ?in=1 mo san hop thoai in — duong nay chi sale dung,
                           link gui khach la link tran. */}
                       <a

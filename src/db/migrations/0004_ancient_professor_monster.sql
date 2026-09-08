@@ -1,0 +1,2 @@
+ALTER TABLE "catalogues" ADD COLUMN "het_han_luc" timestamp with time zone DEFAULT now() + interval '90 days' NOT NULL;--> statement-breakpoint
+ALTER TABLE "catalogues" ADD COLUMN "khoa_luc" timestamp with time zone;

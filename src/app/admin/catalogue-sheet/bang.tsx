@@ -3,6 +3,7 @@ import { khoaMau } from "@/modules/catalogue-share/chia-se.model";
 import { OTich } from "./chon-mau";
 import { layChu } from "@/messages/may-chu";
 import { nhanCo } from "./nhan-co";
+import { LienKetDrive } from "./lien-ket-drive";
 
 
 /** Chuan tieng Viet dung dau phay thap phan, du bang tinh ghi dau cham. */
@@ -97,19 +98,7 @@ export async function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
               <td className={O_GON}><Chu v={d.oChu} /></td>
 
               <td className={O_GON}>
-                {d.urlThuMuc ? (
-                  <a
-                    href={d.urlThuMuc}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-[10px] uppercase tracking-[0.14em] text-hp-muted
-                               transition-colors duration-150 hover:text-hp-ink hover:underline"
-                  >
-                    {t.catalogue_sheet.mo_thu_muc}
-                  </a>
-                ) : (
-                  <Trong />
-                )}
+                <LienKetDrive d={d} t={t} />
               </td>
 
               <td className={`${O_DU_LIEU} text-[10px] uppercase tracking-[0.14em] text-hp-muted`}>

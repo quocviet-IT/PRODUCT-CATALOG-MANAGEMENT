@@ -281,24 +281,39 @@ export function ThanhBoLoc({
 
   return (
     <div className="mb-10 space-y-5">
-      <div className="max-w-md">
+      {/*
+        O tim kiem la thu duoc dung nhieu nhat tren man hinh nay, nen no phai
+        NANG hon moi thu khac. Truoc day no chi la mot duong gach chan mo —
+        nguoi dung bao khong nhin thay no o dau (08/09/2026). Gio la mot o co
+        vien that, icon to hon, va cau goi y ben trong.
+      */}
+      <div className="max-w-xl">
         <label className={NHAN} htmlFor="q">
           {t.catalogue_sheet.tim_kiem_nhan}
         </label>
-        {/* Kinh lup nam TRONG duong gach chan chu khong phai mot o vien rieng:
-            o nhap cua he thiet ke la mot duong ke, khong phai mot cai hop. */}
-        <div className="mt-2 flex items-center gap-2 border-b border-hp-rule
-                        transition-colors duration-150 focus-within:border-b-2
+        <div className="mt-2 flex items-center gap-3 border border-hp-rule bg-hp-card
+                        px-4 py-3 transition-colors duration-150
                         focus-within:border-hp-pink">
-          <Search aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0 text-hp-muted" />
+          <Search aria-hidden strokeWidth={1.5} className="h-5 w-5 shrink-0 text-hp-muted" />
           <input
             id="q"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             autoComplete="off"
-            className="w-full bg-transparent py-1.5 font-body text-base text-hp-body
-                       focus:outline-none"
+            placeholder={t.catalogue_sheet.tim_kiem_goi_y}
+            className="w-full bg-transparent font-body text-base text-hp-body
+                       placeholder:text-hp-muted/70 focus:outline-none"
           />
+          {q !== "" && (
+            <button
+              type="button"
+              onClick={() => setQ("")}
+              aria-label={t.catalogue_sheet.xoa_loc}
+              className="shrink-0 text-hp-muted transition-colors duration-150 hover:text-hp-ink"
+            >
+              <X aria-hidden strokeWidth={1.5} className="h-4 w-4" />
+            </button>
+          )}
         </div>
       </div>
 

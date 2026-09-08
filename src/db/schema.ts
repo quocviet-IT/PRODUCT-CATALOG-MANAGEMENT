@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable, uuid, text, integer, bigint, boolean, timestamp,
   jsonb, numeric, pgEnum, uniqueIndex, index,
@@ -130,6 +131,23 @@ export const catalogues = pgTable("catalogues", {
    * tao no.
    */
   ownerId: uuid("owner_id").references(() => users.id, { onDelete: "set null" }),
+  /**
+   * Sau moc nay link khong mo duoc nua (mac dinh 90 ngay ke tu luc tao).
+   *
+   * Luu moc TUYET DOI chu khong tinh tu created_at moi lan doc: sau nay doi
+   * chinh sach thanh 60 hay 120 ngay thi nhung link DA GUI cho khach khong
+   * duoc phep xe dich theo — khach dang cam trong tay mot cai hen.
+   */
+  hetHanLuc: timestamp("het_han_luc", { withTimezone: true })
+    .notNull()
+    .default(sql`now() + interval '90 days'`),
+  /**
+   * Luc bi khoa tay. NULL = chua khoa.
+   *
+   * Dung moc thoi gian chu khong dung true/false: khi can biet "link nay bi
+   * khoa hoi nao" thi da co san, khong phai di doi mot bang nhat ky rieng.
+   */
+  khoaLuc: timestamp("khoa_luc", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   uniqueIndex("catalogues_slug_idx").on(t.slug),
