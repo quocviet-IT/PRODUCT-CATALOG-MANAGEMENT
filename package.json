@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "kiem-tra:google": "tsx scripts/kiem-tra-google.mts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

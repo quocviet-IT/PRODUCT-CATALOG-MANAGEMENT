@@ -1,5 +1,5 @@
 import sharp, { type Metadata } from "sharp";
-import { taiTepDrive } from "@/modules/sheet/drive.client";
+import { taiAnhDrive } from "@/modules/sheet/drive.client";
 import { LoiAnhKhongHopLe, tinhKichThuocMoi } from "./image-processor";
 import { dungKhoaAnhSheet, ghiTep, layUrlCoKy, tepTonTai } from "./storage";
 
@@ -21,7 +21,7 @@ export async function layUrlAnhSheet(
   const khoa = dungKhoaAnhSheet(fileId, canhDai);
 
   if (!(await tepTonTai(khoa))) {
-    const goc = await taiTepDrive(fileId);
+    const goc = await taiAnhDrive(fileId);
     let meta: Metadata;
     try {
       meta = await sharp(goc).metadata();

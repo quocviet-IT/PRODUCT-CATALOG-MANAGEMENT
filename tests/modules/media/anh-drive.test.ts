@@ -3,8 +3,11 @@ import { randomUUID } from "node:crypto";
 import sharp from "sharp";
 import { LoiAnhKhongHopLe } from "@/modules/media/image-processor";
 
-const taiTepDrive = vi.fn();
-vi.mock("@/modules/sheet/drive.client", () => ({ taiTepDrive }));
+const taiAnhDrive = vi.fn();
+// Ban gia phai khai DUNG ten ham ma anh-drive.ts thuc su import. Doi ten ben
+// kia ma quen o day thi vitest bao "No export is defined", khong phai loi
+// logic — dung di tim nham cho.
+vi.mock("@/modules/sheet/drive.client", () => ({ taiAnhDrive }));
 
 const { layUrlAnhSheet, CANH_DAI_ANH_SHEET } = await import("@/modules/media/anh-drive");
 const { dungKhoaAnhSheet, tepTonTai, xoaTep } = await import("@/modules/media/storage");
@@ -17,7 +20,7 @@ const khoa = dungKhoaAnhSheet(FILE_ID, CANH_DAI_ANH_SHEET);
 afterEach(async () => {
   // Bucket la that va dung chung — khong duoc bo lai rac.
   await xoaTep([khoa]).catch(() => {});
-  taiTepDrive.mockReset();
+  taiAnhDrive.mockReset();
 });
 
 describe("dungKhoaAnhSheet", () => {
@@ -31,32 +34,32 @@ describe("layUrlAnhSheet", () => {
     const to = await sharp({
       create: { width: 2000, height: 1500, channels: 3, background: "#ffffff" },
     }).jpeg().toBuffer();
-    taiTepDrive.mockResolvedValue(to);
+    taiAnhDrive.mockResolvedValue(to);
 
     const url = await layUrlAnhSheet(FILE_ID);
 
     expect(url).toContain("http");
     expect(await tepTonTai(khoa)).toBe(true);
-    expect(taiTepDrive).toHaveBeenCalledOnce();
+    expect(taiAnhDrive).toHaveBeenCalledOnce();
   }, 30000);
 
   it("lan thu hai KHONG goi lai Drive", async () => {
     const to = await sharp({
       create: { width: 800, height: 800, channels: 3, background: "#ffffff" },
     }).jpeg().toBuffer();
-    taiTepDrive.mockResolvedValue(to);
+    taiAnhDrive.mockResolvedValue(to);
 
     await layUrlAnhSheet(FILE_ID);
     await layUrlAnhSheet(FILE_ID);
 
-    expect(taiTepDrive).toHaveBeenCalledOnce();
+    expect(taiAnhDrive).toHaveBeenCalledOnce();
   }, 30000);
 
   it("thu nho ve dung canh dai 600 va chuyen sang webp", async () => {
     const to = await sharp({
       create: { width: 2000, height: 1000, channels: 3, background: "#ffffff" },
     }).jpeg().toBuffer();
-    taiTepDrive.mockResolvedValue(to);
+    taiAnhDrive.mockResolvedValue(to);
 
     await layUrlAnhSheet(FILE_ID);
 
@@ -69,7 +72,7 @@ describe("layUrlAnhSheet", () => {
   }, 30000);
 
   it("tu choi voi loi mien nguyen khi Drive tra ve du lieu khong phai anh", async () => {
-    taiTepDrive.mockResolvedValue(Buffer.from("khong phai anh"));
+    taiAnhDrive.mockResolvedValue(Buffer.from("khong phai anh"));
 
     await expect(layUrlAnhSheet(FILE_ID)).rejects.toBeInstanceOf(LoiAnhKhongHopLe);
   }, 30000);
@@ -81,7 +84,7 @@ describe("layUrlAnhSheet", () => {
     // Cat con khoang nua: header JPEG van doc duoc kich thuoc (metadata() pass)
     // nhung du lieu quet dong bi thieu, lam toBuffer() nem loi libvips tho.
     const catNgang = to.subarray(0, Math.floor(to.length / 2));
-    taiTepDrive.mockResolvedValue(catNgang);
+    taiAnhDrive.mockResolvedValue(catNgang);
 
     await expect(layUrlAnhSheet(FILE_ID)).rejects.toBeInstanceOf(LoiAnhKhongHopLe);
   }, 30000);
