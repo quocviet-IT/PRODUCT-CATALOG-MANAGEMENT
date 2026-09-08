@@ -255,7 +255,7 @@ export const vi = {
     b4_mo_ta: "Đặt tên để sau này tìm lại cho dễ — tên cũng nằm luôn trong đường link gửi khách. Bỏ trống thì hệ thống tự đánh số.",
     b4_c1: "Tên catalogue. Bỏ trống thì thành “Catalogue #12”.",
     b4_c2: "Ba bố cục. Bấm vào ô nào là chọn ô đó.",
-    b4_c3: "Tông màu, thông số cho khách xem, ngôn ngữ, và trang bìa.",
+    b4_c3: "Tông màu, thông số cho khách xem, ngôn ngữ, liên hệ đặt hàng, và trang bìa." + " Điền số điện thoại thì trang khách có nút gọi và nút Zalo.",
 
     b5_ten: "Bỏ bớt ảnh",
     b5_mo_ta: "Mặc định giữ hết ảnh của mẫu. Bấm vào ảnh nào để bỏ ảnh đó ra khỏi catalogue. Cần gỡ nguyên một mẫu thì bấm Gỡ mẫu này.",
@@ -264,7 +264,7 @@ export const vi = {
     b5_c3: "Gỡ cả mẫu khỏi catalogue.",
 
     b6_ten: "Tạo link và gửi khách",
-    b6_mo_ta: "Bấm Tạo link gửi khách. Nội dung được đóng băng ngay lúc này — bảng tính sửa về sau cũng không làm đổi cái khách đang xem.",
+    b6_mo_ta: "Bấm Xem trước để ngó đúng thứ khách sẽ thấy, rồi mới bấm Tạo link gửi khách." + " Nội dung được đóng băng ngay lúc tạo — bảng tính sửa về sau cũng không làm đổi cái khách đang xem.",
     b6_c1: "Bấm Chép link rồi dán vào Zalo hoặc email.",
     b6_c2: "Mở thử để xem đúng thứ khách sẽ thấy.",
     b6_c3: "Tải PDF là bản in — chỉ anh thấy nút này, khách thì không.",
@@ -330,9 +330,13 @@ export const vi = {
     bia_ten_khach_goi_y: "Chị Lan",
     bia_loi_chao: "Lời mở đầu",
     bia_loi_chao_goi_y: "Kính gửi chị bộ sưu tập nhẫn cưới 18K…",
-    bia_ten_sale: "Người tư vấn",
-    bia_ten_sale_goi_y: "Ngọc Anh — 0909 123 456",
 
+    lien_he_nhan: "Liên hệ đặt hàng",
+    lien_he_mo_ta: "Hiện ở cuối trang khách, kèm nút gọi và nút Zalo. Bỏ trống thì không hiện khối này.",
+    lien_he_ten: "Người tư vấn",
+    lien_he_ten_goi_y: "Ngọc Anh",
+    lien_he_dien_thoai: "Điện thoại / Zalo",
+    lien_he_dien_thoai_goi_y: "0909 123 456",
     hien_nhan: "Thông số cho khách xem",
     hien_mo_ta: "Bỏ tích thì khách không thấy dòng đó.",
 
@@ -356,6 +360,10 @@ export const vi = {
     dang_tai: "Đang tải danh sách đã chọn",
     chua_chon_gi: "Chưa chọn mẫu nào. Về danh sách catalogue và tích chọn mẫu trước.",
     ve_danh_sach: "Về danh sách catalogue",
+    xem_truoc: "Xem trước",
+    xem_truoc_tieu_de: "Đúng thứ khách sẽ thấy",
+    xem_truoc_chua_dat_ten: "Catalogue (hệ thống sẽ đánh số)",
+    xem_truoc_chua_co_mau: "Chưa chọn mẫu nào để xem trước.",
     nut_tao: "Tạo link gửi khách",
     dang_tao: "Đang tạo",
     loi_tai_chon: "Không tải được danh sách đã chọn. Thử lại giúp em.",
@@ -386,6 +394,13 @@ export const vi = {
     // Cau nay khach doc. KHONG noi ro la het han hay bi khoa: noi ro la ke
     // cam link biet minh dang cam mot link that, chi khong con hieu luc.
     link_het_hieu_luc: "Link này không còn hiệu lực.",
+    // Khoi keu goi hanh dong o cuoi trang khach. Cau chu phai la loi cua NGUOI
+    // BAN noi voi khach, khong phai loi he thong.
+    cta_tieu_de: "Thích mẫu nào, nhắn em giữ ngay",
+    cta_mo_ta: "Em giữ mẫu, hẹn anh chị xem trực tiếp tại cửa hàng, hoặc đặt làm theo yêu cầu.",
+    cta_nguoi_tu_van: "Người tư vấn",
+    cta_goi: "Gọi",
+    cta_zalo: "Nhắn Zalo",
     lien_he: "Liên hệ nhân viên tư vấn để biết thêm chi tiết.",
   },
 } as const;

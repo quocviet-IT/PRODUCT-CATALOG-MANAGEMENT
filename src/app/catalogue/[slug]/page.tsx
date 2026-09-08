@@ -6,7 +6,7 @@ import { boChu } from "@/messages";
 import { NguonNgonNgu } from "@/messages/dung-chu";
 import { MoHopThoaiIn } from "./nut-in";
 import { PhongToAnh } from "./phong-to";
-import { LOP_TONE, ThanCatalogue, TrangBia } from "./bo-cuc";
+import { KhoiLienHe, LOP_TONE, ThanCatalogue, ThanhLienHe, TrangBia } from "./bo-cuc";
 import { LinkHetHieuLuc } from "./het-hieu-luc";
 import { Logo } from "@/app/thuong-hieu";
 
@@ -87,8 +87,10 @@ export default async function TrangKhachXem({
           {g.bia && (
             <TrangBia
               bia={g.bia}
+              lienHe={g.lienHe}
               tieuDe={c.ten}
               thuongHieu={t.catalogue_sheet.thuong_hieu}
+              t={t}
             />
           )}
 
@@ -118,12 +120,16 @@ export default async function TrangKhachXem({
             <ThanCatalogue muc={c.noiDung.muc} g={g} t={t} />
           </PhongToAnh>
 
+          {g.lienHe && <KhoiLienHe lienHe={g.lienHe} t={t} />}
+
           {moIn && <MoHopThoaiIn />}
 
           <footer className="mt-14 border-t border-hp-rule pt-6 text-xs text-hp-muted">
             {t.chia_se.lien_he}
           </footer>
         </main>
+
+        {g.lienHe && <ThanhLienHe lienHe={g.lienHe} t={t} />}
       </div>
     </NguonNgonNgu>
   );
