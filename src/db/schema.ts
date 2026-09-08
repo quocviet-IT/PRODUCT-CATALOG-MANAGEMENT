@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable, uuid, text, integer, bigint, boolean, timestamp,
   jsonb, numeric, pgEnum, uniqueIndex, index,
@@ -80,4 +81,75 @@ export const productImages = pgTable("product_images", {
 }, (t) => [
   index("product_images_product_idx").on(t.productId),
   index("product_images_hash_idx").on(t.contentHash),
+]);
+
+/**
+ * Mot catalogue sale gui khach.
+ *
+ * noiDung la anh chup DONG CUNG luc tao, khong phai con tro toi bang tinh:
+ * bang tinh sua moi ngay, con link da gui thi nam trong may khach hang tuan.
+ * Khach phai luon thay dung cai sale gui — khong bao gio co chuyen mo ra thay
+ * so lieu khac luc tu van, hay mau bien mat vi ai do xoa dong.
+ *
+ * Chua co owner: he thong dang khong bat dang nhap (quyet dinh 07/09/2026),
+ * sale giu danh sach catalogue cua minh trong trinh duyet. Khi nao bat dang
+ * nhap thi them mot cot owner_id, khong phai dung lai bang.
+ */
+export const catalogues = pgTable("catalogues", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  /** Phan xuat hien trong link /c/<slug>. Ngau nhien, khong doan duoc. */
+  slug: text("slug").notNull(),
+  /**
+   * So thu tu de nguoi doc goi ten: "Catalogue #7". Do Postgres cap nen khong
+   * bao gio trung, ke ca khi hai sale bam Tao cung mot luc.
+   *
+   * Vi sao khong dung ngay thang lam ten mac dinh: hai catalogue tao cung mot
+   * ngay se mang y het mot cai ten, sale mo danh sach ra khong biet cai nao la
+   * cai nao.
+   */
+  so: bigint("so", { mode: "number" }).notNull().generatedAlwaysAsIdentity(),
+  /** Ten sale dat. RONG la hop le — luc do hien thi lay theo `so`. */
+  ten: text("ten").notNull().default(""),
+  /** Xem KieuNoiDung trong catalogue-share/chia-se.model.ts */
+  noiDung: jsonb("noi_dung").notNull(),
+  /**
+   * Cach TRINH BAY noi dung tren — bo cuc, tong mau, trang bia, thong so nao
+   * duoc hien. Xem GiaoDienCatalogue trong chia-se.model.ts.
+   *
+   * Tach khoi noi_dung co chu y: noi_dung la DU LIEU dong bang (mau nao, anh
+   * nao), con cot nay la CACH BAY no ra. Tron hai thu vao mot cot thi moi lan
+   * them mot lua chon trinh bay lai phai nang phien ban cua ban chup du lieu,
+   * va moi catalogue cu deu phai doc lai qua duong tuong thich.
+   *
+   * Mac dinh {} — catalogue tao truoc khi co tinh nang nay doc ra gia tri mac
+   * dinh, hien y het luc no duoc gui di.
+   */
+  giaoDien: jsonb("giao_dien").notNull().default({}),
+  /**
+   * Ai tao. NULL cho ca catalogue tao thoi chua bat dang nhap lan catalogue cua
+   * mot tai khoan da bi xoa — link da gui khach thi khong duoc chet theo nguoi
+   * tao no.
+   */
+  ownerId: uuid("owner_id").references(() => users.id, { onDelete: "set null" }),
+  /**
+   * Sau moc nay link khong mo duoc nua (mac dinh 90 ngay ke tu luc tao).
+   *
+   * Luu moc TUYET DOI chu khong tinh tu created_at moi lan doc: sau nay doi
+   * chinh sach thanh 60 hay 120 ngay thi nhung link DA GUI cho khach khong
+   * duoc phep xe dich theo — khach dang cam trong tay mot cai hen.
+   */
+  hetHanLuc: timestamp("het_han_luc", { withTimezone: true })
+    .notNull()
+    .default(sql`now() + interval '90 days'`),
+  /**
+   * Luc bi khoa tay. NULL = chua khoa.
+   *
+   * Dung moc thoi gian chu khong dung true/false: khi can biet "link nay bi
+   * khoa hoi nao" thi da co san, khong phai di doi mot bang nhat ky rieng.
+   */
+  khoaLuc: timestamp("khoa_luc", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("catalogues_slug_idx").on(t.slug),
+  index("catalogues_owner_idx").on(t.ownerId, t.createdAt),
 ]);

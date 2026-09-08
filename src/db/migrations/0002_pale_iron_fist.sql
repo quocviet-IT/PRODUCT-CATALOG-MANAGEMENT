@@ -1,0 +1,2 @@
+ALTER TABLE "catalogues" ALTER COLUMN "ten" SET DEFAULT '';--> statement-breakpoint
+ALTER TABLE "catalogues" ADD COLUMN "so" bigint NOT NULL GENERATED ALWAYS AS IDENTITY (sequence name "catalogues_so_seq" INCREMENT BY 1 MINVALUE 1 MAXVALUE 9223372036854775807 START WITH 1 CACHE 1);

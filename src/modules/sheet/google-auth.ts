@@ -35,6 +35,17 @@ function layPhien(): JWT {
     // khong thi thu vien khong parse duoc PEM.
     key: env.GOOGLE_SERVICE_ACCOUNT_KEY.replace(/\\n/g, "\n"),
     scopes: PHAM_VI,
+    // Mao danh mot nguoi that trong to chuc (uy quyen toan mien).
+    //
+    // Bat buoc voi bo du lieu nay: 58/65 thu muc anh chi mang MOT quyen duy
+    // nhat la domain/reader — "ai trong ctyhp.vn co link deu xem duoc". Service
+    // account co email ngoai ten mien do nen khong nam trong dien duoc chia se;
+    // khong mao danh thi no doc duoc bang tinh nhung liet ke thu muc tra ve
+    // RONG kem HTTP 200 — hong am tham, khong bao loi gi.
+    //
+    // Con mot loi the nua: thu muc chia se cho ca to chuc ve sau tu dong thay
+    // duoc, khong phai them tay tung cai.
+    subject: env.GOOGLE_IMPERSONATE_EMAIL,
   });
   return phien;
 }

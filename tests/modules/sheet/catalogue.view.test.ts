@@ -6,6 +6,7 @@ import {
   docBoLocTuUrl,
   docTrang,
   locDanhSach,
+  tachTuKhoa,
   thamSoCua,
   tinhDemLoc,
   tinhThongKe,
@@ -326,5 +327,78 @@ describe("catTrang", () => {
     expect(k.soTrang).toBe(1);
     expect(k.tu).toBe(0);
     expect(k.den).toBe(0);
+  });
+});
+
+describe("tim kiem", () => {
+  const DS = [
+    dong({ dongSheet: 1, maMau: "D12741", sku: "108632", chatLieu: "18K",
+           mau: "White", loaiSp: "NHẪN", dongSp: "Complete", size: "5",
+           tlVang: 2.78, loaiXoan: "lab" }),
+    dong({ dongSheet: 2, maMau: "D11030", chatLieu: "14K", mau: "Yellow",
+           loaiSp: "LẮC", dongSp: "Trơn", size: "6.75", tlVang: 5.07,
+           loaiXoan: "tu-nhien" }),
+    dong({ dongSheet: 3, maMau: "N10145", chatLieu: "18K", mau: "White",
+           loaiSp: "DÂY CHUYỀN", size: "18VN" }),
+  ];
+  const dem = (q: string) => locDanhSach(DS, { ...KHONG_LOC, q }).length;
+
+  it("khong dau, co dau, hoa thuong deu ra nhu nhau", () => {
+    for (const q of ["nhẫn", "nhan", "NHAN", "NhẪn"]) expect(dem(q)).toBe(1);
+  });
+
+  it("go tieng Anh ra hang tieng Viet va nguoc lai", () => {
+    expect(dem("ring")).toBe(1);        // NHẪN
+    expect(dem("bracelet")).toBe(1);    // LẮC
+    expect(dem("necklace")).toBe(1);    // DÂY CHUYỀN
+    expect(dem("trắng")).toBe(2);       // White
+    expect(dem("vàng")).toBe(1);        // Yellow
+    expect(dem("plain")).toBe(1);       // Trơn
+  });
+
+  it("NHIEU TU: moi tu deu phai co, khong can dung thu tu", () => {
+    // Truoc day ca hai cau nay tra ve 0 vi cau tim duoc doi chieu nguyen cum
+    // voi chuoi da ghep — "nhan" va "18k" nam o hai cot, khong bao gio ke nhau.
+    expect(dem("nhan 18k")).toBe(1);
+    expect(dem("18k nhan")).toBe(1);
+    expect(dem("white 18k")).toBe(2);
+    expect(dem("nhan 14k")).toBe(0);
+  });
+
+  it("tim duoc theo TL vang, ca dau cham lan dau phay", () => {
+    expect(dem("2.78")).toBe(1);
+    expect(dem("2,78")).toBe(1);
+  });
+
+  it("tim duoc theo loai xoan", () => {
+    expect(dem("lab")).toBe(1);
+    expect(dem("tự nhiên")).toBe(1);
+    expect(dem("natural")).toBe(1);
+  });
+
+  it("tu ngan chi khop tu DAU tu, khong khop giua tu", () => {
+    // "lac" khong duoc keo theo "necklace" — nguoi tim vong lac ma ra day
+    // chuyen la sai han y dinh.
+    expect(dem("lac")).toBe(1);
+  });
+
+  it("tu tu 4 ky tu tro len khop duoc ca giua tu — do la cach go ma hang", () => {
+    expect(dem("12741")).toBe(1);
+    expect(dem("1030")).toBe(1);
+  });
+
+  it("tu khong co trong bang thi khong ra gi, ke ca khi di kem tu co that", () => {
+    expect(dem("khongcogi")).toBe(0);
+    expect(dem("nhan khongcogi")).toBe(0);
+  });
+});
+
+describe("tachTuKhoa", () => {
+  it("tach theo khoang trang, bo dau, ha chu thuong", () => {
+    expect(tachTuKhoa("  Nhẫn   18K  ")).toEqual(["nhan", "18k"]);
+  });
+  it("khong co cau tim thi khong co tu nao", () => {
+    expect(tachTuKhoa(null)).toEqual([]);
+    expect(tachTuKhoa("   ")).toEqual([]);
   });
 });

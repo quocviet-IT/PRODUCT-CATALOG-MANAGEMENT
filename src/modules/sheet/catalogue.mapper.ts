@@ -37,6 +37,10 @@ export type DongCatalogue = {
   urlThuMuc: string | null;
   /** ID thu muc Drive chua TOAN BO anh cua mau, tach tu urlThuMuc. */
   idThuMuc: string | null;
+  /** Cot "Hinh raw - concept": thu muc anh y tuong, tach hoan toan voi anh mau. */
+  urlAnhConcept: string | null;
+  /** Cot "Source clip tho": thu muc video quay tho. */
+  urlClipTho: string | null;
   co: CoBatThuong[];
 };
 
@@ -84,6 +88,11 @@ const COT = {
   // "FOLDER HINH" da doi ten thanh "Hinh raw - luu mau" (07/09/2026). Nhan ca hai
   // ten: mat cot nay la ca thu vien anh o trang chi tiet chet lang le.
   thuMuc:   { ten: "FOLDER HÌNH", batBuoc: false, nhan: ["hình raw - lưu mẫu", "folder hình"] },
+  // Hai cot nay bang tinh da co tu lau nhung he thong khong doc — nguoi dung
+  // bao "thieu cot so voi sheet" (08/09/2026). Deu la lien ket Drive, deu co
+  // the la chip hay hyperlink nhu cot tren.
+  anhConcept: { ten: "Hình raw - concept", batBuoc: false, nhan: ["hình raw - concept"] },
+  clipTho:    { ten: "Source clip thô",    batBuoc: false, nhan: ["source clip thô", "source clip tho"] },
 } as const;
 
 type TenTruong = keyof typeof COT;
@@ -195,6 +204,8 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
       oChu: chu(lay(h, "oChu")),
       chiTiet,
       chatLieu: chu(lay(h, "chatLieu")),
+      urlAnhConcept: lienKet(lay(h, "anhConcept")),
+      urlClipTho: lienKet(lay(h, "clipTho")),
       loaiXoan: chiTiet === null ? null
         : /^LGDRI/i.test(chiTiet) ? "lab"
         : /^DIARI/i.test(chiTiet) ? "tu-nhien"

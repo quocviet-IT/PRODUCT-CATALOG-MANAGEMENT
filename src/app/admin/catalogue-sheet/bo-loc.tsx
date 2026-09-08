@@ -11,36 +11,36 @@ import {
   type DemLoc,
   type MucDem,
 } from "@/modules/sheet/catalogue.view";
-import { vi } from "@/messages/vi";
+import { ChevronDown, Search, X } from "lucide-react";
+import { useChu } from "@/messages/dung-chu";
+import type { BoChu } from "@/messages";
+import { nhanCo } from "./nhan-co";
 
 const NHAN = "block text-[11px] uppercase tracking-[0.14em] text-hp-muted";
 
-const NHAN_CHIEU: Record<ChieuLoc, string> = {
-  chatLieu: vi.catalogue_sheet.cot_chat_lieu,
-  loaiSp: vi.catalogue_sheet.cot_loai_sp,
-  dongSp: vi.catalogue_sheet.cot_dong_sp,
-  mau: vi.catalogue_sheet.cot_mau,
-  size: vi.catalogue_sheet.cot_size,
-  loaiXoan: vi.catalogue_sheet.loai_xoan,
-  canhBao: vi.catalogue_sheet.canh_bao_nhan,
-};
+function nhanChieu(t: BoChu): Record<ChieuLoc, string> {
+  return {
+    chatLieu: t.catalogue_sheet.cot_chat_lieu,
+    loaiSp: t.catalogue_sheet.cot_loai_sp,
+    dongSp: t.catalogue_sheet.cot_dong_sp,
+    mau: t.catalogue_sheet.cot_mau,
+    size: t.catalogue_sheet.cot_size,
+    loaiXoan: t.catalogue_sheet.loai_xoan,
+    canhBao: t.catalogue_sheet.canh_bao_nhan,
+  };
+}
 
 /** Hai chieu mang nhan noi bo, phai doi sang chu nguoi doc hieu. */
-const NHAN_XOAN: Record<string, string> = {
-  lab: vi.catalogue_sheet.xoan_lab,
-  "tu-nhien": vi.catalogue_sheet.xoan_tu_nhien,
-};
-const NHAN_CO: Record<CoBatThuong, string> = {
-  "thieu-sku": vi.catalogue_sheet.co_thieu_sku,
-  "thieu-anh": vi.catalogue_sheet.co_thieu_anh,
-  "thieu-mo-ta": vi.catalogue_sheet.co_thieu_mo_ta,
-  "trung": vi.catalogue_sheet.co_trung,
-  "tl-vang-lech": vi.catalogue_sheet.co_tl_vang_lech,
-};
+function nhanXoan(t: BoChu): Record<string, string> {
+  return {
+    lab: t.catalogue_sheet.xoan_lab,
+    "tu-nhien": t.catalogue_sheet.xoan_tu_nhien,
+  };
+}
 
-function nhanGiaTri(chieu: ChieuLoc, gia_tri: string): string {
-  if (chieu === "loaiXoan") return NHAN_XOAN[gia_tri] ?? gia_tri;
-  if (chieu === "canhBao") return NHAN_CO[gia_tri as CoBatThuong] ?? gia_tri;
+function nhanGiaTri(chieu: ChieuLoc, gia_tri: string, t: BoChu): string {
+  if (chieu === "loaiXoan") return nhanXoan(t)[gia_tri] ?? gia_tri;
+  if (chieu === "canhBao") return nhanCo(t)[gia_tri as CoBatThuong] ?? gia_tri;
   return gia_tri;
 }
 
@@ -86,6 +86,7 @@ function ThaXuong({
   daChon: readonly string[];
   khiDao: (gia_tri: string) => void;
 }) {
+  const t = useChu();
   const [mo, setMo] = useState(false);
   const boc = useRef<HTMLDivElement>(null);
   const nut = useRef<HTMLButtonElement>(null);
@@ -128,17 +129,19 @@ function ThaXuong({
                       : "border-hp-rule text-hp-muted hover:text-hp-ink"}`}
       >
         <span className="truncate">
-          {NHAN_CHIEU[chieu]}
+          {nhanChieu(t)[chieu]}
           {dangBat && (
             <span className="ml-2 tabular-nums">
-              {vi.catalogue_sheet.da_chon.replace("{n}", String(daChon.length))}
+              {t.catalogue_sheet.da_chon.replace("{n}", String(daChon.length))}
             </span>
           )}
         </span>
-        {/* Tam giac quay khi mo — dau hieu duy nhat cho biet o nay bam duoc. */}
-        <span aria-hidden="true" className={mo ? "rotate-180" : undefined}>
-          ▾
-        </span>
+        {/* Mui ten quay khi mo — dau hieu duy nhat cho biet o nay bam duoc. */}
+        <ChevronDown
+          aria-hidden
+          strokeWidth={1.5}
+          className={`h-4 w-4 shrink-0 transition-transform duration-150 ${mo ? "rotate-180" : ""}`}
+        />
       </button>
 
       {mo && (
@@ -149,7 +152,7 @@ function ThaXuong({
         >
           {muc.length === 0 ? (
             <p className="px-3 py-2 text-[11px] text-hp-muted">
-              {vi.catalogue_sheet.khong_con_muc}
+              {t.catalogue_sheet.khong_con_muc}
             </p>
           ) : (
             muc.map((m) => {
@@ -169,7 +172,7 @@ function ThaXuong({
                   <span
                     className={`flex-1 text-sm ${chon ? "text-hp-ink" : "text-hp-body"}`}
                   >
-                    {nhanGiaTri(chieu, m.gia_tri)}
+                    {nhanGiaTri(chieu, m.gia_tri, t)}
                   </span>
                   {/* Dem 0 van hien: muc do dang duoc chon, an di thi nguoi dung
                       mat cho de bo chon no ra. */}
@@ -204,6 +207,7 @@ export function ThanhBoLoc({
 }) {
   const router = useRouter();
   const duongDan = usePathname();
+  const t = useChu();
   const thamSo = useSearchParams();
 
   // Cac o go chu giu trang thai rieng de go khong bi giat, roi moi day len URL
@@ -277,19 +281,40 @@ export function ThanhBoLoc({
 
   return (
     <div className="mb-10 space-y-5">
-      <div className="max-w-md">
+      {/*
+        O tim kiem la thu duoc dung nhieu nhat tren man hinh nay, nen no phai
+        NANG hon moi thu khac. Truoc day no chi la mot duong gach chan mo —
+        nguoi dung bao khong nhin thay no o dau (08/09/2026). Gio la mot o co
+        vien that, icon to hon, va cau goi y ben trong.
+      */}
+      <div className="max-w-xl">
         <label className={NHAN} htmlFor="q">
-          {vi.catalogue_sheet.tim_kiem_nhan}
+          {t.catalogue_sheet.tim_kiem_nhan}
         </label>
-        <input
-          id="q"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          autoComplete="off"
-          className="mt-2 w-full border-0 border-b border-hp-rule bg-transparent px-0.5 py-1.5
-                     font-body text-base text-hp-body transition-colors duration-150
-                     focus:border-b-2 focus:border-hp-pink focus:pb-[5px] focus:outline-none"
-        />
+        <div className="mt-2 flex items-center gap-3 border border-hp-rule bg-hp-card
+                        px-4 py-3 transition-colors duration-150
+                        focus-within:border-hp-pink">
+          <Search aria-hidden strokeWidth={1.5} className="h-5 w-5 shrink-0 text-hp-muted" />
+          <input
+            id="q"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            autoComplete="off"
+            placeholder={t.catalogue_sheet.tim_kiem_goi_y}
+            className="w-full bg-transparent font-body text-base text-hp-body
+                       placeholder:text-hp-muted/70 focus:outline-none"
+          />
+          {q !== "" && (
+            <button
+              type="button"
+              onClick={() => setQ("")}
+              aria-label={t.catalogue_sheet.xoa_loc}
+              className="shrink-0 text-hp-muted transition-colors duration-150 hover:text-hp-ink"
+            >
+              <X aria-hidden strokeWidth={1.5} className="h-4 w-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-wrap items-end gap-x-3 gap-y-3">
@@ -307,26 +332,26 @@ export function ThanhBoLoc({
         ))}
 
         <div className="flex items-baseline gap-2">
-          <span className={NHAN}>{vi.catalogue_sheet.tl_vang_khoang}</span>
+          <span className={NHAN}>{t.catalogue_sheet.tl_vang_khoang}</span>
           <label className="sr-only" htmlFor="tl_tu">
-            {vi.catalogue_sheet.tl_tu}
+            {t.catalogue_sheet.tl_tu}
           </label>
           <input
             id="tl_tu"
             inputMode="decimal"
-            placeholder={vi.catalogue_sheet.tl_tu}
+            placeholder={t.catalogue_sheet.tl_tu}
             value={tlTu}
             onChange={(e) => setTlTu(e.target.value)}
             className={O_SO}
           />
           <span className="text-hp-muted">–</span>
           <label className="sr-only" htmlFor="tl_den">
-            {vi.catalogue_sheet.tl_den}
+            {t.catalogue_sheet.tl_den}
           </label>
           <input
             id="tl_den"
             inputMode="decimal"
-            placeholder={vi.catalogue_sheet.tl_den}
+            placeholder={t.catalogue_sheet.tl_den}
             value={tlDen}
             onChange={(e) => setTlDen(e.target.value)}
             className={O_SO}
@@ -336,23 +361,21 @@ export function ThanhBoLoc({
 
       {coLoc && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-hp-rule pt-4">
-          <span className={NHAN}>{vi.catalogue_sheet.dang_loc_theo}</span>
+          <span className={NHAN}>{t.catalogue_sheet.dang_loc_theo}</span>
           {dangChon.map(({ chieu, gia_tri }) => (
             <button
               key={`${chieu}:${gia_tri}`}
               type="button"
               onClick={() => di({ [thamSoCua(chieu)]: daoGiaTri(hienTai[chieu], gia_tri) })}
-              aria-label={vi.catalogue_sheet.bo_muc.replace(
+              aria-label={t.catalogue_sheet.bo_muc.replace(
                 "{nhan}",
-                `${NHAN_CHIEU[chieu]}: ${nhanGiaTri(chieu, gia_tri)}`,
+                `${nhanChieu(t)[chieu]}: ${nhanGiaTri(chieu, gia_tri, t)}`,
               )}
               className="border border-hp-rule px-2.5 py-1 text-xs text-hp-body
                          transition-colors duration-150 hover:border-hp-ink hover:text-hp-ink"
             >
-              {nhanGiaTri(chieu, gia_tri)}
-              <span aria-hidden="true" className="ml-2 text-hp-muted">
-                ✕
-              </span>
+              {nhanGiaTri(chieu, gia_tri, t)}
+              <X aria-hidden strokeWidth={1.5} className="ml-1.5 inline-block h-3.5 w-3.5 text-hp-muted" />
             </button>
           ))}
           <button
@@ -361,7 +384,7 @@ export function ThanhBoLoc({
             className="ml-auto text-[11px] uppercase tracking-[0.14em] text-hp-muted
                        transition-colors duration-150 hover:text-hp-ink hover:underline"
           >
-            {vi.catalogue_sheet.xoa_loc}
+            {t.catalogue_sheet.xoa_loc}
           </button>
         </div>
       )}
