@@ -1,5 +1,6 @@
 import type { DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
+import { FolderOpen, Images, Video } from "lucide-react";
 import type { BoChu } from "@/messages";
 import { nhanCo } from "./nhan-co";
 
@@ -75,17 +76,30 @@ export function ChiTietMau({
         <ThongSo t={t} nhan={t.catalogue_sheet.cot_o_chu} gia_tri={d.oChu} />
       </dl>
 
-      {d.urlThuMuc && (
-        <a
-          href={d.urlThuMuc}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-4 inline-block text-[11px] uppercase tracking-[0.14em] text-hp-muted
-                     transition-colors duration-150 hover:text-hp-ink hover:underline"
-        >
-          {t.catalogue_sheet.mo_thu_muc}
-        </a>
-      )}
+      {/* O day co cho nen ba lien ket hien ca chu, khac voi trong bang: bang
+          lap lai chung tren moi dong nen chi hien icon. */}
+      <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2">
+        {([
+          [d.urlThuMuc, t.catalogue_sheet.mo_thu_muc, FolderOpen],
+          [d.urlAnhConcept, t.catalogue_sheet.mo_anh_concept, Images],
+          [d.urlClipTho, t.catalogue_sheet.mo_clip_tho, Video],
+        ] as const)
+          .filter((x): x is readonly [string, string, typeof FolderOpen] => x[0] !== null)
+          .map(([url, nhan, Icon]) => (
+            <a
+              key={nhan}
+              href={url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 text-[11px] uppercase
+                         tracking-[0.14em] text-hp-muted transition-colors duration-150
+                         hover:text-hp-ink"
+            >
+              <Icon aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
+              {nhan}
+            </a>
+          ))}
+      </div>
 
       <div className="mt-8 mb-4 flex items-baseline gap-4">
         <h3 className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">

@@ -146,6 +146,7 @@ export const vi = {
     nguon_bang_tinh: "Đọc trực tiếp từ bảng tính, làm mới mỗi 60 giây",
     nguon_mau: "Dữ liệu mẫu — chưa nối với bảng tính",
     tim_kiem_nhan: "Tìm mã mẫu, SKU, MO, SO hoặc mô tả",
+    tim_kiem_goi_y: "Gõ để lọc ngay, không cần bấm Enter",
     chat_lieu: "Chất liệu",
     loai_xoan: "Loại xoàn",
     xoan_lab: "Xoàn lab",
@@ -174,6 +175,9 @@ export const vi = {
     dem_trung: "Trùng dòng",
     chua_co_anh: "Chưa có ảnh",
     mo_thu_muc: "Mở thư mục ảnh",
+    mo_anh_concept: "Mở thư mục ảnh concept",
+    mo_clip_tho: "Mở thư mục clip thô",
+    khong_co_lien_ket: "Không có liên kết",
     khong_khop: "Không có mẫu nào khớp bộ lọc.",
     co_thieu_sku: "Thiếu SKU",
     co_thieu_anh: "Thiếu ảnh",
@@ -286,6 +290,17 @@ export const vi = {
     // {n} = so mau, {a} = so anh
     dem: "{n} mẫu · {a} ảnh",
     khong_ro_nguoi_tao: "—",
+    cot_hieu_luc: "Hiệu lực",
+    trang_thai_mo: "Đang mở",
+    trang_thai_khoa: "Đã khoá",
+    trang_thai_het_han: "Hết hạn",
+    con_ngay: "Còn {n} ngày",
+    khoa: "Khoá link",
+    mo_khoa: "Mở lại",
+    da_khoa_xong: "Đã khoá link.",
+    da_mo_khoa_xong: "Đã mở lại link.",
+    loi_khoa: "Không đổi được trạng thái link. Thử lại giúp em.",
+    giai_thich_han: "Link tự hết hiệu lực sau {n} ngày kể từ lúc tạo. Khoá tay thì link ngừng mở ngay lập tức.",
     mo: "Mở",
     chep: "Chép link",
     da_chep: "Đã chép",
@@ -322,7 +337,7 @@ export const vi = {
     hien_mo_ta: "Bỏ tích thì khách không thấy dòng đó.",
 
     ngon_ngu_nhan: "Ngôn ngữ catalogue",
-    ngon_ngu_mo_ta: "Ngôn ngữ khách thấy khi mở link. Khách vẫn tự đổi được.",
+    ngon_ngu_mo_ta: "Ngôn ngữ khách thấy khi mở link. Chọn ở đây là chốt — khách không đổi được.",
   },
   chia_se: {
     // Thanh chon noi duoi day danh sach
@@ -368,6 +383,9 @@ export const vi = {
     anh_sau: "Ảnh sau",
     dong_anh: "Đóng",
     khong_thay: "Không tìm thấy catalogue này. Có thể link bị sao chép thiếu.",
+    // Cau nay khach doc. KHONG noi ro la het han hay bi khoa: noi ro la ke
+    // cam link biet minh dang cam mot link that, chi khong con hieu luc.
+    link_het_hieu_luc: "Link này không còn hiệu lực.",
     lien_he: "Liên hệ nhân viên tư vấn để biết thêm chi tiết.",
   },
 } as const;

@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import type { Metadata } from "next";
 import { layTheoSlug } from "@/modules/catalogue-share/chia-se.service";
+import { conMoDuoc } from "@/modules/catalogue-share/hieu-luc.model";
 import { boChu } from "@/messages";
-import { NGON_NGU, NHAN_NGAN, docNgonNgu, type NgonNgu } from "@/messages/ngon-ngu";
 import { NguonNgonNgu } from "@/messages/dung-chu";
 import { MoHopThoaiIn } from "./nut-in";
 import { PhongToAnh } from "./phong-to";
 import { LOP_TONE, ThanCatalogue, TrangBia } from "./bo-cuc";
+import { LinkHetHieuLuc } from "./het-hieu-luc";
 import { Logo } from "@/app/thuong-hieu";
 
 /**
@@ -28,18 +28,6 @@ function slugHopLe(s: string): boolean {
   return s.length <= DAI_SLUG_TOI_DA && DANG_SLUG.test(s);
 }
 
-/**
- * Ngon ngu trang khach.
- *
- * KHONG doc cookie: cookie la lua chon cua NHAN VIEN tren may cua ho, con day
- * la trang cua khach. Mac dinh lay ngon ngu sale da chon luc tao catalogue,
- * khach doi bang "?lang=" — mot duong dan thuong nen bam duoc, chia se duoc,
- * va in ra dung thu ngon ngu dang hien.
- */
-function ngonNguTrang(daChon: NgonNgu, thamSo: string | undefined): NgonNgu {
-  return thamSo === undefined ? daChon : docNgonNgu(thamSo);
-}
-
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> },
 ): Promise<Metadata> {
@@ -49,7 +37,11 @@ export async function generateMetadata(
   const c = await layTheoSlug(slug);
   // robots noindex da khai o layout goc — trang nay dac biet khong duoc len
   // ket qua tim kiem vi no la ban gui rieng cho mot khach.
-  return { title: c?.ten ?? macDinh };
+  //
+  // Link da dong thi tieu de tab cung khong duoc mang ten catalogue: ten do
+  // thuong co ten khach hang trong no.
+  if (!c || !conMoDuoc(c.hetHanLuc, c.khoaLuc, new Date())) return { title: macDinh };
+  return { title: c.ten };
 }
 
 export default async function TrangKhachXem({
@@ -70,7 +62,22 @@ export default async function TrangKhachXem({
   if (!c) notFound();
 
   const g = c.giaoDien;
-  const nn = ngonNguTrang(g.ngonNgu, ts.lang);
+
+  // Het han hoac bi khoa: dung han o day, TRUOC khi dung bat cu phan noi dung
+  // nao. Khong hien ma mau, khong hien anh, khong hien so luong — mot trang
+  // "het hieu luc" ma van lo ra catalogue co bao nhieu mau thi khoa lam gi.
+  //
+  // Khong noi ro la het han hay bi khoa: noi ro la xac nhan voi nguoi cam link
+  // rang day tung la mot link that.
+  if (!conMoDuoc(c.hetHanLuc, c.khoaLuc, new Date())) {
+    return <LinkHetHieuLuc t={boChu(g.ngonNgu)} tone={g.tone} />;
+  }
+  // Ngon ngu do SALE chot luc tao catalogue, khach khong doi duoc (quyet dinh
+  // 08/09/2026). Truoc day co nut VI/EN tren trang khach; bo di vi day la ban
+  // gui rieng cho mot nguoi, sale da biet khach doc thu tieng nao.
+  //
+  // Cung KHONG doc cookie: cookie la lua chon cua nhan vien tren may cua ho.
+  const nn = g.ngonNgu;
   const t = boChu(nn);
 
   return (
@@ -85,50 +92,23 @@ export default async function TrangKhachXem({
             />
           )}
 
-          {/* Co trang bia thi ten catalogue DA nam tren do, chu to. Lap lai o day
-              chi lam khach doc mot cai ten hai lan trong hai co chu khac nhau. */}
+          {/* Co trang bia thi ten catalogue DA nam tren do, chu to. Lap lai o
+              day chi lam khach doc mot cai ten hai lan o hai co chu khac nhau. */}
           <header className="mb-10">
-            {!g.bia && (
-              <Logo alt={t.catalogue_sheet.thuong_hieu} />
-            )}
-            <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-              {!g.bia && (
-                <h1 className="mt-2 font-title text-[32px] leading-tight tracking-[0.02em] text-hp-ink">
-                  {c.ten}
-                </h1>
-              )}
-              {/* Doi ngon ngu bang duong dan thuong: khong can JavaScript, bam
-                  chuot phai mo tab moi duoc, va ban in giu dung ngon ngu. */}
-              <nav className="flex items-center gap-2 print:hidden">
-                {NGON_NGU.map((x, i) => (
-                  <span key={x} className="flex items-center gap-2">
-                    {i > 0 && <span aria-hidden className="text-hp-rule">/</span>}
-                    <Link
-                      href={`?lang=${x}`}
-                      scroll={false}
-                      aria-current={x === nn ? "true" : undefined}
-                      className={
-                        "text-[11px] uppercase tracking-[0.14em] transition-colors duration-150 " +
-                        (x === nn
-                          ? "text-hp-ink underline underline-offset-4"
-                          : "text-hp-muted hover:text-hp-ink")
-                      }
-                    >
-                      {NHAN_NGAN[x]}
-                    </Link>
-                  </span>
-                ))}
-              </nav>
-              {g.bia && (
-                <p className="text-xs tabular-nums text-hp-muted">
-                  {t.chia_se.khach_gom.replace("{n}", String(c.noiDung.muc.length))}
-                </p>
-              )}
-            </div>
-            {!g.bia && (
-              <p className="mt-2 text-xs tabular-nums text-hp-muted">
+            {g.bia ? (
+              <p className="text-xs tabular-nums text-hp-muted">
                 {t.chia_se.khach_gom.replace("{n}", String(c.noiDung.muc.length))}
               </p>
+            ) : (
+              <>
+                <Logo alt={t.catalogue_sheet.thuong_hieu} />
+                <h1 className="mt-3 font-title text-[32px] leading-tight tracking-[0.02em] text-hp-ink">
+                  {c.ten}
+                </h1>
+                <p className="mt-2 text-xs tabular-nums text-hp-muted">
+                  {t.chia_se.khach_gom.replace("{n}", String(c.noiDung.muc.length))}
+                </p>
+              </>
             )}
           </header>
 

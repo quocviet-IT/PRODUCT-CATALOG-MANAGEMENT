@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { catalogues, users } from "@/db/schema";
 import { layAnhCuaMau, layDanhSachCatalogue } from "@/modules/sheet/catalogue.service";
@@ -15,6 +15,7 @@ import {
   type NoiDungCatalogue,
 } from "./chia-se.model";
 import { docGiaoDien, type GiaoDienCatalogue } from "./giao-dien.model";
+import { hetHanTu, trangThaiLink, type TrangThaiLink } from "./hieu-luc.model";
 
 /**
  * Bang chu cai cua slug. Bo 0/O/1/I/l: slug nay duoc doc qua dien thoai va go
@@ -79,6 +80,8 @@ export type CatalogueDaLuu = {
   taoLuc: Date;
   noiDung: NoiDungCatalogue;
   giaoDien: GiaoDienCatalogue;
+  hetHanLuc: Date;
+  khoaLuc: Date | null;
 };
 
 /**
@@ -114,6 +117,11 @@ export async function taoCatalogue(
       noiDung,
       giaoDien,
       ownerId,
+      // Dat tu ung dung chu khong de mac dinh cua co so du lieu lo: chinh sach
+      // "song bao lau" chi nen khai o MOT cho — SO_NGAY_SONG trong
+      // hieu-luc.model.ts. Mac dinh ben co so du lieu chi la luoi do cho nhung
+      // dong tao ngoai ung dung.
+      hetHanLuc: hetHanTu(new Date()),
     })
     .returning({ id: catalogues.id, so: catalogues.so, ten: catalogues.ten });
 
@@ -142,7 +150,46 @@ export async function layTheoSlug(slug: string): Promise<CatalogueDaLuu | null> 
     taoLuc: d.createdAt,
     noiDung,
     giaoDien: docGiaoDien(d.giaoDien),
+    hetHanLuc: d.hetHanLuc,
+    khoaLuc: d.khoaLuc,
   };
+}
+
+export class LoiKhongPhaiCuaMinh extends Error {
+  constructor() {
+    super("Catalogue này không phải của bạn.");
+    this.name = "LoiKhongPhaiCuaMinh";
+  }
+}
+
+/**
+ * Khoa / mo khoa mot link.
+ *
+ * Sale chi dong duoc link CUA MINH, admin dong duoc moi link. Kiem quyen ngay
+ * trong cau lenh UPDATE chu khong doc len roi so sanh: doc-roi-ghi de lot khi
+ * hai yeu cau chay sat nhau, va o day thu bi lot la quyen.
+ *
+ * Tra ve false khi khong co dong nao doi — hoac slug khong ton tai, hoac no cua
+ * nguoi khac. KHONG phan biet hai truong hop: noi "co link do nhung khong phai
+ * cua ban" la da xac nhan link do ton tai.
+ */
+export async function datKhoa(
+  slug: string,
+  khoa: boolean,
+  idNguoi: string,
+  xemHet: boolean,
+): Promise<boolean> {
+  const dieuKien = xemHet
+    ? eq(catalogues.slug, slug)
+    : and(eq(catalogues.slug, slug), eq(catalogues.ownerId, idNguoi));
+
+  const doi = await db
+    .update(catalogues)
+    .set({ khoaLuc: khoa ? new Date() : null })
+    .where(dieuKien)
+    .returning({ id: catalogues.id });
+
+  return doi.length > 0;
 }
 
 /** Mot dong tren man hinh "catalogue da tao". */
@@ -155,6 +202,9 @@ export type DongDanhSach = {
   soAnh: number;
   /** Email nguoi tao. null khi catalogue tao thoi chua bat dang nhap. */
   nguoiTao: string | null;
+  hetHanLuc: Date;
+  khoaLuc: Date | null;
+  trangThai: TrangThaiLink;
 };
 
 /** Toi da mot trang danh sach. Sale nao vuot con so nay thi tinh tiep. */
@@ -182,6 +232,8 @@ export async function danhSachCatalogue(
       taoLuc: catalogues.createdAt,
       noiDung: catalogues.noiDung,
       nguoiTao: users.email,
+      hetHanLuc: catalogues.hetHanLuc,
+      khoaLuc: catalogues.khoaLuc,
     })
     .from(catalogues)
     .leftJoin(users, eq(users.id, catalogues.ownerId))
@@ -191,6 +243,10 @@ export async function danhSachCatalogue(
   const ds = xemHet
     ? await truyVan
     : await truyVan.where(eq(catalogues.ownerId, idNguoi));
+
+  // Mot moc thoi gian dung chung cho ca danh sach: tinh lai trong tung vong lap
+  // thi hai dong canh nhau co the roi vao hai phia cua cung mot han.
+  const bayGio = new Date();
 
   return ds.map((d) => {
     const nd = docNoiDung(d.noiDung);
@@ -203,6 +259,9 @@ export async function danhSachCatalogue(
       soMuc: muc.length,
       soAnh: muc.reduce((t, m) => t + m.anh.length, 0),
       nguoiTao: d.nguoiTao,
+      hetHanLuc: d.hetHanLuc,
+      khoaLuc: d.khoaLuc,
+      trangThai: trangThaiLink(d.hetHanLuc, d.khoaLuc, bayGio),
     };
   });
 }
