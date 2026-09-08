@@ -61,9 +61,14 @@ if (thieu || conGiaLap) {
 
 // --- 2. Lay token -----------------------------------------------------------
 const { layAccessToken } = await import("../src/modules/sheet/google-auth");
+const maoDanh = env.GOOGLE_IMPERSONATE_EMAIL;
 try {
   await layAccessToken();
-  dat("2. Lay access token", true, "khoa service account hop le");
+  dat(
+    "2. Lay access token",
+    true,
+    maoDanh ? `dang mao danh ${maoDanh}` : "KHONG mao danh ai — xem chan 4",
+  );
 } catch (e) {
   dat("2. Lay access token", false, batLoi(e));
   console.log("\n-> Kiem lai GOOGLE_SERVICE_ACCOUNT_KEY: khoa PEM phai nam TREN MOT DONG,");
@@ -110,8 +115,16 @@ dat(
   `thu ${thuKiem.length} thu muc, ${thuMucRong} tra ve RONG`,
 );
 if (thuMucRong === thuKiem.length) {
-  console.log(`\n-> Thu muc tra ve RONG kem HTTP 200 la dau hieu CHUA duoc chia se.`);
-  console.log(`   Chia se hai Shared Drive chua anh cho ${email} voi quyen Nguoi xem.`);
+  console.log("\n-> Thu muc tra ve RONG kem HTTP 200 nghia la KHONG NHIN THAY, khong phai rong.");
+  if (!maoDanh) {
+    console.log(`   Nguyen nhan gan nhu chac chan: chua dat GOOGLE_IMPERSONATE_EMAIL.`);
+    console.log(`   Anh san pham chia se kieu domain/reader — ai trong ctyhp.vn co link deu`);
+    console.log(`   xem duoc — ma ${email} nam NGOAI ten mien do nen khong thuoc dien nay.`);
+    console.log(`   Bat uy quyen toan mien, roi dat GOOGLE_IMPERSONATE_EMAIL=<nguoi that>@ctyhp.vn`);
+  } else {
+    console.log(`   Dang mao danh ${maoDanh} — kiem lai nguoi nay co mo duoc thu muc do khong,`);
+    console.log(`   va Admin Console da uy quyen du hai pham vi readonly cho client ID chua.`);
+  }
   process.exit(1);
 }
 
