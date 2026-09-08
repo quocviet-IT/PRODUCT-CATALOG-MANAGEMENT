@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { layDanhSachCatalogue, nguonDangDung } from "@/modules/sheet/catalogue.service";
+import { docTrangThai } from "@/modules/sheet/dong-bo";
+import { dinhDangLuc } from "@/lib/date";
 import {
   catTrang,
   docBoLocTuUrl,
@@ -16,9 +18,24 @@ import { BangCatalogue } from "./bang";
 import { ThanhBoLoc } from "./bo-loc";
 import { NganChiTiet } from "./ngan-chi-tiet";
 import { layChu } from "@/messages/may-chu";
+import type { BoChu } from "@/messages";
 import { nhanCo } from "./nhan-co";
 import { PhanTrang } from "./phan-trang";
 import { BangDieuKhien } from "./bang-dieu-khien";
+
+/**
+ * Dong chu cho nguon "dong-bo": ban chup that cua bang tinh do Apps Script day
+ * len. Neu chua co lan day nao thi noi dung do, khong lang le tut ve cau "du
+ * lieu mau" — hai tinh huong nay can hai hanh dong khac han nhau.
+ */
+async function moTaDongBo(t: BoChu): Promise<string> {
+  const tt = await docTrangThai();
+  if (tt === null) return t.catalogue_sheet.nguon_dong_bo_chua_co;
+  const luc = new Date(tt.luc);
+  return Number.isNaN(luc.getTime())
+    ? t.catalogue_sheet.nguon_dong_bo_chua_co
+    : t.catalogue_sheet.nguon_dong_bo.replace("{luc}", dinhDangLuc(luc));
+}
 
 /**
  * Hai kieu xem chung mot bo loc. Bang la mac dinh vi nguoi dung doi chieu voi
@@ -137,6 +154,15 @@ export default async function TrangCatalogueSheet({
   }
 
   const nguon = nguonDangDung();
+  // Doc moc dong bo NGAY o day chu khong de lop trinh bay tu goi: dong chu
+  // nguon la mot cau khang dinh ve du lieu dang hien, nen no phai duoc dung ra
+  // cung luc va cung noi voi du lieu do.
+  const moTaNguon =
+    nguon === "mau"
+      ? t.catalogue_sheet.nguon_mau
+      : nguon === "bang-tinh"
+        ? t.catalogue_sheet.nguon_bang_tinh
+        : await moTaDongBo(t);
   const daLoc = locDanhSach(tatCa, loc);
   // Ba con so khac nhau, ba chu dich khac nhau — dung gop lai:
   //  - dem (theo tung chieu) -> so ben canh moi muc trong o tha xuong. Moi
@@ -158,11 +184,7 @@ export default async function TrangCatalogueSheet({
         <h1 className="font-title text-[32px] uppercase leading-none tracking-[0.06em] text-hp-ink">
           {t.catalogue_sheet.tieu_de}
         </h1>
-        <p className="mt-3 text-xs text-hp-muted">
-          {nguon === "mau"
-            ? t.catalogue_sheet.nguon_mau
-            : t.catalogue_sheet.nguon_bang_tinh}
-        </p>
+        <p className="mt-3 text-xs text-hp-muted">{moTaNguon}</p>
         <div className="mt-5 h-px bg-hp-rule" />
       </div>
 

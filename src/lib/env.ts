@@ -38,6 +38,10 @@ const schema = z.object({
   CATALOGUE_TEP_MAU: z.string().min(1).optional(),
   // Tep JSON anh xa idThuMuc -> danh sach anh, dung THAY cho Drive khi xem thu.
   CATALOGUE_TEP_ANH_MAU: z.string().min(1).optional(),
+  // Khoa bi mat cua duong dong bo tu Google Apps Script (xem
+  // src/modules/sheet/dong-bo.ts). DE TRONG thi duong do TAT han — khong bao
+  // gio duoc hieu "thieu khoa" thanh "khong can khoa".
+  DONG_BO_SECRET: z.string().min(24).optional(),
 });
 
 export type Env = z.infer<typeof schema>;

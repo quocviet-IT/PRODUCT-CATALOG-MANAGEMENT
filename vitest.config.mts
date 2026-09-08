@@ -14,6 +14,13 @@ export default defineConfig({
     testTimeout: 15000,
   },
   resolve: {
-    alias: { "@": path.resolve(sourceDir, "src") },
+    alias: {
+      "@": path.resolve(sourceDir, "src"),
+      // "server-only" nem loi ngay khi duoc nap ngoai moi truong React Server
+      // Component, nen mot test node thuan khong import noi module nao co no.
+      // Duoi ve ban rong: rao chan do co viec cua no o buoc build cua Next
+      // (chan module bi mat lot vao goi trinh duyet) — va buoc build van chay.
+      "server-only": path.resolve(sourceDir, "node_modules/server-only/empty.js"),
+    },
   },
 });

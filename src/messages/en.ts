@@ -147,6 +147,8 @@ export const en: BoChu = {
     thuong_hieu: "HUNG PHAT USA",
     nguon_bang_tinh: "Read live from the spreadsheet, refreshed every 60 seconds",
     nguon_mau: "Sample data — not connected to the spreadsheet yet",
+    nguon_dong_bo: "Spreadsheet snapshot, pushed by Apps Script at {luc}",
+    nguon_dong_bo_chua_co: "Waiting for Apps Script to push the spreadsheet for the first time",
     tim_kiem_nhan: "Search model code, SKU, MO, SO or description",
     tim_kiem_goi_y: "Type to filter, no need to press Enter",
     chat_lieu: "Material",

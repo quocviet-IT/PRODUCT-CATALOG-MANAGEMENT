@@ -145,6 +145,9 @@ export const vi = {
     thuong_hieu: "HUNG PHAT USA",
     nguon_bang_tinh: "Đọc trực tiếp từ bảng tính, làm mới mỗi 60 giây",
     nguon_mau: "Dữ liệu mẫu — chưa nối với bảng tính",
+    // {luc} la moc thoi gian lan day gan nhat, da dinh dang san.
+    nguon_dong_bo: "Bản chụp bảng tính, Apps Script đẩy lên lúc {luc}",
+    nguon_dong_bo_chua_co: "Đang chờ Apps Script đẩy bảng tính lên lần đầu",
     tim_kiem_nhan: "Tìm mã mẫu, SKU, MO, SO hoặc mô tả",
     tim_kiem_goi_y: "Gõ để lọc ngay, không cần bấm Enter",
     chat_lieu: "Chất liệu",

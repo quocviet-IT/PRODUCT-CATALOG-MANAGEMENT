@@ -3,6 +3,14 @@ import { getEnv } from "@/lib/env";
 import { anhXaBang, type DongCatalogue, type OTho } from "./catalogue.mapper";
 import { docBangTho } from "./sheet.client";
 import { lietKeAnhTrongThuMuc, type AnhTrongThuMuc } from "./drive.client";
+import { NGUON_BANG_DONG_BO } from "./dong-bo.khoa";
+
+/**
+ * mau       — tep JSON tren dia, dung khi xem thu
+ * dong-bo   — ban chup that do Google Apps Script day len (xem dong-bo.ts)
+ * bang-tinh — goi thang Google Sheets API
+ */
+export type NguonDuLieu = "mau" | "dong-bo" | "bang-tinh";
 
 /** Tien to bao rang gia tri la KHOA trong Supabase Storage, khong phai duong dan tep. */
 const TIEN_TO_STORAGE = "storage:";
@@ -66,9 +74,15 @@ async function docBangTuTep(nguon: string): Promise<OTho[][]> {
 /**
  * Nguon du lieu dang dung. Trang hien thi cho nguoi dung biet, vi mot man hinh
  * chay bang du lieu mau ma trong y het ban that la cach de nguoi ta nham nhat.
+ *
+ * Ba trang thai, khong phai hai: ban do Apps Script day len cung di qua duong
+ * "tep mau" ve mat ky thuat, nhung do la du lieu THAT cua bang tinh. Goi no la
+ * "du lieu mau" thi dong chu tro thanh loi noi doi.
  */
-export function nguonDangDung(): "mau" | "bang-tinh" {
-  return getEnv().CATALOGUE_TEP_MAU ? "mau" : "bang-tinh";
+export function nguonDangDung(): NguonDuLieu {
+  const nguon = getEnv().CATALOGUE_TEP_MAU;
+  if (!nguon) return "bang-tinh";
+  return nguon === NGUON_BANG_DONG_BO ? "dong-bo" : "mau";
 }
 
 export async function layDanhSachCatalogue(): Promise<DongCatalogue[]> {
