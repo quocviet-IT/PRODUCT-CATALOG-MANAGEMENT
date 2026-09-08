@@ -24,10 +24,7 @@ export default async function TrangNguoiDung() {
   return (
     <>
       <div className="mb-8">
-        <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-          {t.catalogue_sheet.thuong_hieu}
-        </span>
-        <h1 className="mt-2 font-title text-[32px] leading-none tracking-[0.02em] text-hp-ink">
+        <h1 className="font-title text-[32px] leading-none tracking-[0.02em] text-hp-ink">
           {t.nguoi_dung.tieu_de}
         </h1>
         <p className="mt-3 text-sm text-hp-muted">{t.nguoi_dung.mo_ta}</p>

@@ -5,6 +5,7 @@ import {
   docBoLocTuUrl,
   docTrang,
   locDanhSach,
+  thamSoCua,
   tinhDemLoc,
   tinhThongKe,
 } from "@/modules/sheet/catalogue.view";
@@ -16,6 +17,8 @@ import { ThanhBoLoc } from "./bo-loc";
 import { NganChiTiet } from "./ngan-chi-tiet";
 import { layChu } from "@/messages/may-chu";
 import { nhanCo } from "./nhan-co";
+import { PhanTrang } from "./phan-trang";
+import { BangDieuKhien } from "./bang-dieu-khien";
 
 /**
  * Hai kieu xem chung mot bo loc. Bang la mac dinh vi nguoi dung doi chieu voi
@@ -47,39 +50,9 @@ function urlDoiKieuXem(sp: Record<string, string | undefined>, kieu: KieuXem): s
   return urlDoi(conLai, "xem", kieu);
 }
 
-const NUT_TRANG =
-  "text-[11px] uppercase tracking-[0.14em] text-hp-muted " +
-  "transition-colors duration-150 hover:text-hp-ink hover:underline";
-
 /** Chuan tieng Viet dung dau phay thap phan, du bang tinh ghi dau cham. */
 function dinhDangGam(v: number | null): string | null {
   return v === null ? null : `${v.toFixed(2).replace(".", ",")} g`;
-}
-
-function O({
-  so, nhan, tong,
-}: {
-  so: number;
-  nhan: string;
-  /** Co gia tri khi dang loc: hien "28 / 64" de van thay duoc tong. */
-  tong?: number;
-}) {
-  return (
-    <div className="px-7 first:pl-0">
-      {/* So 0 phai TRONG nhu 0: mot con so mau muc dam nhu cac o khac se khien
-          nguoi doc tuong co van de trong khi khong co van de nao. */}
-      <p
-        className={`font-title text-[28px] leading-none tabular-nums
-                    ${so === 0 ? "text-hp-muted" : "text-hp-ink"}`}
-      >
-        {so}
-        {tong !== undefined && (
-          <span className="text-lg text-hp-muted"> / {tong}</span>
-        )}
-      </p>
-      <p className="mt-2 text-[11px] uppercase tracking-[0.14em] text-hp-muted">{nhan}</p>
-    </div>
-  );
 }
 
 async function The({ d }: { d: DongCatalogue }) {
@@ -180,12 +153,9 @@ export default async function TrangCatalogueSheet({
   return (
     <>
       <div className="mb-10">
-        <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-          {t.catalogue_sheet.thuong_hieu}
-        </span>
         {/* Chu hoa nen can gian chu rong hon chu thuong; 0.06em la muc du tho
             de tung chu tach ra ma chua roi thanh nhan eyebrow. */}
-        <h1 className="mt-2 font-title text-[32px] uppercase leading-none tracking-[0.06em] text-hp-ink">
+        <h1 className="font-title text-[32px] uppercase leading-none tracking-[0.06em] text-hp-ink">
           {t.catalogue_sheet.tieu_de}
         </h1>
         <p className="mt-3 text-xs text-hp-muted">
@@ -196,17 +166,15 @@ export default async function TrangCatalogueSheet({
         <div className="mt-5 h-px bg-hp-rule" />
       </div>
 
-      <div className="mb-10 flex flex-wrap divide-x divide-hp-rule border border-hp-rule bg-hp-card p-6">
-        <O
-          so={thongKeHien.tong}
-          tong={dangLoc ? thongKe.tong : undefined}
-          nhan={t.catalogue_sheet.dem_mau}
-        />
-        <O so={thongKeHien.thieuAnh} nhan={t.catalogue_sheet.dem_thieu_anh} />
-        <O so={thongKeHien.thieuSku} nhan={t.catalogue_sheet.dem_thieu_sku} />
-        <O so={thongKeHien.tlVangLech} nhan={t.catalogue_sheet.dem_tl_vang_lech} />
-        <O so={thongKeHien.trung} nhan={t.catalogue_sheet.dem_trung} />
-      </div>
+      <BangDieuKhien
+        thongKe={thongKe}
+        thongKeHien={thongKeHien}
+        dangLoc={dangLoc}
+        canhBaoDangBat={loc.canhBao}
+        thamSoCanhBao={thamSoCua("canhBao")}
+        sp={sp}
+        t={t}
+      />
 
       <ThanhBoLoc dem={dem} hienTai={loc} />
 
@@ -252,22 +220,17 @@ export default async function TrangCatalogueSheet({
       )}
 
       {daLoc.length > 0 && (
-        <nav className="mt-8 flex flex-wrap items-baseline gap-x-6 gap-y-2 border-t border-hp-rule pt-5">
-          <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-            {t.catalogue_sheet.trang_nhan} {trang}/{soTrang}
-          </span>
-
-          {trang > 1 && (
-            <Link href={urlDoi(sp, "trang", String(trang - 1))} className={NUT_TRANG}>
-              {t.catalogue_sheet.trang_truoc}
-            </Link>
-          )}
-          {trang < soTrang && (
-            <Link href={urlDoi(sp, "trang", String(trang + 1))} className={NUT_TRANG}>
-              {t.catalogue_sheet.trang_sau}
-            </Link>
-          )}
-
+        <nav
+          aria-label={t.catalogue_sheet.trang_nhan}
+          className="mt-8 flex flex-wrap items-center justify-between gap-x-8 gap-y-4
+                     border-t border-hp-rule pt-5"
+        >
+          <PhanTrang
+            trang={trang}
+            soTrang={soTrang}
+            urlTrang={(n) => urlDoi(sp, "trang", String(n))}
+            t={t}
+          />
           <span className="ml-auto text-xs tabular-nums text-hp-muted">
             {t.catalogue_sheet.pham_vi
               .replace("{tu}", String(tu))

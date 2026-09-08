@@ -3,6 +3,7 @@ import { requireUser } from "@/auth/guard";
 import { danhSachCatalogue } from "@/modules/catalogue-share/chia-se.service";
 import { layChu, layNgonNgu } from "@/messages/may-chu";
 import { MA_HTML } from "@/messages/ngon-ngu";
+import { ExternalLink, Plus, Printer } from "lucide-react";
 import { NutChep } from "./nut-chep";
 
 export async function generateMetadata() {
@@ -15,8 +16,9 @@ const O_TIEU_DE =
   "text-[11px] uppercase tracking-[0.14em] text-hp-muted";
 const O = "border-b border-hp-rule px-4 py-3 align-middle text-sm text-hp-body";
 const NUT =
-  "text-[11px] uppercase tracking-[0.14em] text-hp-muted " +
-  "transition-colors duration-150 hover:text-hp-ink hover:underline";
+  "flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-hp-muted " +
+  "transition-colors duration-150 hover:text-hp-ink";
+const ICON = { "aria-hidden": true, strokeWidth: 1.5, className: "h-4 w-4 shrink-0" } as const;
 
 /**
  * Danh sach catalogue da tao.
@@ -39,10 +41,7 @@ export default async function TrangDanhSachCatalogue() {
   return (
     <>
       <div className="mb-8">
-        <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-          {t.catalogue_sheet.thuong_hieu}
-        </span>
-        <h1 className="mt-2 font-title text-[32px] leading-none tracking-[0.02em] text-hp-ink">
+        <h1 className="font-title text-[32px] leading-none tracking-[0.02em] text-hp-ink">
           {t.danh_sach_catalogue.tieu_de}
         </h1>
         <p className="mt-3 text-sm text-hp-muted">
@@ -53,10 +52,11 @@ export default async function TrangDanhSachCatalogue() {
 
       <Link
         href="/admin/catalogue-sheet"
-        className="mb-8 inline-block border border-hp-ink bg-hp-ink px-5 py-2.5
-                   text-[11px] uppercase tracking-[0.14em] text-hp-foundation
+        className="mb-8 inline-flex items-center gap-2 border border-hp-ink bg-hp-ink
+                   px-5 py-2.5 text-[11px] uppercase tracking-[0.14em] text-hp-foundation
                    transition-colors duration-150 hover:border-hp-pink hover:bg-hp-pink"
       >
+        <Plus {...ICON} />
         {t.danh_sach_catalogue.nut_tao}
       </Link>
 
@@ -111,6 +111,7 @@ export default async function TrangDanhSachCatalogue() {
                         rel="noreferrer"
                         className={NUT}
                       >
+                        <ExternalLink {...ICON} />
                         {t.danh_sach_catalogue.mo}
                       </Link>
                       <NutChep slug={c.slug} />
@@ -122,6 +123,7 @@ export default async function TrangDanhSachCatalogue() {
                         rel="noreferrer"
                         className={NUT}
                       >
+                        <Printer {...ICON} />
                         {t.danh_sach_catalogue.in}
                       </a>
                     </div>

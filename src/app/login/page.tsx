@@ -3,6 +3,7 @@ import { dangNhap, dangNhapGoogle } from "@/auth/actions";
 import { LoiMatKhau } from "./loi-mat-khau";
 import { layChu } from "@/messages/may-chu";
 import type { BoChu } from "@/messages";
+import { Logo } from "@/app/thuong-hieu";
 
 function lyDo(t: BoChu): Record<string, string> {
   return {
@@ -45,9 +46,7 @@ export default async function TrangDangNhap({
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
       <div className="border border-hp-rule bg-hp-card p-8 sm:p-10">
-        <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-          {t.catalogue_sheet.thuong_hieu}
-        </span>
+        <Logo alt={t.catalogue_sheet.thuong_hieu} />
         <h1 className="mt-3 font-title text-[28px] leading-none tracking-[0.02em] text-hp-ink">
           {t.dang_nhap.tieu_de}
         </h1>

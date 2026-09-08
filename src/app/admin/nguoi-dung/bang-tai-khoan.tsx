@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import type { CachDangNhap } from "@/modules/nguoi-dung/nguoi-dung.model";
 import type { NguoiDungHang } from "@/modules/nguoi-dung/nguoi-dung.service";
 import { datLaiMatKhau, doiTrangThai, doiVaiTro } from "./actions";
+import { KeyRound, Lock, LockOpen, ShieldCheck, ShieldOff, type LucideIcon } from "lucide-react";
 import { useChu, useNgonNgu } from "@/messages/dung-chu";
 import type { BoChu } from "@/messages";
 import { MA_HTML, type NgonNgu } from "@/messages/ngon-ngu";
@@ -13,9 +14,10 @@ const O_TIEU_DE =
   "text-[11px] uppercase tracking-[0.14em] text-hp-muted";
 const O = "border-b border-hp-rule px-4 py-3 align-middle text-sm text-hp-body";
 const NUT =
-  "text-[11px] uppercase tracking-[0.14em] text-hp-muted " +
-  "transition-colors duration-150 hover:text-hp-ink hover:underline " +
+  "inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] " +
+  "text-hp-muted transition-colors duration-150 hover:text-hp-ink " +
   "disabled:cursor-not-allowed disabled:opacity-40";
+const LOP_ICON = "h-4 w-4 shrink-0";
 
 function nhanCach(t: BoChu): Record<CachDangNhap, string> {
   return {
@@ -48,11 +50,13 @@ function NutHanhDong({
   hanhDong,
   truong,
   nhan,
+  Icon,
   tat,
 }: {
   hanhDong: (truoc: string | null, form: FormData) => Promise<string | null>;
   truong: Record<string, string>;
   nhan: string;
+  Icon: LucideIcon;
   tat?: boolean;
 }) {
   const t = useChu();
@@ -63,6 +67,7 @@ function NutHanhDong({
         <input key={k} type="hidden" name={k} value={v} />
       ))}
       <button type="submit" disabled={tat || dangChay} className={NUT}>
+        <Icon aria-hidden strokeWidth={1.5} className={LOP_ICON} />
         {nhan}
       </button>
       {loi && <span className="ml-2 text-xs text-hp-pink-strong">{loiThanhChu(t)[loi] ?? loi}</span>}
@@ -80,6 +85,7 @@ function DatMatKhau({ id, tenHien }: { id: string; tenHien: string }) {
     return (
       <>
         <button type="button" onClick={() => setMo(true)} className={NUT}>
+          <KeyRound aria-hidden strokeWidth={1.5} className={LOP_ICON} />
           {t.nguoi_dung.dat_mat_khau}
         </button>
         {xong && <span className="ml-2 text-xs text-hp-muted">{t.nguoi_dung.da_doi_mat_khau}</span>}
@@ -167,6 +173,7 @@ export function BangTaiKhoan({ ds, idCuaToi }: { ds: NguoiDungHang[]; idCuaToi: 
                       hanhDong={doiTrangThai}
                       truong={{ id: u.id, bat: u.dangHoatDong ? "0" : "1" }}
                       nhan={u.dangHoatDong ? t.nguoi_dung.khoa : t.nguoi_dung.mo_khoa}
+                      Icon={u.dangHoatDong ? Lock : LockOpen}
                       // Tu khoa chinh minh la khong con ai vao duoc man hinh
                       // nay. Server van chan lan nua — day chi la de nut khong
                       // moi nguoi bam vao mot viec chac chan that bai.
@@ -176,6 +183,7 @@ export function BangTaiKhoan({ ds, idCuaToi }: { ds: NguoiDungHang[]; idCuaToi: 
                       hanhDong={doiVaiTro}
                       truong={{ id: u.id, vai_tro: u.vaiTro === "admin" ? "sale" : "admin" }}
                       nhan={u.vaiTro === "admin" ? t.nguoi_dung.xuong_sale : t.nguoi_dung.len_admin}
+                      Icon={u.vaiTro === "admin" ? ShieldOff : ShieldCheck}
                       tat={laToi && u.vaiTro === "admin"}
                     />
                   </div>

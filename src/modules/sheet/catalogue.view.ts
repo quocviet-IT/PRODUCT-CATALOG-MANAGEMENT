@@ -43,6 +43,13 @@ export type ThongKe = {
   thieuSku: number;
   tlVangLech: number;
   trung: number;
+  /**
+   * So mau KHONG dinh canh bao nao.
+   *
+   * Phai dem rieng, khong duoc lay tong tru di bon con so tren: mot mau vua
+   * thieu anh vua thieu SKU se bi dem hai lan va ket qua ra am.
+   */
+  duDuLieu: number;
 };
 
 const CO_HOP_LE: readonly CoBatThuong[] = [
@@ -339,6 +346,7 @@ export function tinhThongKe(ds: DongCatalogue[]): ThongKe {
     thieuSku: ds.filter((d) => d.co.includes("thieu-sku")).length,
     tlVangLech: ds.filter((d) => d.co.includes("tl-vang-lech")).length,
     trung: ds.filter((d) => d.co.includes("trung")).length,
+    duDuLieu: ds.filter((d) => d.co.length === 0).length,
   };
 }
 

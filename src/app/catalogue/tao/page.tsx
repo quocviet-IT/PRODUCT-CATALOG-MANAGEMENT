@@ -1,6 +1,7 @@
 import { requireUser } from "@/auth/guard";
 import { TaoCatalogue } from "./tao-catalogue";
 import { layChu } from "@/messages/may-chu";
+import { Logo } from "@/app/thuong-hieu";
 
 export async function generateMetadata() {
   const t = await layChu();
@@ -20,9 +21,7 @@ export default async function TrangTaoCatalogue() {
   await requireUser();
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-6 py-10">
-      <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-        {t.catalogue_sheet.thuong_hieu}
-      </span>
+      <Logo alt={t.catalogue_sheet.thuong_hieu} />
       <h1 className="mt-2 font-title text-[32px] leading-none tracking-[0.02em] text-hp-ink">
         {t.chia_se.tao_tieu_de}
       </h1>

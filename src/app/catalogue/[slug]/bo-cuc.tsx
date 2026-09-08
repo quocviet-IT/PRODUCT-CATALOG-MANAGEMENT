@@ -1,6 +1,7 @@
 import type { BoChu } from "@/messages";
 import type { MucCatalogue } from "@/modules/catalogue-share/chia-se.model";
 import type { Bia, BoCuc, GiaoDienCatalogue, Tone } from "@/modules/catalogue-share/giao-dien.model";
+import { Logo } from "@/app/thuong-hieu";
 
 /**
  * Ba cach bay mot catalogue ra truoc mat khach.
@@ -247,9 +248,7 @@ export function TrangBia({ bia, tieuDe, thuongHieu }: {
 }) {
   return (
     <section className="bia-catalogue mb-16 border-b border-hp-rule pb-16 text-center">
-      <span className="block text-[11px] uppercase tracking-[0.2em] text-hp-muted">
-        {thuongHieu}
-      </span>
+      <Logo co="lon" alt={thuongHieu} lop="mx-auto" />
 
       <h1 className="mx-auto mt-8 max-w-2xl font-title text-[40px] leading-[1.15] tracking-[0.02em] text-hp-ink sm:text-[52px]">
         {tieuDe}
