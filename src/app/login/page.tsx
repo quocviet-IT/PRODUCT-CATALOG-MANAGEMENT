@@ -1,12 +1,28 @@
 import { redirect } from "next/navigation";
-import { dangNhap } from "@/auth/actions";
+import { dangNhap, dangNhapGoogle } from "@/auth/actions";
+import { LoiMatKhau } from "./loi-mat-khau";
 import { vi } from "@/messages/vi";
 
 const LY_DO: Record<string, string> = {
   chua_dang_nhap: vi.dang_nhap.chua_dang_nhap,
   bi_vo_hieu_hoa: vi.dang_nhap.bi_vo_hieu_hoa,
   sai_thong_tin: vi.dang_nhap.sai_thong_tin,
+  khong_du_quyen: vi.dang_nhap.khong_du_quyen,
+  loi_google: vi.dang_nhap.loi_google,
+  sai_ten_mien: vi.dang_nhap.sai_ten_mien,
 };
+
+/** Logo Google. Ve thang bang SVG — mot the <img> se them mot luot tai mang. */
+function LogoGoogle() {
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden="true" className="h-[18px] w-[18px] shrink-0">
+      <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+      <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+      <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+      <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+    </svg>
+  );
+}
 
 export default async function TrangDangNhap({
   searchParams,
@@ -14,37 +30,52 @@ export default async function TrangDangNhap({
   searchParams: Promise<{ loi?: string }>;
 }) {
   const { loi } = await searchParams;
-  const thong_bao = loi ? LY_DO[loi] : null;
+  const thongBao = loi ? LY_DO[loi] : null;
 
   async function guiForm(form: FormData) {
     "use server";
-    const ma_loi = await dangNhap(null, form);
-    if (ma_loi) redirect(`/login?loi=${ma_loi}`);
+    const maLoi = await dangNhap(null, form);
+    if (maLoi) redirect(`/login?loi=${maLoi}`);
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 px-6">
-      <h1 className="text-2xl font-bold">{vi.dang_nhap.tieu_de}</h1>
-      {thong_bao && (
-        <p role="alert" className="rounded border border-amber-300 bg-amber-50 px-3 py-2 text-sm">
-          {thong_bao}
-        </p>
-      )}
-      <form action={guiForm} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          {vi.dang_nhap.email}
-          <input name="email" type="email" required autoComplete="email"
-                 className="rounded border px-3 py-2" />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          {vi.dang_nhap.mat_khau}
-          <input name="mat_khau" type="password" required autoComplete="current-password"
-                 className="rounded border px-3 py-2" />
-        </label>
-        <button type="submit" className="rounded bg-teal-800 px-4 py-2 font-medium text-white">
-          {vi.dang_nhap.nut}
-        </button>
-      </form>
+    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
+      <div className="border border-hp-rule bg-hp-card p-8 sm:p-10">
+        <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+          {vi.catalogue_sheet.thuong_hieu}
+        </span>
+        <h1 className="mt-3 font-title text-[28px] leading-none tracking-[0.02em] text-hp-ink">
+          {vi.dang_nhap.tieu_de}
+        </h1>
+        <p className="mt-3 text-sm text-hp-body">{vi.dang_nhap.mo_ta}</p>
+
+        {thongBao && (
+          // Loi dang nhap la mot trong ba cho duy nhat duoc dung mau hong tren
+          // man hinh nay — xem ngan sach hong cua he thiet ke.
+          <p
+            role="alert"
+            className="mt-5 border-l-2 border-hp-pink bg-hp-inset px-4 py-3 text-sm text-hp-body"
+          >
+            {thongBao}
+          </p>
+        )}
+
+        <form action={dangNhapGoogle} className="mt-7">
+          <button
+            type="submit"
+            className="flex w-full items-center justify-center gap-3 border border-hp-rule
+                       bg-hp-foundation px-5 py-3.5 text-sm text-hp-ink
+                       transition-colors duration-150 hover:border-hp-ink"
+          >
+            <LogoGoogle />
+            {vi.dang_nhap.nut_google}
+          </button>
+        </form>
+
+        {/* Duong lui bang mat khau: cac tai khoan co tu truoc van dung duoc, va
+            neu Google gap su co thi he thong khong bi khoa cung. */}
+        <LoiMatKhau guiForm={guiForm} />
+      </div>
     </main>
   );
 }

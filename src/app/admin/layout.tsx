@@ -1,4 +1,4 @@
-import { getSessionUser } from "@/auth/guard";
+import { requireUser } from "@/auth/guard";
 import { dangXuat } from "@/auth/actions";
 import { vi } from "@/messages/vi";
 
@@ -7,34 +7,27 @@ import { vi } from "@/messages/vi";
  * Vi vay khong co thanh dieu huong sang cac module khac — chi mot dai mong mang
  * danh tinh nguoi dang dung va loi ra.
  *
- * Khung nay KHONG con ep dang nhap. Catalogue dang mo cong khai theo yeu cau;
- * cong dang nhap se lam sau. Cac trang /admin/products, /admin/categories,
- * /admin/upload VAN GOI requireUser() o chinh chung nen van duoc gac — dung
- * bo loi goi do khi sua khung nay.
+ * Khung nay EP DANG NHAP cho toan bo khu noi bo (quyet dinh 08/09/2026).
+ * Link gui khach /catalogue/<slug> nam ngoai khung nay nen van cong khai —
+ * khach khong co Gmail cong ty, khoa no la moi link da gui deu chet.
  */
 export default async function KhungQuanTri({ children }: { children: React.ReactNode }) {
-  const user = await getSessionUser();
+  const user = await requireUser();
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-baseline justify-end gap-6 border-b border-hp-rule px-8 py-3">
-        {/* Chua dang nhap thi dai nay trong — giu lai de duong ke duoi khong
-            bien mat, bo cuc khong nhay khi dang nhap tro lai. */}
-        {user && (
-          <>
-            <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-              {user.fullName}
-            </span>
-            <form action={dangXuat}>
-              <button
-                type="submit"
-                className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
-                           transition-colors duration-150 hover:text-hp-ink hover:underline"
-              >
-                {vi.dang_nhap.dang_xuat}
-              </button>
-            </form>
-          </>
-        )}
+        <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+          {user.fullName}
+        </span>
+        <form action={dangXuat}>
+          <button
+            type="submit"
+            className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
+                       transition-colors duration-150 hover:text-hp-ink hover:underline"
+          >
+            {vi.dang_nhap.dang_xuat}
+          </button>
+        </form>
       </header>
 
       {/* min-w-0: flex item mac dinh co min-width:auto nen KHONG chiu co nho hon
