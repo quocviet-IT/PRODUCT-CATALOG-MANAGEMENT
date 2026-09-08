@@ -13,6 +13,12 @@ const schema = z.object({
   GOOGLE_SERVICE_ACCOUNT_EMAIL: z.string().min(1).optional(),
   GOOGLE_SERVICE_ACCOUNT_KEY: z.string().min(1).optional(),
   CATALOGUE_SHEET_ID: z.string().min(1).optional(),
+  // Email mot NGUOI THAT trong ctyhp.vn de service account mao danh.
+  // Vi sao can: anh san pham duoc chia se kieu "ai trong to chuc co link deu
+  // xem duoc" (domain/reader). Service account co email rieng ngoai ten mien
+  // nen KHONG nam trong dien do — khong mao danh thi no khong thay 58/65 thu
+  // muc, du da co khoa hop le. De trong thi chay khong mao danh.
+  GOOGLE_IMPERSONATE_EMAIL: z.string().email().optional(),
   // KHONG dat gia tri mac dinh: mac dinh "test" tung khien mot ban trien khai
   // quen khai bao bien nay doc nham tab that su ten "test" ma khong bao loi
   // gi ca — sai du lieu trong im lang con nguy hiem hon la bao loi ro rang.
