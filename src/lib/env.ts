@@ -19,6 +19,16 @@ const schema = z.object({
   // nen KHONG nam trong dien do — khong mao danh thi no khong thay 58/65 thu
   // muc, du da co khoa hop le. De trong thi chay khong mao danh.
   GOOGLE_IMPERSONATE_EMAIL: z.string().email().optional(),
+
+  // --- Ai duoc dang nhap (xem src/auth/quyen-dang-nhap.ts) ---
+  // Tien to ten mien cong ty. Moi duoi deu vao duoc: ctyhp.vn, ctyhp.com,
+  // ctyhp.us... De trong thi dung mac dinh "ctyhp".
+  AUTH_TIEN_TO_MIEN: z.string().min(1).optional(),
+  // Khai bien nay thi CHI nhung ten mien liet ke o day moi vao duoc, va
+  // AUTH_TIEN_TO_MIEN bi bo qua. Dung khi muon that chat. Ngan bang dau phay.
+  AUTH_TEN_MIEN: z.string().optional(),
+  // Email cu the duoc phep du nam ngoai ten mien. Ngan bang dau phay.
+  AUTH_EMAIL_NGOAI_LE: z.string().optional(),
   // KHONG dat gia tri mac dinh: mac dinh "test" tung khien mot ban trien khai
   // quen khai bao bien nay doc nham tab that su ten "test" ma khong bao loi
   // gi ca — sai du lieu trong im lang con nguy hiem hon la bao loi ro rang.

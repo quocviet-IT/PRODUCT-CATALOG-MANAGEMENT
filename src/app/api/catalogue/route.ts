@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getSessionUser } from "@/auth/guard";
 import { SO_MUC_TOI_DA } from "@/modules/catalogue-share/chia-se.model";
 import {
   DAI_TEN_TOI_DA,
@@ -25,6 +26,11 @@ const Than = z.object({
 const KHONG_LUU_DEM = { "Cache-Control": "private, no-store" };
 
 export async function POST(req: Request): Promise<Response> {
+  const user = await getSessionUser();
+  if (user === null || !user.isActive) {
+    return new Response(null, { status: 401, headers: KHONG_LUU_DEM });
+  }
+
   let than: z.infer<typeof Than>;
   try {
     than = Than.parse(await req.json());

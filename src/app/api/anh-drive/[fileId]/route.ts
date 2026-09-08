@@ -22,9 +22,15 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ fileId: string }> },
 ): Promise<Response> {
-  // Khong gac dang nhap: catalogue dang mo cong khai theo yeu cau, cong dang
-  // nhap se lam sau. Hai chan con lai (dang fileId, danh sach co cho phep)
-  // VAN CAN THIET — chung khong gac nguoi, chung gac dau vao tu URL.
+  // TUYEN NAY PHAI CONG KHAI — dung them cong dang nhap vao day.
+  //
+  // No phuc vu anh cho CA khu noi bo lan trang khach xem /catalogue/<slug>.
+  // Khach hang khong co Gmail cong ty; gac tuyen nay lai thi moi link da
+  // gui cho khach deu mat sach anh, ma trang van len 200 nen rat lau moi
+  // co ai bao. Co mot test khoa dieu nay lai.
+  //
+  // Hai chan con lai (dang fileId, danh sach co cho phep) VAN CAN THIET —
+  // chung khong gac nguoi, chung gac dau vao tu URL.
   const { fileId } = await params;
   if (!DANG_FILE_ID.test(fileId)) {
     return phanHoiRong(400);

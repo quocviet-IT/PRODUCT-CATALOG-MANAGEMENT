@@ -19,6 +19,12 @@ export const vi = {
     chua_dang_nhap: "Vui lòng đăng nhập để tiếp tục.",
     bi_vo_hieu_hoa: "Tài khoản đã bị vô hiệu hoá. Liên hệ quản trị viên.",
     khong_du_quyen: "Bạn không có quyền truy cập trang này.",
+    mo_ta: "Đăng nhập bằng Gmail công ty để vào hệ thống.",
+    nut_google: "Đăng nhập bằng Google",
+    khong_vao_duoc: "Không đăng nhập được bằng Google?",
+    dung_mat_khau: "Dùng email và mật khẩu",
+    loi_google: "Đăng nhập bằng Google không thành công. Thử lại giúp em.",
+    sai_ten_mien: "Email này không thuộc công ty nên chưa vào được. Dùng Gmail công ty (@ctyhp.vn, @ctyhp.com…) hoặc liên hệ quản trị viên.",
   },
   danh_muc: {
     ten_moi_placeholder: "Tên danh mục mới",
