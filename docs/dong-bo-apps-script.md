@@ -49,8 +49,9 @@ Bốn cổng nhận:
 
 | Cổng | Việc |
 |---|---|
-| `POST /api/dong-bo/thu-muc` | Nhận bảng thô, trả về ID các thư mục ảnh cần liệt kê. Không ghi gì. |
-| `POST /api/dong-bo/du-lieu` | Nhận bảng thô, lưu lại. Kèm `anhThuMuc` thì lưu cả danh sách ảnh; không kèm thì giữ nguyên danh sách cũ. |
+| `POST /api/dong-bo/du-lieu` | Nhận bảng thô, lưu lại. Bỏ qua `anhThuMuc` nếu có. |
+| `POST /api/dong-bo/thieu-thu-muc` | Trả về những thư mục ảnh **chưa** được liệt kê. |
+| `POST /api/dong-bo/anh-thu-muc` | Nhận một lô thư mục vừa liệt kê và **gộp** vào bản đồ đã có. |
 | `POST /api/dong-bo/thieu-anh` | Trả về những ảnh chưa có trong bộ đệm, ảnh đại diện xếp trước. |
 | `POST /api/dong-bo/anh` | Nhận ảnh, thu nhỏ thành 600px và 1400px, cất vào bộ đệm. |
 
@@ -58,11 +59,19 @@ Cả bốn đều đòi khoá bí mật trong header `Authorization`. **Không k
 `DONG_BO_SECRET` thì cả bốn TẮT hẳn** — trả về 503, không bao giờ được hiểu
 "thiếu khoá" thành "không cần khoá".
 
-Tại sao cổng `thu-muc` tồn tại thay vì để script tự tìm cột: tên cột của bảng
-tính đã đổi hai lần trong một tháng (`FOLDER HÌNH` → `Hình raw - lưu mẫu`, và
-`LOẠI`/`DÒNG` tráo chỗ cho nhau). Chỉ có mã web mới biết những tên nào còn được
-chấp nhận. Cho script tự đoán là bảo đảm có ngày hai bên lệch nhau — mà lệch kiểu
-đó **không báo lỗi**, chỉ im lặng mất thư viện ảnh của vài chục mẫu.
+Tại sao máy chủ tự suy ra thư mục thay vì để script tự tìm cột: tên cột của bảng
+tính đã đổi ba lần (`FOLDER HÌNH` → `Hình raw - lưu mẫu` → ưu tiên `Hình đã xử
+lý`). Chỉ có mã web mới biết những tên nào còn được chấp nhận. Cho script tự đoán
+là bảo đảm có ngày hai bên lệch nhau — mà lệch kiểu đó **không báo lỗi**, chỉ im
+lặng mất thư viện ảnh của vài chục mẫu.
+
+**Vì sao liệt kê thư mục phải chia lô**: bảng tính lớn từ 71 lên 1.854 mẫu, trỏ
+tới 1.476 thư mục Drive. DriveApp liệt kê mất ~0,55 giây một thư mục — hơn 13
+phút cho cả lượt, trong khi Apps Script cắt ngang ở **6 phút**. Bản cũ làm hết
+trong một hàm nên nó chết giữa chừng và không bao giờ tới bước gửi kết quả: bản
+đồ thư mục đóng băng ở 65 cái, và 1.625 mẫu mất sạch thư viện ảnh. Vì chia lô nên
+cổng `anh-thu-muc` phải **gộp thêm**, không được ghi đè — ghi đè là mỗi lượt xoá
+sạch công của lượt trước.
 
 ---
 
@@ -148,8 +157,8 @@ Trước khi Apps Script đẩy lần đầu, trang catalogue sẽ ghi *"Đang c
    | Function | Nhịp | Việc |
    |---|---|---|
    | `dongBoBang` | mỗi phút | chỉ bảng tính — thứ người dùng sửa và chờ thấy |
-   | `dongBoDuLieu` | mỗi giờ | đầy đủ, kèm liệt kê thư mục Drive |
-   | `dongBoAnh` | mỗi 10 phút | bù ảnh vào bộ đệm |
+   | `dongBoThuMuc` | mỗi 10 phút | liệt kê thư mục ảnh, chạy dần cho tới khi hết |
+   | `dongBoAnh` | mỗi 10 phút | nạp ảnh vào bộ đệm |
 
 ### Bước 4 — Đợi ảnh đuổi kịp
 
@@ -184,8 +193,8 @@ dòng chữ nhỏ dưới tiêu đề ghi *"Bản chụp bảng tính, Apps Scri
 
 **Ngưng đồng bộ**: chạy hàm `ngungLichChay`.
 
-**Chạy lại ngay không chờ lịch**: `dongBoBang` (chỉ bảng tính, 2 giây) hoặc
-`chayThuMotLan` (đầy đủ, kèm ảnh).
+**Chạy lại ngay không chờ lịch**: `dongBoBang` (chỉ bảng tính, 2 giây),
+`dongBoThuMuc` (một lô thư mục), hoặc `chayThuMotLan` (cả ba).
 
 **Đổi tần suất**: sửa trong hàm `datLichChay` rồi chạy lại hàm đó. Nó luôn xoá
 hết lịch cũ trước khi đặt lại, nên chạy bao nhiêu lần cũng được — lịch chồng nhau

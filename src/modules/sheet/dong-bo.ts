@@ -97,3 +97,39 @@ export async function docTrangThai(): Promise<TrangThaiDongBo | null> {
     return null;
   }
 }
+
+/**
+ * Doc ban do thu muc -> danh sach anh hien co. Tra {} khi chua co lan nao.
+ *
+ * Khong bao gio nem loi: cong gop them thu muc phai chay duoc ngay ca khi chua
+ * co gi de gop vao.
+ */
+export async function docAnhThuMuc(): Promise<Record<string, unknown[]>> {
+  try {
+    const buf = await taiVe(KHOA_ANH_THU_MUC);
+    const b = JSON.parse(buf.toString("utf8")) as unknown;
+    return typeof b === "object" && b !== null ? (b as Record<string, unknown[]>) : {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * GOP them thu muc vao ban do da co, khong ghi de.
+ *
+ * Vi sao phai gop: bang tinh gio co 1.476 thu muc anh, ma liet ke chung bang
+ * DriveApp mat khoang 0,55 giay moi cai — hon 13 phut cho ca luot, trong khi
+ * Apps Script cat ngang o 6 phut. Nen viec liet ke phai chia thanh nhieu luot,
+ * va moi luot chi mang ve mot phan. Ghi de o day la moi luot xoa sach cong cua
+ * luot truoc, va ban do khong bao gio day.
+ */
+export async function gopAnhThuMuc(
+  them: Record<string, unknown[]>,
+): Promise<{ tong: number; themMoi: number }> {
+  const cu = await docAnhThuMuc();
+  let themMoi = 0;
+  for (const k of Object.keys(them)) if (!(k in cu)) themMoi++;
+  const moi = { ...cu, ...them };
+  await ghiAnhThuMuc(moi);
+  return { tong: Object.keys(moi).length, themMoi };
+}

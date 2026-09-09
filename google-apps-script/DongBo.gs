@@ -31,6 +31,10 @@
  *  4. Chon ham chayThuMotLan roi bam Run. Google se hoi cap quyen — dong y.
  *  5. Chon ham datLichChay roi bam Run. Tu day no tu chay.
  *
+ * BA LICH CHAY: dongBoBang moi phut (chi bang tinh), dongBoThuMuc moi 10 phut
+ * (liet ke thu muc anh, chay dan cho toi khi het), dongBoAnh moi 10 phut (nap
+ * anh vao bo dem). Lan dau day du mat khoang mot tieng.
+ *
  * KHOA BI MAT nam trong Script Properties chu khong trong ma nguon: ma nguon
  * co the bi chia se, sao chep, dan vao chat.
  */
@@ -50,6 +54,12 @@ var NGAN_SACH_MS = 4.5 * 60 * 1000;
 var SO_ANH_MOI_LAN = 6;
 /** Ngat goi tin som neu no da nang, ke ca khi chua du SO_ANH_MOI_LAN tam. */
 var BYTE_MOI_GOI = 3 * 1024 * 1024;
+
+/**
+ * Bao nhieu thu muc gui mot goi. Doi so nay thi phai doi ca SO_THU_MUC_MOI_LAN
+ * trong src/app/api/dong-bo/anh-thu-muc/route.ts.
+ */
+var SO_THU_MUC_MOI_GOI = 200;
 
 /**
  * Ban thumbnail xin cua Drive. 1600px du de web thu nho xuong 1400 (co lon
@@ -184,13 +194,9 @@ function lietKeAnh_(idThuMuc) {
 /**
  * Chi bang tinh, KHONG liet ke thu muc Drive. ~2 giay.
  *
- * Day la ham chay moi phut. Tach ra khoi dongBoDuLieu vi phan dat tien cua mot
- * luot dong bo la liet ke 65 thu muc Drive (~36 giay) — ma thu muc thi hiem khi
- * doi, con bang tinh thi doi suot. Gop chung lai thi khong the chay moi phut:
- * 36 giay moi phut la an het han muc chay cua ca ngay truoc gio an trua.
- *
- * Cong /api/dong-bo/du-lieu giu nguyen danh sach anh cu khi khong nhan
- * anhThuMuc, nen bo qua no o day khong lam mat gi.
+ * Day la ham chay moi phut, va la ham DUY NHAT dung toi bang tinh. Viec liet ke
+ * thu muc anh nam han o dongBoThuMuc: no ton hang chuc phut, con doc bang tinh
+ * chi ton vai giay. Gop chung lai thi khong the chay moi phut duoc.
  */
 function dongBoBang() {
   var c = cauHinh_();
@@ -203,35 +209,66 @@ function dongBoBang() {
   return kq;
 }
 
-function dongBoDuLieu() {
+/**
+ * Liet ke thu muc anh — CHAY DAN qua nhieu luot.
+ *
+ * VI SAO PHAI CHIA LO: bang tinh lon tu 71 len 1.854 mau, tro toi 1.476 thu muc
+ * Drive. DriveApp liet ke mat khoang nua giay mot thu muc — hon 13 phut cho ca
+ * luot, ma Apps Script cat ngang o 6 phut. Ban cu lam het trong MOT ham nen no
+ * chet giua chung va khong bao gio toi buoc gui ket qua: ban do thu muc dong
+ * bang o 65 cai tu hoi bang con nho, va 1.625 mau mat sach thu vien anh.
+ *
+ * Gio moi luot hoi "con thieu cai nao", lam duoc bao nhieu thi gui bay nhieu,
+ * va cong GOP THEM chu khong ghi de. Vai luot la day.
+ */
+function dongBoThuMuc() {
   var c = cauHinh_();
-  var hang = docBangTho_(c);
-  Logger.log('Doc duoc ' + hang.length + ' dong tho.');
+  var het = Date.now() + NGAN_SACH_MS;
 
-  // Hoi web xem nhung thu muc nao can liet ke. KHONG tu tim cot o day: ten cot
-  // cua bang tinh doi luon, va chi ben web moi biet nhung ten nao con duoc
-  // chap nhan. Hai ben doan rieng la co ngay ngay lech nhau trong im lang.
-  var thuMuc = goiWeb_(c, '/api/dong-bo/thu-muc', { hang: hang }).thuMuc;
-  Logger.log('Can liet ke ' + thuMuc.length + ' thu muc anh.');
+  var hoi = goiWeb_(c, '/api/dong-bo/thieu-thu-muc', {});
+  Logger.log(
+    'Thieu ' + hoi.tongThieu + '/' + hoi.tong + ' thu muc; luot nay lam toi ' +
+    hoi.thieu.length + ' cai.');
+  if (!hoi.thieu.length) return { xong: 0, hong: 0 };
 
-  var anhThuMuc = {};
-  var hongThuMuc = 0;
-  for (var i = 0; i < thuMuc.length; i++) {
-    try {
-      anhThuMuc[thuMuc[i]] = lietKeAnh_(thuMuc[i]);
-    } catch (e) {
-      // Mot thu muc bi xoa hay doi quyen khong duoc lam hong ca lan dong bo:
-      // 64 thu muc con lai van phai len duoc.
-      hongThuMuc++;
-      Logger.log('Khong liet ke duoc thu muc ' + thuMuc[i] + ': ' + e);
-    }
+  var lo = {};
+  var soTrongLo = 0;
+  var xong = 0;
+  var hong = 0;
+
+  function guiLo_() {
+    if (soTrongLo === 0) return;
+    var kq = goiWeb_(c, '/api/dong-bo/anh-thu-muc', { anhThuMuc: lo });
+    xong += soTrongLo;
+    Logger.log('  da gui ' + soTrongLo + ' thu muc; ban do co ' + kq.tong + ' cai.');
+    lo = {};
+    soTrongLo = 0;
   }
 
-  var kq = goiWeb_(c, '/api/dong-bo/du-lieu', { hang: hang, anhThuMuc: anhThuMuc });
+  for (var i = 0; i < hoi.thieu.length; i++) {
+    if (Date.now() > het) break;
+    var id = hoi.thieu[i];
+    try {
+      // Thu muc RONG van phai gui len (mang rong). Co mat trong ban do nghia la
+      // "da liet ke roi" — thieu buoc do thi luot sau lai hoi dung nhung thu muc
+      // rong nay, mai mai.
+      lo[id] = lietKeAnh_(id);
+    } catch (e) {
+      // Thu muc bi xoa hay doi quyen: van danh dau la da xet, khong thi no chan
+      // ca hang doi o moi luot chay.
+      lo[id] = [];
+      hong++;
+      Logger.log('  khong liet ke duoc ' + id + ': ' + e);
+    }
+    soTrongLo++;
+    if (soTrongLo >= SO_THU_MUC_MOI_GOI) guiLo_();
+  }
+  guiLo_();
+
   Logger.log(
-    'DA DAY: ' + kq.soDong + ' dong, ' + kq.soThuMuc + ' thu muc, ' + kq.soAnh + ' anh' +
-    (hongThuMuc ? ' (' + hongThuMuc + ' thu muc doc khong duoc)' : ''));
-  return kq;
+    'DA LIET KE: ' + xong + ' thu muc' + (hong ? ' (' + hong + ' cai loi)' : '') +
+    ', con lai ~' + (hoi.tongThieu - xong) + '.');
+  return { xong: xong, hong: hong, conLai: hoi.tongThieu - xong };
 }
 
 // ---------------------------------------------------------------------------
@@ -334,13 +371,12 @@ function datLichChay() {
 
   // Bang tinh: moi phut. Day la thu nguoi dung sua va cho thay ket qua.
   ScriptApp.newTrigger('dongBoBang').timeBased().everyMinutes(1).create();
-  // Day du (kem liet ke thu muc Drive): moi gio. Day la cach anh MOI bo vao
-  // Drive duoc phat hien.
-  ScriptApp.newTrigger('dongBoDuLieu').timeBased().everyHours(1).create();
+  // Liet ke thu muc anh, chay dan. Cung nhip voi phan nap anh.
+  ScriptApp.newTrigger('dongBoThuMuc').timeBased().everyMinutes(10).create();
   // Anh thi con phai bu dan cho het lan dau, nen chay day hon.
   ScriptApp.newTrigger('dongBoAnh').timeBased().everyMinutes(10).create();
 
-  Logger.log('Da dat lich: bang tinh moi phut, day du moi gio, anh moi 10 phut.');
+  Logger.log('Da dat lich: bang tinh moi phut, thu muc va anh moi 10 phut.');
 }
 
 /** Go het lich, dung dong bo hoan toan. */
@@ -356,6 +392,7 @@ function ngungLichChay() {
 
 /** Chay ca hai buoc mot lan, de xem thu truoc khi dat lich. */
 function chayThuMotLan() {
-  dongBoDuLieu();
+  dongBoBang();
+  dongBoThuMuc();
   dongBoAnh();
 }
