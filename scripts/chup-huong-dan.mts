@@ -111,15 +111,63 @@ async function chup(
   moc: { o: Locator; huong: Huong }[],
   khungCat?: Khung,
 ): Promise<void> {
-  const khung = khungCat ?? { x: 0, y: 0, width: RONG, height: CAO };
+  // Doc khung nhin THAT thay vi dung hang so CAO: buoc 4 phong khung len 1900px
+  // de chup ca bang chon kieu. Lay 900 lam mau so o do thi moi phan tram deu
+  // bi thoi len gap doi — mui ten van ve ra, chi la ve nham cho, va khong co gi
+  // bao loi. Loi nay da song trong tep nay tu dau.
+  const khungNhin = page.viewportSize();
+  if (!khungNhin) throw new Error(`[chup] ${ten}: không đọc được kích thước khung nhìn`);
+  const khung = khungCat ?? { x: 0, y: 0, ...khungNhin };
+
+  /** Do vi tri tat ca cac moc mot luot. */
+  const doHet = async () => {
+    const hop: Khung[] = [];
+    for (const [i, m] of moc.entries()) {
+      const o = await m.o.first().boundingBox();
+      if (!o) {
+        throw new Error(
+          `[chup] ${ten}: không đo được vị trí của điểm ${i + 1}. ` +
+          `Phần tử chưa có trên trang — đợi cho nó hiện ra rồi mới chụp.`,
+        );
+      }
+      hop.push(o);
+    }
+    return hop;
+  };
+
+  // Do HAI LAN, truoc va sau khi chup. Neu giua hai lan ma vi tri xe dich thi
+  // trang van con dang doi luc bam nut chup — anh se la mot man hinh, con mui
+  // ten la toa do cua mot man hinh khac. Loi do da xay ra that o buoc 6: script
+  // doi cung 2,5 giay sau khi bam "Tao link", lan nay man hinh ket qua ve cham
+  // hon mot chut, va anh chup lai la trang chon anh trong khi mui ten van tro
+  // dung cho cua trang ket qua.
+  const truoc = await doHet();
   const anh = await page.screenshot({ type: "png", ...(khungCat ? { clip: khungCat } : {}) });
   await writeFile(join(THU_MUC, `${ten}.png`), anh);
+  const sau = await doHet();
+  for (let i = 0; i < truoc.length; i++) {
+    if (Math.abs(truoc[i].x - sau[i].x) > 1 || Math.abs(truoc[i].y - sau[i].y) > 1) {
+      throw new Error(
+        `[chup] ${ten}: điểm ${i + 1} xê dịch giữa lúc đo và lúc chụp — ` +
+        `trang chưa đứng yên. Đợi phần tử cần chụp hiện ra rồi hãy gọi chup().`,
+      );
+    }
+  }
 
   const diem: Diem[] = [];
-  for (const m of moc) {
-    const o = await m.o.first().boundingBox();
-    if (!o) throw new Error(`[chup] ${ten}: không đo được vị trí của một điểm chú thích`);
-    diem.push(diemTu(o, khung, m.huong));
+  for (const [i, o] of sau.entries()) {
+    const m = moc[i];
+    const d = diemTu(o, khung, m.huong);
+    // Diem nam ngoai anh thi mui ten se ve ra ngoai khung, de len tieu de hoac
+    // dong chu thich cua muc ben canh. Truoc day script ghi ra 117,5% khong noi
+    // gi ca, va cai sai chi lo ra khi co nguoi mo trang huong dan len doc.
+    if (d.x < 0 || d.x > 100 || d.y < 0 || d.y > 100) {
+      throw new Error(
+        `[chup] ${ten}: điểm ${i + 1} rơi ngoài ảnh (x=${d.x}%, y=${d.y}%). ` +
+        `Cuộn cho phần tử vào trong khung nhìn trước khi chụp.`,
+      );
+    }
+    diem.push(d);
   }
   diemTheoAnh[ten] = diem;
   console.log(`  ${ten}.png  ${(anh.byteLength / 1024).toFixed(0)} KB  ${diem.length} điểm`);
@@ -210,9 +258,12 @@ async function main(): Promise<void> {
     await page.setViewportSize({ width: RONG, height: CAO });
 
     // --- 5. Bo bot anh ---
-    await page.evaluate(() => window.scrollBy(0, 1400));
-    await page.waitForTimeout(400);
     const the = page.locator("li").filter({ hasText: /gỡ mẫu này/i }).nth(1);
+    // Cuon theo CHINH the can chup, khong theo mot con so do dem. scrollBy(0, 1400)
+    // dung duoc dung mot lan: them mot mau vao gio hay doi chieu cao mot hang la
+    // muc tieu tut xuong duoi day khung nhin, va mui ten ve ra ngoai anh.
+    await the.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
     await chup(page, "05-bo-anh", [
       { o: the.locator("li").first(), huong: "phai" },
       { o: the.getByText(/\d+\/\d+ ảnh/).first(), huong: "trai" },
@@ -222,7 +273,12 @@ async function main(): Promise<void> {
     // --- 6. Tao link ---
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.getByRole("button", { name: /tạo link gửi khách/i }).click();
-    await page.waitForTimeout(2500);
+    // Doi man hinh ket qua hien ra THAT, khong doi cung mot con so giay: tao
+    // catalogue phai ghi xuong co so du lieu va Storage, thoi gian do khong
+    // doan truoc duoc.
+    await page.getByRole("button", { name: /chép link/i })
+      .waitFor({ state: "visible", timeout: 30_000 });
+    await page.waitForTimeout(500);
     await chup(
       page,
       "06-tao-link",
