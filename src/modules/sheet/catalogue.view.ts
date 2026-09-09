@@ -170,6 +170,86 @@ const DONG_NGHIA_DONG_SP: Record<string, string> = {
   "tron": "plain",
 };
 
+/**
+ * Tu dien Viet-Anh ap dung theo TUNG TU, khac ba bang tren (chung doi chieu
+ * NGUYEN gia tri mot o).
+ *
+ * Vi sao can them: hai cot mo ta la van xuoi — "Dây mân côi", "Mặt dây túi
+ * tiền". Doi chieu nguyen cum thi khong bao gio trung, nen phai dich tung tu.
+ *
+ * Chi mot chieu Viet -> Anh la du: kho tim kiem duoc dung tu chinh o bang tinh
+ * (tieng Viet), nen chi can them ban tieng Anh vao kho. Nguoi go tieng Viet da
+ * khop san voi chinh chu goc roi.
+ *
+ * KHONG co "xoan" -> "diamond" o day, du "xoàn" nghia la kim cuong: bo dau xong
+ * thi "xoàn" (kim cuong) va "xoắn" (van thung) thanh cung mot tu, va mot cai
+ * lac xoan la se hien ra khi khach tim "diamond". Ban dich cua kim cuong duoc
+ * them tu truong loaiXoan ben duoi — cho do doc tu ma LGDRI/DIARI nen khong
+ * bao gio nham.
+ */
+const TU_DIEN_VI_EN: Record<string, string> = {
+  nhan: "ring",
+  day: "chain",
+  chuyen: "necklace",
+  lac: "bracelet",
+  mat: "pendant charm",
+  bong: "earring",
+  tai: "earring",
+  vang: "gold",
+  trang: "white",
+  hong: "rose pink",
+  bac: "silver",
+  tron: "plain",
+  man: "rosary",
+  coi: "rosary",
+  bi: "bead ball",
+  khac: "engraved engraving",
+  may: "machine",
+  la: "leaf",
+  tui: "bag pouch",
+  tien: "money coin",
+  khoen: "link loop",
+  lat: "flip",
+  size: "size",
+};
+
+/**
+ * Chat lieu la MA, khong phai chu: "18K", "14K", "PT". Khong co chu "vang" hay
+ * "gold" nao trong bang tinh de ma khop, nen truoc khi them cho nay thi go
+ * "gold" ra 0 mau — trong khi 64/71 mau la vang.
+ *
+ * Tach rieng khoi tu dien theo tu vi day la doc MA chu khong phai dich chu.
+ */
+function dichChatLieu(v: string | null): string[] {
+  if (!v) return [];
+  const s = chuanHoaTimKiem(v);
+  if (/^pt/.test(s)) return ["platinum", "bach kim"];
+  const m = /^(\d+)\s*k([a-z]?)/.exec(s);
+  if (!m) return [];
+  // "vang" vua la kim loai vua la mau — o day la kim loai.
+  const ra = ["gold", "vang", `${m[1]}k`];
+  const mauTheoMa: Record<string, string> = {
+    y: "yellow vang",
+    w: "white trang",
+    r: "rose hong",
+    p: "rose hong",
+  };
+  const mau = mauTheoMa[m[2]];
+  if (mau) ra.push(mau);
+  return ra;
+}
+
+/** Ban dich tieng Anh cua tung tu trong mot doan van xuoi. */
+function dichTungTu(v: string | null): string[] {
+  if (!v) return [];
+  const ra: string[] = [];
+  for (const tu of chuanHoaTimKiem(v).split(" ")) {
+    const dich = TU_DIEN_VI_EN[tu];
+    if (dich) ra.push(dich);
+  }
+  return ra;
+}
+
 function themDongNghia(v: string | null, bang: Record<string, string>): string[] {
   if (!v) return [];
   const dong = bang[chuanHoaTimKiem(v)];
@@ -191,6 +271,7 @@ function khoTimKiem(d: DongCatalogue): string[] {
   const phan: (string | null)[] = [
     d.maMau, d.sku, d.mo, d.so, d.chiTiet,
     d.chatLieu, d.size, d.dongSp, d.loaiSp, d.mau, d.oChu,
+    d.moTa1, d.moTa2,
   ];
 
   // TL vang la so nen khong tu vao chuoi. Nhan CA HAI cach go: "2.78" va
@@ -201,6 +282,9 @@ function khoTimKiem(d: DongCatalogue): string[] {
   }
   // Loai xoan la nhan noi bo ("lab" / "tu-nhien"), phai doi sang chu nguoi go.
   if (d.loaiXoan) {
+    // "diamond kim cuong" gan o DAY chu khong gan vao tu dien: truong nay doc
+    // tu ma LGDRI/DIARI trong Chi tiet SP nen chac chan la kim cuong that.
+    phan.push("diamond kim cuong");
     phan.push(d.loaiXoan === "lab" ? "lab xoan lab" : "tu nhien natural");
   }
 
@@ -208,6 +292,11 @@ function khoTimKiem(d: DongCatalogue): string[] {
     ...themDongNghia(d.mau, DONG_NGHIA_MAU),
     ...themDongNghia(d.loaiSp, DONG_NGHIA_LOAI_SP),
     ...themDongNghia(d.dongSp, DONG_NGHIA_DONG_SP),
+    // Van xuoi trong hai cot mo ta: dich tung tu mot.
+    ...dichTungTu(d.moTa1),
+    ...dichTungTu(d.moTa2),
+    ...dichTungTu(d.loaiSp),
+    ...dichChatLieu(d.chatLieu),
   );
 
   // Giu dang TUNG TU chu khong phai mot chuoi dai: phep khop ben duoi lam viec
@@ -387,4 +476,85 @@ export function catTrang(
   const dau = (t - 1) * moiTrang;
   const lat = ds.slice(dau, dau + moiTrang);
   return { ds: lat, trang: t, soTrang, tu: ds.length === 0 ? 0 : dau + 1, den: dau + lat.length };
+}
+
+// ---------------------------------------------------------------------------
+// Goi y khi go tim
+// ---------------------------------------------------------------------------
+
+/** Cot ma mot goi y den tu do. Hien canh goi y de nguoi ta biet minh chon gi. */
+export type NhomGoiY =
+  | "maMau" | "loaiSp" | "dongSp" | "chatLieu" | "mau" | "size" | "moTa";
+
+export type MucGoiY = {
+  /** Chu se duoc dien vao o tim kiem khi bam. */
+  chu: string;
+  nhom: NhomGoiY;
+  /** Bao nhieu mau mang gia tri nay. */
+  soLuong: number;
+};
+
+const LAY_GOI_Y: { nhom: NhomGoiY; lay: (d: DongCatalogue) => (string | null)[] }[] = [
+  { nhom: "moTa", lay: (d) => [d.moTa1, d.moTa2] },
+  { nhom: "loaiSp", lay: (d) => [d.loaiSp] },
+  { nhom: "dongSp", lay: (d) => [d.dongSp] },
+  { nhom: "chatLieu", lay: (d) => [d.chatLieu] },
+  { nhom: "mau", lay: (d) => [d.mau] },
+  { nhom: "size", lay: (d) => [d.size] },
+  { nhom: "maMau", lay: (d) => [d.maMau] },
+];
+
+/**
+ * Toan bo tu vung goi y duoc, dung mot lan cho ca bang.
+ *
+ * Tinh o may chu roi truyen sang: o tim kiem la client component va noi dung go
+ * doi theo tung phim, nen viec LOC phai lam o trinh duyet. Nhung danh sach gia
+ * tri thi khong doi theo phim — tinh mot lan, gui mot lan.
+ *
+ * Mot gia tri chi thuoc MOT nhom: neu no xuat hien o hai cot thi giu nhom dau
+ * tien theo thu tu LAY_GOI_Y, va cong don so luong. Hien mot chu hai lan trong
+ * danh sach goi y trong nhu mot loi.
+ */
+export function tuVungGoiY(ds: DongCatalogue[]): MucGoiY[] {
+  const bang = new Map<string, MucGoiY>();
+  for (const { nhom, lay } of LAY_GOI_Y) {
+    for (const d of ds) {
+      for (const v of lay(d)) {
+        const chu = v?.trim();
+        if (!chu) continue;
+        const khoa = chuanHoaTimKiem(chu);
+        const cu = bang.get(khoa);
+        if (cu) cu.soLuong++;
+        else bang.set(khoa, { chu, nhom, soLuong: 1 });
+      }
+    }
+  }
+  return [...bang.values()];
+}
+
+/** Bao nhieu goi y hien cung luc. Dai hon thi danh sach che mat ban thu ket qua. */
+export const SO_GOI_Y = 8;
+
+/**
+ * Loc tu vung theo cau dang go. Ham thuan, chay o trinh duyet theo tung phim.
+ *
+ * Dung DUNG phep khop cua tim kiem that (khopTu): goi y ma hien ra roi bam vao
+ * lai khong ra ket qua nao thi te hon la khong co goi y.
+ */
+export function locGoiY(tuVung: MucGoiY[], q: string | null, toiDa = SO_GOI_Y): MucGoiY[] {
+  const tuKhoa = tachTuKhoa(q);
+  if (tuKhoa.length === 0) return [];
+
+  const hop = tuVung.filter((m) => {
+    const kho = chuanHoaTimKiem(m.chu).split(" ").filter(Boolean);
+    return tuKhoa.every((t) => khopTu(kho, t));
+  });
+
+  // Da go dung y het mot goi y roi thi khong con gi de goi y nua.
+  const daDayDu = chuanHoaTimKiem(q ?? "");
+  const con = hop.filter((m) => chuanHoaTimKiem(m.chu) !== daDayDu);
+
+  return con
+    .sort((a, b) => b.soLuong - a.soLuong || a.chu.localeCompare(b.chu, "vi"))
+    .slice(0, toiDa);
 }

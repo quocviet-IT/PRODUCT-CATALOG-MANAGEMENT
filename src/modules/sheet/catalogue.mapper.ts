@@ -41,6 +41,13 @@ export type DongCatalogue = {
   urlAnhConcept: string | null;
   /** Cot "Source clip tho": thu muc video quay tho. */
   urlClipTho: string | null;
+  /**
+   * Hai cot mo ta bang chu cua nguoi ban hang: "Dây mân côi", "Nhẫn band xoàn
+   * lab"... Day la NGON NGU NGUOI TA GO khi tim, chu khong phai ma hang — nen
+   * chung phai nam trong vung tim kiem.
+   */
+  moTa1: string | null;
+  moTa2: string | null;
   co: CoBatThuong[];
 };
 
@@ -96,6 +103,10 @@ const COT = {
   // the la chip hay hyperlink nhu cot tren.
   anhConcept: { ten: "Hình raw - concept", batBuoc: false, nhan: ["hình raw - concept"] },
   clipTho:    { ten: "Source clip thô",    batBuoc: false, nhan: ["source clip thô", "source clip tho"] },
+  // Hai cot mo ta. Nguoi dung bao tim "day man coi" khong ra gi (09/09/2026):
+  // ca hai cot deu chua bao gio duoc doc vao he thong.
+  moTa1:      { ten: "Mô tả 1",            batBuoc: false, nhan: ["mô tả 1"] },
+  moTa2:      { ten: "Mô tả 2",            batBuoc: false, nhan: ["mô tả 2"] },
 } as const;
 
 type TenTruong = keyof typeof COT;
@@ -216,6 +227,8 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
       chatLieu: chu(lay(h, "chatLieu")),
       urlAnhConcept: lienKet(lay(h, "anhConcept")),
       urlClipTho: lienKet(lay(h, "clipTho")),
+      moTa1: chu(lay(h, "moTa1")),
+      moTa2: chu(lay(h, "moTa2")),
       loaiXoan: chiTiet === null ? null
         : /^LGDRI/i.test(chiTiet) ? "lab"
         : /^DIARI/i.test(chiTiet) ? "tu-nhien"

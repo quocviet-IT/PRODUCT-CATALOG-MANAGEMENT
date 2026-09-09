@@ -10,12 +10,14 @@ import {
   type ChieuLoc,
   type DemLoc,
   type MucDem,
+  type MucGoiY,
 } from "@/modules/sheet/catalogue.view";
-import { ChevronDown, Search, X } from "lucide-react";
+import { ChevronDown, X } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
 import { useDangLoc } from "@/ui/vung-loc";
 import type { BoChu } from "@/messages";
 import { nhanCo } from "./nhan-co";
+import { ODoTim } from "./o-tim";
 
 const NHAN = "block text-[11px] uppercase tracking-[0.14em] text-hp-muted";
 
@@ -202,9 +204,12 @@ const O_SO =
 export function ThanhBoLoc({
   dem,
   hienTai,
+  tuVung,
 }: {
   dem: DemLoc;
   hienTai: BoLocCatalogue;
+  /** Toan bo gia tri co the goi y, tinh mot lan o may chu. */
+  tuVung: MucGoiY[];
 }) {
   const router = useRouter();
   const { dangLoc, chay } = useDangLoc();
@@ -287,53 +292,7 @@ export function ThanhBoLoc({
 
   return (
     <div className="mb-10 space-y-5">
-      {/*
-        O tim kiem la thu duoc dung nhieu nhat tren man hinh nay, nen no phai
-        NANG hon moi thu khac. Truoc day no chi la mot duong gach chan mo —
-        nguoi dung bao khong nhin thay no o dau (08/09/2026). Gio la mot o co
-        vien that, icon to hon, va cau goi y ben trong.
-      */}
-      {/* relative: dong "Dang cap nhat" duoi day dat TUYET DOI de no khong an
-          mot dong chieu cao nao ca. Truoc do no la mot the khoi cao 16px an di
-          bang opacity — khong nhay khi hien ra, nhung de lai mot khoang trong
-          co dinh duoi o tim kiem mai mai. */}
-      <div className="relative max-w-xl">
-        <label className={NHAN} htmlFor="q">
-          {t.catalogue_sheet.tim_kiem_nhan}
-        </label>
-        <div className="mt-2 flex items-center gap-3 border border-hp-rule bg-hp-card
-                        px-4 py-3 transition-colors duration-150
-                        focus-within:border-hp-pink">
-          <Search aria-hidden strokeWidth={1.5} className="h-5 w-5 shrink-0 text-hp-muted" />
-          <input
-            id="q"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            autoComplete="off"
-            placeholder={t.catalogue_sheet.tim_kiem_goi_y}
-            className="w-full bg-transparent font-body text-base text-hp-body
-                       placeholder:text-hp-muted/70 focus:outline-none"
-          />
-          {q !== "" && (
-            <button
-              type="button"
-              onClick={() => setQ("")}
-              aria-label={t.catalogue_sheet.xoa_loc}
-              className="shrink-0 text-hp-muted transition-colors duration-150 hover:text-hp-ink"
-            >
-              <X aria-hidden strokeWidth={1.5} className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-        <p
-          aria-live="polite"
-          className={`absolute left-0 top-full mt-1.5 text-[11px] uppercase
-                      tracking-[0.14em] text-hp-muted transition-opacity duration-150
-                      ${dangLoc ? "opacity-100" : "opacity-0"}`}
-        >
-          {dangLoc ? t.phan_hoi.dang_cap_nhat : ""}
-        </p>
-      </div>
+      <ODoTim q={q} datQ={setQ} tuVung={tuVung} dangLoc={dangLoc} t={t} />
 
       <div className="flex flex-wrap items-end gap-x-3 gap-y-3">
         {MOI_CHIEU.map((chieu) => (

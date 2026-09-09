@@ -10,6 +10,8 @@ import {
   thamSoCua,
   tinhDemLoc,
   tinhThongKe,
+  locGoiY,
+  tuVungGoiY,
   type BoLocCatalogue,
 } from "@/modules/sheet/catalogue.view";
 import { bangMau } from "./fixtures/bang-mau";
@@ -352,8 +354,18 @@ describe("tim kiem", () => {
     expect(dem("bracelet")).toBe(1);    // LẮC
     expect(dem("necklace")).toBe(1);    // DÂY CHUYỀN
     expect(dem("trắng")).toBe(2);       // White
-    expect(dem("vàng")).toBe(1);        // Yellow
     expect(dem("plain")).toBe(1);       // Trơn
+  });
+
+  it("'vàng' la KIM LOAI, khong phai chi mau Yellow", () => {
+    // Ca ba mau deu la 14K/18K nen ca ba deu la vang — ke ca cai mau White,
+    // vi vang trang van la vang. Truoc day cau nay chi ra dung mot mau (mau
+    // co cot MAU = Yellow), va do la cach hieu sai: nguoi ta go "vang" de tim
+    // do vang, khong phai de tim do mau vang.
+    expect(dem("vàng")).toBe(3);
+    expect(dem("gold")).toBe(3);
+    // Muon dung mau vang thi go them chu mau.
+    expect(dem("vàng yellow")).toBe(DS.filter((d) => d.mau === "Yellow").length);
   });
 
   it("NHIEU TU: moi tu deu phai co, khong can dung thu tu", () => {
@@ -400,5 +412,103 @@ describe("tachTuKhoa", () => {
   it("khong co cau tim thi khong co tu nao", () => {
     expect(tachTuKhoa(null)).toEqual([]);
     expect(tachTuKhoa("   ")).toEqual([]);
+  });
+});
+
+describe("tim kiem hai cot mo ta", () => {
+  const tim = (q: string) => locDanhSach(ds, { ...KHONG_LOC, q });
+
+  it("tim duoc chu trong Mo ta 1", () => {
+    // Nguoi dung bao go "mân côi" khong ra gi (09/09/2026): ca hai cot mo ta
+    // chua bao gio duoc doc vao he thong.
+    expect(tim("mân côi").length).toBe(1);
+    expect(tim("mân côi")[0].moTa1).toBe("Dây mân côi");
+  });
+
+  it("tim duoc chu trong Mo ta 2", () => {
+    expect(tim("nhẫn band").length).toBeGreaterThan(0);
+    expect(tim("nhẫn band").every((d) => d.moTa2?.includes("Nhẫn band"))).toBe(true);
+  });
+
+  it("khong dau van tim duoc", () => {
+    expect(tim("man coi").length).toBe(tim("mân côi").length);
+  });
+
+  it("tieng Anh tim ra chu tieng Viet trong mo ta", () => {
+    // "Dây mân côi" -> day = chain, man coi = rosary.
+    expect(tim("rosary").length).toBe(1);
+    expect(tim("chain rosary").length).toBe(1);
+  });
+
+  it("kim cuong dich tu loaiXoan chu khong tu chu 'xoan'", () => {
+    // "xoàn" (kim cuong) va "xoắn" (van thung) bo dau xong la mot tu. Neu dich
+    // thang tu do sang "diamond" thi mot cai lac xoan la se hien ra khi khach
+    // tim "diamond". Ban dich phai den tu loaiXoan — cho doc ma LGDRI/DIARI.
+    const coXoan = ds.filter((d) => d.loaiXoan !== null);
+    expect(coXoan.length).toBeGreaterThan(0);
+    expect(tim("diamond").length).toBe(coXoan.length);
+  });
+});
+
+describe("chat lieu la MA, phai doc ra chu", () => {
+  const tim = (q: string) => locDanhSach(ds, { ...KHONG_LOC, q });
+
+  it("go 'gold' ra duoc cac mau 14K/18K", () => {
+    // Bang tinh chi ghi "18K", "14KY" — khong co chu "vang" hay "gold" nao de
+    // ma khop. Truoc khi doc ma nay thi "gold" ra 0 mau, trong khi gan het bang
+    // la vang.
+    const vang = ds.filter((d) => /^\d+\s*K/i.test(d.chatLieu ?? ""));
+    expect(vang.length).toBeGreaterThan(0);
+    expect(tim("gold").length).toBe(vang.length);
+    expect(tim("vàng").length).toBe(vang.length);
+  });
+
+  it("doc duoc chu cai mau trong ma: 14KY la vang yellow", () => {
+    const ky = ds.filter((d) => /^\d+\s*KY/i.test(d.chatLieu ?? ""));
+    if (ky.length === 0) return;
+    expect(tim("yellow gold").length).toBeGreaterThanOrEqual(ky.length);
+  });
+
+  it("PT la bach kim, khong phai vang", () => {
+    const pt = ds.filter((d) => /^PT/i.test(d.chatLieu ?? ""));
+    if (pt.length === 0) return;
+    expect(tim("platinum").length).toBe(pt.length);
+  });
+});
+
+describe("goi y khi go tim", () => {
+  const tuVung = tuVungGoiY(ds);
+
+  it("chua go gi thi khong goi y", () => {
+    expect(locGoiY(tuVung, null)).toEqual([]);
+    expect(locGoiY(tuVung, "   ")).toEqual([]);
+  });
+
+  it("goi y chu that trong bang tinh, kem so mau", () => {
+    const kq = locGoiY(tuVung, "man");
+    expect(kq.map((m) => m.chu)).toContain("Dây mân côi");
+    expect(kq.find((m) => m.chu === "Dây mân côi")?.nhom).toBe("moTa");
+    expect(kq.find((m) => m.chu === "Dây mân côi")?.soLuong).toBe(1);
+  });
+
+  it("go het chinh goi y do thi thoi goi y no nua", () => {
+    expect(locGoiY(tuVung, "Dây mân côi").map((m) => m.chu)).not.toContain("Dây mân côi");
+  });
+
+  it("moi goi y bam vao deu phai ra ket qua", () => {
+    // Mot goi y hien ra roi bam vao lai ra bang rong thi te hon la khong co
+    // goi y. Kiem bang chinh bo loc that.
+    for (const m of tuVung) {
+      expect(locDanhSach(ds, { ...KHONG_LOC, q: m.chu }).length, m.chu).toBeGreaterThan(0);
+    }
+  });
+
+  it("khong lap lai mot chu hai lan", () => {
+    const chu = tuVung.map((m) => m.chu);
+    expect(new Set(chu).size).toBe(chu.length);
+  });
+
+  it("cat bot khi qua nhieu", () => {
+    expect(locGoiY(tuVung, "a", 3).length).toBeLessThanOrEqual(3);
   });
 });

@@ -165,7 +165,10 @@ export const vi = {
     // {luc} la moc thoi gian lan day gan nhat, da dinh dang san.
     nguon_dong_bo: "Bản chụp bảng tính, Apps Script đẩy lên lúc {luc}",
     nguon_dong_bo_chua_co: "Đang chờ Apps Script đẩy bảng tính lên lần đầu",
-    tim_kiem_nhan: "Tìm mã mẫu, SKU, MO, SO hoặc mô tả",
+    tim_kiem_nhan: "Tìm mã mẫu, SKU, MO, SO, mô tả — tiếng Việt hoặc tiếng Anh",
+    cot_mo_ta: "Mô tả",
+    // {n} = so mau mang gia tri duoc goi y.
+    goi_y_dem: "{n} mẫu",
     tim_kiem_goi_y: "Gõ để lọc ngay, không cần bấm Enter",
     chat_lieu: "Chất liệu",
     loai_xoan: "Loại xoàn",

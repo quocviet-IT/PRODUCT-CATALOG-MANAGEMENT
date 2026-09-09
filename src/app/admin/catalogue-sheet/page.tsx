@@ -10,6 +10,7 @@ import {
   thamSoCua,
   tinhDemLoc,
   tinhThongKe,
+  tuVungGoiY,
 } from "@/modules/sheet/catalogue.view";
 import type { DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { khoaMau } from "@/modules/catalogue-share/chia-se.model";
@@ -207,7 +208,10 @@ export default async function TrangCatalogueSheet({
         />
       </KetQuaLoc>
 
-      <ThanhBoLoc dem={dem} hienTai={loc} />
+      {/* Tu vung goi y tinh tren TOAN BO bang, khong theo bo loc dang bat:
+          goi y la de nguoi ta biet trong he thong CO nhung chu gi, ke ca khi
+          bo loc hien tai dang che chung di. */}
+      <ThanhBoLoc dem={dem} hienTai={loc} tuVung={tuVungGoiY(tatCa)} />
 
       <KetQuaLoc>
 
