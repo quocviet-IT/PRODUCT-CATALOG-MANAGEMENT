@@ -448,8 +448,8 @@ export function dangLoc(loc: BoLocCatalogue): boolean {
 /** So dong moi trang. 20 vua man hinh ma khong bat nguoi dung cuon dai. */
 export const MOI_TRANG = 20;
 
-export type KetQuaTrang = {
-  ds: DongCatalogue[];
+export type KetQuaTrang<T = DongCatalogue> = {
+  ds: T[];
   trang: number;
   soTrang: number;
   tu: number;
@@ -466,11 +466,11 @@ export function docTrang(sp: Record<string, string | undefined>): number {
  * danh sach rong — nguoi go tay ?trang=999 nen thay trang cuoi, khong phai
  * mot man hinh trong khong giai thich gi.
  */
-export function catTrang(
-  ds: DongCatalogue[],
+export function catTrang<T>(
+  ds: T[],
   trang: number,
   moiTrang: number = MOI_TRANG,
-): KetQuaTrang {
+): KetQuaTrang<T> {
   const soTrang = Math.max(1, Math.ceil(ds.length / moiTrang));
   const t = Math.min(Math.max(1, Math.trunc(trang)), soTrang);
   const dau = (t - 1) * moiTrang;

@@ -207,8 +207,15 @@ export type DongDanhSach = {
   trangThai: TrangThaiLink;
 };
 
-/** Toi da mot trang danh sach. Sale nao vuot con so nay thi tinh tiep. */
-export const MOI_TRANG = 200;
+/**
+ * Tran an toan cho mot lan doc, KHONG phai co trang.
+ *
+ * Man hinh tu phan trang lay (20 dong mot trang), va viec loc thi lam trong bo
+ * nho tren toan bo danh sach — nen phai lay ve du. Con so nay chi de mot bang
+ * phinh ra bat thuong khong keo sap trang; cham toi no thi den luc phan trang
+ * bang SQL.
+ */
+export const TOI_DA_MOT_LAN = 2000;
 
 /**
  * Danh sach catalogue da tao.
@@ -238,7 +245,7 @@ export async function danhSachCatalogue(
     .from(catalogues)
     .leftJoin(users, eq(users.id, catalogues.ownerId))
     .orderBy(desc(catalogues.createdAt))
-    .limit(MOI_TRANG);
+    .limit(TOI_DA_MOT_LAN);
 
   const ds = xemHet
     ? await truyVan

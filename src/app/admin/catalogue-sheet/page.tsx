@@ -28,7 +28,7 @@ import { NganChiTiet } from "./ngan-chi-tiet";
 import { layChu } from "@/messages/may-chu";
 import type { BoChu } from "@/messages";
 import { nhanCo } from "./nhan-co";
-import { PhanTrang } from "./phan-trang";
+import { PhanTrang } from "@/ui/phan-trang";
 import { BangDieuKhien } from "./bang-dieu-khien";
 import { AnhTai } from "@/ui/anh-tai";
 import { KetQuaLoc, NguonLoc } from "@/ui/vung-loc";

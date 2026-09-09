@@ -306,6 +306,12 @@ export const vi = {
     mo_ta_sale: "Những link anh đã tạo. Bấm vào để mở đúng thứ khách nhìn thấy.",
     mo_ta_admin: "Toàn bộ link đã tạo trên hệ thống, của mọi nhân viên.",
     chua_co: "Chưa tạo catalogue nào.",
+    tim_kiem_nhan: "Tìm theo tên catalogue, đường dẫn hoặc người tạo",
+    tim_kiem_goi_y: "Gõ để lọc ngay",
+    khong_khop: "Không có catalogue nào khớp.",
+    // Don vi o day la CATALOGUE, khong phai mau — dung dung lai chuoi cua
+    // man hinh catalogue.
+    pham_vi: "Hiện {tu}–{den} trong {tong} catalogue",
     nut_tao: "Tạo catalogue mới",
     cot_ten: "Tên",
     cot_noi_dung: "Nội dung",

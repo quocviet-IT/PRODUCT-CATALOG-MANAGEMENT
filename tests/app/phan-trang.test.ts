@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SO_O_TOI_DA, cuaSoTrang } from "@/app/admin/catalogue-sheet/phan-trang";
+import { SO_O_TOI_DA, cuaSoTrang } from "@/ui/phan-trang";
 
 describe("cuaSoTrang", () => {
   it("it trang thi hien het, khong don", () => {
