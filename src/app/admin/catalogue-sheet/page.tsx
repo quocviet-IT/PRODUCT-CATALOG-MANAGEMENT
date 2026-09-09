@@ -13,6 +13,7 @@ import {
   tinhThongKe,
   tuVungGoiY,
   cotRong,
+  dongLapMa,
   docSapXepTuUrl,
   sapXepDanhSach,
   type ChieuSap,
@@ -21,7 +22,7 @@ import {
 } from "@/modules/sheet/catalogue.view";
 import type { DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { khoaMau } from "@/modules/catalogue-share/chia-se.model";
-import { ChonMau, OTich } from "./chon-mau";
+import { ChonMau, DauCungMau, OTich } from "./chon-mau";
 import { BangCatalogue } from "./bang";
 import { ThanhBoLoc } from "./bo-loc";
 import { NganChiTiet } from "./ngan-chi-tiet";
@@ -98,7 +99,7 @@ function dinhDangGam(v: number | null): string | null {
   return v === null ? null : `${v.toFixed(2).replace(".", ",")} g`;
 }
 
-async function The({ d }: { d: DongCatalogue }) {
+async function The({ d, lap }: { d: DongCatalogue; lap: boolean }) {
   const t = await layChu();
   const trongLuong = dinhDangGam(d.tlVang);
   const coDongTrongLuongSize = trongLuong !== null || d.size !== null;
@@ -125,7 +126,7 @@ async function The({ d }: { d: DongCatalogue }) {
 
       <div className="p-5">
         <div className="mb-3">
-          <OTich ma={khoaMau(d)} />
+          {lap ? <DauCungMau ma={khoaMau(d)} /> : <OTich ma={khoaMau(d)} />}
         </div>
         {d.chatLieu && (
           <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
@@ -315,7 +316,14 @@ export default async function TrangCatalogueSheet({
               />
             ) : (
               <ul className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-                {ds.map((d) => <The key={d.dongSheet} d={d} />)}
+                {(() => {
+                  // Mot ma mau trai tren nhieu dong thi chi the DAU mang o tich
+                  // — hai o cung khoa se tich/bo cung nhau. Xem dongLapMa.
+                  const lap = dongLapMa(ds, khoaMau);
+                  return ds.map((d) => (
+                    <The key={d.dongSheet} d={d} lap={lap.has(d.dongSheet)} />
+                  ));
+                })()}
               </ul>
             )}
           </NganChiTiet>

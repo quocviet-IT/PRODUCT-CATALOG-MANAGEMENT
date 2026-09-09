@@ -13,6 +13,7 @@ import {
   locGoiY,
   tuVungGoiY,
   cotRong,
+  dongLapMa,
   docSapXepTuUrl,
   sapXepDanhSach,
   COT_AN_DUOC,
@@ -20,6 +21,7 @@ import {
   type BoLocCatalogue,
 } from "@/modules/sheet/catalogue.view";
 import { bangMau } from "./fixtures/bang-mau";
+import { khoaMau } from "@/modules/catalogue-share/chia-se.model";
 
 const ds = anhXaBang(bangMau);
 
@@ -585,5 +587,33 @@ describe("cot rong", () => {
 
   it("danh sach rong khi khong co dong nao thi coi la rong het", () => {
     expect(cotRong([]).size).toBe(COT_AN_DUOC.length);
+  });
+});
+
+describe("dong lap mot ma mau", () => {
+  const d = (dongSheet: number, maMau: string | null) =>
+    ({ ...ds[0], dongSheet, maMau }) as DongCatalogue;
+
+  it("chi dong DAU cua moi ma la khong lap", () => {
+    // O tich mang khoa la MA MAU, nhung bang hien mot dong moi bien the. Hai o
+    // cung khoa thi tich mot cai la ca hai cung tich, bo mot cai la ca hai cung
+    // bo — nguoi dung bao loi, va ho dung.
+    const lap = dongLapMa([d(1, "A"), d(2, "A"), d(3, "B"), d(4, "A")], khoaMau);
+    expect([...lap].sort((x, y) => x - y)).toEqual([2, 4]);
+  });
+
+  it("moi ma mot dong thi khong co dong nao lap", () => {
+    expect(dongLapMa([d(1, "A"), d(2, "B")], khoaMau).size).toBe(0);
+  });
+
+  it("dong khong co ma mau thi moi dong la mot khoa rieng", () => {
+    // khoaMau lui ve "dong-<so>" nen hai dong trong khong bi coi la trung nhau.
+    expect(dongLapMa([d(1, null), d(2, null)], khoaMau).size).toBe(0);
+  });
+
+  it("tinh theo THU TU dang hien, khong theo so dong bang tinh", () => {
+    // Doi cach sap xep thi dong dau doi theo — van luon dung mot o tich cho
+    // moi ma tren man hinh.
+    expect([...dongLapMa([d(9, "A"), d(2, "A")], khoaMau)]).toEqual([2]);
   });
 });

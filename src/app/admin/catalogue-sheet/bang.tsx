@@ -1,12 +1,12 @@
 import type { DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { khoaMau } from "@/modules/catalogue-share/chia-se.model";
-import { OTich } from "./chon-mau";
+import { DauCungMau, OTich } from "./chon-mau";
 import { layChu } from "@/messages/may-chu";
 import { nhanCo } from "./nhan-co";
 import { LienKetDrive } from "./lien-ket-drive";
 import { AnhTai } from "@/ui/anh-tai";
 import { DauCot } from "./dau-cot";
-import type { CotAnDuoc, KhoaSap, SapXep } from "@/modules/sheet/catalogue.view";
+import { dongLapMa, type CotAnDuoc, type KhoaSap, type SapXep } from "@/modules/sheet/catalogue.view";
 
 
 /** Chuan tieng Viet dung dau phay thap phan, du bang tinh ghi dau cham. */
@@ -48,6 +48,8 @@ export async function BangCatalogue({
   const t = await layChu();
   const nhan = nhanCo(t);
   const hien = (c: CotAnDuoc) => !an.has(c);
+  // Mot ma mau trai tren nhieu dong thi chi dong dau mang o tich — xem dongLapMa.
+  const lap = dongLapMa(ds, khoaMau);
   return (
     // Bang rong hon man hinh phai tu cuon trong khung cua no, khong day ca trang
     // truot ngang.
@@ -115,7 +117,9 @@ export async function BangCatalogue({
               className="cursor-pointer bg-hp-card transition-colors duration-150 hover:bg-hp-inset"
             >
               <td className={`${O_DU_LIEU} w-px`}>
-                <OTich ma={khoaMau(d)} />
+                {lap.has(d.dongSheet)
+                  ? <DauCungMau ma={khoaMau(d)} />
+                  : <OTich ma={khoaMau(d)} />}
               </td>
               <td className={O_DU_LIEU}>
                 <div className="flex h-11 w-11 items-center justify-center bg-hp-inset">

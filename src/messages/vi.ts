@@ -396,6 +396,10 @@ export const vi = {
     da_chon: "Đã chọn {n} mẫu",
     bo_chon_het: "Bỏ chọn hết",
     tao_catalogue: "Tạo catalogue",
+    // Dong lap lai mot ma mau da co o tich o tren. Chon la chon theo MAU,
+    // khong theo dong — moi ma chi vao catalogue mot lan.
+    cung_mau: "Cùng mẫu",
+    cung_mau_giai_thich: "Dòng này cùng mẫu {ma} — tích chọn ở dòng đầu của mẫu.",
 
     // Man hinh tao
     tao_tieu_de: "Tạo catalogue gửi khách",

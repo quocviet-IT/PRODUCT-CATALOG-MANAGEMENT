@@ -90,6 +90,26 @@ export function ChonMau({ children }: { children: ReactNode }) {
 }
 
 /** O tich cua mot dong. Dung o CA bang lan luoi nen de chung mot cho. */
+/**
+ * Cho nhung dong LAP LAI mot ma mau da co o tich o tren.
+ *
+ * Khong dat them mot o tich thu hai cung khoa: hai o cung data-chon la tich cai
+ * nay thi cai kia cung tich, va bo cai nay thi ca hai cung bo. Nguoi dung thay
+ * dung nhu mot loi — va ho dung, vi giao dien dang hua hai thu doc lap trong
+ * khi ben duoi chi co mot.
+ */
+export function DauCungMau({ ma }: { ma: string }) {
+  const t = useChu();
+  return (
+    <span
+      title={t.chia_se.cung_mau_giai_thich.replace("{ma}", ma)}
+      className="whitespace-nowrap text-[10px] uppercase tracking-[0.14em] text-hp-muted"
+    >
+      {t.chia_se.cung_mau}
+    </span>
+  );
+}
+
 export function OTich({ ma }: { ma: string }) {
   const t = useChu();
   return (

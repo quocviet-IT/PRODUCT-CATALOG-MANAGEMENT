@@ -656,3 +656,28 @@ export function cotRong(ds: DongCatalogue[]): Set<CotAnDuoc> {
   }
   return rong;
 }
+
+/**
+ * Số dòng của những dòng LẶP LẠI một mã mẫu đã xuất hiện trước đó trong danh
+ * sách này.
+ *
+ * VÌ SAO CẦN: ô tích mang khoá là MÃ MẪU (xem khoaMau), nhưng bảng hiện một
+ * dòng cho mỗi biến thể — 202/1.591 mã trải trên nhiều dòng. Hai dòng cùng mã
+ * nghĩa là hai ô tích cùng một khoá: tích một cái thì cái kia cũng tích, bỏ một
+ * cái thì cả hai cùng bỏ. Người dùng thấy đúng như một lỗi, và họ đúng — giao
+ * diện đang hứa hai thứ độc lập trong khi bên dưới chỉ có một.
+ *
+ * Nên chỉ dòng ĐẦU của mỗi mã mới mang ô tích; những dòng sau nói rõ là cùng
+ * mẫu. Tính theo thứ tự đang hiển thị, nên đổi cách sắp xếp hay sang trang thì
+ * dòng đầu đổi theo — vẫn luôn có đúng một ô tích cho mỗi mã trên màn hình.
+ */
+export function dongLapMa(ds: DongCatalogue[], khoa: (d: DongCatalogue) => string): Set<number> {
+  const daGap = new Set<string>();
+  const lap = new Set<number>();
+  for (const d of ds) {
+    const k = khoa(d);
+    if (daGap.has(k)) lap.add(d.dongSheet);
+    else daGap.add(k);
+  }
+  return lap;
+}

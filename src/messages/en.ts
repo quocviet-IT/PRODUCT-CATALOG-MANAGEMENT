@@ -386,6 +386,8 @@ export const en: BoChu = {
     da_chon: "{n} models selected",
     bo_chon_het: "Clear selection",
     tao_catalogue: "Create catalogue",
+    cung_mau: "Same model",
+    cung_mau_giai_thich: "Same model {ma} — tick it on the model's first row.",
 
     tao_tieu_de: "Create a catalogue for a customer",
     tao_mo_ta: "Untick any image you do not want to send. Remove any model you do not need.",
