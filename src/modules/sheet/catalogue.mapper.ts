@@ -88,6 +88,9 @@ const COT = {
   // "FOLDER HINH" da doi ten thanh "Hinh raw - luu mau" (07/09/2026). Nhan ca hai
   // ten: mat cot nay la ca thu vien anh o trang chi tiet chet lang le.
   thuMuc:   { ten: "FOLDER HÌNH", batBuoc: false, nhan: ["hình raw - lưu mẫu", "folder hình"] },
+  // Anh da chinh sua, dep hon anh chup tho. Uu tien hon `thuMuc` — xem
+  // urlThuMuc ben duoi.
+  thuMucDaXuLy: { ten: "Hình đã xử lý", batBuoc: false, nhan: ["hình đã xử lý"] },
   // Hai cot nay bang tinh da co tu lau nhung he thong khong doc — nguoi dung
   // bao "thieu cot so voi sheet" (08/09/2026). Deu la lien ket Drive, deu co
   // the la chip hay hyperlink nhu cot tren.
@@ -171,7 +174,14 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
     const maMau = chu(lay(h, "maMau"));
     const mo = chu(lay(h, "mo"));
     const chiTiet = chu(lay(h, "chiTiet"));
-    const urlThuMuc = lienKet(lay(h, "thuMuc"));
+    // Anh da xu ly truoc, anh raw sau — va xet theo TUNG DONG chu khong phai
+    // chon lay mot cot cho ca bang.
+    //
+    // Vi sao khong doi han sang cot moi: luc chuyen (09/09/2026) cot "Hinh da
+    // xu ly" moi co 7/71 mau, con cot raw co 69/71. Doi han la 64 mau mat sach
+    // thu vien anh ngay tren nhung link khach dang mo. Uu tien tung dong thi mau
+    // nao xu ly xong la tu doi sang anh dep, khong ai phai lam gi.
+    const urlThuMuc = lienKet(lay(h, "thuMucDaXuLy")) ?? lienKet(lay(h, "thuMuc"));
     const fileIdAnh = tachFileIdAnh(lay(h, "hinh")?.userEnteredValue?.formulaValue);
 
     // includeGridData=true tra ca dong trong nhung con dinh dang (border,

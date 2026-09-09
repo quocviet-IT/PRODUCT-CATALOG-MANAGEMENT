@@ -94,6 +94,30 @@ describe("anhXaBang", () => {
     expect(ds[0].urlThuMuc).toContain("/drive/folders/");
   });
 
+  describe("uu tien thu muc anh DA XU LY", () => {
+    // Bang tinh dang chuyen dan tu anh chup tho sang anh da chinh sua. Luc doi
+    // (09/09/2026) cot moi mo co 7/71 mau, cot cu co 69/71 — nen phai uu tien
+    // theo TUNG DONG, khong phai chon mot cot cho ca bang. Chon ca bang la 64
+    // mau mat sach thu vien anh ngay tren nhung link khach dang mo.
+    it("dong co CA HAI cot thi lay cot da xu ly", () => {
+      expect(ds[1].urlThuMuc).toContain("1QqXuLy");
+      expect(ds[1].idThuMuc).toBe("1QqXuLy0000000000000000000000");
+    });
+
+    it("dong chi co cot raw thi van lay cot raw", () => {
+      expect(ds[0].idThuMuc).toBe("1On2rBPpBzpLsU7xTyvg0H8v7MM12foE8");
+    });
+
+    it("bang chua co cot moi van doc duoc, chi la khong co anh da xu ly", () => {
+      // Cot "Hinh da xu ly" KHONG bat buoc: mot ban sao bang tinh chua kip them
+      // cot van phai chay, va van lay duoc thu muc raw nhu cu.
+      const khongCotMoi = bangMau.map((h) => h.slice(0, 13));
+      const lai = anhXaBang(khongCotMoi);
+      expect(lai.length).toBe(ds.length);
+      expect(lai[1].idThuMuc).toBe("1On2rBPpBzpLsU7xTyvg0H8v7MM12foE8");
+    });
+  });
+
   describe("thu muc dat bang chip Drive", () => {
     // Bang tinh dung CA HAI kieu trong cung cot FOLDER HINH: dong cu la
     // hyperlink, dong moi la chip (chen bang @ hoac keo tep tu Drive). Google
