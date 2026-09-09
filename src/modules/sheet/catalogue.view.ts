@@ -558,3 +558,101 @@ export function locGoiY(tuVung: MucGoiY[], q: string | null, toiDa = SO_GOI_Y): 
     .sort((a, b) => b.soLuong - a.soLuong || a.chu.localeCompare(b.chu, "vi"))
     .slice(0, toiDa);
 }
+
+// ---------------------------------------------------------------------------
+// Sap xep
+// ---------------------------------------------------------------------------
+
+/**
+ * Cac cot sap xep duoc. "dong" la thu tu goc cua bang tinh — mac dinh, va la
+ * thu duy nhat khop voi cai nguoi dung nhin thay khi ho mo Google Sheets.
+ */
+export const KHOA_SAP = [
+  "dong", "maMau", "sku", "so", "mo", "loaiSp", "dongSp",
+  "chatLieu", "mau", "tlVang", "size", "chiTiet",
+] as const;
+export type KhoaSap = (typeof KHOA_SAP)[number];
+export type ChieuSap = "tang" | "giam";
+export type SapXep = { khoa: KhoaSap; chieu: ChieuSap };
+
+export const SAP_MAC_DINH: SapXep = { khoa: "dong", chieu: "tang" };
+
+export function docSapXepTuUrl(sp: Record<string, string | undefined>): SapXep {
+  const khoa = (KHOA_SAP as readonly string[]).includes(sp.sap ?? "")
+    ? (sp.sap as KhoaSap)
+    : SAP_MAC_DINH.khoa;
+  const chieu: ChieuSap = sp.chieu === "giam" ? "giam" : "tang";
+  return { khoa, chieu };
+}
+
+/** Gia tri dem ra so sanh. null nghia la "o trong". */
+const LAY_SAP: Record<KhoaSap, (d: DongCatalogue) => string | number | null> = {
+  dong: (d) => d.dongSheet,
+  maMau: (d) => d.maMau,
+  sku: (d) => d.sku,
+  so: (d) => d.so,
+  mo: (d) => d.mo,
+  loaiSp: (d) => d.loaiSp,
+  dongSp: (d) => d.dongSp,
+  chatLieu: (d) => d.chatLieu,
+  mau: (d) => d.mau,
+  tlVang: (d) => d.tlVang,
+  size: (d) => d.size,
+  chiTiet: (d) => d.chiTiet,
+};
+
+/**
+ * Sap xep danh sach. Ham thuan, KHONG sua mang goc.
+ *
+ * O trong luon xuong CUOI, khong theo chieu sap: dao chieu ma dua ca mot man
+ * hinh o trong len dau thi cu bam dao chieu la mat hut du lieu, va nguoi ta
+ * tuong bang hong.
+ *
+ * Bang nhau thi tra ve thu tu goc cua bang tinh — thu tu on dinh, khong nhay
+ * lung tung moi lan dung lai trang.
+ */
+export function sapXepDanhSach(ds: DongCatalogue[], sap: SapXep): DongCatalogue[] {
+  const lay = LAY_SAP[sap.khoa];
+  const dau = sap.chieu === "giam" ? -1 : 1;
+  return [...ds].sort((a, b) => {
+    const x = lay(a);
+    const y = lay(b);
+    if (x === null && y === null) return a.dongSheet - b.dongSheet;
+    if (x === null) return 1;
+    if (y === null) return -1;
+    let n: number;
+    if (typeof x === "number" && typeof y === "number") n = x - y;
+    else if (sap.khoa === "size") n = sapSize(String(x), String(y));
+    else n = String(x).localeCompare(String(y), "vi", { numeric: true });
+    return n !== 0 ? n * dau : a.dongSheet - b.dongSheet;
+  });
+}
+
+/**
+ * Nhung cot KHONG bao gio co du lieu trong toan bo bang.
+ *
+ * Bang nay 16 cot va phai keo ngang mai moi het. Mot cot rong tuyet doi — hom
+ * nay la "O chu", 0/71 dong — chi ton be ngang de bay ra mot cot gach ngang.
+ * Tinh tren TOAN BO bang chu khong theo bo loc dang bat: cot bien mat rooi hien
+ * lai theo tung lan go tim thi bang nhay lien tuc.
+ */
+export const COT_AN_DUOC = ["sku", "so", "mo", "chiTiet", "size", "oChu", "thuMuc"] as const;
+export type CotAnDuoc = (typeof COT_AN_DUOC)[number];
+
+const LAY_COT: Record<CotAnDuoc, (d: DongCatalogue) => unknown> = {
+  sku: (d) => d.sku,
+  so: (d) => d.so,
+  mo: (d) => d.mo,
+  chiTiet: (d) => d.chiTiet,
+  size: (d) => d.size,
+  oChu: (d) => d.oChu,
+  thuMuc: (d) => d.urlThuMuc ?? d.urlAnhConcept ?? d.urlClipTho,
+};
+
+export function cotRong(ds: DongCatalogue[]): Set<CotAnDuoc> {
+  const rong = new Set<CotAnDuoc>();
+  for (const c of COT_AN_DUOC) {
+    if (!ds.some((d) => LAY_COT[c](d) !== null && LAY_COT[c](d) !== "")) rong.add(c);
+  }
+  return rong;
+}

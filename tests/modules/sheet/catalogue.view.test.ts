@@ -12,6 +12,11 @@ import {
   tinhThongKe,
   locGoiY,
   tuVungGoiY,
+  cotRong,
+  docSapXepTuUrl,
+  sapXepDanhSach,
+  COT_AN_DUOC,
+  SAP_MAC_DINH,
   type BoLocCatalogue,
 } from "@/modules/sheet/catalogue.view";
 import { bangMau } from "./fixtures/bang-mau";
@@ -510,5 +515,75 @@ describe("goi y khi go tim", () => {
 
   it("cat bot khi qua nhieu", () => {
     expect(locGoiY(tuVung, "a", 3).length).toBeLessThanOrEqual(3);
+  });
+});
+
+describe("sap xep", () => {
+  const ma = (l: DongCatalogue[]) => l.map((d) => d.maMau);
+
+  it("mac dinh la thu tu bang tinh", () => {
+    expect(docSapXepTuUrl({})).toEqual({ khoa: "dong", chieu: "tang" });
+    expect(sapXepDanhSach(ds, SAP_MAC_DINH).map((d) => d.dongSheet))
+      .toEqual([...ds].map((d) => d.dongSheet).sort((a, b) => a - b));
+  });
+
+  it("khoa la khong nhan thi lui ve mac dinh", () => {
+    // Tham so den tu URL, ai cung go tay duoc.
+    expect(docSapXepTuUrl({ sap: "../bi-mat", chieu: "xxx" })).toEqual(SAP_MAC_DINH);
+  });
+
+  it("dao chieu dao dung thu tu", () => {
+    const tang = ma(sapXepDanhSach(ds, { khoa: "maMau", chieu: "tang" }));
+    const giam = ma(sapXepDanhSach(ds, { khoa: "maMau", chieu: "giam" }));
+    // Chi so sanh phan KHONG rong: o trong luon o cuoi ca hai chieu.
+    const tangCo = tang.filter((x) => x !== null);
+    const giamCo = giam.filter((x) => x !== null);
+    expect(giamCo).toEqual([...tangCo].reverse());
+  });
+
+  it("o trong luon xuong cuoi, ca hai chieu", () => {
+    // Dao chieu ma dua ca mot man hinh o trong len dau thi nguoi dung tuong
+    // bang hong.
+    for (const chieu of ["tang", "giam"] as const) {
+      const kq = sapXepDanhSach(ds, { khoa: "sku", chieu });
+      const viTriRong = kq.findIndex((d) => d.sku === null);
+      if (viTriRong === -1) continue;
+      expect(kq.slice(viTriRong).every((d) => d.sku === null)).toBe(true);
+    }
+  });
+
+  it("khong sua mang goc", () => {
+    const truoc = ma(ds);
+    sapXepDanhSach(ds, { khoa: "maMau", chieu: "giam" });
+    expect(ma(ds)).toEqual(truoc);
+  });
+
+  it("tl vang sap theo SO, khong theo chuoi", () => {
+    const kq = sapXepDanhSach(ds, { khoa: "tlVang", chieu: "tang" })
+      .map((d) => d.tlVang)
+      .filter((v): v is number => v !== null);
+    expect(kq).toEqual([...kq].sort((a, b) => a - b));
+  });
+
+  it("bang nhau thi giu thu tu bang tinh — khong nhay lung tung", () => {
+    const kq = sapXepDanhSach(ds, { khoa: "chatLieu", chieu: "tang" });
+    for (let i = 1; i < kq.length; i++) {
+      if (kq[i].chatLieu === kq[i - 1].chatLieu) {
+        expect(kq[i].dongSheet).toBeGreaterThan(kq[i - 1].dongSheet);
+      }
+    }
+  });
+});
+
+describe("cot rong", () => {
+  it("bat duoc cot khong dong nao co du lieu", () => {
+    // Bang co 16 cot va phai keo ngang moi het. Mot cot rong tuyet doi chi ton
+    // be ngang de bay ra mot cot gach ngang.
+    expect(cotRong(ds).has("oChu")).toBe(true);
+    expect(cotRong(ds).has("chiTiet")).toBe(false);
+  });
+
+  it("danh sach rong khi khong co dong nao thi coi la rong het", () => {
+    expect(cotRong([]).size).toBe(COT_AN_DUOC.length);
   });
 });
