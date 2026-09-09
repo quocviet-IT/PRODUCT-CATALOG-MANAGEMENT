@@ -3,8 +3,10 @@
 **Hiện tại**: web chạy bằng một bản chụp dữ liệu lấy tay. Sửa bảng tính không lên
 web, thêm ảnh vào Drive cũng không lên web.
 
-**Sau khi làm xong**: sửa bảng tính → **dưới một phút** sau web đổi theo. Bỏ ảnh mới
-vào thư mục Drive → chậm nhất một tiếng sau web thấy. Không ai phải bấm gì.
+**Sau khi làm xong**: sửa bảng tính → web đổi theo sau **khoảng nửa phút**, chậm
+nhất ~80 giây (tối đa 60 giây chờ lượt chạy kế tiếp, cộng tối đa 20 giây bộ đệm
+web). Bỏ ảnh mới vào thư mục Drive → chậm nhất một tiếng sau web thấy. Không ai
+phải bấm gì.
 
 ## Vì sao lại là Apps Script
 
