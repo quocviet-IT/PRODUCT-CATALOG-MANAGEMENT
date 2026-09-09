@@ -53,6 +53,12 @@ export type TrangThaiDongBo = {
   soDong: number;
   soThuMuc: number;
   soAnh: number;
+  /**
+   * Van tay cua bang tho lan truoc. Duong dong bo chay moi phut, ma bang tinh
+   * thi ca ngay khong ai dong toi — so van tay de biet co dang ghi de tep 110 KB
+   * hay khong. Vang mat o cac ban chup cu, nen phai la tuy chon.
+   */
+  bam?: string;
 };
 
 export async function ghiBang(hang: unknown[][]): Promise<void> {

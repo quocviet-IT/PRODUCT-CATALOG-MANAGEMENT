@@ -181,6 +181,28 @@ function lietKeAnh_(idThuMuc) {
 // Buoc 1: day bang tinh + danh sach anh
 // ---------------------------------------------------------------------------
 
+/**
+ * Chi bang tinh, KHONG liet ke thu muc Drive. ~2 giay.
+ *
+ * Day la ham chay moi phut. Tach ra khoi dongBoDuLieu vi phan dat tien cua mot
+ * luot dong bo la liet ke 65 thu muc Drive (~36 giay) — ma thu muc thi hiem khi
+ * doi, con bang tinh thi doi suot. Gop chung lai thi khong the chay moi phut:
+ * 36 giay moi phut la an het han muc chay cua ca ngay truoc gio an trua.
+ *
+ * Cong /api/dong-bo/du-lieu giu nguyen danh sach anh cu khi khong nhan
+ * anhThuMuc, nen bo qua no o day khong lam mat gi.
+ */
+function dongBoBang() {
+  var c = cauHinh_();
+  var hang = docBangTho_(c);
+  var kq = goiWeb_(c, '/api/dong-bo/du-lieu', { hang: hang });
+  Logger.log(
+    kq.doiBang
+      ? 'BANG TINH DA DOI -> da day ' + kq.soDong + ' dong.'
+      : 'Bang tinh khong doi (' + kq.soDong + ' dong).');
+  return kq;
+}
+
 function dongBoDuLieu() {
   var c = cauHinh_();
   var hang = docBangTho_(c);
@@ -310,12 +332,15 @@ function datLichChay() {
   var cu = ScriptApp.getProjectTriggers();
   for (var i = 0; i < cu.length; i++) ScriptApp.deleteTrigger(cu[i]);
 
-  // Bang tinh do nguoi sua tay, moi gio mot lan la du kip.
+  // Bang tinh: moi phut. Day la thu nguoi dung sua va cho thay ket qua.
+  ScriptApp.newTrigger('dongBoBang').timeBased().everyMinutes(1).create();
+  // Day du (kem liet ke thu muc Drive): moi gio. Day la cach anh MOI bo vao
+  // Drive duoc phat hien.
   ScriptApp.newTrigger('dongBoDuLieu').timeBased().everyHours(1).create();
   // Anh thi con phai bu dan cho het lan dau, nen chay day hon.
   ScriptApp.newTrigger('dongBoAnh').timeBased().everyMinutes(10).create();
 
-  Logger.log('Da dat lich: du lieu moi gio, anh moi 10 phut.');
+  Logger.log('Da dat lich: bang tinh moi phut, day du moi gio, anh moi 10 phut.');
 }
 
 /** Go het lich, dung dong bo hoan toan. */

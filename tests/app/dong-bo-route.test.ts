@@ -100,6 +100,46 @@ describe("POST /api/dong-bo/du-lieu", () => {
     ]);
   });
 
+  it("khong kem anhThuMuc thi GIU NGUYEN danh sach anh cu, khong xoa", async () => {
+    // Day la ca chay moi phut. Ghi de anh-thu-muc.json bang mot vat rong o day
+    // se xoa sach thu vien anh cua 65 mau — im lang, va moi phut mot lan.
+    taiVe.mockResolvedValue(
+      Buffer.from(
+        JSON.stringify({ luc: "2026-09-09T01:00:00.000Z", soDong: 71, soThuMuc: 65, soAnh: 1717 }),
+        "utf8",
+      ),
+    );
+    const res = await duLieu.POST(goi("du-lieu", { hang: bangMau }));
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { soThuMuc: number; soAnh: number };
+    // Con so cu duoc mang sang, khong tut ve 0.
+    expect(body.soThuMuc).toBe(65);
+    expect(body.soAnh).toBe(1717);
+
+    const khoaDaGhi = ghiTep.mock.calls.map((c) => c[0]);
+    expect(khoaDaGhi).not.toContain("dong-bo/anh-thu-muc.json");
+    expect(khoaDaGhi).toContain("dong-bo/bang.json");
+  });
+
+  it("bang khong doi thi khong ghi lai, nhung moc thoi gian van cap nhat", async () => {
+    // Lan dau: ghi va sinh ra trang thai.
+    await duLieu.POST(goi("du-lieu", { hang: bangMau }));
+    const trangThai = ghiTep.mock.calls.find((c) => c[0] === "dong-bo/trang-thai.json")![1];
+    ghiTep.mockClear();
+
+    // Lan hai: dung bang do, va lan nay doc duoc trang thai cua lan truoc.
+    taiVe.mockResolvedValue(trangThai);
+    const res = await duLieu.POST(goi("du-lieu", { hang: bangMau }));
+    expect((await res.json()).doiBang).toBe(false);
+
+    const khoaDaGhi = ghiTep.mock.calls.map((c) => c[0]);
+    // Khong ghi lai tep 110 KB y het ban cu...
+    expect(khoaDaGhi).not.toContain("dong-bo/bang.json");
+    // ...nhung moc thoi gian PHAI moi: nguoi dung nhin no de biet dong bo con
+    // song. Moc dung im vi "khong co gi moi" trong y het moc dung im vi hong.
+    expect(khoaDaGhi).toContain("dong-bo/trang-thai.json");
+  });
+
   it("tu choi bang co tieu de nhung khong con dong nao", async () => {
     // Truong hop nguy hiem nhat: script doc dung tab, tieu de van do, nhung
     // pham vi tra ve rong. Gan nhu chac chan la loi phia Google chu khong phai
@@ -129,8 +169,11 @@ describe("POST /api/dong-bo/du-lieu", () => {
   });
 
   it("tu choi than sai hinh dang", async () => {
+    // Bang RONG khong nam o day — no la 422 bang_rong, mot cau tra loi khac han
+    // va co bai kiem rieng. O day chi la nhung than khong dung hinh dang.
     expect((await duLieu.POST(goi("du-lieu", { hang: "khong phai mang" }))).status).toBe(400);
-    expect((await duLieu.POST(goi("du-lieu", { hang: [] }))).status).toBe(400);
+    expect((await duLieu.POST(goi("du-lieu", {}))).status).toBe(400);
+    expect((await duLieu.POST(goi("du-lieu", { hang: [[]], anhThuMuc: 5 }))).status).toBe(400);
     expect(ghiTep).not.toHaveBeenCalled();
   });
 });

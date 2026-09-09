@@ -37,9 +37,10 @@ async function docTepMau(nguon: string): Promise<string> {
   return readFile(nguon, "utf8");
 }
 
-// Bang tinh do nguoi sua tay, tan suat thay doi tinh bang gio. 60 giay du de
-// nhieu nguoi mo trang lien tiep khong tao ra nhieu lan goi API.
-export const HAN_BO_DEM_MS = 60_000;
+// Do tre nguoi dung cam nhan duoc = chu ky day cua Apps Script + bo dem nay.
+// Script day bang tinh moi phut, nen giu bo dem o 60 giay la tu bien mot phut
+// thanh hai. 20 giay van gom duoc nhieu lan mo trang lien tiep vao mot lan doc.
+export const HAN_BO_DEM_MS = 20_000;
 
 let boDem: { luc: number; ds: DongCatalogue[] } | null = null;
 
