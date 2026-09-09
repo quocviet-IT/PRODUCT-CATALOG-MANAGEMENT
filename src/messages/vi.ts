@@ -165,7 +165,7 @@ export const vi = {
     // {luc} la moc thoi gian lan day gan nhat, da dinh dang san.
     nguon_dong_bo: "Dữ liệu cập nhật lúc {luc}",
     nguon_dong_bo_chua_co: "Đang chờ dữ liệu cập nhật lần đầu",
-    tim_kiem_nhan: "Tìm mã mẫu, SKU, MO, SO, mô tả — tiếng Việt hoặc tiếng Anh",
+    tim_kiem_nhan: "Tìm mã mẫu, SKU, MO, SO, mô tả",
     cot_mo_ta: "Mô tả",
     // {n} = so mau mang gia tri duoc goi y.
     goi_y_dem: "{n} mẫu",

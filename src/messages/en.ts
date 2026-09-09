@@ -161,7 +161,7 @@ export const en: BoChu = {
     nguon_mau: "Sample data — not connected to the spreadsheet yet",
     nguon_dong_bo: "Data updated at {luc}",
     nguon_dong_bo_chua_co: "Waiting for the first data update",
-    tim_kiem_nhan: "Search model code, SKU, MO, SO, description — Vietnamese or English",
+    tim_kiem_nhan: "Search model code, SKU, MO, SO, description",
     cot_mo_ta: "Description",
     goi_y_dem: "{n}",
     tim_kiem_goi_y: "Type to filter",
