@@ -70,7 +70,9 @@ export const SO_MUC_TOI_DA = 100;
  * bat ky vao anh chup, bien catalogue thanh cho tro toi tep la.
  */
 export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogue {
-  const theoKhoa = new Map(nguon.map((n) => [khoaMau(n.d), n]));
+  // Cung mot phep chon dong voi man hinh chon (chonDongTotNhat): sale xem
+  // truoc thay gi thi khach phai thay dung the.
+  const theoKhoa = new Map(chonDongTotNhat(nguon).map((n) => [khoaMau(n.d), n]));
   const muc: MucCatalogue[] = [];
   const daCo = new Set<string>();
 
@@ -152,6 +154,48 @@ export function dungSlug(ten: string, so: number, duoi: string): string {
 export type MucDeChon = MucCatalogue & { ma: string };
 
 /**
+ * Nhieu dong bang tinh CUNG mot ma mau thi chon lay MOT dong.
+ *
+ * VI SAO CO TINH HUONG NAY: khoa chon la ma mau (xem khoaMau), nhung bang tinh
+ * co 202/1.591 ma mau trai tren nhieu dong — cung mot mau, khac trong luong hay
+ * khac size. Man hinh chon va trang khach deu hien MOT the cho moi ma.
+ *
+ * VI SAO PHAI CHON CO CHU DICH: truoc day hai cho deu dung
+ * `new Map(nguon.map(n => [khoaMau(n.d), n]))`, ma Map thi giu lai cai CUOI
+ * CUNG. Dong cuoi trong bang tinh khong co ly do gi de la dong tot nhat — va
+ * that su thi mau C10045 co hai dong: dong 69 co thu muc 4 anh, dong 615 co
+ * mot thu muc rong. Sale tich chon, mo ra thay "Mau nay chua co anh nao",
+ * trong khi anh van nam day. Bon ma mau dang bi nhu vay.
+ *
+ * Thu tu uu tien: CO ANH truoc — day la thu nguoi dung mat khi chon nham dong;
+ * roi den dong khai bao day du hon; cuoi cung la dong dau trong bang tinh, de
+ * ket qua on dinh chu khong doi theo tung lan doc.
+ */
+function doDayDu(d: DongCatalogue): number {
+  return [d.sku, d.so, d.mo, d.chiTiet, d.loaiSp, d.dongSp, d.chatLieu, d.mau, d.size,
+          d.tlVang, d.moTa1, d.moTa2, d.urlThuMuc]
+    .filter((v) => v !== null && v !== "").length;
+}
+
+export function chonDongTotNhat(nguon: NguonMau[]): NguonMau[] {
+  const nhom = new Map<string, NguonMau[]>();
+  for (const n of nguon) {
+    const k = khoaMau(n.d);
+    const cu = nhom.get(k);
+    if (cu) cu.push(n);
+    else nhom.set(k, [n]);
+  }
+
+  return [...nhom.values()].map((ds) =>
+    ds.reduce((tot, n) =>
+      n.anh.length !== tot.anh.length ? (n.anh.length > tot.anh.length ? n : tot)
+      : doDayDu(n.d) !== doDayDu(tot.d) ? (doDayDu(n.d) > doDayDu(tot.d) ? n : tot)
+      : n.d.dongSheet < tot.d.dongSheet ? n : tot,
+    ),
+  );
+}
+
+/**
  * Du lieu cho man hinh tao catalogue.
  *
  * Dung CHUNG hinh dang voi muc khach xem — khong phai de tiet kiem code, ma de
@@ -159,7 +203,7 @@ export type MucDeChon = MucCatalogue & { ma: string };
  * thi sale se tuong khach cung thay chung.
  */
 export function dungMucDeChon(nguon: NguonMau[]): MucDeChon[] {
-  return nguon.map(({ d, anh }) => ({
+  return chonDongTotNhat(nguon).map(({ d, anh }) => ({
     ma: khoaMau(d),
     maMau: d.maMau,
     loaiSp: d.loaiSp,

@@ -4,6 +4,8 @@ import {
   SO_MUC_TOI_DA,
   docNoiDung,
   dungNoiDung,
+  dungMucDeChon,
+  chonDongTotNhat,
   khoaMau,
   chuanHoaSlug,
   dungSlug,
@@ -181,5 +183,66 @@ describe("dungSlug", () => {
     for (const ten of ["Chị Lan", "", "★"]) {
       expect(dungSlug(ten, 1, "zzzzzzzz").endsWith("-zzzzzzzz")).toBe(true);
     }
+  });
+});
+
+describe("nhieu dong cung mot ma mau", () => {
+  const dong = (v: Partial<DongCatalogue>): DongCatalogue => ({
+    dongSheet: 1, sku: null, maMau: "C10045", mo: null, so: null, dongSp: null,
+    loaiSp: null, mau: null, oChu: null, chiTiet: null, chatLieu: null,
+    loaiXoan: null, tlVang: null, size: null, fileIdAnh: null, urlThuMuc: null,
+    idThuMuc: null, urlAnhConcept: null, urlClipTho: null, moTa1: null,
+    moTa2: null, co: [], ...v,
+  });
+  const anh = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({ fileId: `f${i}`, ten: `${i}.jpg` }));
+
+  it("chon dong CO ANH, khong phai dong cuoi", () => {
+    // Truoc day ca hai cho deu dung new Map(...) — Map giu cai CUOI. Mau C10045
+    // co dong 69 voi 4 anh va dong 615 voi thu muc rong, nen sale tich chon roi
+    // mo ra thay "Mau nay chua co anh nao" trong khi anh van nam day.
+    const nguon = [
+      { d: dong({ dongSheet: 69 }), anh: anh(4) },
+      { d: dong({ dongSheet: 615, tlVang: 21.67 }), anh: [] },
+    ];
+    const kq = dungMucDeChon(nguon);
+    expect(kq).toHaveLength(1);
+    expect(kq[0].anh).toHaveLength(4);
+  });
+
+  it("cung so anh thi chon dong khai bao day du hon", () => {
+    const nguon = [
+      { d: dong({ dongSheet: 5 }), anh: anh(2) },
+      { d: dong({ dongSheet: 9, sku: "1", chatLieu: "18K", tlVang: 3, size: "6" }), anh: anh(2) },
+    ];
+    expect(dungMucDeChon(nguon)[0].chatLieu).toBe("18K");
+  });
+
+  it("bang nhau het thi lay dong DAU — ket qua phai on dinh", () => {
+    const nguon = [
+      { d: dong({ dongSheet: 40 }), anh: anh(1) },
+      { d: dong({ dongSheet: 12 }), anh: anh(1) },
+    ];
+    expect(dungMucDeChon(nguon)[0].ma).toBe("C10045");
+    expect(chonDongTotNhat(nguon)[0].d.dongSheet).toBe(12);
+  });
+
+  it("ma mau khac nhau thi giu nguyen tat ca", () => {
+    const nguon = [
+      { d: dong({ dongSheet: 1, maMau: "A" }), anh: [] },
+      { d: dong({ dongSheet: 2, maMau: "B" }), anh: [] },
+    ];
+    expect(dungMucDeChon(nguon)).toHaveLength(2);
+  });
+
+  it("noi dung gui khach dung DUNG dong ma man hinh chon da hien", () => {
+    // Hai cho lech nhau la sale xem truoc thay anh, khach mo link ra thay trong.
+    const nguon = [
+      { d: dong({ dongSheet: 69 }), anh: anh(4) },
+      { d: dong({ dongSheet: 615 }), anh: [] },
+    ];
+    const hien = dungMucDeChon(nguon)[0];
+    const noiDung = dungNoiDung(nguon, [{ ma: "C10045", anh: hien.anh.map((a) => a.fileId) }]);
+    expect(noiDung.muc[0].anh).toHaveLength(4);
   });
 });
