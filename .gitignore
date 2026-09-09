@@ -13,3 +13,12 @@ next-env.d.ts
 # Du lieu mau de xem thu khi chua co service account — KHONG commit
 *.local.json
 .vercel
+
+# Ban dung san cua bang ve template — 2 MB, dung lai duoc tu cac tep .dc.html
+# canh no. Chi loai DUNG tep do: "*.html" se quet mat ca cac tep .dc.html nguon.
+thiet-ke-template/template-trang-suc.html
+
+# Anh chup de SOAT trang thai cho (npm run soat:cho). La ban ghi cua mot lan
+# kiem tra, khong phai tai san cua du an — anh huong dan trong public/huong-dan
+# moi la thu phai commit.
+/anh-soat/

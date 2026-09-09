@@ -1,0 +1,115 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&amp;family=EB+Garamond:wght@400;500&amp;display=swap">
+  <style>
+    body { margin: 0; font-family: "EB Garamond", Georgia, serif; }
+    a { color: #C4165F; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</helmet>
+
+<div style="width: 390px; min-height: 844px; background: {{p.nen}}; color: {{p.than}}; display: flex; flex-direction: column; font-family: 'EB Garamond', Georgia, serif">
+
+  <div style="padding: 30px 22px 0; display: flex; flex-direction: column; gap: 20px">
+    <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 19px; letter-spacing: 0.14em; color: {{p.nhan}}">HUNG PHAT</div>
+    <div style="display: flex; flex-direction: column; gap: 9px">
+      <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 34px; line-height: 1.1; color: {{p.muc}}">Nhẫn cưới 18K</div>
+      <div style="font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: {{p.mo}}">Tuyển chọn cho chị Lan · 6 mẫu</div>
+    </div>
+  </div>
+
+  <div style="margin-top: 26px; display: flex; flex-direction: column; gap: 40px">
+    <sc-for list="{{muc}}" as="m" hint-placeholder-count="2">
+      <div style="display: flex; flex-direction: column">
+
+        <div style="position: relative">
+          <div style="height: 293px; background: {{p.deAnh}}; display: flex; align-items: center; justify-content: center; overflow: hidden">
+            <sc-if value="{{m.hot}}" hint-placeholder-val="{{ true }}">
+              <svg viewBox="0 0 200 150" width="210" height="158" aria-hidden="true">
+                <defs>
+                  <linearGradient id="vangA" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#EFD9A6"></stop>
+                    <stop offset="0.45" stop-color="#C9A465"></stop>
+                    <stop offset="1" stop-color="#8C7137"></stop>
+                  </linearGradient>
+                </defs>
+                <ellipse cx="100" cy="140" rx="42" ry="5" fill="#2A2725" opacity="0.08"></ellipse>
+                <ellipse cx="100" cy="84" rx="47" ry="53" fill="none" stroke="url(#vangA)" stroke-width="9"></ellipse>
+                <g fill="#FFFFFF" stroke="#CFD7E0" stroke-width="0.7">
+                  <circle cx="100" cy="31" r="4.4"></circle>
+                  <circle cx="130" cy="42" r="4.1"></circle>
+                  <circle cx="146" cy="70" r="4.1"></circle>
+                  <circle cx="145" cy="103" r="4.1"></circle>
+                  <circle cx="126" cy="126" r="4.1"></circle>
+                  <circle cx="74" cy="126" r="4.1"></circle>
+                  <circle cx="55" cy="103" r="4.1"></circle>
+                  <circle cx="54" cy="70" r="4.1"></circle>
+                  <circle cx="70" cy="42" r="4.1"></circle>
+                </g>
+              </svg>
+            </sc-if>
+            <sc-if value="{{m.tron}}" hint-placeholder-val="{{ true }}">
+              <svg viewBox="0 0 200 150" width="210" height="158" aria-hidden="true">
+                <defs>
+                  <linearGradient id="vangB" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#EFD9A6"></stop>
+                    <stop offset="0.45" stop-color="#C9A465"></stop>
+                    <stop offset="1" stop-color="#8C7137"></stop>
+                  </linearGradient>
+                </defs>
+                <ellipse cx="100" cy="140" rx="42" ry="5" fill="#2A2725" opacity="0.08"></ellipse>
+                <ellipse cx="100" cy="84" rx="47" ry="53" fill="none" stroke="url(#vangB)" stroke-width="13"></ellipse>
+                <ellipse cx="100" cy="84" rx="47" ry="53" fill="none" stroke="#FFF6E0" stroke-width="1.4" opacity="0.5"></ellipse>
+              </svg>
+            </sc-if>
+          </div>
+          <div style="position: absolute; left: 14px; bottom: -24px; font-family: 'Cormorant Garamond', Georgia, serif; font-size: 64px; line-height: 1; color: {{p.nhan}}">{{m.so}}</div>
+        </div>
+
+        <div style="padding: 36px 22px 0; display: flex; flex-direction: column; gap: 7px">
+          <div style="font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: {{p.mo}}">{{m.ma}}</div>
+          <div style="font-size: 15px; line-height: 1.5; color: {{p.than}}">{{m.thongSo}}</div>
+        </div>
+
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{
+  "nen": {"editor": "enum", "options": ["kem", "ngà", "than", "rêu"], "default": "kem", "section": "Màu"},
+  "nhan": {"editor": "color", "options": ["#D4436F", "#A96A00", "#00806B", "#A0439B"], "default": "#D4436F", "section": "Màu"},
+  "$preview": {"width": 390, "height": 844}
+}'>
+const NEN = {
+  "kem":  { nen: "#F7F1EB", muc: "#2A2725", than: "#4A4540", mo: "#6E6760", ke: "#D4CFC4", deAnh: "#FCFAF7" },
+  "ngà":  { nen: "#FBF9F5", muc: "#1B1A19", than: "#3C3A38", mo: "#6B6864", ke: "#E4E1DC", deAnh: "#FFFFFF" },
+  "than": { nen: "#17150F", muc: "#F2EBDF", than: "#D8D0C2", mo: "#9A9184", ke: "#33302A", deAnh: "#FCFAF7" },
+  "rêu":  { nen: "#1B231D", muc: "#EDF0E9", than: "#CDD4C8", mo: "#8D978A", ke: "#303A32", deAnh: "#FCFAF7" }
+};
+
+class Component extends DCLogic {
+  renderVals() {
+    const p = Object.assign({}, NEN[this.props.nen] || NEN["kem"]);
+    p.nhan = this.props.nhan || "#D4436F";
+    return {
+      p: p,
+      muc: [
+        { so: "01", ma: "D12741 · Nhẫn cưới", thongSo: "Vàng 14K · Yellow · Size 10 · 2,78 g", hot: true, tron: false },
+        { so: "02", ma: "D11030 · Nhẫn cưới", thongSo: "Vàng 18K · Yellow · Size 6.75 · 2,12 g", hot: false, tron: true }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

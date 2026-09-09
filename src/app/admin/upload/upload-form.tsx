@@ -36,7 +36,7 @@ export function FormTaiAnh() {
         <input type="file" name="tep" multiple required
                accept=".jpg,.jpeg,.png,.webp,.heic"
                className="rounded border p-3 text-sm" />
-        <button type="submit" disabled={dangChay}
+        <button type="submit" disabled={dangChay} aria-busy={dangChay}
                 className="flex w-fit items-center gap-2 rounded bg-teal-800 px-4 py-2 text-sm text-white disabled:opacity-50">
           <Upload aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
           {dangChay ? t.tai_anh.dang_tai_len : t.tai_anh.nut_tai_len}

@@ -6,6 +6,7 @@ import {
   GIO_RONG, chupGio, dangKyGio, daoMa, datGio,
 } from "@/modules/catalogue-share/gio-chon";
 import { useChu } from "@/messages/dung-chu";
+import { ChuCho } from "@/ui/dau-cho";
 
 /**
  * Boc danh sach (bang hoac luoi) va quan ly viec tich chon mau.
@@ -78,7 +79,7 @@ export function ChonMau({ children }: { children: ReactNode }) {
                          uppercase tracking-[0.14em] text-hp-foundation
                          transition-colors duration-150 hover:border-hp-pink hover:bg-hp-pink"
             >
-              {t.chia_se.tao_catalogue}
+              <ChuCho>{t.chia_se.tao_catalogue}</ChuCho>
             </Link>
           </div>
         </div>

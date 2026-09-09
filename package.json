@@ -13,8 +13,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "kiem-tra:google": "tsx scripts/kiem-tra-google.mts",
+    "kiem-tra:dong-bo": "tsx scripts/kiem-tra-dong-bo.mts",
     "huong-dan:anh": "tsx scripts/chup-huong-dan.mts",
-    "logo": "tsx scripts/dung-logo.mts"
+    "logo": "tsx scripts/dung-logo.mts",
+    "soat:cho": "tsx scripts/soat-cho.mts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

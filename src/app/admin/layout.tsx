@@ -4,6 +4,7 @@ import { dangXuat } from "@/auth/actions";
 import { layChu } from "@/messages/may-chu";
 import { DoiNgonNgu } from "@/messages/dung-chu";
 import { Logo } from "@/app/thuong-hieu";
+import { NutGui } from "@/ui/nut-gui";
 import { BookOpen, FolderOpen, LayoutGrid, LogOut, Users } from "lucide-react";
 
 /**
@@ -60,10 +61,13 @@ export default async function KhungQuanTri({ children }: { children: React.React
         </span>
         <DoiNgonNgu />
         <form action={dangXuat}>
-          <button type="submit" className={MUC}>
+          <NutGui
+            lop={MUC}
+            nhanCho={<><LogOut {...ICON} />{t.dang_nhap.dang_ra}</>}
+          >
             <LogOut {...ICON} />
             {t.dang_nhap.dang_xuat}
-          </button>
+          </NutGui>
         </form>
       </header>
 

@@ -6,6 +6,8 @@ import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 import { ChiTietMau } from "./chi-tiet-mau";
 import { X } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
+import { AnhTai } from "@/ui/anh-tai";
+import { VungXuong, Xuong } from "@/ui/xuong";
 
 /**
  * Boc danh sach (bang hoac luoi) va mo ngan chi tiet khi bam vao mot dong.
@@ -116,9 +118,27 @@ export function NganChiTiet({ children }: { children: ReactNode }) {
             </button>
 
             {dangTai && !dl ? (
-              <div className="bg-hp-inset px-4 py-3 text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-                {t.catalogue_sheet.dang_tai}
-              </div>
+              /* Dung lai dung bo cuc cua ChiTietMau chu khong phai mot dong
+                 chu: ngan truot cao gan het man hinh, mot dong chu don doc o
+                 dinh de mot khoang trong lon ben duoi va trong nhu ngan bi hong. */
+              <VungXuong nhan={t.phan_hoi.dang_tai_chi_tiet}>
+                <Xuong lop="h-7 w-40" />
+                <Xuong lop="mt-3 h-3 w-full max-w-sm" />
+                <div className="mt-5 h-px bg-hp-rule" />
+                <div className="mt-6 space-y-4">
+                  {Array.from({ length: 7 }, (_, i) => (
+                    <div key={i} className="border-b border-hp-rule pb-3">
+                      <Xuong lop="h-2.5 w-20" />
+                      <Xuong lop="mt-2 h-3 w-36" />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  {Array.from({ length: 6 }, (_, i) => (
+                    <Xuong key={i} lop="aspect-square w-full" />
+                  ))}
+                </div>
+              </VungXuong>
             ) : loi ? (
               <p className="text-sm text-hp-pink-strong">{t.catalogue_sheet.loi_tai_chi_tiet}</p>
             ) : dl ? (
@@ -144,11 +164,16 @@ export function NganChiTiet({ children }: { children: ReactNode }) {
           className="fixed inset-0 z-[60] flex cursor-zoom-out flex-col items-center
                      justify-center gap-4 bg-hp-ink/90 p-8 transition-opacity duration-150"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <AnhTai
             src={`/api/anh-drive/${anhLon.fileId}?w=1400`}
             alt={anhLon.ten}
-            className="max-h-[85vh] max-w-full object-contain"
+            nen="toi"
+            tai="eager"
+            // Ban 1400px la mot KHOA BO DEM khac voi ban 600px dang hien trong
+            // luoi, nen no thuong phai tai moi that su — day la mot lan cho co
+            // that, khong phai chop mat.
+            lopBoc="flex h-[85vh] w-full max-w-[1100px] items-center justify-center"
+            lop="max-h-full max-w-full object-contain"
           />
           <p className="text-[11px] uppercase tracking-[0.14em] text-hp-foundation/80">
             {anhLon.ten}

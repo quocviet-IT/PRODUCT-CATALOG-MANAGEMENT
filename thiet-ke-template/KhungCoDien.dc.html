@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&amp;family=EB+Garamond:wght@400;500&amp;display=swap">
+  <style>
+    body { margin: 0; font-family: "EB Garamond", Georgia, serif; }
+    a { color: #C4165F; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+  </style>
+</helmet>
+
+<div style="width: 390px; min-height: 844px; background: {{p.nen}}; color: {{p.than}}; display: flex; flex-direction: column; padding: 26px 20px 40px; box-sizing: border-box; gap: 26px; font-family: 'EB Garamond', Georgia, serif">
+
+  <!-- Dau trang: hai duong ke om lay ten thuong hieu -->
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 14px">
+    <div style="width: 100%; height: 1px; background: {{p.ke}}"></div>
+    <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 20px; letter-spacing: 0.2em; color: {{p.nhan}}">HUNG PHAT</div>
+    <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 30px; line-height: 1.15; color: {{p.muc}}; text-align: center">Nhẫn cưới 18K</div>
+    <div style="font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: {{p.mo}}">Kính gửi chị Lan</div>
+    <div style="width: 100%; height: 1px; background: {{p.ke}}"></div>
+  </div>
+
+  <!-- Moi mau mot khung ke doi, can giua nhu mot tam chung nhan -->
+  <div style="display: flex; flex-direction: column; gap: 22px">
+    <sc-for list="{{muc}}" as="m" hint-placeholder-count="2">
+      <div style="border: 1px solid {{p.ke}}; padding: 7px">
+        <div style="border: 1px solid {{p.ke}}; padding: 22px 18px 20px; display: flex; flex-direction: column; align-items: center; gap: 16px">
+
+          <div style="width: 100%; height: 176px; background: {{p.deAnh}}; display: flex; align-items: center; justify-content: center; overflow: hidden">
+            <sc-if value="{{m.hot}}" hint-placeholder-val="{{ true }}">
+              <svg viewBox="0 0 200 150" width="188" height="141" aria-hidden="true">
+                <defs>
+                  <linearGradient id="kcdA" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#EFD9A6"></stop>
+                    <stop offset="0.45" stop-color="#C9A465"></stop>
+                    <stop offset="1" stop-color="#8C7137"></stop>
+                  </linearGradient>
+                </defs>
+                <ellipse cx="100" cy="140" rx="40" ry="4.5" fill="#2A2725" opacity="0.08"></ellipse>
+                <ellipse cx="100" cy="84" rx="45" ry="51" fill="none" stroke="url(#kcdA)" stroke-width="9"></ellipse>
+                <g fill="#FFFFFF" stroke="#CFD7E0" stroke-width="0.7">
+                  <circle cx="100" cy="33" r="4.3"></circle>
+                  <circle cx="128" cy="44" r="4"></circle>
+                  <circle cx="143" cy="71" r="4"></circle>
+                  <circle cx="142" cy="102" r="4"></circle>
+                  <circle cx="124" cy="124" r="4"></circle>
+                  <circle cx="76" cy="124" r="4"></circle>
+                  <circle cx="58" cy="102" r="4"></circle>
+                  <circle cx="57" cy="71" r="4"></circle>
+                  <circle cx="72" cy="44" r="4"></circle>
+                </g>
+              </svg>
+            </sc-if>
+            <sc-if value="{{m.tron}}" hint-placeholder-val="{{ true }}">
+              <svg viewBox="0 0 200 150" width="188" height="141" aria-hidden="true">
+                <defs>
+                  <linearGradient id="kcdB" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#EFD9A6"></stop>
+                    <stop offset="0.45" stop-color="#C9A465"></stop>
+                    <stop offset="1" stop-color="#8C7137"></stop>
+                  </linearGradient>
+                </defs>
+                <ellipse cx="100" cy="140" rx="40" ry="4.5" fill="#2A2725" opacity="0.08"></ellipse>
+                <ellipse cx="100" cy="84" rx="45" ry="51" fill="none" stroke="url(#kcdB)" stroke-width="13"></ellipse>
+                <ellipse cx="100" cy="84" rx="45" ry="51" fill="none" stroke="#FFF6E0" stroke-width="1.4" opacity="0.5"></ellipse>
+              </svg>
+            </sc-if>
+          </div>
+
+          <div style="font-family: 'Cormorant Garamond', Georgia, serif; font-size: 22px; letter-spacing: 0.06em; color: {{p.muc}}">{{m.ma}}</div>
+
+          <!-- Dau phan cach: hai net ke va mot vien kim cuong nho -->
+          <div style="display: flex; align-items: center; gap: 10px; width: 100%">
+            <div style="flex-grow: 1; height: 1px; background: {{p.ke}}"></div>
+            <svg viewBox="0 0 10 10" width="7" height="7" aria-hidden="true">
+              <rect x="1.5" y="1.5" width="7" height="7" transform="rotate(45 5 5)" fill="{{p.nhan}}"></rect>
+            </svg>
+            <div style="flex-grow: 1; height: 1px; background: {{p.ke}}"></div>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 18px">
+            <sc-for list="{{m.ts}}" as="x" hint-placeholder-count="4">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 3px">
+                <div style="font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; color: {{p.mo}}">{{x.nhan}}</div>
+                <div style="font-size: 14px; color: {{p.than}}">{{x.gia}}</div>
+              </div>
+            </sc-for>
+          </div>
+
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{
+  "nen": {"editor": "enum", "options": ["kem", "ngà", "than", "rêu"], "default": "ngà", "section": "Màu"},
+  "nhan": {"editor": "color", "options": ["#D4436F", "#A96A00", "#00806B", "#A0439B"], "default": "#A96A00", "section": "Màu"},
+  "$preview": {"width": 390, "height": 844}
+}'>
+const NEN = {
+  "kem":  { nen: "#F7F1EB", muc: "#2A2725", than: "#4A4540", mo: "#6E6760", ke: "#D4CFC4", deAnh: "#FCFAF7" },
+  "ngà":  { nen: "#FBF9F5", muc: "#1B1A19", than: "#3C3A38", mo: "#6B6864", ke: "#E4E1DC", deAnh: "#FFFFFF" },
+  "than": { nen: "#17150F", muc: "#F2EBDF", than: "#D8D0C2", mo: "#9A9184", ke: "#33302A", deAnh: "#FCFAF7" },
+  "rêu":  { nen: "#1B231D", muc: "#EDF0E9", than: "#CDD4C8", mo: "#8D978A", ke: "#303A32", deAnh: "#FCFAF7" }
+};
+
+class Component extends DCLogic {
+  renderVals() {
+    const p = Object.assign({}, NEN[this.props.nen] || NEN["ngà"]);
+    p.nhan = this.props.nhan || "#A96A00";
+    return {
+      p: p,
+      muc: [
+        {
+          ma: "D12741", hot: true, tron: false,
+          ts: [
+            { nhan: "Chất liệu", gia: "14K" },
+            { nhan: "Màu", gia: "Yellow" },
+            { nhan: "Size", gia: "10" },
+            { nhan: "TL vàng", gia: "2,78 g" }
+          ]
+        },
+        {
+          ma: "D11030", hot: false, tron: true,
+          ts: [
+            { nhan: "Chất liệu", gia: "18K" },
+            { nhan: "Màu", gia: "Yellow" },
+            { nhan: "Size", gia: "6.75" },
+            { nhan: "TL vàng", gia: "2,12 g" }
+          ]
+        }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

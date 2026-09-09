@@ -7,6 +7,7 @@ import { kyNhieuUrl } from "@/modules/media/anh-url";
 import { luuSanPham } from "./actions";
 import { danhSachTrangThai } from "../bo-loc";
 import { layChu } from "@/messages/may-chu";
+import { AnhTai } from "@/ui/anh-tai";
 
 export default async function TrangChiTiet({ params }: { params: Promise<{ id: string }> }) {
   const t = await layChu();
@@ -24,8 +25,13 @@ export default async function TrangChiTiet({ params }: { params: Promise<{ id: s
       <div className="flex flex-col gap-3">
         {urls.length === 0 && <p className="text-sm text-neutral-500">{t.san_pham.san_pham_chua_co_anh}</p>}
         {urls.map((u, i) => u && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img key={anhs[i].id} src={u} alt={sp.name} className="w-full rounded-lg border" />
+          <AnhTai
+            key={anhs[i].id}
+            src={u}
+            alt={sp.name}
+            lopBoc="block aspect-square w-full overflow-hidden rounded-lg border"
+            lop="h-full w-full object-cover"
+          />
         ))}
       </div>
 

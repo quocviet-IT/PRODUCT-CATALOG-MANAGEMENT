@@ -200,7 +200,7 @@ async function main(): Promise<void> {
     await page.fill("#ten", "Chị Lan — nhẫn cưới 18K");
     // Bang chon kieu trinh bay cao hon mot man hinh: chup rieng buoc nay o
     // khung cao hon de ca bang lot vao mot anh, khong phai cat lam hai.
-    await page.setViewportSize({ width: RONG, height: 1500 });
+    await page.setViewportSize({ width: RONG, height: 1900 });
     await page.waitForTimeout(300);
     await chup(page, "04-dat-ten-va-kieu", [
       { o: page.locator("#ten"), huong: "trai" },

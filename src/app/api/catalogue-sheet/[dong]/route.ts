@@ -4,6 +4,7 @@ import {
   layAnhCuaMau,
   layDanhSachCatalogue,
   nguonDangDung,
+  type NguonDuLieu,
 } from "@/modules/sheet/catalogue.service";
 import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 
@@ -12,7 +13,7 @@ export type DuLieuChiTiet = {
   anh: AnhTrongThuMuc[];
   /** True khi doc thu muc anh that bai — khac han voi thu muc rong. */
   loiAnh: boolean;
-  nguon: "mau" | "bang-tinh";
+  nguon: NguonDuLieu;
 };
 
 export async function GET(

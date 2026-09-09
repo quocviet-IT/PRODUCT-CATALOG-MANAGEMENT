@@ -72,20 +72,33 @@ body {
  * bang mau thu hai nao phai giu cho khop — chi co mot bo ten mau, ba gia tri.
  */
 .tone-trang,
-.tone-toi {
+.tone-toi,
+.tone-reu {
   background: var(--color-hp-foundation);
 }
 
+/* Trang nga — khong phai trang tinh: trang tinh lam nen anh va nen trang bang
+   nhau, mat luon ranh gioi o anh. */
 .tone-trang {
-  /* Nen trang thi plate phai lech mot chut moi thay duoc ranh o anh. */
-  --color-hp-plate:       #F7F5F2;
-  --color-hp-foundation:  #FFFFFF;
+  --color-hp-plate:       #FFFFFF;
+  --color-hp-foundation:  #FBF9F5;
   --color-hp-card:        #FFFFFF;
-  --color-hp-inset:       #F3F2F0;
+  --color-hp-inset:       #F3F1ED;
   --color-hp-ink:         #1B1A19;
   --color-hp-body:        #3C3A38;
   --color-hp-muted:       #6B6864;
-  --color-hp-rule:        #E2E0DC;
+  --color-hp-rule:        #E4E1DC;
+}
+
+/* Xanh reu — tong toi thu hai, am hon mau than mot chut. */
+.tone-reu {
+  --color-hp-foundation:  #1B231D;
+  --color-hp-card:        #232C25;
+  --color-hp-inset:       #2A342C;
+  --color-hp-ink:         #EDF0E9;
+  --color-hp-body:        #CDD4C8;
+  --color-hp-muted:       #8D978A;
+  --color-hp-rule:        #303A32;
 }
 
 .tone-toi {
@@ -105,7 +118,8 @@ body {
 @media print {
   /* Ban in LUON la nen sang. Mot catalogue tong toi in ra se ngon nguyen mot
      hop muc va chu van kho doc — day la ban giay dua tan tay khach. */
-  .tone-toi {
+  .tone-toi,
+  .tone-reu {
     --color-hp-foundation:  #FFFFFF;
     --color-hp-card:        #FFFFFF;
     --color-hp-inset:       #F3F2F0;
@@ -120,5 +134,20 @@ body {
   /* Trang bia dung rieng mot to giay. */
   .bia-catalogue {
     break-after: page;
+  }
+}
+
+/*
+ * Ai da bao he dieu hanh la minh khong chiu duoc chuyen dong thi khong duoc
+ * nhan them mot man hinh day o xam nhap nhay. Cac o cho van con — chi la no
+ * dung yen. Chung van lam dung viec cua minh: giu dung cho, dung kich thuoc.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

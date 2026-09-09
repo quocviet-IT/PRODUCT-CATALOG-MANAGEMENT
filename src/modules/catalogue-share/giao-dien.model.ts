@@ -12,11 +12,41 @@ import { docNgonNgu, type NgonNgu } from "@/messages/ngon-ngu";
  * kiem duoc bang test.
  */
 
-export const BO_CUC = ["danh-sach", "luoi", "lookbook"] as const;
+export const BO_CUC = [
+  "danh-sach", "luoi", "lookbook",
+  "trien-lam", "khung-co-dien", "tap-chi",
+] as const;
 export type BoCuc = (typeof BO_CUC)[number];
 
-export const TONE = ["beige", "trang", "toi"] as const;
+export const TONE = ["beige", "trang", "toi", "reu"] as const;
 export type Tone = (typeof TONE)[number];
+
+/**
+ * Mau nhan.
+ *
+ * La mot DANH SACH DONG chu khong phai o chon mau tu do: bon mau nay cung do
+ * sang va do tuoi trong oklch (L .58 / C .19), chi khac sac, nen ghep voi nen
+ * nao cung khong choi. Mo cho chon mau bat ky la som muon cung co mot catalogue
+ * gui khach voi chu vang chanh tren nen kem.
+ */
+export const NHAN = ["hong", "dong", "luc", "man"] as const;
+export type Nhan = (typeof NHAN)[number];
+
+/**
+ * Moi mau nhan co HAI sac.
+ *
+ * `nhat` de ve chu va duong ke tren nen; `dam` danh rieng cho nut co chu trang.
+ * Hong thuong hieu chi dat 3.81:1 tren nen kem — du cho mot dong chu, khong du
+ * cho chu trang tren nut.
+ */
+export const MAU_NHAN: Record<Nhan, { nhat: string; dam: string }> = {
+  // Hong dung DUNG hai token dang co: catalogue khong chon gi phai ra y het
+  // hom nay, khong lech mot chut nao.
+  hong: { nhat: "#E91D79", dam: "#C4165F" },
+  dong: { nhat: "#A96A00", dam: "#8A5600" },
+  luc:  { nhat: "#00806B", dam: "#006956" },
+  man:  { nhat: "#A0439B", dam: "#873781" },
+};
 
 /** Cac thong so co the bat/tat cho khach xem. Trung ten voi truong cua MucCatalogue. */
 export const THONG_SO = ["loaiSp", "chatLieu", "mau", "size", "tlVang"] as const;
@@ -40,6 +70,7 @@ export type GiaoDienCatalogue = {
   bia: Bia | null;
   /** null = khong hien khoi lien he. */
   lienHe: LienHe | null;
+  nhan: Nhan;
   hien: Record<ThongSo, boolean>;
   ngonNgu: NgonNgu;
 };
@@ -57,6 +88,7 @@ export const GIAO_DIEN_MAC_DINH: GiaoDienCatalogue = {
   tone: "beige",
   bia: null,
   lienHe: null,
+  nhan: "hong",
   hien: { loaiSp: true, chatLieu: true, mau: true, size: true, tlVang: true },
   ngonNgu: "vi",
 };
@@ -143,6 +175,7 @@ export function docGiaoDien(tho: unknown): GiaoDienCatalogue {
     tone: trong(TONE, o.tone, GIAO_DIEN_MAC_DINH.tone),
     bia: docBia(o.bia),
     lienHe: docLienHe(o),
+    nhan: trong(NHAN, o.nhan, GIAO_DIEN_MAC_DINH.nhan),
     hien: docHien(o.hien),
     ngonNgu: docNgonNgu(o.ngonNgu),
   };

@@ -16,7 +16,7 @@ export function LinkHetHieuLuc({ t, tone }: { t: BoChu; tone: Tone }) {
   return (
     <div className={`min-h-screen ${LOP_TONE[tone]}`}>
       <main className="mx-auto flex min-h-screen max-w-xl flex-col justify-center px-6 py-10">
-        <Logo alt={t.catalogue_sheet.thuong_hieu} />
+        <Logo alt={t.catalogue_sheet.thuong_hieu} theoMau lop="text-hp-pink" />
         <h1 className="mt-4 font-title text-[28px] leading-tight text-hp-ink">
           {t.chia_se.link_het_hieu_luc}
         </h1>

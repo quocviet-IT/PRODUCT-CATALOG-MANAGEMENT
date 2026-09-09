@@ -9,12 +9,27 @@ export const vi = {
     dang_tai: "Đang tải…",
     khong_co_du_lieu: "Chưa có dữ liệu",
   },
+  /**
+   * Chu cho luc CHO. Phan lon chi trinh doc man hinh nghe thay: nguoi nhin
+   * duoc thi da thay khoi xam roi.
+   */
+  phan_hoi: {
+    dang_tai_trang: "Đang tải trang",
+    dang_tai_danh_sach: "Đang tải danh sách",
+    dang_tai_chi_tiet: "Đang tải chi tiết mẫu",
+    dang_tai_catalogue: "Đang tải catalogue",
+    dang_tai_tai_khoan: "Đang tải danh sách tài khoản",
+    anh_hong: "Không tải được ảnh",
+    dang_cap_nhat: "Đang cập nhật…",
+  },
   dang_nhap: {
     tieu_de: "Đăng nhập",
     email: "Email",
     mat_khau: "Mật khẩu",
     nut: "Đăng nhập",
+    dang_vao: "Đang đăng nhập",
     dang_xuat: "Đăng xuất",
+    dang_ra: "Đang thoát",
     sai_thong_tin: "Email hoặc mật khẩu không đúng.",
     chua_dang_nhap: "Vui lòng đăng nhập để tiếp tục.",
     bi_vo_hieu_hoa: "Tài khoản đã bị vô hiệu hoá. Liên hệ quản trị viên.",
@@ -84,6 +99,7 @@ export const vi = {
     email_da_ton_tai: "Email này đã có tài khoản. Nếu họ đang đăng nhập bằng Google thì dùng “Đặt mật khẩu” ở dòng của họ.",
     tu_khoa_chinh_minh: "Không thể tự khoá tài khoản của mình — sẽ không còn ai vào được màn hình này.",
     tu_ha_quyen_chinh_minh: "Không thể tự hạ quyền của mình — sẽ không còn ai vào được màn hình này.",
+    dang_chay: "Đang xử lý",
     loi_he_thong: "Không thực hiện được. Thử lại giúp em.",
   },
   danh_muc: {
@@ -143,8 +159,12 @@ export const vi = {
     // Ten thuong hieu viet KHONG DAU va co "USA" — day la cach thuong hieu tu
     // xung o thi truong My, khong phai loi thieu dau tieng Viet.
     thuong_hieu: "HUNG PHAT USA",
-    nguon_bang_tinh: "Đọc trực tiếp từ bảng tính, làm mới mỗi 60 giây",
+    // KHONG neu con so giay o day: no la HAN_BO_DEM_MS, va da lech mot lan.
+    nguon_bang_tinh: "Đọc trực tiếp từ bảng tính",
     nguon_mau: "Dữ liệu mẫu — chưa nối với bảng tính",
+    // {luc} la moc thoi gian lan day gan nhat, da dinh dang san.
+    nguon_dong_bo: "Bản chụp bảng tính, Apps Script đẩy lên lúc {luc}",
+    nguon_dong_bo_chua_co: "Đang chờ Apps Script đẩy bảng tính lên lần đầu",
     tim_kiem_nhan: "Tìm mã mẫu, SKU, MO, SO hoặc mô tả",
     tim_kiem_goi_y: "Gõ để lọc ngay, không cần bấm Enter",
     chat_lieu: "Chất liệu",
@@ -299,6 +319,7 @@ export const vi = {
     mo_khoa: "Mở lại",
     da_khoa_xong: "Đã khoá link.",
     da_mo_khoa_xong: "Đã mở lại link.",
+    dang_doi_khoa: "Đang đổi",
     loi_khoa: "Không đổi được trạng thái link. Thử lại giúp em.",
     giai_thich_han: "Link tự hết hiệu lực sau {n} ngày kể từ lúc tạo. Khoá tay thì link ngừng mở ngay lập tức.",
     mo: "Mở",
@@ -318,6 +339,21 @@ export const vi = {
     bo_cuc_lookbook: "Lookbook",
     bo_cuc_lookbook_mo_ta: "Mỗi mẫu một khối lớn, ảnh khổ rộng. Hợp khi gửi ít mẫu.",
 
+    bo_cuc_trien_lam: "Triển lãm",
+    bo_cuc_trien_lam_mo_ta: "Ảnh tràn hết bề ngang, số thứ tự cỡ lớn. Sang nhất — hợp khi gửi ít mẫu.",
+    bo_cuc_khung: "Khung cổ điển",
+    bo_cuc_khung_mo_ta: "Mỗi mẫu một khung kẻ đôi, thông số căn giữa. Trang trọng, dễ đọc thông số.",
+    bo_cuc_tap_chi: "Tạp chí",
+    bo_cuc_tap_chi_mo_ta: "Ảnh một bên, chữ bên kia, so le từng mẫu. Lướt nhanh nhất.",
+
+    tone_reu: "Xanh rêu",
+
+    nhan_mau_nhan: "Màu nhấn",
+    nhan_mau_mo_ta: "Bốn màu cùng độ sáng và độ tươi, chỉ khác sắc — ghép với nền nào cũng không chỏi.",
+    nhan_hong: "Hồng thương hiệu",
+    nhan_dong: "Vàng đồng",
+    nhan_luc: "Xanh cổ vịt",
+    nhan_man: "Mận chín",
     tone_nhan: "Tông màu",
     tone_beige: "Be cổ điển",
     tone_trang: "Trắng tối giản",

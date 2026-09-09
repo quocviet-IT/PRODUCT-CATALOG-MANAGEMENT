@@ -6,7 +6,9 @@ import { boChu } from "@/messages";
 import { NguonNgonNgu } from "@/messages/dung-chu";
 import { MoHopThoaiIn } from "./nut-in";
 import { PhongToAnh } from "./phong-to";
-import { KhoiLienHe, LOP_TONE, ThanCatalogue, ThanhLienHe, TrangBia } from "./bo-cuc";
+import {
+  KhoiLienHe, LOP_TONE, ThanCatalogue, ThanhLienHe, TrangBia, bienMauNhan,
+} from "./bo-cuc";
 import { LinkHetHieuLuc } from "./het-hieu-luc";
 import { Logo } from "@/app/thuong-hieu";
 
@@ -82,7 +84,7 @@ export default async function TrangKhachXem({
 
   return (
     <NguonNgonNgu ngonNgu={nn}>
-      <div className={`min-h-screen ${LOP_TONE[g.tone]}`}>
+      <div className={`min-h-screen ${LOP_TONE[g.tone]}`} style={bienMauNhan(g.nhan)}>
         <main className="mx-auto max-w-4xl px-6 py-10 print:max-w-none print:py-0">
           {g.bia && (
             <TrangBia
@@ -103,7 +105,7 @@ export default async function TrangKhachXem({
               </p>
             ) : (
               <>
-                <Logo alt={t.catalogue_sheet.thuong_hieu} />
+                <Logo alt={t.catalogue_sheet.thuong_hieu} theoMau lop="text-hp-pink" />
                 <h1 className="mt-3 font-title text-[32px] leading-tight tracking-[0.02em] text-hp-ink">
                   {c.ten}
                 </h1>

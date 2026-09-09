@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useChu } from "@/messages/dung-chu";
+import { NutGui } from "@/ui/nut-gui";
 
 const NHAN = "block text-[11px] uppercase tracking-[0.14em] text-hp-muted";
 const O_NHAP =
@@ -57,14 +58,15 @@ export function LoiMatKhau({ guiForm }: { guiForm: (form: FormData) => void }) {
             className={O_NHAP}
           />
         </div>
-        <button
-          type="submit"
-          className="w-full border border-hp-ink bg-hp-ink px-5 py-2.5 text-[11px] uppercase
-                     tracking-[0.14em] text-hp-foundation transition-colors duration-150
-                     hover:border-hp-pink hover:bg-hp-pink"
+        <NutGui
+          nhanCho={t.dang_nhap.dang_vao}
+          lop="w-full border border-hp-ink bg-hp-ink px-5 py-2.5 text-[11px] uppercase
+               tracking-[0.14em] text-hp-foundation transition-colors duration-150
+               hover:border-hp-pink hover:bg-hp-pink
+               disabled:cursor-not-allowed disabled:opacity-40"
         >
           {t.dang_nhap.nut}
-        </button>
+        </NutGui>
       </form>
     </div>
   );
