@@ -111,11 +111,24 @@ Trước khi Apps Script đẩy lần đầu, trang catalogue sẽ ghi *"Đang c
    Khoá bí mật để ở đây chứ **không để trong mã nguồn**: mã nguồn thì bị chia sẻ,
    sao chép, dán vào chat.
 
-4. Quay lại `Code.gs`, chọn hàm **`chayThuMotLan`** trong ô thả xuống rồi bấm
+4. Cột trái, mục **Services** → bấm dấu **+** → chọn **Google Sheets API** →
+   **Add**. Bấm **+** lần nữa → **Drive API** → **Add**.
+
+   **Bắt buộc**, và đây là chỗ dễ vấp nhất. Script gọi Sheets/Drive qua REST,
+   mà REST thì đòi API phải được bật trong **dự án Cloud ẩn** Apps Script tự tạo
+   cho mỗi project. `SpreadsheetApp` và `DriveApp` vẫn chạy bình thường nên rất
+   dễ tưởng là đã đủ quyền — rồi đúng phát 403 *"Google Sheets API has not been
+   used in project … before or it is disabled."* Thêm Service ở đây chính là cái
+   công tắc đó.
+
+   Phải thêm **cả hai**: thiếu Drive API thì script chạy qua được bước đọc bảng
+   tính rồi mới chết ở bước tải ảnh, với đúng lỗi 403 y hệt.
+
+5. Quay lại `Code.gs`, chọn hàm **`chayThuMotLan`** trong ô thả xuống rồi bấm
    **Run**. Google sẽ hỏi cấp quyền — bấm qua **Advanced** → **Go to … (unsafe)**
    → **Allow**. (Chữ "unsafe" là vì script chưa qua kiểm duyệt của Google, không
    phải vì nó nguy hiểm — anh vừa tự viết ra nó.)
-5. Xem tab **Execution log**. Đúng thì thấy đại ý:
+6. Xem tab **Execution log**. Đúng thì thấy đại ý:
 
    ```
    Bang tinh: ONLINE CATALOGUE
@@ -126,7 +139,7 @@ Trước khi Apps Script đẩy lần đầu, trang catalogue sẽ ghi *"Đang c
    DA DAY ANH: 168 tam, 0 tam hong, con lai ~1192.
    ```
 
-6. Chọn hàm **`datLichChay`** rồi bấm **Run** một lần. Từ đây nó tự chạy:
+7. Chọn hàm **`datLichChay`** rồi bấm **Run** một lần. Từ đây nó tự chạy:
    dữ liệu mỗi giờ, ảnh mỗi 10 phút.
 
 ### Bước 4 — Đợi ảnh đuổi kịp
@@ -152,6 +165,7 @@ dòng chữ nhỏ dưới tiêu đề ghi *"Bản chụp bảng tính, Apps Scri
 
 | Hiện tượng | Nguyên nhân | Cách sửa |
 |---|---|---|
+| `403 … API has not been used in project …` | Chưa thêm Advanced Service | Làm bước 3.4 — thêm cả **Google Sheets API** và **Drive API** trong mục Services |
 | `tra ve 503: {"loi":"chua_bat"}` | Vercel chưa có `DONG_BO_SECRET`, hoặc đã thêm mà chưa redeploy | Làm lại bước 2, nhớ Redeploy |
 | `tra ve 401` | Khoá trong Script Properties khác khoá trên Vercel | So lại từng ký tự, coi chừng khoảng trắng thừa hai đầu |
 | `tra ve 422: {"loi":"bang_rong"}` | Sai tên tab, hoặc tab thật sự không còn dòng nào | Kiểm tra Script Property `TAB` |
