@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
+import { AnhTai } from "@/ui/anh-tai";
 
 /**
  * Boc danh sach mau va cho khach bam vao anh de phong to.
@@ -78,11 +79,13 @@ export function PhongToAnh({
           className="fixed inset-0 z-50 flex cursor-zoom-out flex-col items-center
                      justify-center gap-4 bg-hp-ink/92 p-4 sm:p-8 print:hidden"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <AnhTai
             src={`/api/anh-drive/${dangXem.fileId}?w=1400`}
             alt={dangXem.ten}
-            className="max-h-[82vh] max-w-full object-contain"
+            nen="toi"
+            tai="eager"
+            lopBoc="flex h-[82vh] w-full max-w-[1100px] items-center justify-center"
+            lop="max-h-full max-w-full object-contain"
           />
 
           {anh.length > 1 && (

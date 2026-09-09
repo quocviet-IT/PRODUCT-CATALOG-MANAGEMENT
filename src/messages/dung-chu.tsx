@@ -3,6 +3,7 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { boChu, type BoChu } from ".";
 import { datNgonNgu } from "./hanh-dong";
+import { NutGui } from "@/ui/nut-gui";
 import {
   NGON_NGU, NGON_NGU_MAC_DINH, NHAN_NGAN, NHAN_NGON_NGU, type NgonNgu,
 } from "./ngon-ngu";
@@ -50,11 +51,13 @@ export function DoiNgonNgu({ lop }: { lop?: string }) {
           {i > 0 && <span aria-hidden className="text-hp-rule">/</span>}
           <form action={datNgonNgu}>
             <input type="hidden" name="ngon_ngu" value={n} />
-            <button
-              type="submit"
+            {/* Nhan chi co hai ky tu ("VI"), khong the doi chu ma khong lam ca
+                dai xe dich — nen dau hieu cho o day la mo di, khong phai doi chu. */}
+            <NutGui
+              nhanCho={<span className="opacity-40">{NHAN_NGAN[n]}</span>}
               aria-current={n === hienTai ? "true" : undefined}
               title={NHAN_NGON_NGU[n]}
-              className={
+              lop={
                 "text-[11px] uppercase tracking-[0.14em] transition-colors duration-150 " +
                 (n === hienTai
                   ? "text-hp-ink underline underline-offset-4"
@@ -62,7 +65,7 @@ export function DoiNgonNgu({ lop }: { lop?: string }) {
               }
             >
               {NHAN_NGAN[n]}
-            </button>
+            </NutGui>
           </form>
         </span>
       ))}

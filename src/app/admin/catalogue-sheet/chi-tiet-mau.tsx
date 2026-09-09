@@ -4,6 +4,7 @@ import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 import { FolderOpen, Images, Video } from "lucide-react";
 import type { BoChu } from "@/messages";
 import { nhanCo } from "./nhan-co";
+import { AnhTai } from "@/ui/anh-tai";
 
 /**
  * Phan trinh bay chi tiet mot mau. KHONG doc du lieu, khong biet minh dang nam
@@ -130,12 +131,10 @@ export function ChiTietMau({
             const khung = (
               <>
                 <div className="flex aspect-square items-center justify-center bg-hp-inset">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
+                  <AnhTai
                     src={`/api/anh-drive/${a.fileId}`}
                     alt={a.ten}
-                    loading="lazy"
-                    className="h-full w-full object-contain"
+                    lop="h-full w-full object-contain"
                   />
                 </div>
                 <p className="truncate px-2 py-1.5 text-[10px] text-hp-muted" title={a.ten}>

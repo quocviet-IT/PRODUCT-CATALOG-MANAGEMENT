@@ -8,6 +8,7 @@ import { KeyRound, Lock, LockOpen, ShieldCheck, ShieldOff, type LucideIcon } fro
 import { useChu, useNgonNgu } from "@/messages/dung-chu";
 import type { BoChu } from "@/messages";
 import { MA_HTML, type NgonNgu } from "@/messages/ngon-ngu";
+import { NutGui } from "@/ui/nut-gui";
 
 const O_TIEU_DE =
   "whitespace-nowrap border-b border-hp-rule px-4 py-3 text-left " +
@@ -66,10 +67,18 @@ function NutHanhDong({
       {Object.entries(truong).map(([k, v]) => (
         <input key={k} type="hidden" name={k} value={v} />
       ))}
-      <button type="submit" disabled={tat || dangChay} className={NUT}>
+      <NutGui
+        dangChay={dangChay}
+        tat={tat}
+        lop={NUT}
+        nhanCho={<>
+          <Icon aria-hidden strokeWidth={1.5} className={LOP_ICON} />
+          {t.nguoi_dung.dang_chay}
+        </>}
+      >
         <Icon aria-hidden strokeWidth={1.5} className={LOP_ICON} />
         {nhan}
-      </button>
+      </NutGui>
       {loi && <span className="ml-2 text-xs text-hp-pink-strong">{loiThanhChu(t)[loi] ?? loi}</span>}
     </form>
   );

@@ -6,6 +6,7 @@ import { layTatCa } from "@/modules/catalog/categories.service";
 import { kyNhieuUrl } from "@/modules/media/anh-url";
 import { dinhDangTien } from "@/lib/money";
 import { ThanhBoLoc } from "./bo-loc";
+import { AnhTai } from "@/ui/anh-tai";
 import { layChu } from "@/messages/may-chu";
 
 export default async function TrangSanPham({
@@ -51,9 +52,7 @@ export default async function TrangSanPham({
               <Link href={`/admin/products/${s.id}`}>
                 <div className="aspect-square bg-neutral-100">
                   {urls[i] ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={urls[i]!} alt={s.name} loading="lazy"
-                         className="h-full w-full object-cover" />
+                    <AnhTai src={urls[i]!} alt={s.name} lop="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full items-center justify-center text-xs text-neutral-400">
                       {t.san_pham.chua_co_anh}

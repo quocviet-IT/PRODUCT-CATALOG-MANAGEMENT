@@ -4,6 +4,7 @@ import { OTich } from "./chon-mau";
 import { layChu } from "@/messages/may-chu";
 import { nhanCo } from "./nhan-co";
 import { LienKetDrive } from "./lien-ket-drive";
+import { AnhTai } from "@/ui/anh-tai";
 
 
 /** Chuan tieng Viet dung dau phay thap phan, du bang tinh ghi dau cham. */
@@ -71,12 +72,10 @@ export async function BangCatalogue({ ds }: { ds: DongCatalogue[] }) {
               <td className={O_DU_LIEU}>
                 <div className="flex h-14 w-14 items-center justify-center bg-hp-inset">
                   {d.fileIdAnh ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <AnhTai
                       src={`/api/anh-drive/${d.fileIdAnh}`}
                       alt={d.maMau ?? t.catalogue_sheet.anh_chua_co_ma_mau}
-                      loading="lazy"
-                      className="h-full w-full object-contain"
+                      lop="h-full w-full object-contain"
                     />
                   ) : null}
                 </div>
