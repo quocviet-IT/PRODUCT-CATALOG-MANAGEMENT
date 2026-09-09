@@ -19,8 +19,17 @@
  *       KHOA       <chuoi bi mat, giong het bien DONG_BO_SECRET tren Vercel>
  *       SHEET_ID   <ID bang tinh, doan giua /d/ va /edit tren thanh dia chi>
  *       TAB        Catalogue-OL
- *  3. Chon ham chayThuMotLan roi bam Run. Google se hoi cap quyen — dong y.
- *  4. Chon ham datLichChay roi bam Run. Tu day no tu chay.
+ *  3. Cot trai, muc Services -> dau + -> them "Google Sheets API", roi them
+ *     tiep "Drive API".
+ *
+ *     BAT BUOC, va day la cho de vap nhat. Script goi Sheets/Drive qua REST
+ *     (xem chu thich o docBangTho_ va taiAnhBase64_), ma REST thi doi API phai
+ *     duoc bat trong du an Cloud AN ma Apps Script tu tao. SpreadsheetApp va
+ *     DriveApp van chay binh thuong nen rat de tuong la da du quyen — roi
+ *     dung phat 403 "Google Sheets API has not been used in project ...".
+ *     Them Service o day chinh la cai cong tac do.
+ *  4. Chon ham chayThuMotLan roi bam Run. Google se hoi cap quyen — dong y.
+ *  5. Chon ham datLichChay roi bam Run. Tu day no tu chay.
  *
  * KHOA BI MAT nam trong Script Properties chu khong trong ma nguon: ma nguon
  * co the bi chia se, sao chep, dan vao chat.
