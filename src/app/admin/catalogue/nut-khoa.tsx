@@ -5,6 +5,7 @@ import { Lock, LockOpen } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
 import type { TrangThaiLink } from "@/modules/catalogue-share/hieu-luc.model";
 import { doiKhoa } from "./actions";
+import { NutGui } from "@/ui/nut-gui";
 
 const NUT =
   "inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] " +
@@ -28,12 +29,19 @@ export function NutKhoa({ slug, trangThai }: { slug: string; trangThai: TrangTha
     <form action={gui} className="inline">
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="khoa" value={dangKhoa ? "0" : "1"} />
-      <button type="submit" disabled={dangChay} className={NUT}>
+      {/* Giu nguyen icon, chi doi CHU: nut nam trong mot hang thao tac chat
+          nhau, doi ca icon la ca hang xe dich giua luc bam. */}
+      <NutGui dangChay={dangChay} nhanCho={<>
+        {dangKhoa
+          ? <LockOpen aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
+          : <Lock aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />}
+        {t.danh_sach_catalogue.dang_doi_khoa}
+      </>} lop={NUT}>
         {dangKhoa
           ? <LockOpen aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
           : <Lock aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />}
         {dangKhoa ? t.danh_sach_catalogue.mo_khoa : t.danh_sach_catalogue.khoa}
-      </button>
+      </NutGui>
       {loi && (
         <span className="ml-2 text-xs text-hp-pink-strong">
           {t.danh_sach_catalogue.loi_khoa}

@@ -22,6 +22,8 @@ import type { BoChu } from "@/messages";
 import { nhanCo } from "./nhan-co";
 import { PhanTrang } from "./phan-trang";
 import { BangDieuKhien } from "./bang-dieu-khien";
+import { AnhTai } from "@/ui/anh-tai";
+import { KetQuaLoc, NguonLoc } from "@/ui/vung-loc";
 
 /**
  * Dong chu cho nguon "dong-bo": ban chup that cua bang tinh do Apps Script day
@@ -85,12 +87,10 @@ async function The({ d }: { d: DongCatalogue }) {
     >
       <div className="flex aspect-[4/5] items-center justify-center bg-hp-inset">
         {d.fileIdAnh ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <AnhTai
             src={`/api/anh-drive/${d.fileIdAnh}`}
             alt={d.maMau ?? t.catalogue_sheet.anh_chua_co_ma_mau}
-            loading="lazy"
-            className="h-full w-full object-contain"
+            lop="h-full w-full object-contain"
           />
         ) : (
           <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
@@ -188,17 +188,28 @@ export default async function TrangCatalogueSheet({
         <div className="mt-5 h-px bg-hp-rule" />
       </div>
 
-      <BangDieuKhien
-        thongKe={thongKe}
-        thongKeHien={thongKeHien}
-        dangLoc={dangLoc}
-        canhBaoDangBat={loc.canhBao}
-        thamSoCanhBao={thamSoCua("canhBao")}
-        sp={sp}
-        t={t}
-      />
+      {/* Thanh bo loc va vung ket qua la anh em, khong ai thay trang thai cua
+          ai. NguonLoc noi hai ben lai: luc dieu huong dang chay thi ket qua tu
+          mo di, thay vi danh sach cu nam im nhu the khong co gi khop.
+          Day thong ke nam TRONG vung mo cung voi bang: no cung la ket qua cua
+          bo loc, de no sang ro giua mot trang dang mo la trung ra con so cu nhu
+          the do la con so hien tai. */}
+      <NguonLoc>
+      <KetQuaLoc>
+        <BangDieuKhien
+          thongKe={thongKe}
+          thongKeHien={thongKeHien}
+          dangLoc={dangLoc}
+          canhBaoDangBat={loc.canhBao}
+          thamSoCanhBao={thamSoCua("canhBao")}
+          sp={sp}
+          t={t}
+        />
+      </KetQuaLoc>
 
       <ThanhBoLoc dem={dem} hienTai={loc} />
+
+      <KetQuaLoc>
 
       {/* Kieu xem khong dung mau hong: ngan sach hong da chi het cho vien focus
           o tim kiem va gach chan bo loc dang bat. O day phan biet bang ink/muted. */}
@@ -261,6 +272,8 @@ export default async function TrangCatalogueSheet({
           </span>
         </nav>
       )}
+      </KetQuaLoc>
+      </NguonLoc>
     </>
   );
 }

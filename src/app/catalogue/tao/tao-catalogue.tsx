@@ -10,6 +10,7 @@ import {
   ArrowLeft, Check, Copy, Eye, ExternalLink, FolderOpen, Link2, Plus, Printer, X,
 } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
+import { AnhTai } from "@/ui/anh-tai";
 import {
   GIAO_DIEN_MAC_DINH, type GiaoDienCatalogue,
 } from "@/modules/catalogue-share/giao-dien.model";
@@ -223,12 +224,10 @@ export function TaoCatalogue() {
                                       ${dangGiu ? "border-hp-ink" : "border-hp-rule opacity-45"}`}
                         >
                           <div className="flex aspect-square items-center justify-center bg-hp-inset">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
+                            <AnhTai
                               src={`/api/anh-drive/${a.fileId}`}
                               alt={a.ten}
-                              loading="lazy"
-                              className="h-full w-full object-contain"
+                              lop="h-full w-full object-contain"
                             />
                           </div>
                           <span className="flex items-center gap-2 px-2 py-1.5">
@@ -281,6 +280,7 @@ export function TaoCatalogue() {
           type="button"
           onClick={tao}
           disabled={dangTao}
+          aria-busy={dangTao}
           className="flex items-center gap-2 border border-hp-ink bg-hp-ink
                      px-6 py-2.5 text-[11px] uppercase tracking-[0.14em] text-hp-foundation
                      transition-colors duration-150 hover:border-hp-pink hover:bg-hp-pink

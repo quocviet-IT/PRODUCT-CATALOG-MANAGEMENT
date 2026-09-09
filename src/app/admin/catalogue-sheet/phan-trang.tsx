@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import type { BoChu } from "@/messages";
+import { ChuCho, IconCho } from "@/ui/dau-cho";
 
 /**
  * Thanh phan trang: ve dau, lui mot trang, so trang, tien mot trang, trang cuoi.
@@ -63,7 +64,7 @@ export function PhanTrang({
         </span>
       ) : (
         <Link href={urlTrang(1)} className={NUT}>
-          <ChevronsLeft className="h-4 w-4" />
+          <IconCho><ChevronsLeft className="h-4 w-4" /></IconCho>
           {t.catalogue_sheet.trang_dau}
         </Link>
       )}
@@ -75,7 +76,7 @@ export function PhanTrang({
         </span>
       ) : (
         <Link href={urlTrang(trang - 1)} className={NUT} rel="prev">
-          <ChevronLeft className="h-4 w-4" />
+          <IconCho><ChevronLeft className="h-4 w-4" /></IconCho>
           {t.catalogue_sheet.trang_truoc}
         </Link>
       )}
@@ -94,7 +95,7 @@ export function PhanTrang({
                   : "border-hp-rule text-hp-body hover:border-hp-ink")
               }
             >
-              {n}
+              <ChuCho>{n}</ChuCho>
             </Link>
           </li>
         ))}
@@ -108,7 +109,7 @@ export function PhanTrang({
       ) : (
         <Link href={urlTrang(trang + 1)} className={NUT} rel="next">
           {t.catalogue_sheet.trang_sau}
-          <ChevronRight className="h-4 w-4" />
+          <IconCho><ChevronRight className="h-4 w-4" /></IconCho>
         </Link>
       )}
 
@@ -120,7 +121,7 @@ export function PhanTrang({
       ) : (
         <Link href={urlTrang(soTrang)} className={NUT}>
           {t.catalogue_sheet.trang_cuoi}
-          <ChevronsRight className="h-4 w-4" />
+          <IconCho><ChevronsRight className="h-4 w-4" /></IconCho>
         </Link>
       )}
     </div>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { dangNhap, dangNhapGoogle } from "@/auth/actions";
 import { LoiMatKhau } from "./loi-mat-khau";
+import { NutGui } from "@/ui/nut-gui";
 import { layChu } from "@/messages/may-chu";
 import type { BoChu } from "@/messages";
 import { Logo } from "@/app/thuong-hieu";
@@ -64,15 +65,24 @@ export default async function TrangDangNhap({
         )}
 
         <form action={dangNhapGoogle} className="mt-7">
-          <button
-            type="submit"
-            className="flex w-full items-center justify-center gap-3 border border-hp-rule
-                       bg-hp-foundation px-5 py-3.5 text-sm text-hp-ink
-                       transition-colors duration-150 hover:border-hp-ink"
+          {/* Bam nut nay la roi khoi trang: server action chuyen huong sang
+              Google. Duong truyen cham thi man hinh dung im vai giay, va nguoi
+              dung bam lan hai — mo mot luong dang nhap thu hai chong len. */}
+          <NutGui
+            nhanCho={
+              <>
+                <LogoGoogle />
+                {t.dang_nhap.dang_vao}
+              </>
+            }
+            lop="flex w-full items-center justify-center gap-3 border border-hp-rule
+                 bg-hp-foundation px-5 py-3.5 text-sm text-hp-ink
+                 transition-colors duration-150 hover:border-hp-ink
+                 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <LogoGoogle />
             {t.dang_nhap.nut_google}
-          </button>
+          </NutGui>
         </form>
 
         {/* Duong lui bang mat khau: cac tai khoan co tu truoc van dung duoc, va

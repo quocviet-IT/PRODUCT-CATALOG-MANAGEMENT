@@ -1,5 +1,6 @@
 import { MessageCircle, Phone } from "lucide-react";
 import type { BoChu } from "@/messages";
+import { AnhTai } from "@/ui/anh-tai";
 import type { MucCatalogue } from "@/modules/catalogue-share/chia-se.model";
 import {
   MAU_NHAN,
@@ -96,17 +97,16 @@ function Anh({
       className={`flex cursor-zoom-in items-center justify-center overflow-hidden
                   bg-hp-plate ${tyLe}`}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <AnhTai
         src={`/api/anh-drive/${fileId}?w=${rong}`}
         alt={m.maMau ?? ten}
         // Anh dau tien tai ngay; phan con lai cho toi khi khach cuon toi. Mot
         // catalogue 40 mau co the co hon 200 anh.
-        loading={uuTien ? "eager" : "lazy"}
+        tai={uuTien ? "eager" : "lazy"}
         // scale nhe khi re chuot: dau hieu cho biet anh bam duoc, va no khong
         // lam xe dich bat cu thu gi quanh no vi da co overflow-hidden.
-        className="h-full w-full object-contain transition-transform duration-300
-                   hover:scale-[1.03]"
+        lop="h-full w-full object-contain transition-transform duration-300
+             hover:scale-[1.03]"
       />
     </div>
   );

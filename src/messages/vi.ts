@@ -9,12 +9,27 @@ export const vi = {
     dang_tai: "Đang tải…",
     khong_co_du_lieu: "Chưa có dữ liệu",
   },
+  /**
+   * Chu cho luc CHO. Phan lon chi trinh doc man hinh nghe thay: nguoi nhin
+   * duoc thi da thay khoi xam roi.
+   */
+  phan_hoi: {
+    dang_tai_trang: "Đang tải trang",
+    dang_tai_danh_sach: "Đang tải danh sách",
+    dang_tai_chi_tiet: "Đang tải chi tiết mẫu",
+    dang_tai_catalogue: "Đang tải catalogue",
+    dang_tai_tai_khoan: "Đang tải danh sách tài khoản",
+    anh_hong: "Không tải được ảnh",
+    dang_cap_nhat: "Đang cập nhật…",
+  },
   dang_nhap: {
     tieu_de: "Đăng nhập",
     email: "Email",
     mat_khau: "Mật khẩu",
     nut: "Đăng nhập",
+    dang_vao: "Đang đăng nhập",
     dang_xuat: "Đăng xuất",
+    dang_ra: "Đang thoát",
     sai_thong_tin: "Email hoặc mật khẩu không đúng.",
     chua_dang_nhap: "Vui lòng đăng nhập để tiếp tục.",
     bi_vo_hieu_hoa: "Tài khoản đã bị vô hiệu hoá. Liên hệ quản trị viên.",
@@ -84,6 +99,7 @@ export const vi = {
     email_da_ton_tai: "Email này đã có tài khoản. Nếu họ đang đăng nhập bằng Google thì dùng “Đặt mật khẩu” ở dòng của họ.",
     tu_khoa_chinh_minh: "Không thể tự khoá tài khoản của mình — sẽ không còn ai vào được màn hình này.",
     tu_ha_quyen_chinh_minh: "Không thể tự hạ quyền của mình — sẽ không còn ai vào được màn hình này.",
+    dang_chay: "Đang xử lý",
     loi_he_thong: "Không thực hiện được. Thử lại giúp em.",
   },
   danh_muc: {
@@ -303,6 +319,7 @@ export const vi = {
     mo_khoa: "Mở lại",
     da_khoa_xong: "Đã khoá link.",
     da_mo_khoa_xong: "Đã mở lại link.",
+    dang_doi_khoa: "Đang đổi",
     loi_khoa: "Không đổi được trạng thái link. Thử lại giúp em.",
     giai_thich_han: "Link tự hết hiệu lực sau {n} ngày kể từ lúc tạo. Khoá tay thì link ngừng mở ngay lập tức.",
     mo: "Mở",

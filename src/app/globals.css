@@ -136,3 +136,18 @@ body {
     break-after: page;
   }
 }
+
+/*
+ * Ai da bao he dieu hanh la minh khong chiu duoc chuyen dong thi khong duoc
+ * nhan them mot man hinh day o xam nhap nhay. Cac o cho van con — chi la no
+ * dung yen. Chung van lam dung viec cua minh: giu dung cho, dung kich thuoc.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
