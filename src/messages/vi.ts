@@ -143,7 +143,8 @@ export const vi = {
     // Ten thuong hieu viet KHONG DAU va co "USA" — day la cach thuong hieu tu
     // xung o thi truong My, khong phai loi thieu dau tieng Viet.
     thuong_hieu: "HUNG PHAT USA",
-    nguon_bang_tinh: "Đọc trực tiếp từ bảng tính, làm mới mỗi 60 giây",
+    // KHONG neu con so giay o day: no la HAN_BO_DEM_MS, va da lech mot lan.
+    nguon_bang_tinh: "Đọc trực tiếp từ bảng tính",
     nguon_mau: "Dữ liệu mẫu — chưa nối với bảng tính",
     // {luc} la moc thoi gian lan day gan nhat, da dinh dang san.
     nguon_dong_bo: "Bản chụp bảng tính, Apps Script đẩy lên lúc {luc}",

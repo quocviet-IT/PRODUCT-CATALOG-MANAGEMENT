@@ -3,8 +3,8 @@
 **Hiện tại**: web chạy bằng một bản chụp dữ liệu lấy tay. Sửa bảng tính không lên
 web, thêm ảnh vào Drive cũng không lên web.
 
-**Sau khi làm xong**: sửa bảng tính → chậm nhất một tiếng sau web đổi theo. Bỏ ảnh
-mới vào thư mục Drive → chậm nhất một tiếng sau web thấy. Không ai phải bấm gì.
+**Sau khi làm xong**: sửa bảng tính → **dưới một phút** sau web đổi theo. Bỏ ảnh mới
+vào thư mục Drive → chậm nhất một tiếng sau web thấy. Không ai phải bấm gì.
 
 ## Vì sao lại là Apps Script
 
@@ -28,9 +28,10 @@ công ty. Hai đường kia đều phải để một khoá riêng tư nằm tr�
 ## Cách nó chạy
 
 ```
-Apps Script (chạy trong Google, mỗi giờ một lần)
-   │  đọc bảng tính Catalogue-OL  ─ kèm chip Drive
-   │  liệt kê ảnh trong ~65 thư mục
+Apps Script (chạy trong Google)
+   │  mỗi PHÚT   — đọc bảng tính Catalogue-OL, kèm chip Drive   (~2 giây)
+   │  mỗi GIỜ    — thêm bước liệt kê ảnh trong ~65 thư mục      (~36 giây)
+   │  mỗi 10 PHÚT— bù ảnh còn thiếu vào bộ đệm
    ▼
 POST hpcatalogue.app/api/dong-bo/…   ─ kèm khoá bí mật
    ▼
@@ -47,7 +48,7 @@ Bốn cổng nhận:
 | Cổng | Việc |
 |---|---|
 | `POST /api/dong-bo/thu-muc` | Nhận bảng thô, trả về ID các thư mục ảnh cần liệt kê. Không ghi gì. |
-| `POST /api/dong-bo/du-lieu` | Nhận bảng thô + danh sách ảnh từng thư mục, lưu lại. |
+| `POST /api/dong-bo/du-lieu` | Nhận bảng thô, lưu lại. Kèm `anhThuMuc` thì lưu cả danh sách ảnh; không kèm thì giữ nguyên danh sách cũ. |
 | `POST /api/dong-bo/thieu-anh` | Trả về những ảnh chưa có trong bộ đệm, ảnh đại diện xếp trước. |
 | `POST /api/dong-bo/anh` | Nhận ảnh, thu nhỏ thành 600px và 1400px, cất vào bộ đệm. |
 
@@ -139,8 +140,14 @@ Trước khi Apps Script đẩy lần đầu, trang catalogue sẽ ghi *"Đang c
    DA DAY ANH: 168 tam, 0 tam hong, con lai ~1192.
    ```
 
-7. Chọn hàm **`datLichChay`** rồi bấm **Run** một lần. Từ đây nó tự chạy:
-   dữ liệu mỗi giờ, ảnh mỗi 10 phút.
+7. Chọn hàm **`datLichChay`** rồi bấm **Run** một lần. Từ đây nó tự chạy. Kiểm
+   bằng ⏰ **Triggers**, phải thấy đúng **ba** dòng:
+
+   | Function | Nhịp | Việc |
+   |---|---|---|
+   | `dongBoBang` | mỗi phút | chỉ bảng tính — thứ người dùng sửa và chờ thấy |
+   | `dongBoDuLieu` | mỗi giờ | đầy đủ, kèm liệt kê thư mục Drive |
+   | `dongBoAnh` | mỗi 10 phút | bù ảnh vào bộ đệm |
 
 ### Bước 4 — Đợi ảnh đuổi kịp
 
@@ -175,7 +182,8 @@ dòng chữ nhỏ dưới tiêu đề ghi *"Bản chụp bảng tính, Apps Scri
 
 **Ngưng đồng bộ**: chạy hàm `ngungLichChay`.
 
-**Chạy lại ngay không chờ lịch**: chạy hàm `chayThuMotLan`.
+**Chạy lại ngay không chờ lịch**: `dongBoBang` (chỉ bảng tính, 2 giây) hoặc
+`chayThuMotLan` (đầy đủ, kèm ảnh).
 
 **Đổi tần suất**: sửa trong hàm `datLichChay` rồi chạy lại hàm đó. Nó luôn xoá
 hết lịch cũ trước khi đặt lại, nên chạy bao nhiêu lần cũng được — lịch chồng nhau
@@ -202,6 +210,17 @@ vào sáng hôm sau.
 **Một ảnh hỏng không làm hỏng cả lô.** Script gửi theo lô sáu tấm; nếu một tấm
 hỏng làm cả yêu cầu thất bại thì năm tấm kia phải tải lại từ đầu ở lượt sau — và
 có thể hỏng mãi mãi.
+
+**Bảng tính và thư mục Drive đi hai nhịp khác nhau.** Phần đắt tiền của một lượt
+đồng bộ là liệt kê 65 thư mục Drive — 36 giây, so với 2 giây để đọc bảng tính. Gộp
+chung thì không thể chạy mỗi phút: 36 giây mỗi phút là ăn hết hạn mức chạy của cả
+ngày trước giờ ăn trưa. Mà thư mục thì hiếm khi đổi, còn bảng tính thì đổi suốt.
+
+**Bảng không đổi thì không ghi lại.** Chạy mỗi phút là 1.440 lượt một ngày, mà bảng
+tính thì cả ngày không ai động tới. Cổng `du-lieu` giữ một vân tay (sha256) của bảng
+trong `trang-thai.json` và bỏ qua việc ghi đè tệp 110 KB y hệt bản cũ. **Nhưng mốc
+thời gian vẫn cập nhật** — người dùng đọc dòng đó để biết đồng bộ *còn sống*, và một
+mốc đứng im vì "không có gì mới" trông y hệt một mốc đứng im vì script hỏng.
 
 **Mỗi gói tin tối đa 6 ảnh.** Vercel chặn thân yêu cầu ở 4,5 MB và base64 làm
 phình ảnh thêm một phần ba. Đổi con số này thì phải đổi ở **cả hai nơi**:
