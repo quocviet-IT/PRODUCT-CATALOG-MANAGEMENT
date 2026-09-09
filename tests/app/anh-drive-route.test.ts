@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const layUrlAnhSheet = vi.fn();
+const layAnhSheet = vi.fn();
 // Ban gia phai khai DU nhung gi tuyen thuc su import. Tuyen doc CO_ANH_HOP_LE
 // de doi chieu tham so ?w= — thieu no thi tuyen no ngay khi chay.
 vi.mock("@/modules/media/anh-drive", () => ({
-  layUrlAnhSheet,
+  layAnhSheet,
   CANH_DAI_ANH_SHEET: 600,
   CANH_DAI_ANH_LON: 1400,
   CO_ANH_HOP_LE: [600, 1400],
@@ -16,14 +16,15 @@ const goi = (fileId: string) =>
   GET(new Request("http://x/api/anh-drive/x"), { params: Promise.resolve({ fileId }) });
 
 beforeEach(() => {
-  layUrlAnhSheet.mockReset();
-  layUrlAnhSheet.mockResolvedValue("https://ky.example/anh.webp");
+  layAnhSheet.mockReset();
+  // Bytes gia — tuyen chi chuyen tiep chung, khong doc noi dung.
+  layAnhSheet.mockResolvedValue(Buffer.from("webp-gia"));
 });
 
 describe("GET /api/anh-drive/[fileId]", () => {
   it("phuc vu khi khong co phien dang nhap — tuyen nay dang mo cong khai", async () => {
     const res = await goi("1AbcDefGhiJkl");
-    expect(res.status).toBe(302);
+    expect(res.status).toBe(200);
   });
 
   it("khong import cong dang nhap — mo cong khai thi khong duoc con phu thuoc auth", async () => {
@@ -39,23 +40,30 @@ describe("GET /api/anh-drive/[fileId]", () => {
     for (const xau of ["../../bi-mat", "a", "co khoang trang", "x".repeat(200)]) {
       expect((await goi(xau)).status).toBe(400);
     }
-    expect(layUrlAnhSheet).not.toHaveBeenCalled();
+    expect(layAnhSheet).not.toHaveBeenCalled();
   });
 
-  it("chuyen huong sang URL co ky khi hop le", async () => {
+  it("tra thang bytes anh, kem header cache dai", async () => {
+    // Truoc day tuyen tra 302 sang mot URL co ky va cam cache — moi tam anh,
+    // moi lan mo trang, ton hai luot goi Supabase vong qua Thai Binh Duong.
     const res = await goi("1AbcDefGhiJkl");
-    expect(res.status).toBe(302);
-    expect(res.headers.get("location")).toBe("https://ky.example/anh.webp");
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("image/webp");
+    expect(await res.text()).toBe("webp-gia");
+
+    const cache = res.headers.get("cache-control") ?? "";
+    expect(cache).toContain("public");
+    expect(cache).toContain("immutable");
   });
 
   it("tra 502 khi Drive hong, khong nem ra ngoai", async () => {
-    layUrlAnhSheet.mockRejectedValue(new Error("drive hong"));
+    layAnhSheet.mockRejectedValue(new Error("drive hong"));
     expect((await goi("1AbcDefGhiJkl")).status).toBe(502);
   });
 
-  it("ghi log phia server khi layUrlAnhSheet loi, nhung than phan hoi van rong va status van 502", async () => {
+  it("ghi log phia server khi layAnhSheet loi, nhung than phan hoi van rong va status van 502", async () => {
     const loiGoc = new Error("drive hong");
-    layUrlAnhSheet.mockRejectedValue(loiGoc);
+    layAnhSheet.mockRejectedValue(loiGoc);
     const gianDiep = vi.spyOn(console, "error").mockImplementation(() => {});
 
     try {
@@ -73,7 +81,7 @@ describe("GET /api/anh-drive/[fileId]", () => {
     }
   });
 
-  it("moi phan hoi tuyen nay tra ve deu mang Cache-Control: private, no-store", async () => {
+  it("LOI thi khong duoc cache — mot 502 bi giu lai la anh chet ca thang", async () => {
     const kiemTraKhongLuuDem = (res: Response) => {
       expect(res.headers.get("cache-control")).toBe("private, no-store");
     };
@@ -81,12 +89,9 @@ describe("GET /api/anh-drive/[fileId]", () => {
     // 400 — fileId khong hop le
     kiemTraKhongLuuDem(await goi("a"));
 
-    // 302 — hop le
-    kiemTraKhongLuuDem(await goi("1AbcDefGhiJkl"));
-
-    // 502 — layUrlAnhSheet loi
+    // 502 — layAnhSheet loi
     const gianDiep = vi.spyOn(console, "error").mockImplementation(() => {});
-    layUrlAnhSheet.mockRejectedValue(new Error("drive hong"));
+    layAnhSheet.mockRejectedValue(new Error("drive hong"));
     try {
       kiemTraKhongLuuDem(await goi("1AbcDefGhiJkl"));
     } finally {

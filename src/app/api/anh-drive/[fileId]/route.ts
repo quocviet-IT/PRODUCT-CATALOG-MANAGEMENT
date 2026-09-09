@@ -1,20 +1,26 @@
-import { CANH_DAI_ANH_SHEET, CO_ANH_HOP_LE, layUrlAnhSheet } from "@/modules/media/anh-drive";
+import { CANH_DAI_ANH_SHEET, CO_ANH_HOP_LE, layAnhSheet } from "@/modules/media/anh-drive";
 
 // fileId den tu duong dan URL nen khong tin duoc. Chan truoc khi dung no
 // de dung khoa Storage hay goi Drive.
 const DANG_FILE_ID = /^[A-Za-z0-9_-]{10,80}$/;
 
-// URL co ky tra ve chi dung mot lan cho MOT phien va het han sau mot gio
-// (xem HAN_URL_GIAY trong anh-drive.ts). Vi vay chinh chuyen huong nay khong
-// duoc phep nam trong bat ky bo dem trung gian nao: mot Location bi cache qua
-// thoi han se tra ra anh vo lang le. Anh o dau ben kia van duoc cache binh
-// thuong theo header cua Supabase Storage.
+/**
+ * Anh cua mot (fileId, co) KHONG BAO GIO DOI: khoa bo dem gom ca hai, va duong
+ * dong bo khong ghi de len tam da co. Vi vay cho cache that lau va danh dau
+ * immutable — CDN cua Vercel giu lai, va tu luot xem thu hai tro di khong con
+ * luot goi nao sang Supabase.
+ *
+ * Ban truoc dat "private, no-store" vi tuyen nay tra ve mot URL co ky het han
+ * sau mot gio. Gio no tra thang bytes nen han do khong con lien quan.
+ */
+const LUU_DEM_LAU = "public, max-age=2592000, immutable";
+/** Loi thi KHONG duoc cache: mot 502 bi giu lai la anh chet suot ca thang. */
 const KHONG_LUU_DEM = "private, no-store";
 
-function phanHoiRong(status: number, headers?: HeadersInit): Response {
+function phanHoiRong(status: number): Response {
   return new Response(null, {
     status,
-    headers: { "Cache-Control": KHONG_LUU_DEM, ...headers },
+    headers: { "Cache-Control": KHONG_LUU_DEM },
   });
 }
 
@@ -42,8 +48,14 @@ export async function GET(
   const canhDai = (CO_ANH_HOP_LE as readonly number[]).includes(w) ? w : CANH_DAI_ANH_SHEET;
 
   try {
-    const url = await layUrlAnhSheet(fileId, canhDai);
-    return phanHoiRong(302, { Location: url });
+    const anh = await layAnhSheet(fileId, canhDai);
+    return new Response(new Uint8Array(anh), {
+      headers: {
+        "Content-Type": "image/webp",
+        "Content-Length": String(anh.byteLength),
+        "Cache-Control": LUU_DEM_LAU,
+      },
+    });
   } catch (loi) {
     // Mot anh hong khong duoc lam hong ca luoi — nguoi goi (tag <img>) chi
     // nhan 502 rong, khong bao gio lo van ban loi tho cua libvips/Drive ra
