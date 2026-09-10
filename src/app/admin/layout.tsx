@@ -5,7 +5,8 @@ import { layChu } from "@/messages/may-chu";
 import { DoiNgonNgu } from "@/messages/dung-chu";
 import { Logo } from "@/app/thuong-hieu";
 import { NutGui } from "@/ui/nut-gui";
-import { BookOpen, FolderOpen, LayoutGrid, LogOut, Users } from "lucide-react";
+import { NutGopY } from "./gop-y/nut-gop-y";
+import { BookOpen, FolderOpen, Inbox, LayoutGrid, LogOut, Users } from "lucide-react";
 
 /**
  * Man hinh nay phuc vu dung mot viec: nhan vien kinh doanh tra cuu catalogue.
@@ -39,10 +40,19 @@ export default async function KhungQuanTri({ children }: { children: React.React
             giau nut di chi de sale khong bam vao mot cho ho chac chan bi tu
             choi. */}
         {user.mucQuyen === "admin" && (
-          <Link href="/admin/nguoi-dung" className={MUC}>
-            <Users {...ICON} />
-            {t.nguoi_dung.nut_menu}
-          </Link>
+          <>
+            {/* "Hop gop y" chu khong phai "Gop y": ngay ben canh la NUT gop
+                y ma ai cung bam duoc. Hai chu giong het nhau tren cung mot
+                thanh la nguoi dung phai thu ca hai moi biet cai nao la cai gi. */}
+            <Link href="/admin/gop-y" className={MUC}>
+              <Inbox {...ICON} />
+              {t.gop_y.nut_menu}
+            </Link>
+            <Link href="/admin/nguoi-dung" className={MUC}>
+              <Users {...ICON} />
+              {t.nguoi_dung.nut_menu}
+            </Link>
+          </>
         )}
         <Link href="/admin/catalogue-sheet" className={MUC}>
           <LayoutGrid {...ICON} />
@@ -59,6 +69,7 @@ export default async function KhungQuanTri({ children }: { children: React.React
         <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
           {user.fullName}
         </span>
+        <NutGopY />
         <DoiNgonNgu />
         <form action={dangXuat}>
           <NutGui

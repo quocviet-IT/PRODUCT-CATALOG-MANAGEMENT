@@ -2,6 +2,7 @@ import { requireUser } from "@/auth/guard";
 import { TaoCatalogue } from "./tao-catalogue";
 import { layChu } from "@/messages/may-chu";
 import { Logo } from "@/app/thuong-hieu";
+import { NutGopY } from "@/app/admin/gop-y/nut-gop-y";
 
 export async function generateMetadata() {
   const t = await layChu();
@@ -21,7 +22,13 @@ export default async function TrangTaoCatalogue() {
   await requireUser();
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-6 py-10">
-      <Logo alt={t.catalogue_sheet.thuong_hieu} />
+      {/* Nut gop y phai co CA o day, du man hinh nay nam ngoai khung /admin.
+          Day la cho sale lam viec that va cung la cho hay hong nhat — bat ho
+          quay ve mot man hinh khac moi bao duoc loi la mat luon cai loi. */}
+      <div className="flex items-center justify-between gap-4">
+        <Logo alt={t.catalogue_sheet.thuong_hieu} />
+        <NutGopY />
+      </div>
       <h1 className="mt-2 font-title text-[32px] leading-none tracking-[0.02em] text-hp-ink">
         {t.chia_se.tao_tieu_de}
       </h1>

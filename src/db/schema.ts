@@ -197,3 +197,36 @@ export const catalogues = pgTable("catalogues", {
   uniqueIndex("catalogues_slug_idx").on(t.slug),
   index("catalogues_owner_idx").on(t.ownerId, t.createdAt),
 ]);
+
+export const loaiGopY = pgEnum("loai_gop_y", ["hong", "y-kien"]);
+export const trangThaiGopY = pgEnum("trang_thai_gop_y", ["moi", "da-xu-ly"]);
+
+/**
+ * Gop y cua nhan vien, gui tu bat ky man hinh nao.
+ *
+ * Ban gon nhat co the: hai loai, hai trang thai. Khong co anh chup man hinh,
+ * khong co diem uu tien — them duoc sau, con mot o gop y khong ai dung duoc thi
+ * khong sua duoc gi.
+ */
+export const gopY = pgTable("gop_y", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  loai: loaiGopY("loai").notNull(),
+  noiDung: text("noi_dung").notNull(),
+  trangThai: trangThaiGopY("trang_thai").notNull().default("moi"),
+  /**
+   * Duong dan trang luc gui, vi du "/admin/catalogue-sheet".
+   *
+   * Luu duong dan chu khong luu ca URL: chuoi truy van co the chua tu khoa tim
+   * kiem cua sale, va mot bang gop y khong phai cho de luu lai thoi quen lam
+   * viec cua tung nguoi.
+   */
+  duongDan: text("duong_dan").notNull().default(""),
+  /**
+   * Ai gui. NULL khi tai khoan do bi xoa sau nay — mot gop y dung van con dung
+   * ke ca khi nguoi viet da nghi viec.
+   */
+  nguoiGuiId: uuid("nguoi_gui_id").references(() => users.id, { onDelete: "set null" }),
+  /** Chep lai luc gui, de con doc duoc khi tai khoan da bi xoa. */
+  nguoiGuiEmail: text("nguoi_gui_email").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index("gop_y_trang_thai_idx").on(t.trangThai, t.createdAt)]);
