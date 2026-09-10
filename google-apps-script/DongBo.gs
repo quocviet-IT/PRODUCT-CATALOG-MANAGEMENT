@@ -52,8 +52,18 @@ var NGAN_SACH_MS = 4.5 * 60 * 1000;
  * src/app/api/dong-bo/anh/route.ts.
  */
 var SO_ANH_MOI_LAN = 6;
-/** Ngat goi tin som neu no da nang, ke ca khi chua du SO_ANH_MOI_LAN tam. */
+/**
+ * Tran base64 cho MOT goi tin. Phai kiem TRUOC khi them anh vao lo, khong phai
+ * sau: kiem sau thi mot lo dang o 2,99 MB nhan them mot tam 2 MB la thanh gan
+ * 5 MB, va Vercel tra 413 FUNCTION_PAYLOAD_TOO_LARGE. Da xay ra that
+ * (10/09/2026) khi bang tinh lon ra va keo theo nhung thu muc co anh nang hon.
+ */
 var BYTE_MOI_GOI = 3 * 1024 * 1024;
+/**
+ * Mot tam anh ma rieng no da vuot tran thi khong goi tin nao chua noi. Bo qua
+ * va bao ro ten tep, con hon de no chan ca hang doi mai mai.
+ */
+var BYTE_MOI_ANH = BYTE_MOI_GOI;
 
 /**
  * Bao nhieu thu muc gui mot goi. Doi so nay thi phai doi ca SO_THU_MUC_MOI_LAN
@@ -62,10 +72,13 @@ var BYTE_MOI_GOI = 3 * 1024 * 1024;
 var SO_THU_MUC_MOI_GOI = 200;
 
 /**
- * Ban thumbnail xin cua Drive. 1600px du de web thu nho xuong 1400 (co lon
- * nhat man hinh dung) ma khong bi mem.
+ * Ban thumbnail xin cua Drive. Web chi hien toi 1400px, nen xin dung 1400 —
+ * xin 1600 nhu truoc la moi tam nang them khoang mot phan tu ma khong them mot
+ * diem net nao, va chinh cho do day goi tin vuot tran.
  */
-var RONG_THUMBNAIL = 1600;
+var RONG_THUMBNAIL = 1400;
+/** Co lui khi mot tam o 1400px van qua nang cho mot goi tin. */
+var RONG_THUMBNAIL_NHO = 900;
 
 /**
  * Nhung tang du lieu can lay trong MOT lan goi.
@@ -284,7 +297,7 @@ function dongBoThuMuc() {
  *  - Ban goc nang vai MB toi hon chuc MB. Web chi hien toi 1400px, nen gui ban
  *    goc la ton bang thong ma khong them mot diem net nao.
  */
-function taiAnhBase64_(fileId) {
+function taiAnhBase64_(fileId, rong) {
   var url =
     'https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId) +
     '?supportsAllDrives=true&fields=thumbnailLink';
@@ -299,7 +312,7 @@ function taiAnhBase64_(fileId) {
 
   // thumbnailLink co san hau to kich thuoc (vi du "=s220") — thay bang co minh
   // can. Link nay tai duoc ma khong can gui token.
-  var anh = UrlFetchApp.fetch(link.replace(/=[^=]*$/, '=w' + RONG_THUMBNAIL), {
+  var anh = UrlFetchApp.fetch(link.replace(/=[^=]*$/, '=w' + (rong || RONG_THUMBNAIL)), {
     muteHttpExceptions: true,
   });
   if (anh.getResponseCode() !== 200) return null;
@@ -328,16 +341,40 @@ function dongBoAnh() {
     var id = hoi.thieu[i];
     var b64 = null;
     try {
-      b64 = taiAnhBase64_(id);
+      b64 = taiAnhBase64_(id, RONG_THUMBNAIL);
+      // Rieng mot tam ma da vuot tran goi tin thi khong lo nao chua noi. Thu
+      // lai o co nho hon thay vi bo han: bo han la lan sau /thieu-anh van tra
+      // no ve, va no chiem mot cho trong moi luot chay, mai mai.
+      if (b64 && b64.length > BYTE_MOI_ANH) {
+        Logger.log('  ' + id + ' nang ' + Math.round(b64.length / 1024) +
+                   ' KB, thu lai o ' + RONG_THUMBNAIL_NHO + 'px.');
+        b64 = taiAnhBase64_(id, RONG_THUMBNAIL_NHO);
+      }
     } catch (e) {
       Logger.log('Loi tai anh ' + id + ': ' + e);
     }
     if (!b64) { hong++; continue; }
 
+    if (b64.length > BYTE_MOI_ANH) {
+      hong++;
+      Logger.log('Bo qua ' + id + ': van ' + Math.round(b64.length / 1024) +
+                 ' KB sau khi thu nho, khong goi tin nao chua noi.');
+      continue;
+    }
+
+    // Gui lo dang co TRUOC khi them tam nay, neu them vao la vuot tran.
+    if (lo.length > 0 && byteLo + b64.length > BYTE_MOI_GOI) {
+      var truoc = goiWeb_(c, '/api/dong-bo/anh', { anh: lo });
+      xong += truoc.xong;
+      hong += truoc.hong.length;
+      lo = [];
+      byteLo = 0;
+    }
+
     lo.push({ fileId: id, duLieu: b64 });
     byteLo += b64.length;
 
-    if (lo.length >= SO_ANH_MOI_LAN || byteLo >= BYTE_MOI_GOI) {
+    if (lo.length >= SO_ANH_MOI_LAN) {
       var kq = goiWeb_(c, '/api/dong-bo/anh', { anh: lo });
       xong += kq.xong;
       hong += kq.hong.length;

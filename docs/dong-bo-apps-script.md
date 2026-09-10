@@ -233,6 +233,17 @@ trong `trang-thai.json` và bỏ qua việc ghi đè tệp 110 KB y hệt bản 
 thời gian vẫn cập nhật** — người dùng đọc dòng đó để biết đồng bộ *còn sống*, và một
 mốc đứng im vì "không có gì mới" trông y hệt một mốc đứng im vì script hỏng.
 
-**Mỗi gói tin tối đa 6 ảnh.** Vercel chặn thân yêu cầu ở 4,5 MB và base64 làm
-phình ảnh thêm một phần ba. Đổi con số này thì phải đổi ở **cả hai nơi**:
-`SO_ANH_MOI_LAN` trong `DongBo.gs` và trong `src/app/api/dong-bo/anh/route.ts`.
+**Mỗi gói tin tối đa 6 ảnh và 3 MB.** Vercel chặn thân yêu cầu ở 4,5 MB và
+base64 làm phình ảnh thêm một phần ba. Đổi con số này thì phải đổi ở **cả hai
+nơi**: `SO_ANH_MOI_LAN` trong `DongBo.gs` và trong
+`src/app/api/dong-bo/anh/route.ts`.
+
+**Kiểm kích thước TRƯỚC khi thêm ảnh vào lô, không phải sau.** Bản cũ cộng dồn
+rồi mới kiểm, nên một lô đang ở 2,99 MB nhận thêm một tấm 2 MB là thành gần 5 MB
+— Vercel trả `413 FUNCTION_PAYLOAD_TOO_LARGE`. Lỗi này chỉ lộ ra khi bảng tính
+lớn và kéo theo những thư mục có ảnh nặng hơn (10/09/2026).
+
+**Xin thumbnail đúng 1400px**, bằng cỡ lớn nhất web hiển thị. Xin 1600 như trước
+là mỗi tấm nặng thêm khoảng một phần tư mà không thêm một điểm nét nào. Tấm nào
+ở 1400px vẫn quá nặng thì thử lại ở 900px — **không bỏ hẳn**: bỏ hẳn thì lần sau
+`/thieu-anh` vẫn trả nó về, và nó chiếm một chỗ trong mọi lượt chạy, mãi mãi.
