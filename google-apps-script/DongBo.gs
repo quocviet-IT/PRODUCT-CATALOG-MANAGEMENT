@@ -47,6 +47,19 @@
 var NGAN_SACH_MS = 4.5 * 60 * 1000;
 
 /**
+ * Ngan sach RIENG cho buoc nap anh, ngan hon phan con lai. CO LY DO.
+ *
+ * Buoc nay chay moi 5 phut (xem datLichChay). Neu van dung 4,5 phut nhu cu thi
+ * mot luot cong voi do tre khoi dong se lan sang luot ke tiep, va hai luot chay
+ * chong nhau se cung hoi mot danh sach anh thieu roi tai VE CUNG NHUNG ANH DO —
+ * dot hai lan han muc de duoc dung mot lan viec.
+ *
+ * 4 phut de lai mot phut cach ly, du cho mot luot ket thuc truoc khi luot sau
+ * bat dau.
+ */
+var NGAN_SACH_ANH_MS = 4 * 60 * 1000;
+
+/**
  * Bao nhieu anh mot goi tin. Vercel chan than yeu cau o 4,5 MB va base64 lam
  * phinh anh them mot phan ba. Doi so nay thi phai doi ca trong
  * src/app/api/dong-bo/anh/route.ts.
@@ -375,7 +388,7 @@ function taiAnhBase64_(fileId, rong) {
 
 function dongBoAnh() {
   var c = cauHinh_();
-  var het = Date.now() + NGAN_SACH_MS;
+  var het = Date.now() + NGAN_SACH_ANH_MS;
 
   var hoi = goiWeb_(c, '/api/dong-bo/thieu-anh', {});
   Logger.log(
@@ -464,10 +477,20 @@ function datLichChay() {
   ScriptApp.newTrigger('dongBoBang').timeBased().everyMinutes(1).create();
   // Liet ke thu muc anh, chay dan. Cung nhip voi phan nap anh.
   ScriptApp.newTrigger('dongBoThuMuc').timeBased().everyMinutes(10).create();
-  // Anh thi con phai bu dan cho het lan dau, nen chay day hon.
-  ScriptApp.newTrigger('dongBoAnh').timeBased().everyMinutes(10).create();
+  /**
+   * Anh: MOI 5 PHUT, gap doi phan con lai.
+   *
+   * Con khoang 30.000 anh phai nap lan dau. O nhip 10 phut, do that duoc 957
+   * anh moi gio — het khoang 32 gio. Nhip 5 phut rut xuong con khoang 16 gio.
+   *
+   * Han muc UrlFetch cua tai khoan Workspace la 100.000 luot mot ngay. O nhip
+   * nay: bang tinh 1.440, thu muc ~900, anh 288 luot chay x ~167 loi goi
+   * (1 hoi danh sach + ~142 anh + ~24 lan day) = ~48.000. Tong ~50.000 — nua
+   * han muc, con cho cho nhung viec khac trong ngay.
+   */
+  ScriptApp.newTrigger('dongBoAnh').timeBased().everyMinutes(5).create();
 
-  Logger.log('Da dat lich: bang tinh moi phut, thu muc va anh moi 10 phut.');
+  Logger.log('Da dat lich: bang tinh moi phut, thu muc moi 10 phut, anh moi 5 phut.');
 }
 
 /** Go het lich, dung dong bo hoan toan. */
