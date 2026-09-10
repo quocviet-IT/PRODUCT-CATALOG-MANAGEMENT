@@ -72,6 +72,25 @@ var BYTE_MOI_ANH = BYTE_MOI_GOI;
 var SO_THU_MUC_MOI_GOI = 200;
 
 /**
+ * May chu tu choi mot thu muc mang qua 500 anh, va tu choi CA LO.
+ *
+ * Cat o day chu khong de may chu tu choi: mot lo bi tu choi la ca luot chay
+ * chet, va luot sau lai hoi dung nhung thu muc do — ket vinh vien. Thu muc lon
+ * nhat hien nay moi 166 anh, nhung cai chan nay phai co truoc khi co cai thu
+ * 501, chu khong phai sau.
+ */
+var SO_ANH_MOI_THU_MUC = 500;
+
+/**
+ * Tran than yeu cau cua Vercel la 4,5 MB. Giu duoi 3 MB cho chac.
+ *
+ * Lo 200 thu muc lon nhat hien nay chi 0,45 MB, nhung so thu muc moi lo la mot
+ * con so DEM chu khong phai con so BYTE — gap mot cum thu muc nhieu anh la
+ * vuot, va 413 thi ca lo mat trang. Da dinh dung lo nay o duong anh hom truoc.
+ */
+var BYTE_MOI_GOI_THU_MUC = 3 * 1024 * 1024;
+
+/**
  * Ban thumbnail xin cua Drive. Web chi hien toi 1400px, nen xin dung 1400 —
  * xin 1600 nhu truoc la moi tam nang them khoang mot phan tu ma khong them mot
  * diem net nao, va chinh cho do day goi tin vuot tran.
@@ -195,6 +214,12 @@ function lietKeAnh_(idThuMuc) {
     var f = it.next();
     if (String(f.getMimeType()).indexOf('image/') === 0) {
       ds.push({ fileId: f.getId(), ten: f.getName() });
+      // Dung han o nguong may chu chap nhan. Doc them roi de may chu tu choi
+      // ca lo thi vua ton thoi gian vua lam ket hang doi.
+      if (ds.length >= SO_ANH_MOI_THU_MUC) {
+        Logger.log('  thu muc ' + idThuMuc + ' co hon ' + SO_ANH_MOI_THU_MUC + ' anh, cat bot.');
+        break;
+      }
     }
   }
   return ds;
@@ -246,6 +271,7 @@ function dongBoThuMuc() {
 
   var lo = {};
   var soTrongLo = 0;
+  var byteLo = 0;
   var xong = 0;
   var hong = 0;
 
@@ -256,6 +282,7 @@ function dongBoThuMuc() {
     Logger.log('  da gui ' + soTrongLo + ' thu muc; ban do co ' + kq.tong + ' cai.');
     lo = {};
     soTrongLo = 0;
+    byteLo = 0;
   }
 
   for (var i = 0; i < hoi.thieu.length; i++) {
@@ -273,6 +300,16 @@ function dongBoThuMuc() {
       hong++;
       Logger.log('  khong liet ke duoc ' + id + ': ' + e);
     }
+    // Do TRUOC khi them, giong duong anh: do sau khi them thi lo da qua tran
+    // roi moi phat hien, va lan gui do nhan 413.
+    var themByte = JSON.stringify(lo[id]).length + id.length + 8;
+    if (soTrongLo > 0 && byteLo + themByte > BYTE_MOI_GOI_THU_MUC) {
+      var giu = lo[id];
+      delete lo[id];
+      guiLo_();
+      lo[id] = giu;
+    }
+    byteLo += themByte;
     soTrongLo++;
     if (soTrongLo >= SO_THU_MUC_MOI_GOI) guiLo_();
   }

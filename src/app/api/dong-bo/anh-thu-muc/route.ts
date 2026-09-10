@@ -1,7 +1,6 @@
 import { z } from "zod";
 import {
   LoiChuaBatDongBo,
-  docAnhThuMuc,
   docTrangThai,
   ghiTrangThai,
   gopAnhThuMuc,
@@ -56,12 +55,10 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ loi: "than_khong_hop_le" }, { status: 400, headers: KHONG_LUU_DEM });
   }
 
-  const { tong, themMoi } = await gopAnhThuMuc(than.anhThuMuc);
-
-  // Dem lai tren BAN DO DA GOP, khong cong don so cua rieng lo nay: cong don
-  // thi chay lai mot lo se dem hai lan, va dong chu trang thai bao sai.
-  const banDo = await docAnhThuMuc();
-  const soAnh = Object.values(banDo).reduce((t, x) => t + x.length, 0);
+  // So dem lay THANG tu buoc gop — no da cam ban do trong tay. Khong cong don
+  // so cua rieng lo nay: cong don thi chay lai mot lo se dem hai lan, va dong
+  // chu trang thai bao sai.
+  const { tong, themMoi, soAnh } = await gopAnhThuMuc(than.anhThuMuc);
   const truoc = await docTrangThai();
   if (truoc) {
     await ghiTrangThai({ ...truoc, luc: new Date().toISOString(), soThuMuc: tong, soAnh });

@@ -125,11 +125,20 @@ export async function docAnhThuMuc(): Promise<Record<string, unknown[]>> {
  */
 export async function gopAnhThuMuc(
   them: Record<string, unknown[]>,
-): Promise<{ tong: number; themMoi: number }> {
+): Promise<{ tong: number; themMoi: number; soAnh: number }> {
   const cu = await docAnhThuMuc();
   let themMoi = 0;
   for (const k of Object.keys(them)) if (!(k in cu)) themMoi++;
   const moi = { ...cu, ...them };
   await ghiAnhThuMuc(moi);
-  return { tong: Object.keys(moi).length, themMoi };
+
+  // Dem NGAY TAI DAY tren ban do vua gop. Truoc day tuyen goi ham nay xong lai
+  // tai VE nguyen tep mot lan nua chi de dem — ba luot cham kho thay vi hai,
+  // tren mot tep chi to dan theo so thu muc (0,12 MB hoi 65 thu muc, 0,85 MB o
+  // 534). Apps Script cat mot loi goi UrlFetch o khoang mot phut, nen moi giay
+  // thua o day deu di ve phia lam luot dong bo chet.
+  let soAnh = 0;
+  for (const ds of Object.values(moi)) soAnh += ds.length;
+
+  return { tong: Object.keys(moi).length, themMoi, soAnh };
 }
