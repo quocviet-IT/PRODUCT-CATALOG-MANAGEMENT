@@ -1,6 +1,7 @@
 import { z } from "zod";
 import {
   LoiChuaBatDongBo,
+  SO_ANH_MOI_THU_MUC,
   docTrangThai,
   ghiTrangThai,
   gopAnhThuMuc,
@@ -22,7 +23,6 @@ const KHONG_LUU_DEM = { "Cache-Control": "private, no-store" };
 
 /** Giữ gói tin dưới trần 4,5 MB của Vercel. */
 const SO_THU_MUC_MOI_LAN = 400;
-const SO_ANH_MOI_THU_MUC = 500;
 
 const Than = z.object({
   anhThuMuc: z

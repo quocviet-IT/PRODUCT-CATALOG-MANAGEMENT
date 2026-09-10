@@ -48,6 +48,19 @@ export function kiemKhoa(req: Request): boolean {
   return timingSafeEqual(a, b);
 }
 
+/**
+ * So anh toi da luu cho MOT thu muc Drive.
+ *
+ * Day la tran tren cua "mot mau co bao nhieu anh" trong ca he thong: dong bo
+ * khong bao gio ghi qua ngan nay, nen khong tuyen nao o phia sau duoc phep tu
+ * choi mot con so nho hon. /api/catalogue tung dat rieng tran 40 voi ghi chu
+ * "thu vien lon nhat hien co la 8" — dung o thoi bang tinh con nho, nhung sau
+ * khi dong bo quet het 1.462 thu muc Drive thi thu muc lon nhat co 166 anh va
+ * 112 thu muc vuot 40. Ket qua: 7,7% mau khong tao duoc link, loi 400, va
+ * khong ai biet vi sao. Mot con so, mot cho.
+ */
+export const SO_ANH_MOI_THU_MUC = 500;
+
 export type TrangThaiDongBo = {
   luc: string;
   soDong: number;
