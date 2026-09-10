@@ -98,6 +98,8 @@ export const vi = {
     dat_mat_khau: "Đặt mật khẩu",
     huy: "Huỷ",
     doi_vai_tro: "Đổi vai trò",
+    len_admin: "Nâng lên quản trị",
+    xuong_sale: "Hạ xuống sale",
 
     // Them tai khoan
     them_tieu_de: "Cấp tài khoản mới",
