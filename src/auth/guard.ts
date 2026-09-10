@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
@@ -35,7 +36,25 @@ export function kiemTraQuyen(user: NguoiDung | null, canAdmin: boolean): KetQuaQ
   return { cho_phep: true, user };
 }
 
-export async function getSessionUser(): Promise<NguoiDung | null> {
+/**
+ * Ho so nguoi dang dang nhap. MOT lan cho MOI yeu cau — `cache` cua React ghi
+ * nho ket qua trong pham vi mot yeu cau.
+ *
+ * Vi sao phai boc: Next dung khung (layout) va trang SONG SONG, ma ca hai deu
+ * goi cua gac — layout goi requireUser(), trang goi requireAdmin(). Khong boc
+ * thi moi lan mo mot trang quan tri la HAI cau truy vấn y het nhau chay cung
+ * luc tren CUNG MOT ket noi (db/client.ts giu max: 1).
+ *
+ * Ngay 10/09/2026 chinh cho nay da lam sap khu quan tri tren ban chay that:
+ * tren production con lai nhung phien Postgres ket cung o trang thai
+ * `active / Client:ClientRead`, chay dung cau truy van nay, ket chin phut khong
+ * tu thoat. Moi phien ket la mot ban ham nhiem doc, va MOI yeu cau roi vao ban
+ * do deu treo — ke ca trang cong khai khong lien quan. Chay rieng le thi cau
+ * nay luon duoi 550ms; chi vo khi don cung luc tren mot ket noi.
+ *
+ * Bot mot truy van moi yeu cau la bot mot nua co hoi don cung luc.
+ */
+export const getSessionUser = cache(async (): Promise<NguoiDung | null> => {
   const supabase = await taoSupabaseServer();
   const { data } = await supabase.auth.getUser();
   if (!data.user) return null;
@@ -57,7 +76,7 @@ export async function getSessionUser(): Promise<NguoiDung | null> {
     .limit(1);
   if (!ho_so) return null;
   return ho_so;
-}
+});
 
 async function chot(canAdmin: boolean): Promise<NguoiDung> {
   const kq = kiemTraQuyen(await getSessionUser(), canAdmin);

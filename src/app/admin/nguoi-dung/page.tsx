@@ -21,12 +21,21 @@ export async function generateMetadata() {
 export default async function TrangNguoiDung() {
   const t = await layChu();
   const toi = await requireAdmin();
-  // Ba truy van doc lap — chay song song, khong xep hang sau nhau.
-  const [ds, vaiTros, dem] = await Promise.all([
-    danhSachNguoiDung(),
-    danhSachVaiTro(),
-    demTheoVaiTro(),
-  ]);
+  // TUAN TU, co chu y — dung doi lai thanh Promise.all.
+  //
+  // Ba truy van nay doc lap nen chay song song la "dung" ve ly thuyet, nhung
+  // db/client.ts giu max: 1, ma postgres.js gop nhieu truy van len CUNG mot
+  // ket noi khi chung chay cung luc. Ngay 10/09/2026 chinh Promise.all o day
+  // (cong voi cua gac chay hai lan) da de lai nhung phien Postgres ket cung o
+  // `active / Client:ClientRead` tren ban chay that, moi phien ket lam treo
+  // toan bo mot ban ham — ke ca trang cong khai khong lien quan. Xem chu thich
+  // trong auth/guard.ts.
+  //
+  // Cai gia phai tra la vai tram mili giay moi lan mo trang. Re hon nhieu so
+  // voi mot khu quan tri treo.
+  const ds = await danhSachNguoiDung();
+  const vaiTros = await danhSachVaiTro();
+  const dem = await demTheoVaiTro();
 
   return (
     <>
