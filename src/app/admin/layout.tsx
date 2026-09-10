@@ -38,7 +38,7 @@ export default async function KhungQuanTri({ children }: { children: React.React
             gac — trang do va moi server action cua no deu tu goi requireAdmin();
             giau nut di chi de sale khong bam vao mot cho ho chac chan bi tu
             choi. */}
-        {user.mucQuyen === "admin" && (
+        {user.role === "admin" && (
           <Link href="/admin/nguoi-dung" className={MUC}>
             <Users {...ICON} />
             {t.nguoi_dung.nut_menu}

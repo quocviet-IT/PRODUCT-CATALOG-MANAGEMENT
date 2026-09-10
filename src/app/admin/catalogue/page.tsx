@@ -90,7 +90,7 @@ export default async function TrangDanhSachCatalogue({
   const t = await layChu();
   const nn = await layNgonNgu();
   const sp = await searchParams;
-  const laAdmin = user.mucQuyen === "admin";
+  const laAdmin = user.role === "admin";
   const tatCa = await danhSachCatalogue(user.id, laAdmin);
   const daLoc = locDanhSachDaTao(tatCa, sp.q?.trim() || null);
   const { ds, trang, soTrang, tu, den } = catTrang(daLoc, docTrang(sp));

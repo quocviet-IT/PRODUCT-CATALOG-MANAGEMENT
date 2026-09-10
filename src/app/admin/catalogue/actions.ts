@@ -21,7 +21,7 @@ export async function doiKhoa(_truoc: string | null, form: FormData): Promise<st
   const khoa = String(form.get("khoa") ?? "") === "1";
 
   try {
-    const xong = await datKhoa(slug, khoa, user.id, user.mucQuyen === "admin");
+    const xong = await datKhoa(slug, khoa, user.id, user.role === "admin");
     if (!xong) return "loi_khoa";
   } catch (loi) {
     console.error("[catalogue] loi doi trang thai khoa:", loi);

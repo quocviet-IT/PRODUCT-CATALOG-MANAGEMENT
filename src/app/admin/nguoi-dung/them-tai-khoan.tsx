@@ -2,11 +2,9 @@
 
 import { useActionState, useState } from "react";
 import { themTaiKhoan } from "./actions";
-import { ChonVaiTro } from "./chon-vai-tro";
 import { UserPlus } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
 import type { BoChu } from "@/messages";
-import { MA_SALE, type VaiTro } from "@/modules/nguoi-dung/nguoi-dung.model";
 
 const NHAN = "block text-[11px] uppercase tracking-[0.14em] text-hp-muted";
 const O_NHAP =
@@ -25,7 +23,7 @@ function loiThanhChu(t: BoChu): Record<string, string> {
   };
 }
 
-export function ThemTaiKhoan({ vaiTros }: { vaiTros: readonly VaiTro[] }) {
+export function ThemTaiKhoan() {
   const t = useChu();
   const [mo, setMo] = useState(false);
   const [loi, guiForm, dangChay] = useActionState(themTaiKhoan, null);
@@ -97,12 +95,10 @@ export function ThemTaiKhoan({ vaiTros }: { vaiTros: readonly VaiTro[] }) {
         </div>
         <div>
           <label className={NHAN} htmlFor="vai_tro">{t.nguoi_dung.o_vai_tro}</label>
-          <ChonVaiTro
-            id="vai_tro"
-            vaiTros={vaiTros}
-            macDinh={MA_SALE}
-            lop={`${O_NHAP} cursor-pointer`}
-          />
+          <select id="vai_tro" name="vai_tro" defaultValue="sale" className={`${O_NHAP} cursor-pointer`}>
+            <option value="sale">{t.nguoi_dung.vai_tro_sale}</option>
+            <option value="admin">{t.nguoi_dung.vai_tro_admin}</option>
+          </select>
         </div>
 
         <div className="flex items-center gap-5 sm:col-span-2">

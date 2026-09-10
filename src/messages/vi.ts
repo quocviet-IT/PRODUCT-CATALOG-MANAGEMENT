@@ -41,33 +41,6 @@ export const vi = {
     loi_google: "Đăng nhập bằng Google không thành công. Thử lại giúp em.",
     sai_ten_mien: "Email này không thuộc công ty nên chưa vào được. Dùng Gmail công ty (@ctyhp.vn, @ctyhp.com…) hoặc liên hệ quản trị viên.",
   },
-  vai_tro: {
-    tieu_de: "Vai trò",
-    mo_ta: "Thêm vai trò cho hợp với công ty — GSNB, R&D, thực tập sinh. Tên là do anh đặt, nhưng quyền thì hệ thống chỉ cưỡng chế được hai bậc: quản trị và không phải quản trị. Cột Quyền nói rõ người mang vai trò đó làm được gì.",
-
-    cot_ten: "Tên vai trò",
-    cot_ten_en: "Tên tiếng Anh",
-    cot_quyen: "Quyền",
-    cot_so_nguoi: "Đang giữ",
-
-    quyen_admin: "Quản trị — vào được mọi màn hình",
-    quyen_sale: "Thường — tạo catalogue, không vào được quản trị",
-
-    them_tieu_de: "Thêm vai trò",
-    nut_them: "Thêm vai trò",
-    luu: "Lưu",
-    xoa: "Xoá",
-    vi_du_ten: "Ví dụ: Giám sát nội bộ",
-    trong_thi_dung_tieng_viet: "Bỏ trống thì dùng tên tiếng Việt",
-
-    thieu_ten: "Chưa nhập tên vai trò.",
-    ten_qua_dai: "Tên vai trò không quá 40 ký tự.",
-    ma_khong_hop_le: "Tên này không tạo được mã. Dùng chữ và số.",
-    da_ton_tai: "Đã có vai trò trùng tên này rồi.",
-    he_thong_khong_sua: "Vai trò gốc của hệ thống không đổi quyền hay xoá được.",
-    dang_co_nguoi_giu: "Còn tài khoản đang giữ vai trò này. Chuyển họ sang vai trò khác trước.",
-  },
-
   nguoi_dung: {
     tieu_de: "Tài khoản",
     mo_ta: "Cấp tài khoản cho nhân viên, khoá tài khoản đã nghỉ, đặt lại mật khẩu.",
@@ -97,7 +70,6 @@ export const vi = {
     mo_khoa: "Mở khoá",
     dat_mat_khau: "Đặt mật khẩu",
     huy: "Huỷ",
-    doi_vai_tro: "Đổi vai trò",
     len_admin: "Nâng lên quản trị",
     xuong_sale: "Hạ xuống sale",
 
