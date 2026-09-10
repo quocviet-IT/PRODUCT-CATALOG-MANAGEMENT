@@ -1,6 +1,8 @@
 import { requireAdmin } from "@/auth/guard";
 import { danhSachNguoiDung } from "@/modules/nguoi-dung/nguoi-dung.service";
+import { danhSachVaiTro, demTheoVaiTro } from "@/modules/nguoi-dung/vai-tro.service";
 import { BangTaiKhoan } from "./bang-tai-khoan";
+import { QuanLyVaiTro } from "./quan-ly-vai-tro";
 import { ThemTaiKhoan } from "./them-tai-khoan";
 import { layChu } from "@/messages/may-chu";
 
@@ -19,7 +21,12 @@ export async function generateMetadata() {
 export default async function TrangNguoiDung() {
   const t = await layChu();
   const toi = await requireAdmin();
-  const ds = await danhSachNguoiDung();
+  // Ba truy van doc lap — chay song song, khong xep hang sau nhau.
+  const [ds, vaiTros, dem] = await Promise.all([
+    danhSachNguoiDung(),
+    danhSachVaiTro(),
+    demTheoVaiTro(),
+  ]);
 
   return (
     <>
@@ -31,8 +38,10 @@ export default async function TrangNguoiDung() {
         <div className="mt-5 h-px bg-hp-rule" />
       </div>
 
-      <ThemTaiKhoan />
-      <BangTaiKhoan ds={ds} idCuaToi={toi.id} />
+      <QuanLyVaiTro vaiTros={vaiTros} dem={dem} />
+
+      <ThemTaiKhoan vaiTros={vaiTros} />
+      <BangTaiKhoan ds={ds} idCuaToi={toi.id} vaiTros={vaiTros} />
     </>
   );
 }
