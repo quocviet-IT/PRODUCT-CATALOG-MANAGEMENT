@@ -101,8 +101,6 @@ export const en: BoChu = {
     dat_mat_khau: "Set password",
     huy: "Cancel",
     doi_vai_tro: "Change role",
-    len_admin: "Make administrator",
-    xuong_sale: "Demote to sales",
 
     them_tieu_de: "Create an account",
     them_mo_ta: "This person will sign in with the email and password you set here. Send them the password through a private channel.",
