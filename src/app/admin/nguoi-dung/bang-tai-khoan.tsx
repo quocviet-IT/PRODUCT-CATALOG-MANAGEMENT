@@ -1,15 +1,10 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import {
-  tenVaiTro,
-  type CachDangNhap,
-  type VaiTro,
-} from "@/modules/nguoi-dung/nguoi-dung.model";
+import type { CachDangNhap } from "@/modules/nguoi-dung/nguoi-dung.model";
 import type { NguoiDungHang } from "@/modules/nguoi-dung/nguoi-dung.service";
 import { datLaiMatKhau, doiTrangThai, doiVaiTro } from "./actions";
-import { ChonVaiTro } from "./chon-vai-tro";
-import { KeyRound, Lock, LockOpen, Shield, type LucideIcon } from "lucide-react";
+import { KeyRound, Lock, LockOpen, ShieldCheck, ShieldOff, type LucideIcon } from "lucide-react";
 import { useChu, useNgonNgu } from "@/messages/dung-chu";
 import type { BoChu } from "@/messages";
 import { MA_HTML, type NgonNgu } from "@/messages/ngon-ngu";
@@ -40,7 +35,6 @@ function loiThanhChu(t: BoChu): Record<string, string> {
     mat_khau_qua_dai: t.nguoi_dung.mat_khau_qua_dai,
     tu_khoa_chinh_minh: t.nguoi_dung.tu_khoa_chinh_minh,
     tu_ha_quyen_chinh_minh: t.nguoi_dung.tu_ha_quyen_chinh_minh,
-    vai_tro_he_thong: t.vai_tro.he_thong_khong_sua,
     loi_he_thong: t.nguoi_dung.loi_he_thong,
   };
 }
@@ -86,49 +80,6 @@ function NutHanhDong({
         {nhan}
       </NutGui>
       {loi && <span className="ml-2 text-xs text-hp-pink-strong">{loiThanhChu(t)[loi] ?? loi}</span>}
-    </form>
-  );
-}
-
-/**
- * Doi vai tro cua mot tai khoan.
- *
- * Truoc day day la mot nut bat-tat giua admin va sale. Gio vai tro la du lieu
- * nen phai la mot o CHON — mot nut khong the dua ra sau lua chon.
- *
- * Nut Luu chi bat khi gia tri da khac: mot nut luon bam duoc trong khi khong
- * co gi de luu khien nguoi dung bam thu de xem co gi doi khong.
- */
-function DoiVaiTro({ u, vaiTros }: { u: NguoiDungHang; vaiTros: readonly VaiTro[] }) {
-  const t = useChu();
-  const [chon, setChon] = useState(u.vaiTro);
-  const [loi, gui, dangChay] = useActionState(doiVaiTro, null);
-
-  return (
-    <form action={gui} className="flex flex-wrap items-center gap-2">
-      <input type="hidden" name="id" value={u.id} />
-      <ChonVaiTro
-        vaiTros={vaiTros}
-        giaTri={chon}
-        onChange={setChon}
-        nhanAria={`${t.nguoi_dung.cot_vai_tro} — ${u.email}`}
-        lop="cursor-pointer border-0 border-b border-hp-rule bg-transparent px-0.5 py-1
-             text-sm text-hp-body transition-colors duration-150 focus:border-b-2
-             focus:border-hp-pink focus:pb-[3px] focus:outline-none"
-      />
-      <NutGui
-        dangChay={dangChay}
-        tat={chon === u.vaiTro}
-        lop={NUT}
-        nhanCho={<>
-          <Shield aria-hidden strokeWidth={1.5} className={LOP_ICON} />
-          {t.nguoi_dung.dang_chay}
-        </>}
-      >
-        <Shield aria-hidden strokeWidth={1.5} className={LOP_ICON} />
-        {t.nguoi_dung.doi_vai_tro}
-      </NutGui>
-      {loi && <span className="text-xs text-hp-pink-strong">{loiThanhChu(t)[loi] ?? loi}</span>}
     </form>
   );
 }
@@ -182,23 +133,10 @@ function DatMatKhau({ id, tenHien }: { id: string; tenHien: string }) {
   );
 }
 
-export function BangTaiKhoan({
-  ds,
-  idCuaToi,
-  vaiTros,
-}: {
-  ds: NguoiDungHang[];
-  idCuaToi: string;
-  vaiTros: readonly VaiTro[];
-}) {
+export function BangTaiKhoan({ ds, idCuaToi }: { ds: NguoiDungHang[]; idCuaToi: string }) {
   const t = useChu();
   const nn = useNgonNgu();
   const cach = nhanCach(t);
-  /** Ma vai tro -> ten hien. Ma la la thi hien nguyen ma, hon la hien trong khong. */
-  const ten = (ma: string) => {
-    const v = vaiTros.find((x) => x.ma === ma);
-    return v ? tenVaiTro(v, nn === "en") : ma;
-  };
   return (
     <div className="overflow-x-auto border border-hp-rule">
       <table className="w-full border-collapse">
@@ -223,7 +161,9 @@ export function BangTaiKhoan({
                   {laToi && <span className="ml-2 text-xs text-hp-muted">{t.nguoi_dung.la_ban}</span>}
                 </td>
                 <td className={O}>{u.hoTen}</td>
-                <td className={`${O} whitespace-nowrap`}>{ten(u.vaiTro)}</td>
+                <td className={`${O} whitespace-nowrap`}>
+                  {u.vaiTro === "admin" ? t.nguoi_dung.vai_tro_admin : t.nguoi_dung.vai_tro_sale}
+                </td>
                 <td className={`${O} whitespace-nowrap`}>
                   {u.cachDangNhap ? cach[u.cachDangNhap] : t.nguoi_dung.vao_khac}
                 </td>
@@ -248,7 +188,13 @@ export function BangTaiKhoan({
                       // moi nguoi bam vao mot viec chac chan that bai.
                       tat={laToi && u.dangHoatDong}
                     />
-                    <DoiVaiTro u={u} vaiTros={vaiTros} />
+                    <NutHanhDong
+                      hanhDong={doiVaiTro}
+                      truong={{ id: u.id, vai_tro: u.vaiTro === "admin" ? "sale" : "admin" }}
+                      nhan={u.vaiTro === "admin" ? t.nguoi_dung.xuong_sale : t.nguoi_dung.len_admin}
+                      Icon={u.vaiTro === "admin" ? ShieldOff : ShieldCheck}
+                      tat={laToi && u.vaiTro === "admin"}
+                    />
                   </div>
                 </td>
               </tr>

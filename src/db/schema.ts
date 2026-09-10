@@ -4,60 +4,16 @@ import {
   jsonb, numeric, pgEnum, uniqueIndex, index,
 } from "drizzle-orm/pg-core";
 
-/**
- * MUC QUYEN — cai he thong thuc su cuong che. Chi hai bac, va co ly do:
- * moi cua gac trong ma nguon deu hoi mot cau nhi phan "co phai admin khong".
- * Them mot bac thu ba o day ma khong sua cac cua gac la tao ra mot bac quyen
- * khong ai kiem tra.
- */
-export const mucQuyen = pgEnum("muc_quyen", ["admin", "sale"]);
+export const vaiTro = pgEnum("vai_tro", ["admin", "sale"]);
 export const trangThaiSanPham = pgEnum("trang_thai_san_pham", ["active", "discontinued", "draft"]);
 export const nguonDuLieu = pgEnum("nguon_du_lieu", ["upload", "gdrive"]);
-
-/**
- * VAI TRO — cai con nguoi doc. Du lieu, khong phai enum, vi cong ty con them
- * vai tro moi (GSNB, R&D, thuc tap sinh) ma khong ai muon doi phai deploy.
- *
- * Vi sao tach lam hai cot `ma` va `muc_quyen`: mot vai tro moi la mot CAI TEN,
- * con quyen thi van chi co hai bac ma he thong biet cuong che. Bat nguoi tao
- * vai tro chon bac quyen khien viec "them GSNB" tro thanh mot lua chon co y
- * thuc, thay vi am tham roi vao bac thap nhat.
- *
- * `he_thong` danh dau hai vai tro goc: admin va sale khong xoa duoc va khong
- * doi duoc muc quyen. Xoa `admin` la khong con ai vao duoc man hinh quan tri;
- * ha muc quyen cua no cung vay.
- */
-export const vaiTro = pgTable("vai_tro", {
-  /** Ma khong dau, chu thuong — thu nam trong cot users.role. */
-  ma: text("ma").primaryKey(),
-  ten: text("ten").notNull(),
-  /**
-   * Ten tieng Anh. Ten vai tro gio la DU LIEU nen khong nam trong tep messages
-   * duoc nua; muon man hinh tieng Anh khong ro ri tieng Viet thi ban dich phai
-   * di theo hang.
-   */
-  tenEn: text("ten_en").notNull(),
-  mucQuyen: mucQuyen("muc_quyen").notNull().default("sale"),
-  heThong: boolean("he_thong").notNull().default(false),
-  thuTu: integer("thu_tu").notNull().default(0),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (t) => [index("vai_tro_thu_tu_idx").on(t.thuTu, t.ma)]);
 
 /** Khoa chinh trung voi auth.users.id cua Supabase. */
 export const users = pgTable("users", {
   id: uuid("id").primaryKey(),
   email: text("email").notNull(),
   fullName: text("full_name").notNull(),
-  /**
-   * Tro toi vai_tro.ma. RESTRICT chu khong phai SET NULL hay CASCADE: xoa mot
-   * vai tro dang co nguoi giu phai BAO LOI cho admin chuyen ho sang vai tro
-   * khac truoc, chu khong duoc lang le bo trong quyen cua ho — mot hang co
-   * role NULL la mot nguoi khong ai biet duoc phep lam gi.
-   */
-  role: text("role")
-    .notNull()
-    .default("sale")
-    .references(() => vaiTro.ma, { onDelete: "restrict", onUpdate: "cascade" }),
+  role: vaiTro("role").notNull().default("sale"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [uniqueIndex("users_email_idx").on(t.email)]);
