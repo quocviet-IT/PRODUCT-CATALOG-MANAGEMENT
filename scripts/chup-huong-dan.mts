@@ -173,6 +173,26 @@ async function chup(
   console.log(`  ${ten}.png  ${(anh.byteLength / 1024).toFixed(0)} KB  ${diem.length} điểm`);
 }
 
+/**
+ * Thay du lieu THAT bang du lieu minh hoa NGAY TREN MAN HINH, truoc khi chup.
+ *
+ * Anh huong dan nam trong public/ — bat ky ai biet duong dan deu tai duoc — va
+ * kho ma nguon thi cong khai. Hai thu tuyet doi khong duoc lot ra:
+ *
+ *   1. Email nhan vien. Mot anh chup bang tai khoan la mot danh ba noi bo.
+ *   2. Duong dan /c/<slug> cua catalogue. Slug co that la mot link DANG SONG
+ *      gui cho khach; no duoc thiet ke de khong doan ra, nen in no len mot anh
+ *      cong khai la mo cua catalogue cua khach cho ca Internet.
+ *
+ * Chi doi CHU TREN MAN HINH, khong dong toi co so du lieu: sua hang that cua
+ * dong nghiep chi de chup mot tam anh la cai gia qua dat. Dieu huong sang trang
+ * khac la moi thu tro lai nhu cu.
+ */
+const EMAIL_MINH_HOA = [
+  "ngoc.anh@ctyhp.vn", "minh.thu@ctyhp.vn", "gia.bao@ctyhp.vn",
+  "thuy.linh@ctyhp.vn", "quang.huy@ctyhp.vn", "kim.ngan@ctyhp.vn",
+];
+
 async function dangNhap(page: Page): Promise<void> {
   await page.goto(`${GOC}/login`, { waitUntil: "networkidle" });
   await page.getByRole("button", { name: /không đăng nhập được/i }).click();
@@ -232,6 +252,14 @@ async function main(): Promise<void> {
     ]);
 
     // --- 3. Tich chon ---
+    // Dong danh sach GOI Y truoc da. O tim kiem con giu tieu diem tu buoc 2 nen
+    // danh sach goi y van mo, va no nam de len hang dau cua bang — Playwright
+    // bao "subtree intercepts pointer events" roi doi het 30 giay. Nguoi that
+    // cung gap dung canh do: bam vao mau dau tien thi trung phai goi y.
+    await page.keyboard.press("Escape");
+    await page.locator("#q").blur();
+    await page.waitForTimeout(300);
+
     const oTich = page.locator('input[type="checkbox"]');
     const soO = Math.min(await oTich.count(), 3);
     for (let i = 0; i < soO; i++) await oTich.nth(i).check();
@@ -262,7 +290,14 @@ async function main(): Promise<void> {
     // Cuon theo CHINH the can chup, khong theo mot con so do dem. scrollBy(0, 1400)
     // dung duoc dung mot lan: them mot mau vao gio hay doi chieu cao mot hang la
     // muc tieu tut xuong duoi day khung nhin, va mui ten ve ra ngoai anh.
-    await the.scrollIntoViewIfNeeded();
+    // scrollIntoViewIfNeeded() KHONG du: the nay cao hon ca khung nhin, nen
+    // Playwright canh no sao cho vua "nhin thay duoc" — va dinh the, noi co
+    // dong dem anh, nam nhinh tren mep tren. Do ra y = -2%, mui ten ve ra ngoai
+    // anh. Tu cuon lay, chua 80px cho dinh the.
+    await the.evaluate((el) => {
+      const y = el.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: y, behavior: "instant" });
+    });
     await page.waitForTimeout(400);
     await chup(page, "05-bo-anh", [
       { o: the.locator("li").first(), huong: "phai" },
@@ -292,12 +327,83 @@ async function main(): Promise<void> {
 
     // --- 7. Danh sach ---
     await page.goto(`${GOC}/admin/catalogue`, { waitUntil: "networkidle" });
+    await page.locator("tbody tr").first().waitFor();
+    await page.locator("table").first().evaluate((bang, email) => {
+      const ten = ["Chị Lan — nhẫn cưới 18K", "Anh Tuấn — bộ cưới", "Chị Mai — nhẫn kim cương",
+                   "Khách Hà Nội — dây chuyền", "Chị Hương — bông tai", "Anh Nam — nhẫn nam",
+                   "Chị Thảo — lắc tay", "Khách quen — vòng cổ"];
+      bang.querySelectorAll("tbody tr").forEach((tr, i) => {
+        const o = tr.querySelectorAll("td");
+        // O dau: dong ten roi dong duong dan. Doi ca hai; duong dan that la
+        // link dang song cua khach.
+        const trong = o[0]?.querySelectorAll("*");
+        if (trong && trong.length >= 2) {
+          trong[0].textContent = ten[i % ten.length];
+          trong[1].textContent = "/vi-du-" + String(i + 1).padStart(2, "0") + "-abcd1234";
+        }
+        // Cot "Nguoi tao" — email that cua dong nghiep.
+        if (o[4]) o[4].textContent = email[i % email.length];
+      });
+    }, EMAIL_MINH_HOA);
+    await page.waitForTimeout(200);
+
     const dongDau = page.locator("tbody tr").first();
     await chup(page, "07-danh-sach", [
       { o: page.getByRole("link", { name: /catalogue đã tạo/i }).first(), huong: "tren" },
       { o: dongDau.getByRole("button", { name: /chép link/i }), huong: "tren" },
       { o: dongDau.getByRole("link", { name: /tải pdf/i }), huong: "duoi" },
     ]);
+
+    // --- 8. Tai khoan va vai tro (chi quan tri) ---
+    await page.goto(`${GOC}/admin/nguoi-dung`, { waitUntil: "networkidle" });
+    // Doi bang vai tro hien han roi moi do: hai bang tren trang nay deu co
+    // <select>, va do luc trang con dang dung thi nth(1) co the chua phai bang
+    // tai khoan.
+    await page.getByRole("heading", { name: "Vai trò", exact: true }).waitFor();
+    const bangVaiTro = page.locator("table").first();
+    const bangTaiKhoan = page.locator("table").nth(1);
+    await bangTaiKhoan.locator("tbody tr").first().waitFor();
+
+    /**
+     * Thay email va ten THAT cua nhan vien bang ten minh hoa, TRUOC khi chup.
+     *
+     * Anh nay di vao public/ — bat ky ai biet duong dan deu tai duoc — va kho
+     * ma nguon thi cong khai. Mot anh chup bang tai khoan la mot danh ba noi bo
+     * dang len mang, va khong ai nhan ra dieu do cho toi luc da muon.
+     *
+     * Chi doi CHU TREN MAN HINH, khong dong toi co so du lieu: sua hang that
+     * cua dong nghiep chi de chup mot tam anh la cai gia qua dat. Dieu huong
+     * sang trang khac la moi thu tro lai nhu cu.
+     */
+    await bangTaiKhoan.evaluate((bang, dsEmail) => {
+      const ho = ["Ngọc Anh", "Minh Thư", "Gia Bảo", "Thuỳ Linh", "Quang Huy", "Kim Ngân"];
+      const hang = bang.querySelectorAll("tbody tr");
+      hang.forEach((tr, i) => {
+        const o = tr.querySelectorAll("td");
+        const email = dsEmail[i % dsEmail.length];
+        const ten = ho[i % ho.length];
+        // O email co the kem the "(bạn)"; chi doi doan chu dau, giu the do.
+        const nutEmail = o[0]?.firstChild;
+        if (nutEmail && nutEmail.nodeType === Node.TEXT_NODE) nutEmail.textContent = email;
+        else if (o[0]) o[0].textContent = email;
+        if (o[1]) o[1].textContent = ten;
+      });
+    }, EMAIL_MINH_HOA);
+    await page.waitForTimeout(200);
+
+    await chup(
+      page,
+      "08-tai-khoan-vai-tro",
+      [
+        // Cot "Quyen" — thu that su quyet dinh nguoi do lam duoc gi. Chi vao
+        // TIEU DE cot chu khong vao mot o chon cu the: hai vai tro goc co o
+        // chon bi tat, con vai tro tu dat thi khong chac da ton tai luc chup.
+        { o: bangVaiTro.getByRole("columnheader", { name: /quyền/i }), huong: "tren" },
+        { o: page.getByRole("button", { name: /thêm vai trò/i }).first(), huong: "duoi" },
+        { o: bangTaiKhoan.locator("tbody tr").first().locator("select"), huong: "trai" },
+      ],
+      { x: 0, y: 0, width: RONG, height: CAO },
+    );
 
     await writeFile(
       join(THU_MUC, "diem.json"),

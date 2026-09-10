@@ -319,6 +319,11 @@ export const en: BoChu = {
     b7_c1: "Reach it from the top bar.",
     b7_c2: "Copy an old link again without recreating it.",
     b7_c3: "Download the PDF of an older catalogue.",
+    b8_ten: "Create accounts and assign roles",
+    b8_mo_ta: "Administrators only. A role is a NAME you choose to match your company — internal audit, R&D, interns. Access, though, comes in only two levels the system can enforce, so every role has to pick one.",
+    b8_c1: "The Access column is what decides what someone can do: Administrator reaches every screen, Standard only builds catalogues. The two built-in roles cannot change level and cannot be deleted.",
+    b8_c2: "Add a new role here. A role someone still holds cannot be deleted — move them to another role first.",
+    b8_c3: "To change someone's role: pick it in this box, then press Change role beside it.",
   },
   danh_sach_catalogue: {
     tieu_de: "Catalogues created",

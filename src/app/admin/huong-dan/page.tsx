@@ -12,8 +12,14 @@ export async function generateMetadata() {
 
 const THU_MUC_ANH = "huong-dan";
 
-/** Mot buoc: cau chu do nguoi viet dat, vi tri mui ten do may do. */
-type Buoc = { ten: string; moTa: string; anh: string; chu: string[] };
+/**
+ * Mot buoc: cau chu do nguoi viet dat, vi tri mui ten do may do.
+ *
+ * `chiAdmin` cho nhung buoc noi ve man hinh ma sale khong mo duoc. Day la de
+ * KHOI BAY ra mot huong dan lam nguoi ta di tim mot nut khong ton tai voi ho —
+ * khong phai de giau bi mat, vi noi dung buoc do khong co gi bi mat ca.
+ */
+type Buoc = { ten: string; moTa: string; anh: string; chu: string[]; chiAdmin?: true };
 
 function cacBuoc(t: BoChu): Buoc[] {
   return [
@@ -59,6 +65,13 @@ function cacBuoc(t: BoChu): Buoc[] {
       anh: "07-danh-sach",
       chu: [t.huong_dan.b7_c1, t.huong_dan.b7_c2, t.huong_dan.b7_c3],
     },
+    {
+      ten: t.huong_dan.b8_ten,
+      moTa: t.huong_dan.b8_mo_ta,
+      anh: "08-tai-khoan-vai-tro",
+      chu: [t.huong_dan.b8_c1, t.huong_dan.b8_c2, t.huong_dan.b8_c3],
+      chiAdmin: true,
+    },
   ];
 }
 
@@ -98,9 +111,11 @@ function ghep(chu: string[], viTri: ViTri[] | undefined): Diem[] {
 }
 
 export default async function TrangHuongDan() {
-  await requireUser();
+  const toi = await requireUser();
   const t = await layChu();
-  const buoc = cacBuoc(t);
+  // Loc theo MUC QUYEN chu khong theo ten vai tro: mot vai tro tu dat mang bac
+  // quan tri thi cung phai thay buoc nay.
+  const buoc = cacBuoc(t).filter((b) => !b.chiAdmin || toi.mucQuyen === "admin");
 
   return (
     <div className="mx-auto max-w-3xl">

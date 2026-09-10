@@ -325,6 +325,11 @@ export const vi = {
     b7_c1: "Vào từ thanh trên cùng.",
     b7_c2: "Chép lại link cũ mà không cần tạo lại.",
     b7_c3: "Tải PDF của một catalogue cũ.",
+    b8_ten: "Cấp tài khoản và phân vai trò",
+    b8_mo_ta: "Chỉ quản trị thấy bước này. Vai trò là cái TÊN anh tự đặt cho hợp với công ty — GSNB, R&D, thực tập sinh. Nhưng quyền thì hệ thống chỉ cưỡng chế được hai bậc, nên mỗi vai trò buộc phải chọn một trong hai.",
+    b8_c1: "Cột Quyền mới là thứ quyết định người đó làm được gì: Quản trị vào được mọi màn hình, Thường chỉ tạo catalogue. Hai vai trò gốc không đổi được bậc và không xoá được.",
+    b8_c2: "Thêm vai trò mới ở đây. Vai trò còn người giữ thì không xoá được — chuyển họ sang vai trò khác trước.",
+    b8_c3: "Đổi vai trò của một người: chọn ở ô này rồi bấm Đổi vai trò bên cạnh.",
   },
   danh_sach_catalogue: {
     tieu_de: "Catalogue đã tạo",
