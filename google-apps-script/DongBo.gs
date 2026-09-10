@@ -69,7 +69,24 @@ var BYTE_MOI_ANH = BYTE_MOI_GOI;
  * Bao nhieu thu muc gui mot goi. Doi so nay thi phai doi ca SO_THU_MUC_MOI_LAN
  * trong src/app/api/dong-bo/anh-thu-muc/route.ts.
  */
-var SO_THU_MUC_MOI_GOI = 200;
+/**
+ * So thu muc moi lan day len — CO Y de nho.
+ *
+ * Do that tren ban chay that (log 11:14–11:18 ngay 10/09/2026): liet ke mot thu
+ * muc Drive mat khoang 1,2 giay, khong phai 0,55 giay nhu uoc tinh cu. Voi lo
+ * 200 cai thi phai 4 PHUT 6 GIAY moi luu duoc lan dau — gan het ca ngan sach
+ * 4,5 phut cua mot luot. Nghia la mot luot chet o thu muc thu 199 luu duoc so
+ * KHONG.
+ *
+ * Do dung la dieu da xay ra: trong luc trang web treo, moi luot deu chet truoc
+ * khi kip day, nen job nay dung im 40 phut trong khi job anh — day moi 6 anh
+ * mot lan — van chay binh thuong.
+ *
+ * 50 cai thi cu khoang mot phut luu mot lan. Ton them vai loi goi mang (khong
+ * dang ke, moi loi goi duoi mot giay), doi lai mot truc trac chi lam mat mot
+ * phut cong thay vi ca luot.
+ */
+var SO_THU_MUC_MOI_GOI = 50;
 
 /**
  * May chu tu choi mot thu muc mang qua 500 anh, va tu choi CA LO.
