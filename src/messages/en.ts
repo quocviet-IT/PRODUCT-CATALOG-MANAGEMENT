@@ -46,6 +46,33 @@ export const en: BoChu = {
     loi_google: "Google sign-in did not go through. Please try again.",
     sai_ten_mien: "This email is not on the company domain. Use your company Google account (@ctyhp.vn, @ctyhp.com…) or contact an administrator.",
   },
+  vai_tro: {
+    tieu_de: "Roles",
+    mo_ta: "Add the roles your company actually has — internal audit, R&D, interns. You choose the names, but the system only enforces two levels of access: administrator and not. The Access column says what someone in that role can do.",
+
+    cot_ten: "Role name",
+    cot_ten_en: "English name",
+    cot_quyen: "Access",
+    cot_so_nguoi: "In use",
+
+    quyen_admin: "Administrator — every screen",
+    quyen_sale: "Standard — builds catalogues, no admin screens",
+
+    them_tieu_de: "Add a role",
+    nut_them: "Add role",
+    luu: "Save",
+    xoa: "Delete",
+    vi_du_ten: "For example: Internal Audit",
+    trong_thi_dung_tieng_viet: "Left blank, the Vietnamese name is used",
+
+    thieu_ten: "The role name is missing.",
+    ten_qua_dai: "A role name must be 40 characters or fewer.",
+    ma_khong_hop_le: "That name produces no code. Use letters and numbers.",
+    da_ton_tai: "A role with that name already exists.",
+    he_thong_khong_sua: "Built-in roles cannot change access level or be deleted.",
+    dang_co_nguoi_giu: "Accounts still hold this role. Move them to another role first.",
+  },
+
   nguoi_dung: {
     tieu_de: "Accounts",
     mo_ta: "Create accounts for staff, lock accounts that have left, reset passwords.",
@@ -73,6 +100,7 @@ export const en: BoChu = {
     mo_khoa: "Unlock",
     dat_mat_khau: "Set password",
     huy: "Cancel",
+    doi_vai_tro: "Change role",
     len_admin: "Make administrator",
     xuong_sale: "Demote to sales",
 

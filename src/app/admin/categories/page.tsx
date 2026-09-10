@@ -40,7 +40,7 @@ export default async function TrangDanhMuc() {
         ? <p className="text-sm text-neutral-500">{t.chung.khong_co_du_lieu}</p>
         : <ul className="mb-8 divide-y">{cay.map((n) => <Nhanh key={n.id} nut={n} mucLui={0} />)}</ul>}
 
-      {user.role === "admin" && (
+      {user.mucQuyen === "admin" && (
         <form action={themDanhMuc} className="flex gap-2">
           <input name="name" placeholder={t.danh_muc.ten_moi_placeholder} required
                  className="flex-1 rounded border px-3 py-2 text-sm" />

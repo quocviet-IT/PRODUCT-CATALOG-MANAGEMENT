@@ -62,7 +62,7 @@ describe("kiemTraSuaDoi", () => {
   });
 
   it("chan admin tu ha quyen chinh minh", () => {
-    expect(kiemTraSuaDoi(TOI, TOI, { kieu: "doi-vai-tro", vaiTroMoi: "sale" }))
+    expect(kiemTraSuaDoi(TOI, TOI, { kieu: "doi-vai-tro", mucQuyenMoi: "sale" }))
       .toBe("tu_ha_quyen_chinh_minh");
   });
 
@@ -71,14 +71,20 @@ describe("kiemTraSuaDoi", () => {
   });
 
   it("van cho tu giu vai tro admin cua chinh minh", () => {
-    expect(kiemTraSuaDoi(TOI, TOI, { kieu: "doi-vai-tro", vaiTroMoi: "admin" })).toBeNull();
+    expect(kiemTraSuaDoi(TOI, TOI, { kieu: "doi-vai-tro", mucQuyenMoi: "admin" })).toBeNull();
+  });
+
+  it("cho tu chuyen sang vai tro TEN KHAC nhung van bac quyen admin", () => {
+    // Chuyen minh sang "GSNB" mang bac admin thi khong khoa ai ra ngoai ca —
+    // quy tac phai xet BAC QUYEN, khong xet ten vai tro.
+    expect(kiemTraSuaDoi(TOI, TOI, { kieu: "doi-vai-tro", mucQuyenMoi: "admin" })).toBeNull();
   });
 
   it("khong chan gi khi tac dong len nguoi KHAC", () => {
     for (const td of [
       { kieu: "khoa" } as const,
       { kieu: "mo-khoa" } as const,
-      { kieu: "doi-vai-tro", vaiTroMoi: "sale" } as const,
+      { kieu: "doi-vai-tro", mucQuyenMoi: "sale" } as const,
       { kieu: "doi-mat-khau" } as const,
     ]) {
       expect(kiemTraSuaDoi(TOI, NGUOI_KHAC, td)).toBeNull();
