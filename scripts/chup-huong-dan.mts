@@ -347,13 +347,15 @@ async function main(): Promise<void> {
                    "Chị Thảo — lắc tay", "Khách quen — vòng cổ"];
       bang.querySelectorAll("tbody tr").forEach((tr, i) => {
         const o = tr.querySelectorAll("td");
-        // O dau: dong ten roi dong duong dan. Doi ca hai; duong dan that la
-        // link dang song cua khach.
-        const trong = o[0]?.querySelectorAll("*");
-        if (trong && trong.length >= 2) {
-          trong[0].textContent = ten[i % ten.length];
-          trong[1].textContent = "/vi-du-" + String(i + 1).padStart(2, "0") + "-abcd1234";
-        }
+        // O dau: ten roi duong dan. Doi ca hai; duong dan that la link dang song
+        // cua khach. Tim theo data-* chu KHONG theo thu tu the con: o nay con co
+        // nut "Doi ten link", dem the con la che nham nut do va de lo duong dan.
+        // Thieu mot trong hai thi dung han — anh chup ma lo link that thi thoi.
+        const oTen = tr.querySelector("[data-ten-catalogue]");
+        const oDuong = tr.querySelector("[data-duong-dan]");
+        if (!oTen || !oDuong) throw new Error("Khong tim thay o ten / duong dan de che");
+        oTen.textContent = ten[i % ten.length];
+        oDuong.textContent = "/vi-du-" + String(i + 1).padStart(2, "0") + "-abcd1234";
         // Cot "Nguoi tao" — email that cua dong nghiep.
         if (o[4]) o[4].textContent = email[i % email.length];
       });

@@ -3,6 +3,9 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import type { MucDeChon } from "@/modules/catalogue-share/chia-se.model";
+import { SO_NGAY_SONG } from "@/modules/catalogue-share/hieu-luc.model";
+import { DoiTenLink } from "@/app/admin/catalogue/doi-ten-link";
+import { XemTruocLink } from "./xem-truoc-link";
 import {
   chupGio, datGio,
 } from "@/modules/catalogue-share/gio-chon";
@@ -48,6 +51,12 @@ export function TaoCatalogue() {
   /** ma -> tap fileId dang giu. Mac dinh giu HET, sale bo bot. */
   const [anhGiu, setAnhGiu] = useState<Record<string, string[]>>({});
   const [ten, setTen] = useState("");
+  // Ten link di theo ten catalogue cho toi khi sale tu sua o ten link. Hai state
+  // rieng + mot co, KHONG chep ten sang bang effect: effect goi setState la mot
+  // lan render day chuyen moi lan go phim.
+  const [tenLinkRieng, setTenLinkRieng] = useState("");
+  const [daSuaTenLink, setDaSuaTenLink] = useState(false);
+  const tenLink = daSuaTenLink ? tenLinkRieng : ten;
   const [giaoDien, setGiaoDien] = useState<GiaoDienCatalogue>(GIAO_DIEN_MAC_DINH);
   const [moXemTruoc, setMoXemTruoc] = useState(false);
   const [dangTao, setDangTao] = useState(false);
@@ -112,6 +121,7 @@ export function TaoCatalogue() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ten,
+          tenLink,
           chon: muc.map((m) => ({ ma: m.ma, anh: anhGiu[m.ma] ?? [] })),
           giaoDien,
         }),
@@ -147,7 +157,7 @@ export function TaoCatalogue() {
   if (trangThai === "loi-tai") {
     return <p className="text-sm text-hp-pink-strong">{t.chia_se.loi_tai_chon}</p>;
   }
-  if (slug !== null) return <DaXong slug={slug} />;
+  if (slug !== null) return <DaXong slug={slug} khiDoiSlug={setSlug} />;
   if (muc.length === 0) {
     return (
       <>
@@ -184,6 +194,31 @@ export function TaoCatalogue() {
                      placeholder:text-hp-rule focus:border-b-2 focus:border-hp-pink
                      focus:pb-[5px] focus:outline-none"
         />
+
+        {/* Ten link rieng: ten catalogue hay mang ten khach ("Chi Lan — nhan
+            cuoi"), ma link thi hien nguyen trong khung xem truoc cua Zalo. */}
+        <label
+          className="mt-6 block text-[11px] uppercase tracking-[0.14em] text-hp-muted"
+          htmlFor="ten-link"
+        >
+          {t.chia_se.ten_link_nhan}
+        </label>
+        <p className="mt-1 text-xs text-hp-muted">{t.chia_se.ten_link_mo_ta}</p>
+        <input
+          id="ten-link"
+          value={tenLink}
+          onChange={(e) => {
+            setTenLinkRieng(e.target.value);
+            setDaSuaTenLink(true);
+          }}
+          placeholder={t.chia_se.ten_link_goi_y}
+          maxLength={120}
+          className="mt-2 w-full border-0 border-b border-hp-rule bg-transparent px-0.5 py-1.5
+                     font-body text-base text-hp-body transition-colors duration-150
+                     placeholder:text-hp-rule focus:border-b-2 focus:border-hp-pink
+                     focus:pb-[5px] focus:outline-none"
+        />
+        <XemTruocLink tenLink={tenLink} ten={ten} />
       </div>
 
       <div className="mb-10">
@@ -304,7 +339,14 @@ export function TaoCatalogue() {
   );
 }
 
-function DaXong({ slug }: { slug: string }) {
+function DaXong({
+  slug,
+  khiDoiSlug,
+}: {
+  slug: string;
+  /** Doi ten link xong thi o link, nut chep, mo thu va tai PDF deu theo duong dan moi. */
+  khiDoiSlug: (slugMoi: string) => void;
+}) {
   const t = useChu();
   const [daChep, setDaChep] = useState(false);
 
@@ -336,12 +378,19 @@ function DaXong({ slug }: { slug: string }) {
       <h2 className="font-title text-[28px] leading-none text-hp-ink">
         {t.chia_se.xong_tieu_de}
       </h2>
-      <p className="mt-3 text-sm text-hp-body">{t.chia_se.xong_mo_ta}</p>
+      {/* Truoc day cau nay noi "Link khong het han" — sai tu khi link song 90
+          ngay (08/09/2026). So ngay doc tu SO_NGAY_SONG, khong go tay. */}
+      <p className="mt-3 text-sm text-hp-body">
+        {t.chia_se.xong_mo_ta.replace("{n}", String(SO_NGAY_SONG))}
+      </p>
       <p className="mt-1 text-xs text-hp-muted">{t.chia_se.tai_pdf_giai_thich}</p>
 
       <p className="mt-6 border border-hp-rule bg-hp-card px-4 py-3 text-sm break-all text-hp-body">
         {link}
       </p>
+      {/* Doi ten ngay tai day: day la luc sale nhin thay link lan dau, va la luc
+          ho nhan ra "catalogue-65-…" khong noi gi voi khach. */}
+      <DoiTenLink slug={slug} khiDoi={khiDoiSlug} />
 
       <div className="mt-5 flex flex-wrap items-center gap-4">
         <button

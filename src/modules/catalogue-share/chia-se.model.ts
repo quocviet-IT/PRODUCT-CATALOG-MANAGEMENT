@@ -150,6 +150,44 @@ export function dungSlug(ten: string, so: number, duoi: string): string {
   return `${phanTen}-${duoi}`;
 }
 
+/**
+ * Ma khong doan duoc cua mot duong dan: cum ky tu sau dau gach CUOI CUNG.
+ *
+ * Day moi la phan DINH DANH cua catalogue — phan ten dung truoc chi de doc. Nho
+ * vay sale doi ten link duoc ma link cu da gui khach van tim ra dung catalogue:
+ * hai duong dan cung ma la cung mot catalogue.
+ *
+ * Slug doi cu ("zxhpnhyrtpu3", 12 ky tu lien, khong dau gach): ca chuoi la ma.
+ */
+export function maCuaSlug(slug: string): string {
+  const i = slug.lastIndexOf("-");
+  return i === -1 ? slug : slug.slice(i + 1);
+}
+
+/** Phan ten doc duoc cua duong dan, de dien san vao o doi ten. Slug doi cu: rong. */
+export function phanTenCuaSlug(slug: string): string {
+  const i = slug.lastIndexOf("-");
+  return i === -1 ? "" : slug.slice(0, i);
+}
+
+/**
+ * Ma ngan nhat duoc dem di tim catalogue. Ma that dai 8 (slug moi) hoac 12 (slug
+ * doi cu); chan duoi 8 de mot duong dan go bay kieu "abc-x" khong thanh mot lan do
+ * tren ca bang.
+ */
+export const DAI_MA_TOI_THIEU = 8;
+
+/**
+ * Duong dan moi khi sale doi ten link: ten moi + GIU NGUYEN ma cu.
+ *
+ * null khi ten moi khong con chu hay so nao sau khi bo dau (toan ky tu la, toan
+ * emoji) — khong tu bia mot ten thay sale.
+ */
+export function slugDoiTen(slugCu: string, tenLink: string): string | null {
+  const phanTen = chuanHoaSlug(tenLink);
+  return phanTen ? `${phanTen}-${maCuaSlug(slugCu)}` : null;
+}
+
 /** Mot muc tren man hinh tao catalogue: nhu muc khach xem, kem TOAN BO thu vien. */
 export type MucDeChon = MucCatalogue & { ma: string };
 

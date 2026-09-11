@@ -24,6 +24,8 @@ const SO_ANH_TOI_DA = SO_ANH_MOI_THU_MUC;
 
 const Than = z.object({
   ten: z.string().max(DAI_TEN_TOI_DA).default(""),
+  // Ten link rieng. Khong gui (trinh duyet cu) hay bo trong thi link theo ten.
+  tenLink: z.string().max(DAI_TEN_TOI_DA).default(""),
   chon: z
     .array(
       z.object({
@@ -60,6 +62,7 @@ export async function POST(req: Request): Promise<Response> {
       than.chon,
       docGiaoDien(than.giaoDien),
       user.id,
+      than.tenLink,
     );
     return Response.json(kq, { status: 201, headers: KHONG_LUU_DEM });
   } catch (loi) {

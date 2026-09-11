@@ -1,14 +1,17 @@
 import { randomBytes } from "node:crypto";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, or, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { catalogues, users } from "@/db/schema";
 import { layAnhCuaMau, layDanhSachCatalogue } from "@/modules/sheet/catalogue.service";
 import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 import {
+  DAI_MA_TOI_THIEU,
+  chuanHoaSlug,
   docNoiDung,
   dungNoiDung,
   dungSlug,
   khoaMau,
+  slugDoiTen,
   tenHienThi,
   type LuaChon,
   type NguonMau,
@@ -90,12 +93,17 @@ export type CatalogueDaLuu = {
  * Anh chup duoc dung LAI O DAY tu du lieu that, khong nhan tu trinh duyet:
  * trinh duyet chi noi CHON MAU NAO va GIU ANH NAO. Nho vay khong ai gui len
  * duoc mot catalogue ghi sai trong luong vang hay bia ra mot ma mau.
+ *
+ * `tenLink` tach khoi `ten` co chu y: ten catalogue hay mang ten khach ("Chi Lan
+ * — nhan cuoi 18K"), con link thi hien ra trong khung xem truoc cua Zalo. Bo
+ * trong (hoac khong con chu nao) thi link lay theo ten catalogue nhu truoc.
  */
 export async function taoCatalogue(
   ten: string,
   chon: LuaChon[],
   giaoDien: GiaoDienCatalogue,
   ownerId: string | null,
+  tenLink = "",
 ): Promise<{ slug: string; ten: string }> {
   const nguon = await layNguonTheoMa(chon.map((c) => c.ma));
   const noiDung = dungNoiDung(nguon, chon);
@@ -125,7 +133,7 @@ export async function taoCatalogue(
     })
     .returning({ id: catalogues.id, so: catalogues.so, ten: catalogues.ten });
 
-  const slug = dungSlug(moi.ten, moi.so, duoi);
+  const slug = dungSlug(chuanHoaSlug(tenLink) ? tenLink : moi.ten, moi.so, duoi);
   try {
     await db.update(catalogues).set({ slug }).where(eq(catalogues.id, moi.id));
   } catch (loi) {
@@ -135,12 +143,10 @@ export async function taoCatalogue(
   return { slug, ten: tenHienThi(moi.ten, moi.so) };
 }
 
-export async function layTheoSlug(slug: string): Promise<CatalogueDaLuu | null> {
-  const [d] = await db.select().from(catalogues).where(eq(catalogues.slug, slug)).limit(1);
-  if (!d) return null;
+function docDong(d: typeof catalogues.$inferSelect): CatalogueDaLuu | null {
   const noiDung = docNoiDung(d.noiDung);
   if (!noiDung) {
-    console.error(`[chia-se] noi dung catalogue ${slug} khong doc duoc`);
+    console.error(`[chia-se] noi dung catalogue ${d.slug} khong doc duoc`);
     return null;
   }
   return {
@@ -153,6 +159,32 @@ export async function layTheoSlug(slug: string): Promise<CatalogueDaLuu | null> 
     hetHanLuc: d.hetHanLuc,
     khoaLuc: d.khoaLuc,
   };
+}
+
+export async function layTheoSlug(slug: string): Promise<CatalogueDaLuu | null> {
+  const [d] = await db.select().from(catalogues).where(eq(catalogues.slug, slug)).limit(1);
+  return d ? docDong(d) : null;
+}
+
+/**
+ * Tim catalogue theo MA (phan cuoi duong dan) — cho link cu sau khi sale doi ten.
+ *
+ * So khop NGUYEN ma, khong so khop mot phan: van phai co du chuoi ngau nhien moi
+ * tim ra, nen doi ten khong mo them loi nao cho ke doan link. Hai dong tro len
+ * cung ma (khong xay ra voi ma ngau nhien 40 bit) thi coi nhu khong thay — khong
+ * doan giup nguoi go.
+ */
+export async function layTheoMa(ma: string): Promise<CatalogueDaLuu | null> {
+  if (ma.length < DAI_MA_TOI_THIEU || !/^[a-z0-9]+$/.test(ma)) return null;
+  const ds = await db
+    .select()
+    .from(catalogues)
+    .where(or(
+      eq(catalogues.slug, ma),
+      sql`right(${catalogues.slug}, ${ma.length + 1}::int) = ${`-${ma}`}`,
+    ))
+    .limit(2);
+  return ds.length === 1 ? docDong(ds[0]) : null;
 }
 
 export class LoiKhongPhaiCuaMinh extends Error {
@@ -190,6 +222,45 @@ export async function datKhoa(
     .returning({ id: catalogues.id });
 
   return doi.length > 0;
+}
+
+export class LoiTenLinkRong extends Error {
+  constructor() {
+    super("Tên link cần có ít nhất một chữ hoặc số.");
+    this.name = "LoiTenLinkRong";
+  }
+}
+
+/**
+ * Doi ten link — chi doi PHAN TEN, giu nguyen ma.
+ *
+ * Link cu da gui khach khong chet: trang khach khong khop nguyen duong dan thi
+ * tim theo ma (layTheoMa) roi chuyen sang duong dan moi.
+ *
+ * Quyen giong datKhoa: sale doi link cua minh, admin doi moi link, va dieu kien
+ * nam trong chinh cau lenh UPDATE. Tra ve duong dan moi, hoac null khi khong co
+ * dong nao doi — khong phan biet "khong co" voi "khong phai cua ban".
+ */
+export async function doiTenLink(
+  slugCu: string,
+  tenLink: string,
+  idNguoi: string,
+  xemHet: boolean,
+): Promise<string | null> {
+  const slugMoi = slugDoiTen(slugCu, tenLink);
+  if (slugMoi === null) throw new LoiTenLinkRong();
+
+  const dieuKien = xemHet
+    ? eq(catalogues.slug, slugCu)
+    : and(eq(catalogues.slug, slugCu), eq(catalogues.ownerId, idNguoi));
+
+  const doi = await db
+    .update(catalogues)
+    .set({ slug: slugMoi })
+    .where(dieuKien)
+    .returning({ slug: catalogues.slug });
+
+  return doi[0]?.slug ?? null;
 }
 
 /** Mot dong tren man hinh "catalogue da tao". */

@@ -13,6 +13,7 @@ import { OTimNhanh } from "@/ui/o-tim-nhanh";
 import { KetQuaLoc, NguonLoc } from "@/ui/vung-loc";
 import { NutChep } from "./nut-chep";
 import { NutKhoa } from "./nut-khoa";
+import { DoiTenLink } from "./doi-ten-link";
 
 export async function generateMetadata() {
   const t = await layChu();
@@ -159,13 +160,20 @@ export default async function TrangDanhSachCatalogue({
               {ds.map((c) => (
                 <tr key={c.slug} className="bg-hp-card">
                   <td className={`${O} text-hp-ink`}>
+                    {/* data-ten-catalogue / data-duong-dan: kich ban chup anh huong
+                        dan tim dung hai o nay de thay bang chu minh hoa — ten hay
+                        mang ten khach, duong dan la link dang song. */}
                     <Link
                       href={`/catalogue/${c.slug}`}
+                      data-ten-catalogue
                       className="transition-colors duration-150 hover:text-hp-pink hover:underline"
                     >
                       {c.ten}
                     </Link>
-                    <span className="mt-0.5 block text-xs text-hp-muted">/{c.slug}</span>
+                    <span data-duong-dan className="mt-0.5 block text-xs text-hp-muted">
+                      /{c.slug}
+                    </span>
+                    <DoiTenLink slug={c.slug} />
                   </td>
                   <td className={`${O} whitespace-nowrap tabular-nums`}>
                     {t.danh_sach_catalogue.dem

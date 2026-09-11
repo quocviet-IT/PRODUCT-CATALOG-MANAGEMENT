@@ -9,6 +9,9 @@ import {
   khoaMau,
   chuanHoaSlug,
   dungSlug,
+  maCuaSlug,
+  phanTenCuaSlug,
+  slugDoiTen,
   tenHienThi,
   type NguonMau,
 } from "@/modules/catalogue-share/chia-se.model";
@@ -183,6 +186,55 @@ describe("dungSlug", () => {
     for (const ten of ["Chị Lan", "", "★"]) {
       expect(dungSlug(ten, 1, "zzzzzzzz").endsWith("-zzzzzzzz")).toBe(true);
     }
+  });
+});
+
+describe("doi ten link (11/09/2026)", () => {
+  // Sale muon doi "catalogue-65-abvbyxr2" thanh ten doc duoc sau khi da tao. Ma
+  // cuoi la dinh danh that: doi ten chi doi phan ten, link cu tim lai bang ma.
+  it("ma la cum sau dau gach cuoi, phan ten la phan truoc", () => {
+    expect(maCuaSlug("chi-lan-nhan-cuoi-18k-k3m9x2p4")).toBe("k3m9x2p4");
+    expect(phanTenCuaSlug("chi-lan-nhan-cuoi-18k-k3m9x2p4")).toBe("chi-lan-nhan-cuoi-18k");
+  });
+
+  it("slug doi cu khong co dau gach: ca chuoi la ma, phan ten rong", () => {
+    // 18/42 catalogue that dang dung dang nay (12 ky tu lien).
+    expect(maCuaSlug("zxhpnhyrtpu3")).toBe("zxhpnhyrtpu3");
+    expect(phanTenCuaSlug("zxhpnhyrtpu3")).toBe("");
+  });
+
+  it("doi ten giu nguyen ma va bo dau tieng Viet", () => {
+    expect(slugDoiTen("catalogue-65-abvbyxr2", "Dây chuyền khoen lật"))
+      .toBe("day-chuyen-khoen-lat-abvbyxr2");
+  });
+
+  it("chu Đ viet hoa cung thanh d", () => {
+    expect(slugDoiTen("x-abcdefgh", "ĐÔI BÔNG TAI")).toBe("doi-bong-tai-abcdefgh");
+  });
+
+  it("doi ten slug doi cu: ten dung truoc, van tim lai duoc bang ma cu", () => {
+    const moi = slugDoiTen("zxhpnhyrtpu3", "Nhẫn cưới");
+    expect(moi).toBe("nhan-cuoi-zxhpnhyrtpu3");
+    expect(maCuaSlug(moi!)).toBe("zxhpnhyrtpu3");
+  });
+
+  it("doi ten nhieu lan ma van giu nguyen", () => {
+    const lan1 = slugDoiTen("catalogue-65-abvbyxr2", "Dây chuyền")!;
+    const lan2 = slugDoiTen(lan1, "Nhẫn cưới — chị Lan")!;
+    expect(lan2).toBe("nhan-cuoi-chi-lan-abvbyxr2");
+    expect(maCuaSlug(lan2)).toBe("abvbyxr2");
+  });
+
+  it("ten khong con chu hay so thi khong doi — khong bia ten thay sale", () => {
+    expect(slugDoiTen("catalogue-65-abvbyxr2", "★★★")).toBeNull();
+    expect(slugDoiTen("catalogue-65-abvbyxr2", "   ")).toBeNull();
+  });
+
+  it("ten dai van giu duong dan trong tran 80 ky tu cua trang khach", () => {
+    // Trang /catalogue/[slug] tu choi duong dan dai hon 80 (DAI_SLUG_TOI_DA).
+    const moi = slugDoiTen("zxhpnhyrtpu3", "Dây chuyền ".repeat(20))!;
+    expect(moi.length).toBeLessThanOrEqual(80);
+    expect(moi.endsWith("-zxhpnhyrtpu3")).toBe(true);
   });
 });
 
