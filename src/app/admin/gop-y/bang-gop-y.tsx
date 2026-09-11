@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
-import { Check, RotateCcw } from "lucide-react";
+import { Check, ImageIcon, RotateCcw } from "lucide-react";
 import type { BoChu } from "@/messages";
 import { useChu, useNgonNgu } from "@/messages/dung-chu";
 import { MA_HTML } from "@/messages/ngon-ngu";
@@ -74,7 +74,22 @@ export function BangGopY({ ds }: { ds: GopYHang[] }) {
                 </td>
                 {/* whitespace-pre-line: nguoi go xuong dong de tach y, nuot mat
                     cac dau xuong dong la dinh ba y vao mot khoi kho doc. */}
-                <td className={`${O} min-w-[24rem] whitespace-pre-line`}>{g.noiDung}</td>
+                <td className={`${O} min-w-[24rem] whitespace-pre-line`}>
+                  {g.noiDung}
+                  {g.coAnh && (
+                    <a
+                      href={`/api/gop-y/anh/${g.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-3 flex w-fit items-center gap-1.5 text-[11px] uppercase
+                                 tracking-[0.14em] text-hp-muted transition-colors duration-150
+                                 hover:text-hp-ink hover:underline"
+                    >
+                      <ImageIcon {...ICON} />
+                      {t.gop_y.xem}
+                    </a>
+                  )}
+                </td>
                 <td className={`${O} whitespace-nowrap text-xs text-hp-muted`}>
                   {g.duongDan || "—"}
                 </td>

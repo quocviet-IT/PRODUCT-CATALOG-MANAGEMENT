@@ -204,9 +204,9 @@ export const trangThaiGopY = pgEnum("trang_thai_gop_y", ["moi", "da-xu-ly"]);
 /**
  * Gop y cua nhan vien, gui tu bat ky man hinh nao.
  *
- * Ban gon nhat co the: hai loai, hai trang thai. Khong co anh chup man hinh,
- * khong co diem uu tien — them duoc sau, con mot o gop y khong ai dung duoc thi
- * khong sua duoc gi.
+ * Ban gon nhat co the: hai loai, hai trang thai, anh chup man hinh tuy chon (them
+ * 11/09/2026). Khong co diem uu tien — them duoc sau, con mot o gop y khong ai
+ * dung duoc thi khong sua duoc gi.
  */
 export const gopY = pgTable("gop_y", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -228,5 +228,14 @@ export const gopY = pgTable("gop_y", {
   nguoiGuiId: uuid("nguoi_gui_id").references(() => users.id, { onDelete: "set null" }),
   /** Chep lai luc gui, de con doc duoc khi tai khoan da bi xoa. */
   nguoiGuiEmail: text("nguoi_gui_email").notNull().default(""),
+  /**
+   * Khoa anh chup man hinh trong Storage, hoac NULL khi khong kem.
+   *
+   * Anh nay la du lieu THAT — gia, ma mau, duong dan link khach. No nam o thu muc
+   * gop-y/ cua bucket "catalogue" (bucket KHONG public, da soat 11/09/2026) va chi
+   * doc duoc qua /api/gop-y/anh/[id], tuyen do chi tra cho quan tri dang hoat
+   * dong. Khong bao gio de no thanh mot duong dan cong khai hay mot URL co ky.
+   */
+  anh: text("anh"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [index("gop_y_trang_thai_idx").on(t.trangThai, t.createdAt)]);

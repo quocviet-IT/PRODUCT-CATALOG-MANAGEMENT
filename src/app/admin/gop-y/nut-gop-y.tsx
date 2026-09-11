@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { usePathname } from "next/navigation";
-import { MessageSquare, X } from "lucide-react";
+import { Camera, MessageSquare, X } from "lucide-react";
 import type { BoChu } from "@/messages";
 import { useChu } from "@/messages/dung-chu";
 import { DAI_NOI_DUNG_TOI_DA, LOAI_GOP_Y } from "@/modules/gop-y/gop-y.model";
@@ -25,6 +25,7 @@ function loiThanhChu(t: BoChu): Record<string, string> {
   return {
     thieu_noi_dung: t.gop_y.thieu_noi_dung,
     noi_dung_qua_dai: t.gop_y.noi_dung_qua_dai,
+    anh_qua_lon: t.gop_y.anh_qua_lon,
     loi_he_thong: t.nguoi_dung.loi_he_thong,
   };
 }
@@ -36,7 +37,67 @@ export function NutGopY() {
   const [xong, setXong] = useState(false);
   const [loi, setLoi] = useState<string | null>(null);
   const [dangChay, batDau] = useTransition();
+  const [kemAnh, setKemAnh] = useState(true);
+  const [anh, setAnh] = useState<string | null>(null);
+  const [dangChup, setDangChup] = useState(false);
+  const [chupHong, setChupHong] = useState(false);
   const oChu = useRef<HTMLTextAreaElement>(null);
+  const hopThoai = useRef<HTMLDivElement>(null);
+
+  /**
+   * Chup man hinh TRUOC khi mo hop thoai.
+   *
+   * Neu chup sau khi mo thi anh se la anh cua chinh cai hop thoai dang che mat
+   * cho hong — dung thu nguoi bao loi muon cho xem. Chup truoc, luu lai, roi
+   * moi mo.
+   *
+   * Thu vien nap theo yeu cau: no chi can den khi co nguoi bam bao loi, khong
+   * co ly do gi bat moi trang tai no san.
+   */
+  async function chup(): Promise<void> {
+    setDangChup(true);
+    setChupHong(false);
+    try {
+      const { domToJpeg } = await import("modern-screenshot");
+      // CHI phan dang hien tren man hinh, khong ca trang: nguoi bao loi muon cho
+      // xem dung cho ho dang nhin. Chup ca trang thi trang dai (Huong dan, luoi
+      // nhieu mau) vua cham vua de vuot tran anh — va cho hong chim giua mot anh
+      // cao vai met.
+      const rong = document.documentElement.clientWidth;
+      const url = await domToJpeg(document.body, {
+        width: rong,
+        height: window.innerHeight,
+        style: { transform: `translate(${-window.scrollX}px, ${-window.scrollY}px)` },
+        // Anh rong toi da ~1100px: du ro de doc chu tren may tinh, con dien thoai
+        // (rong 390) giu ti le 1 thay vi thu nho toi khong doc duoc. JPEG 0,72
+        // giu anh mot man hinh quanh vai tram KB, xa duoi tran BYTE_ANH_TOI_DA.
+        scale: Math.min(1, Math.max(0.5, 1100 / rong)),
+        quality: 0.72,
+        backgroundColor: "#F7F1EB",
+        // Mot anh tai cham khong duoc giu nut o "Dang chup" mai: qua 8 giay thi
+        // bo anh do, chup phan con lai.
+        timeout: 8_000,
+      });
+      setAnh(url);
+    } catch (e) {
+      // Chup hong thi KHONG chan viec gui: cai anh la thu kem theo, con cau
+      // nguoi ta go moi la thu can giu.
+      console.error("[gop-y] khong chup duoc man hinh:", e);
+      setAnh(null);
+      setChupHong(true);
+    } finally {
+      setDangChup(false);
+    }
+  }
+
+  async function moHopThoai(): Promise<void> {
+    setXong(false);
+    setLoi(null);
+    setAnh(null);
+    setChupHong(false);
+    if (kemAnh) await chup();
+    setMo(true);
+  }
 
   /**
    * Doc THANG ket qua cua server action thay vi theo doi qua useActionState.
@@ -48,6 +109,7 @@ export function NutGopY() {
    */
   function gui(f: FormData) {
     batDau(async () => {
+      if (kemAnh && anh) f.set("anh", anh);
       const kq = await guiGopY(null, f);
       if (kq === null) {
         setLoi(null);
@@ -74,11 +136,12 @@ export function NutGopY() {
     <>
       <button
         type="button"
-        onClick={() => { setXong(false); setLoi(null); setMo(true); }}
-        className={NUT_THANH}
+        onClick={() => { void moHopThoai(); }}
+        disabled={dangChup}
+        className={`${NUT_THANH} disabled:opacity-40`}
       >
         <MessageSquare {...ICON} />
-        {t.gop_y.nut}
+        {dangChup ? t.gop_y.dang_chup : t.gop_y.nut}
       </button>
 
       {xong && !mo && (
@@ -94,6 +157,7 @@ export function NutGopY() {
           onClick={(e) => { if (e.target === e.currentTarget) setMo(false); }}
         >
           <div
+            ref={hopThoai}
             role="dialog"
             aria-modal="true"
             aria-label={t.gop_y.tieu_de}
@@ -116,6 +180,39 @@ export function NutGopY() {
 
             <form action={gui} className="mt-5 space-y-5">
               <input type="hidden" name="duong_dan" value={duongDan} />
+
+              {/* Anh chup: hien de nguoi gui THAY dung cai minh sap gui di. Mot
+                  o tich "kem anh" ma khong cho xem la bat nguoi ta tin suong. */}
+              <div className="border border-hp-rule bg-hp-inset/40 p-3">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-hp-body">
+                  <input
+                    type="checkbox"
+                    checked={kemAnh}
+                    onChange={(e) => {
+                      setKemAnh(e.target.checked);
+                      if (!e.target.checked) { setAnh(null); setChupHong(false); }
+                    }}
+                    className="h-3.5 w-3.5 shrink-0 accent-hp-ink"
+                  />
+                  <Camera {...ICON} />
+                  {t.gop_y.kem_anh}
+                </label>
+
+                {kemAnh && anh && (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={anh}
+                      alt={t.gop_y.xem_anh}
+                      className="mt-3 max-h-48 w-full border border-hp-rule object-contain object-top"
+                    />
+                    <p className="mt-2 text-xs text-hp-muted">{t.gop_y.anh_mo_ta}</p>
+                  </>
+                )}
+                {kemAnh && chupHong && (
+                  <p className="mt-2 text-xs text-hp-muted">{t.gop_y.chup_hong}</p>
+                )}
+              </div>
 
               <fieldset>
                 <legend className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">

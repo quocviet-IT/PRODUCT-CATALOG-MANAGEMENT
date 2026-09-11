@@ -85,6 +85,14 @@ export const vi = {
     da_gui: "Đã gửi, cảm ơn anh chị",
 
     nut_menu: "Hộp góp ý",
+    dang_chup: "Đang chụp",
+    kem_anh: "Gửi kèm ảnh màn hình",
+    xem_anh: "Ảnh màn hình sẽ gửi kèm",
+    anh_mo_ta: "Ảnh chụp lúc anh chị bấm nút, trước khi ô này mở ra. Chỉ quản trị xem được.",
+    chup_hong: "Không chụp được màn hình. Góp ý vẫn gửi được, chỉ thiếu ảnh.",
+    anh_qua_lon: "Ảnh màn hình quá lớn. Bỏ tích gửi kèm ảnh rồi gửi lại giúp em.",
+    xem: "Xem ảnh",
+
     tieu_de_trang: "Góp ý",
     mo_ta_trang: "Góp ý nhân viên gửi từ các màn hình. Còn {n} góp ý chưa xử lý.",
     cot_loai: "Loại",

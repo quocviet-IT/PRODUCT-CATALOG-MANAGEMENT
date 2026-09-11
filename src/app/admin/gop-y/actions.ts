@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin, requireUser } from "@/auth/guard";
 import {
   chuanHoaDuongDan,
+  kiemTraAnh,
   kiemTraGopY,
   laLoaiGopY,
   laTrangThaiGopY,
@@ -27,6 +28,10 @@ export async function guiGopY(_truoc: string | null, form: FormData): Promise<st
   const loi = kiemTraGopY(noiDung);
   if (loi) return loi;
 
+  const anh = chuoi(form, "anh");
+  const loiAnh = kiemTraAnh(anh);
+  if (loiAnh) return loiAnh;
+
   const tho = chuoi(form, "loai");
   try {
     await taoGopY({
@@ -37,6 +42,7 @@ export async function guiGopY(_truoc: string | null, form: FormData): Promise<st
       duongDan: chuanHoaDuongDan(chuoi(form, "duong_dan")),
       nguoiGuiId: toi.id,
       nguoiGuiEmail: toi.email,
+      anh,
     });
   } catch (e) {
     console.error("[gop-y] loi ghi gop y:", e);

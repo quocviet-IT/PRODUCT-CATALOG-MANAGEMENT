@@ -1,9 +1,12 @@
 import { describe, it, expect } from "vitest";
 import {
+  BYTE_ANH_TOI_DA,
   DAI_NOI_DUNG_TOI_DA,
   DAI_DUONG_DAN_TOI_DA,
   chuanHoaDuongDan,
+  kiemTraAnh,
   kiemTraGopY,
+  tachDataUrl,
   laLoaiGopY,
   laTrangThaiGopY,
 } from "@/modules/gop-y/gop-y.model";
@@ -67,5 +70,46 @@ describe("laLoaiGopY / laTrangThaiGopY", () => {
     expect(laTrangThaiGopY("moi")).toBe(true);
     expect(laTrangThaiGopY("da-xu-ly")).toBe(true);
     expect(laTrangThaiGopY("dang-xem")).toBe(false);
+  });
+});
+
+describe("kiemTraAnh", () => {
+  it("khong kem anh la hop le", () => {
+    expect(kiemTraAnh("")).toBeNull();
+  });
+
+  it("nhan anh duoi tran", () => {
+    expect(kiemTraAnh("data:image/jpeg;base64," + "A".repeat(1000))).toBeNull();
+  });
+
+  it("tu choi anh vuot tran", () => {
+    // Vuot tran than cua server action thi Next tu choi ca form — mat luon
+    // phan chu nguoi ta go. Chan o day de con bao duoc mot cau de hieu.
+    expect(kiemTraAnh("x".repeat(BYTE_ANH_TOI_DA + 1))).toBe("anh_qua_lon");
+  });
+});
+
+describe("tachDataUrl", () => {
+  const jpg = "data:image/jpeg;base64," + Buffer.from("anh-thu").toString("base64");
+
+  it("tach duoc kieu va byte", () => {
+    const kq = tachDataUrl(jpg);
+    expect(kq?.kieu).toBe("image/jpeg");
+    expect(kq?.byte.toString()).toBe("anh-thu");
+  });
+
+  it("nhan png va webp", () => {
+    expect(tachDataUrl("data:image/png;base64,QUJD")?.kieu).toBe("image/png");
+    expect(tachDataUrl("data:image/webp;base64,QUJD")?.kieu).toBe("image/webp");
+  });
+
+  it("tra null cho chuoi khong dung dang, KHONG nem loi", () => {
+    // Du lieu den tu trinh duyet; mot gop y co chu van dang gia hon mot loi 500
+    // vi cai anh kem theo.
+    expect(tachDataUrl("")).toBeNull();
+    expect(tachDataUrl("khong phai anh")).toBeNull();
+    expect(tachDataUrl("data:text/html;base64,PHNjcmlwdD4=")).toBeNull();
+    expect(tachDataUrl("data:image/svg+xml;base64,PHN2Zz4=")).toBeNull();
+    expect(tachDataUrl("data:image/jpeg;base64,<script>")).toBeNull();
   });
 });

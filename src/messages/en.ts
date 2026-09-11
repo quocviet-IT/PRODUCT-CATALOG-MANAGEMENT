@@ -90,6 +90,14 @@ export const en: BoChu = {
     da_gui: "Sent — thank you",
 
     nut_menu: "Feedback inbox",
+    dang_chup: "Capturing",
+    kem_anh: "Send a screenshot too",
+    xem_anh: "The screenshot that will be sent",
+    anh_mo_ta: "Taken when you pressed the button, before this box opened. Only administrators can see it.",
+    chup_hong: "The screenshot could not be taken. You can still send the report without it.",
+    anh_qua_lon: "That screenshot is too large. Untick the screenshot and send again.",
+    xem: "View",
+
     tieu_de_trang: "Feedback",
     mo_ta_trang: "What staff have sent in from their screens. {n} still open.",
     cot_loai: "Kind",
