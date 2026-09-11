@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Globe, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { requireUser } from "@/auth/guard";
 import { dangXuat } from "@/auth/actions";
 import { layChu } from "@/messages/may-chu";
-import { DoiNgonNgu } from "@/messages/dung-chu";
+import { NhomDoiNgonNgu } from "@/messages/dung-chu";
 import { Logo } from "@/app/thuong-hieu";
 import { NutGui } from "@/ui/nut-gui";
 import { NutGopY } from "./gop-y/nut-gop-y";
@@ -38,15 +38,8 @@ export default async function KhungQuanTri({ children }: { children: React.React
             {/* Doi ngon ngu nam NGAY TREN THANH, khong trong menu nguoi dung (anh
                 gop y 11/09/2026): nguoi dung phai thay duoc la co ban tieng Anh
                 va doi bang mot cu bam, khong phai mo menu ra moi biet. Co tren ca
-                man hinh hep. */}
-            <div
-              role="group"
-              aria-label={t.dieu_huong.ngon_ngu}
-              className="flex items-center gap-2 text-hp-muted"
-            >
-              <Globe {...ICON} />
-              <DoiNgonNgu />
-            </div>
+                man hinh hep. Cung mot nut voi trang dang nhap. */}
+            <NhomDoiNgonNgu />
             <span aria-hidden="true" className="my-auto h-4 w-px bg-hp-rule" />
             <MenuTaiKhoan
               hoTen={user.fullName}
