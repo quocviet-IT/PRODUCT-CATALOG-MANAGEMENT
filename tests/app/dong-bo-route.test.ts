@@ -185,8 +185,12 @@ describe("POST /api/dong-bo/du-lieu", () => {
 });
 
 describe("POST /api/dong-bo/thieu-anh", () => {
+  // Thu muc cot "Hinh da xu ly" cua dong thu hai trong bangMau (xem mapper test).
+  const Q = "1QqXuLy0000000000000000000000";
   const anhThuMuc = {
-    tm1: [{ fileId: "thuvien1", ten: "a.jpg" }, { fileId: "thuvien2", ten: "b.jpg" }],
+    [Q]: [{ fileId: "thuvien1", ten: "a.jpg" }, { fileId: "thuvien2", ten: "b.jpg" }],
+    // Thu muc cu con sot trong ban do — bang KHONG tro toi no nua.
+    "thu-muc-cu": [{ fileId: "cu1", ten: "c.jpg" }],
   };
 
   function datBanChup(hang: unknown = bangMau) {
@@ -207,16 +211,16 @@ describe("POST /api/dong-bo/thieu-anh", () => {
     }
   });
 
-  it("xep anh dai dien cua tung dong TRUOC thu vien anh", async () => {
-    // Thu tu la mot yeu cau that: hong giua chung thi cai hong phai la phan it
-    // ai mo, khong phai luoi catalogue ma ai cung nhin thay dau tien.
+  it("CHI nap anh thu muc cot Hinh da xu ly — khong anh cot HINH, khong thu muc cu", async () => {
+    // Chot 11/09/2026. Truoc day tuyen nay nap anh cot HINH truoc roi lap qua
+    // MOI thu muc trong ban do — ke ca 1.464 thu muc cu con sot sau khi tab rut
+    // tu 1.839 dong xuong 12.
     datBanChup();
     const res = await thieuAnh.POST(goi("thieu-anh", {}));
     const { thieu } = (await res.json()) as { thieu: string[] };
-    const viTriThuVien = thieu.indexOf("thuvien1");
-    expect(viTriThuVien).toBeGreaterThan(0);
-    // Moi thu dung truoc thu vien deu phai la anh dai dien.
-    expect(thieu.slice(0, viTriThuVien)).not.toContain("thuvien2");
+    expect(thieu).toEqual(["thuvien1", "thuvien2"]);
+    expect(thieu).not.toContain("18I_Y9I_tLtnizSbupQclY48QBxG3I3XB"); // anh cot HINH cua dong dau
+    expect(thieu).not.toContain("cu1"); // thu muc cu bang khong con tro toi
   });
 
   it("bo qua anh da co DU CA HAI co trong bo dem", async () => {

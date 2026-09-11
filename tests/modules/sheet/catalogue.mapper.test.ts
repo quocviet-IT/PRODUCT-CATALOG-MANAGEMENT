@@ -90,39 +90,40 @@ describe("anhXaBang", () => {
     expect(ds[0].fileIdAnh).toBe("18I_Y9I_tLtnizSbupQclY48QBxG3I3XB");
   });
 
-  it("lay hyperlink lam duong dan thu muc", () => {
-    expect(ds[0].urlThuMuc).toContain("/drive/folders/");
+  it("lay hyperlink cot Hinh da xu ly lam duong dan thu muc", () => {
+    expect(ds[1].urlThuMuc).toContain("/drive/folders/");
   });
 
-  describe("uu tien thu muc anh DA XU LY", () => {
-    // Bang tinh dang chuyen dan tu anh chup tho sang anh da chinh sua. Luc doi
-    // (09/09/2026) cot moi mo co 7/71 mau, cot cu co 69/71 — nen phai uu tien
-    // theo TUNG DONG, khong phai chon mot cot cho ca bang. Chon ca bang la 64
-    // mau mat sach thu vien anh ngay tren nhung link khach dang mo.
+  describe("CHI lay thu muc cot Hinh da xu ly (chot 11/09/2026)", () => {
+    // Truoc day co duong lui ve cot raw "Hinh raw - luu mau" khi cot da xu ly
+    // trong (luc chuyen 09/09 cot moi chi co 7/71 mau). Tab Catalogue-OL da lam
+    // lai, 12/12 dong co cot da xu ly, va cong ty chot chi dong bo va hien anh
+    // DA XU LY — giu duong lui la de anh raw lot vao catalogue gui khach.
     it("dong co CA HAI cot thi lay cot da xu ly", () => {
       expect(ds[1].urlThuMuc).toContain("1QqXuLy");
       expect(ds[1].idThuMuc).toBe("1QqXuLy0000000000000000000000");
     });
 
-    it("dong chi co cot raw thi van lay cot raw", () => {
-      expect(ds[0].idThuMuc).toBe("1On2rBPpBzpLsU7xTyvg0H8v7MM12foE8");
+    it("dong chi co cot raw thi KHONG co thu muc anh — khong lui ve cot raw", () => {
+      expect(ds[0].urlThuMuc).toBeNull();
+      expect(ds[0].idThuMuc).toBeNull();
     });
 
-    it("bang chua co cot moi van doc duoc, chi la khong co anh da xu ly", () => {
+    it("bang chua co cot da xu ly van doc duoc, chi la khong dong nao co thu muc", () => {
       // Cot "Hinh da xu ly" KHONG bat buoc: mot ban sao bang tinh chua kip them
-      // cot van phai chay, va van lay duoc thu muc raw nhu cu.
+      // cot van phai doc duoc — nhung khong con lay thu muc raw thay the.
       const khongCotMoi = bangMau.map((h) => h.slice(0, 13));
       const lai = anhXaBang(khongCotMoi);
       expect(lai.length).toBe(ds.length);
-      expect(lai[1].idThuMuc).toBe("1On2rBPpBzpLsU7xTyvg0H8v7MM12foE8");
+      expect(lai.every((d) => d.idThuMuc === null)).toBe(true);
     });
   });
 
   describe("thu muc dat bang chip Drive", () => {
-    // Bang tinh dung CA HAI kieu trong cung cot FOLDER HINH: dong cu la
-    // hyperlink, dong moi la chip (chen bang @ hoac keo tep tu Drive). Google
-    // KHONG dat lien ket cua chip vao hyperlink — doc mot kieu thoi thi nhung
-    // dong dung chip mat thu vien anh ma khong bao loi gi.
+    // Bang tinh dung CA HAI kieu trong cung mot cot: dong cu la hyperlink, dong
+    // moi la chip (chen bang @ hoac keo tep tu Drive). Google KHONG dat lien ket
+    // cua chip vao hyperlink — doc mot kieu thoi thi nhung dong dung chip mat
+    // thu vien anh ma khong bao loi gi. Nay chi con doc cot Hinh da xu ly.
     const chip = (v: string, uri: string): OTho => ({
       formattedValue: v,
       chipRuns: [
@@ -133,10 +134,8 @@ describe("anhXaBang", () => {
 
     // Tim cot theo TIEU DE, khong ghi cung so thu tu: bang tinh doi cot lien
     // tuc, mot con so cung o day se lang le thay the nham cot khac.
-    const cotThuMuc = bangMau[1].findIndex((o) =>
-      ["hình raw - lưu mẫu", "folder hình"].includes(
-        chuanHoaTieuDe(o.formattedValue ?? "").toLowerCase(),
-      ),
+    const cotThuMuc = bangMau[1].findIndex(
+      (o) => chuanHoaTieuDe(o.formattedValue ?? "").toLowerCase() === "hình đã xử lý",
     );
 
     it("fixture co cot thu muc de thay the", () => {

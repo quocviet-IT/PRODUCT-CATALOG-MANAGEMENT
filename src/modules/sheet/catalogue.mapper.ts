@@ -185,14 +185,14 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
     const maMau = chu(lay(h, "maMau"));
     const mo = chu(lay(h, "mo"));
     const chiTiet = chu(lay(h, "chiTiet"));
-    // Anh da xu ly truoc, anh raw sau — va xet theo TUNG DONG chu khong phai
-    // chon lay mot cot cho ca bang.
+    // CHI cot "Hinh da xu ly" — KHONG lui ve cot "Hinh raw - luu mau" nua.
     //
-    // Vi sao khong doi han sang cot moi: luc chuyen (09/09/2026) cot "Hinh da
-    // xu ly" moi co 7/71 mau, con cot raw co 69/71. Doi han la 64 mau mat sach
-    // thu vien anh ngay tren nhung link khach dang mo. Uu tien tung dong thi mau
-    // nao xu ly xong la tu doi sang anh dep, khong ai phai lam gi.
-    const urlThuMuc = lienKet(lay(h, "thuMucDaXuLy")) ?? lienKet(lay(h, "thuMuc"));
+    // Truoc 11/09/2026 co duong lui: luc chuyen (09/09) cot da xu ly moi co 7/71
+    // mau, doi han la 64 mau mat thu vien anh. Nay tab Catalogue-OL da lam lai,
+    // 12/12 dong deu co cot da xu ly, va cong ty chot: chi dong bo va chi hien
+    // anh DA XU LY. Giu duong lui la de anh raw lot vao catalogue gui khach moi
+    // khi mot dong quen dien cot Q — dung thu vua duoc yeu cau bo.
+    const urlThuMuc = lienKet(lay(h, "thuMucDaXuLy"));
     const fileIdAnh = tachFileIdAnh(lay(h, "hinh")?.userEnteredValue?.formulaValue);
 
     // includeGridData=true tra ca dong trong nhung con dinh dang (border,
