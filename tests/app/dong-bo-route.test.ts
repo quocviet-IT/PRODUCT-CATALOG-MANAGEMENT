@@ -314,10 +314,14 @@ describe("liet ke thu muc theo lo", () => {
   // cai, tuc hon 13 phut — ma Apps Script cat ngang o 6 phut. Nen phai chia lo,
   // va chia lo thi phai GOP chu khong duoc ghi de.
   const LUC = "dong-bo/thu-muc-luc.json";
-  function datBanChup(banDo: Record<string, unknown[]> = {}, luc: Record<string, unknown> = {}) {
+  function datBanChup(
+    banDo: Record<string, unknown[]> = {},
+    luc: Record<string, unknown> = {},
+    bang: unknown = bangMau,
+  ) {
     taiVe.mockImplementation(async (khoa: string) =>
       Buffer.from(
-        JSON.stringify(khoa === "dong-bo/bang.json" ? bangMau : khoa === LUC ? luc : banDo),
+        JSON.stringify(khoa === "dong-bo/bang.json" ? bang : khoa === LUC ? luc : banDo),
         "utf8",
       ),
     );
@@ -330,6 +334,44 @@ describe("liet ke thu muc theo lo", () => {
       soMoi: number;
       soCu: number;
     };
+
+  it("thieu-thu-muc: thu muc QUA HAN chi dua toi da SO_LIET_KE_LAI_MOI_LUOT cai moi luot, thu muc MOI dua het", async () => {
+    // Gio chay Apps Script dung chung ca ngay cho moi job: bang lon ma liet ke lai
+    // het moi 30 phut thi can han muc, va dongBoBang moi phut chet theo.
+    const { SO_LIET_KE_LAI_MOI_LUOT } = await import("@/modules/sheet/thu-muc-can-liet-ke");
+    const COT_SKU = 0;
+    const COT_MA_MAU = 4;
+    const COT_XU_LY = 13;
+    const ids = Array.from(
+      { length: SO_LIET_KE_LAI_MOI_LUOT + 6 },
+      (_, i) => `1QqLo${String(i).padStart(24, "0")}`,
+    );
+    const [idMoi, ...idCu] = ids;
+    // Nhan ban dong co cot "Hinh da xu ly" cua bang mau, moi dong mot thu muc rieng.
+    const bang = [
+      bangMau[0],
+      bangMau[1],
+      ...ids.map((id, i) =>
+        bangMau[3].map((o, cot) =>
+          cot === COT_XU_LY
+            ? { formattedValue: `xu-ly-${i}`, hyperlink: `https://drive.google.com/drive/folders/${id}` }
+            : cot === COT_MA_MAU
+              ? { formattedValue: `M${1000 + i}` }
+              : cot === COT_SKU
+                ? { formattedValue: String(300000 + i) }
+                : o,
+        ),
+      ),
+    ];
+    // idMoi chua liet ke; con lai da liet ke nhung chua co moc -> qua han het.
+    datBanChup(Object.fromEntries(idCu.map((id) => [id, []])), {}, bang);
+
+    const r = await hoi();
+    expect(r.soMoi).toBe(1);
+    expect(r.soCu).toBe(idCu.length);
+    expect(r.tongThieu).toBe(ids.length);
+    expect(r.thieu).toEqual([idMoi, ...idCu.slice(0, SO_LIET_KE_LAI_MOI_LUOT)]);
+  });
 
   it("thieu-thu-muc: tra ve thu muc CHUA liet ke", async () => {
     datBanChup({});

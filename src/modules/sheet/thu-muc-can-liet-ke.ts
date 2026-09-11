@@ -52,6 +52,30 @@ export function thuMucCanLietKe(
 }
 
 /**
+ * Toi da bao nhieu thu muc CU (qua han) dua cho MOT luot Apps Script — 10 phut
+ * mot luot.
+ *
+ * Liet ke lai ton gio chay Apps Script, ma han muc trigger 6 GIO/NGAY DUNG CHUNG
+ * cho ca ba job: can no thi dongBoBang (moi phut) cung dung theo, het ngay.
+ * DriveApp mat ~0,55 giay mot thu muc; bang tung tro toi 1.476 thu muc, liet ke
+ * lai het moi 30 phut la ~10,8 gio chay moi ngay.
+ *
+ * Chan 30: toi da ~17 giay moi luot, ~40 phut moi ngay, bang lon co nao cung
+ * vay. Doi lai, bang lon thi vong lam moi dai ra (300 thu muc: ~100 phut) thay
+ * vi lam sap dong bo. Thu muc MOI khong bi chan: moi cai chi liet ke mot lan, va
+ * la thu nguoi dung dang cho thay.
+ */
+export const SO_LIET_KE_LAI_MOI_LUOT = 30;
+
+/** Danh sach cho mot luot: het thu muc MOI, roi toi da `toiDaCu` thu muc CU (cu nhat truoc). */
+export function luotLietKe(
+  { moi, cu }: { moi: readonly string[]; cu: readonly string[] },
+  toiDaCu: number = SO_LIET_KE_LAI_MOI_LUOT,
+): string[] {
+  return [...moi, ...cu.slice(0, toiDaCu)];
+}
+
+/**
  * Gop mot lo vua liet ke vao ban do.
  *
  * MANG RONG KHONG DUOC XOA DANH SACH DANG CO. Apps Script gui [] ca khi thu muc

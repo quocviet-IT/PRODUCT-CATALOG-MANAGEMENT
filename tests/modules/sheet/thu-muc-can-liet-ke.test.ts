@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import {
   HAN_LIET_KE_LAI_MS,
+  SO_LIET_KE_LAI_MOI_LUOT,
+  luotLietKe,
   thuMucCanLietKe,
   tronBanDo,
 } from "@/modules/sheet/thu-muc-can-liet-ke";
@@ -58,6 +60,33 @@ describe("thuMucCanLietKe", () => {
 
   it("khong lap khi nhieu dong chung mot thu muc", () => {
     expect(thuMucCanLietKe(["a", "a", "b"], {}, {}, BAY_GIO).moi).toEqual(["a", "b"]);
+  });
+});
+
+describe("luotLietKe", () => {
+  it("chan 30 thu muc CU moi luot — gio chay Apps Script dung chung ca ngay cho moi job", () => {
+    expect(SO_LIET_KE_LAI_MOI_LUOT).toBe(30);
+  });
+
+  it("dua HET thu muc moi, nhung chi toi da SO_LIET_KE_LAI_MOI_LUOT thu muc cu, cu nhat truoc", () => {
+    // Bang tung tro toi 1.476 thu muc: liet ke lai het moi 30 phut la ~10,8 gio
+    // chay moi ngay, qua han muc 6 gio — va dongBoBang moi phut chet theo.
+    const moi = Array.from({ length: 45 }, (_, i) => `moi-${i}`);
+    const cu = Array.from({ length: 100 }, (_, i) => `cu-${i}`);
+    expect(luotLietKe({ moi, cu })).toEqual([...moi, ...cu.slice(0, SO_LIET_KE_LAI_MOI_LUOT)]);
+  });
+
+  it("it thu muc cu hon muc chan thi dua het", () => {
+    expect(luotLietKe({ moi: ["m"], cu: ["a", "b"] })).toEqual(["m", "a", "b"]);
+  });
+
+  it("noi voi thuMucCanLietKe: thu muc cu nhat duoc lam truoc, cai con lai cho luot sau", () => {
+    const ids = Array.from({ length: 40 }, (_, i) => `t-${i}`);
+    const banDo = Object.fromEntries(ids.map((id) => [id, []]));
+    // t-0 cu nhat (moc 40+39 phut truoc), t-39 moi nhat trong nhom qua han.
+    const luc = Object.fromEntries(ids.map((id, i) => [id, truoc(79 - i)]));
+    const r = luotLietKe(thuMucCanLietKe(ids, banDo, luc, BAY_GIO));
+    expect(r).toEqual(ids.slice(0, SO_LIET_KE_LAI_MOI_LUOT));
   });
 });
 
