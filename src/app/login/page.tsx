@@ -57,7 +57,9 @@ export default async function TrangDangNhap({
         <NhomDoiNgonNgu />
       </div>
 
-      <main className="mx-auto flex min-h-screen w-full max-w-md flex-col justify-center px-6 py-10">
+      {/* KHONG w-full: the co theo noi dung nhu truoc khi co nut ngon ngu. Them
+          w-full hom 11/09/2026 lam the rong ra ~60px ma khong ai yeu cau. */}
+      <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
         <div className="border border-hp-rule bg-hp-card p-8 sm:p-10">
           <Logo alt={t.catalogue_sheet.thuong_hieu} />
           <h1 className="mt-3 font-title text-[28px] leading-none tracking-[0.02em] text-hp-ink">
