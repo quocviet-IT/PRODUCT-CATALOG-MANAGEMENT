@@ -167,6 +167,52 @@ describe("anhXaBang", () => {
     });
   });
 
+  describe("cot Clip da xu ly (cot R, 11/09/2026)", () => {
+    // Moi dong mot tep .mp4, thuong gan bang chip Drive. Cot KHONG bat buoc:
+    // ban sao bang tinh chua them cot van doc duoc, chi la khong dong nao co clip.
+    const URI_CLIP = "https://drive.google.com/file/d/1ClipDaXuLy000000000000000000/view?usp=drive_link";
+    const chipClip: OTho = {
+      formattedValue: "C10068.mp4",
+      chipRuns: [{ chip: { richLinkProperties: { mimeType: "video/mp4", uri: URI_CLIP } } }],
+    };
+
+    /** bangMau them MOT cot o cuoi; o du lieu dat theo chi so cua tieu de moi. */
+    function themCot(tieuDe: string, o: OTho): OTho[][] {
+      const tieuDeMoi = [...bangMau[1], { formattedValue: tieuDe }];
+      // Dong du lieu co the ngan hon hang tieu de (Sheets bo o trong cuoi dong),
+      // nen gan theo chi so chu khong noi vao cuoi dong.
+      const h = [...bangMau[2]];
+      h[tieuDeMoi.length - 1] = o;
+      return [bangMau[0], tieuDeMoi, h];
+    }
+
+    it("doc ten tep va lien ket tu chip", () => {
+      const [d] = anhXaBang(themCot("Clip đã xử lý", chipClip));
+      expect(d.tenClipDaXuLy).toBe("C10068.mp4");
+      expect(d.urlClipDaXuLy).toBe(URI_CLIP);
+    });
+
+    it("o dung hyperlink thuong cung doc duoc", () => {
+      const [d] = anhXaBang(themCot("Clip đã xử lý", { formattedValue: "L10370.mp4", hyperlink: URI_CLIP }));
+      expect(d.urlClipDaXuLy).toBe(URI_CLIP);
+      expect(d.tenClipDaXuLy).toBe("L10370.mp4");
+    });
+
+    it("tieu de go khong dau van nhan", () => {
+      expect(anhXaBang(themCot("CLIP DA XU LY", chipClip))[0].urlClipDaXuLy).toBe(URI_CLIP);
+    });
+
+    it("o trong thi ca ten lan lien ket deu null", () => {
+      const [d] = anhXaBang(themCot("Clip đã xử lý", {}));
+      expect(d.urlClipDaXuLy).toBeNull();
+      expect(d.tenClipDaXuLy).toBeNull();
+    });
+
+    it("bang chua co cot thi khong dong nao co clip", () => {
+      expect(ds.every((d) => d.urlClipDaXuLy === null && d.tenClipDaXuLy === null)).toBe(true);
+    });
+  });
+
   it("uu tien cot SIZE, trong thi tach tu mo ta", () => {
     expect(ds[0].size).toBe("10");   // co trong cot
     expect(ds[1].size).toBe("18VN"); // chi co trong mo ta

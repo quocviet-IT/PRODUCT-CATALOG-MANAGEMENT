@@ -317,6 +317,8 @@ export const vi = {
     cot_mau: "Màu",
     cot_o_chu: "Ổ chủ",
     cot_thu_muc: "Thư mục",
+    cot_clip: "Clip đã xử lý",
+    mo_clip: "Mở clip trên Google Drive",
     chua_co_ma_mau: "— Chưa có mã mẫu —",
     anh_chua_co_ma_mau: "Ảnh sản phẩm chưa có mã mẫu",
     size_nhan: "Size",

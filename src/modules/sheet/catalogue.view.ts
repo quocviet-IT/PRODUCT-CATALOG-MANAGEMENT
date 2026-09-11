@@ -636,7 +636,7 @@ export function sapXepDanhSach(ds: DongCatalogue[], sap: SapXep): DongCatalogue[
  * Tinh tren TOAN BO bang chu khong theo bo loc dang bat: cot bien mat rooi hien
  * lai theo tung lan go tim thi bang nhay lien tuc.
  */
-export const COT_AN_DUOC = ["sku", "so", "mo", "chiTiet", "size", "oChu", "thuMuc"] as const;
+export const COT_AN_DUOC = ["sku", "so", "mo", "chiTiet", "size", "oChu", "thuMuc", "clip"] as const;
 export type CotAnDuoc = (typeof COT_AN_DUOC)[number];
 
 const LAY_COT: Record<CotAnDuoc, (d: DongCatalogue) => unknown> = {
@@ -647,6 +647,7 @@ const LAY_COT: Record<CotAnDuoc, (d: DongCatalogue) => unknown> = {
   size: (d) => d.size,
   oChu: (d) => d.oChu,
   thuMuc: (d) => d.urlThuMuc ?? d.urlAnhConcept ?? d.urlClipTho,
+  clip: (d) => d.urlClipDaXuLy ?? d.tenClipDaXuLy,
 };
 
 export function cotRong(ds: DongCatalogue[]): Set<CotAnDuoc> {

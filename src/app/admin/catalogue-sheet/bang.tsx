@@ -4,6 +4,7 @@ import { DauCungMau, OTich } from "./chon-mau";
 import { layChu } from "@/messages/may-chu";
 import { nhanCo } from "./nhan-co";
 import { LienKetDrive } from "./lien-ket-drive";
+import { ClipDaXuLy } from "./clip-da-xu-ly";
 import { AnhTai } from "@/ui/anh-tai";
 import { DauCot } from "./dau-cot";
 import { dongLapMa, type CotAnDuoc, type KhoaSap, type SapXep } from "@/modules/sheet/catalogue.view";
@@ -107,6 +108,7 @@ export async function BangCatalogue({
             )}
             {hien("oChu") && <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_o_chu}</th>}
             {hien("thuMuc") && <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_thu_muc}</th>}
+            {hien("clip") && <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_clip}</th>}
             <th className={O_TIEU_DE}>{t.catalogue_sheet.cot_canh_bao}</th>
           </tr>
         </thead>
@@ -164,6 +166,11 @@ export async function BangCatalogue({
               {hien("thuMuc") && (
                 <td className={O_GON}>
                   <LienKetDrive d={d} t={t} />
+                </td>
+              )}
+              {hien("clip") && (
+                <td className={O_GON}>
+                  <ClipDaXuLy d={d} t={t} />
                 </td>
               )}
 

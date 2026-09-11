@@ -588,6 +588,15 @@ describe("cot rong", () => {
   it("danh sach rong khi khong co dong nao thi coi la rong het", () => {
     expect(cotRong([]).size).toBe(COT_AN_DUOC.length);
   });
+
+  it("cot Clip da xu ly an khi khong dong nao co clip, hien khi co mot dong", () => {
+    // Ban sao bang tinh chua them cot R khong duoc bay ra mot cot gach ngang.
+    expect(cotRong(ds).has("clip")).toBe(true);
+    const coClip: DongCatalogue = {
+      ...ds[0], urlClipDaXuLy: "https://drive.google.com/file/d/x/view", tenClipDaXuLy: "C10068.mp4",
+    };
+    expect(cotRong([...ds, coClip]).has("clip")).toBe(false);
+  });
 });
 
 describe("dong lap mot ma mau", () => {

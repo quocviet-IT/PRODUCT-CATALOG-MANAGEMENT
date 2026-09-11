@@ -191,8 +191,8 @@ describe("nhieu dong cung mot ma mau", () => {
     dongSheet: 1, sku: null, maMau: "C10045", mo: null, so: null, dongSp: null,
     loaiSp: null, mau: null, oChu: null, chiTiet: null, chatLieu: null,
     loaiXoan: null, tlVang: null, size: null, fileIdAnh: null, urlThuMuc: null,
-    idThuMuc: null, urlAnhConcept: null, urlClipTho: null, moTa1: null,
-    moTa2: null, co: [], ...v,
+    idThuMuc: null, urlAnhConcept: null, urlClipTho: null, urlClipDaXuLy: null,
+    tenClipDaXuLy: null, moTa1: null, moTa2: null, co: [], ...v,
   });
   const anh = (n: number) =>
     Array.from({ length: n }, (_, i) => ({ fileId: `f${i}`, ten: `${i}.jpg` }));

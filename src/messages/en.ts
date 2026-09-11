@@ -311,6 +311,8 @@ export const en: BoChu = {
     cot_mau: "Colour",
     cot_o_chu: "Centre stone",
     cot_thu_muc: "Folder",
+    cot_clip: "Edited clip",
+    mo_clip: "Open the clip in Google Drive",
     chua_co_ma_mau: "— No model code —",
     anh_chua_co_ma_mau: "Product image without a model code",
     size_nhan: "Size",

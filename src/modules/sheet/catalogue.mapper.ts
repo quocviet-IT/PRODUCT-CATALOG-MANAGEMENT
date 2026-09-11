@@ -49,6 +49,13 @@ export type DongCatalogue = {
   /** Cot "Source clip tho": thu muc video quay tho. */
   urlClipTho: string | null;
   /**
+   * Cot "Clip da xu ly" (cot R): MOT tep video .mp4 da dung xong, thuong gan
+   * bang chip Drive. Giu ca ten hien tren o ("C10068.mp4") — do la thu nguoi
+   * dung nhan ra tren bang tinh — lan lien ket de mo clip.
+   */
+  urlClipDaXuLy: string | null;
+  tenClipDaXuLy: string | null;
+  /**
    * Hai cot mo ta bang chu cua nguoi ban hang: "Dây mân côi", "Nhẫn band xoàn
    * lab"... Day la NGON NGU NGUOI TA GO khi tim, chu khong phai ma hang — nen
    * chung phai nam trong vung tim kiem.
@@ -110,6 +117,8 @@ const COT = {
   // the la chip hay hyperlink nhu cot tren.
   anhConcept: { ten: "Hình raw - concept", batBuoc: false, nhan: ["hình raw - concept"] },
   clipTho:    { ten: "Source clip thô",    batBuoc: false, nhan: ["source clip thô", "source clip tho"] },
+  // Cot R, clip dung xong cua tung mau (11/09/2026). Chip hay hyperlink deu doc.
+  clipDaXuLy: { ten: "Clip đã xử lý",      batBuoc: false, nhan: ["clip đã xử lý", "clip da xu ly"] },
   // Hai cot mo ta. Nguoi dung bao tim "day man coi" khong ra gi (09/09/2026):
   // ca hai cot deu chua bao gio duoc doc vao he thong.
   moTa1:      { ten: "Mô tả 1",            batBuoc: false, nhan: ["mô tả 1"] },
@@ -234,6 +243,8 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
       chatLieu: chu(lay(h, "chatLieu")),
       urlAnhConcept: lienKet(lay(h, "anhConcept")),
       urlClipTho: lienKet(lay(h, "clipTho")),
+      urlClipDaXuLy: lienKet(lay(h, "clipDaXuLy")),
+      tenClipDaXuLy: chu(lay(h, "clipDaXuLy")),
       moTa1: chu(lay(h, "moTa1")),
       moTa2: chu(lay(h, "moTa2")),
       loaiXoan: chiTiet === null ? null

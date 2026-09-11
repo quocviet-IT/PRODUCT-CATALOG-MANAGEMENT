@@ -7,7 +7,8 @@ function dong(v: Partial<DongCatalogue>): DongCatalogue {
     dongSheet: 3, sku: null, maMau: "N10145", mo: null, so: null, dongSp: null, loaiSp: null,
     mau: null, oChu: null, chiTiet: null, chatLieu: null, loaiXoan: null, tlVang: null,
     size: null, fileIdAnh: "anh-cot-hinh", urlThuMuc: null, idThuMuc: "q1",
-    urlAnhConcept: null, urlClipTho: null, moTa1: null, moTa2: null, co: [], ...v,
+    urlAnhConcept: null, urlClipTho: null, urlClipDaXuLy: null, tenClipDaXuLy: null,
+    moTa1: null, moTa2: null, co: [], ...v,
   };
 }
 
