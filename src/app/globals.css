@@ -73,8 +73,71 @@ body {
  */
 .tone-trang,
 .tone-toi,
-.tone-reu {
-  background: var(--color-hp-foundation);
+.tone-reu,
+.tone-hoa-van,
+.tone-champagne,
+.tone-bach-kim,
+.tone-hong-phan {
+  background-color: var(--color-hp-foundation);
+}
+
+/*
+ * Hoa van hong (11/09/2026) — giong website hungphatusa.com: nen kem cua thuong
+ * hieu + tam hoa van toile hong cua chinh website. Bang mau giu nguyen tong be,
+ * chi them nen.
+ *
+ * Website phu hoa van bang ::before voi opacity 0.08-0.10. O day do mo da PHA
+ * SAN vao anh (hoa-van-hong.jpg): khung "Xem truoc" la mot khung tu cuon, va mot
+ * lop ::before dat tuyet doi chi phu duoc chieu cao mot man hinh — cuon xuong la
+ * het hoa van.
+ */
+.tone-hoa-van {
+  background-image: url("/giao-dien/hoa-van-hong.jpg");
+  background-repeat: repeat;
+  background-size: 740px auto;
+}
+
+/* Champagne — kem anh vang am, cho trang suc vang. */
+.tone-champagne {
+  --color-hp-foundation:  #F5EDDD;
+  --color-hp-card:        #FBF6EC;
+  --color-hp-inset:       #EEE3CD;
+  --color-hp-ink:         #2B2419;
+  --color-hp-body:        #4A3F2F;
+  --color-hp-muted:       #6B5F4B;
+  --color-hp-rule:        #E0D2B6;
+}
+
+/* Bach kim — xam bac mat, cho kim cuong va bach kim. Nen anh trang tinh: anh
+   chup nen trang dat len xam bac van giu duoc ranh gioi o anh. */
+.tone-bach-kim {
+  --color-hp-plate:       #FFFFFF;
+  --color-hp-foundation:  #F1F2F4;
+  --color-hp-card:        #FAFBFC;
+  --color-hp-inset:       #E6E9EC;
+  --color-hp-ink:         #1D2125;
+  --color-hp-body:        #3B4248;
+  --color-hp-muted:       #5F666D;
+  --color-hp-rule:        #D8DCE0;
+}
+
+/* Hong phan — hong nhat nhe nhang, khong hoa van. */
+.tone-hong-phan {
+  --color-hp-foundation:  #F8EDEC;
+  --color-hp-card:        #FDF7F6;
+  --color-hp-inset:       #F1E1DF;
+  --color-hp-ink:         #2E2325;
+  --color-hp-body:        #4D3E41;
+  --color-hp-muted:       #6E5D61;
+  --color-hp-rule:        #E9D5D3;
+}
+
+@media print {
+  /* Hoa van la de xem tren man hinh. In ra giay no thanh mot lop xam lam ban anh
+     san pham — ban in cua tong hoa van la tong be tron. */
+  .tone-hoa-van {
+    background-image: none;
+  }
 }
 
 /* Trang nga — khong phai trang tinh: trang tinh lam nen anh va nen trang bang

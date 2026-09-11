@@ -18,7 +18,17 @@ export const BO_CUC = [
 ] as const;
 export type BoCuc = (typeof BO_CUC)[number];
 
-export const TONE = ["beige", "trang", "toi", "reu"] as const;
+/**
+ * Tong mau.
+ *
+ * Bon tong sau them 11/09/2026 theo yeu cau nguoi dung — chon theo nhom san pham
+ * hoac phong cach. Bon tong dau giu nguyen de catalogue da gui khong doi. THEM
+ * vao cuoi chu khong chen giua: thu tu nay la thu tu hien trong o chon.
+ */
+export const TONE = [
+  "beige", "trang", "toi", "reu",
+  "hoa-van", "champagne", "bach-kim", "hong-phan",
+] as const;
 export type Tone = (typeof TONE)[number];
 
 /**
@@ -46,6 +56,20 @@ export const MAU_NHAN: Record<Nhan, { nhat: string; dam: string }> = {
   dong: { nhat: "#A96A00", dam: "#8A5600" },
   luc:  { nhat: "#00806B", dam: "#006956" },
   man:  { nhat: "#A0439B", dam: "#873781" },
+};
+
+/**
+ * Mau nhan GOI Y khi sale chon mot tong moi: chon tong la doi luon mau nhan cho
+ * hop — dung nhu mo ta tung tong da duyet — va sale van doi lai duoc ben duoi.
+ *
+ * Bon tong cu KHONG co goi y: truoc nay chon tong khong dong gi toi mau nhan, va
+ * chon lai chung khong duoc am tham doi mau nhan sale da chon.
+ */
+export const NHAN_GOI_Y: Partial<Record<Tone, Nhan>> = {
+  "hoa-van": "hong",
+  champagne: "dong",
+  "bach-kim": "luc",
+  "hong-phan": "hong",
 };
 
 /** Cac thong so co the bat/tat cho khach xem. Trung ten voi truong cua MucCatalogue. */

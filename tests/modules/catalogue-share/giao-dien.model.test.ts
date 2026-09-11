@@ -177,7 +177,7 @@ describe("bố cục và màu nhấn mới", () => {
     for (const k of BO_CUC) expect(docGiaoDien({ boCuc: k }).boCuc).toBe(k);
   });
 
-  it("nhận cả bốn nền và bốn màu nhấn", () => {
+  it("nhận cả tám nền và bốn màu nhấn", () => {
     for (const k of TONE) expect(docGiaoDien({ tone: k }).tone).toBe(k);
     for (const k of NHAN) expect(docGiaoDien({ nhan: k }).nhan).toBe(k);
   });

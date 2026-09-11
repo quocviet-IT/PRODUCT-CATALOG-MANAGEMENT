@@ -40,6 +40,10 @@ export const LOP_TONE: Record<Tone, string> = {
   trang: "tone-trang",
   toi: "tone-toi",
   reu: "tone-reu",
+  "hoa-van": "tone-hoa-van",
+  champagne: "tone-champagne",
+  "bach-kim": "tone-bach-kim",
+  "hong-phan": "tone-hong-phan",
 };
 
 /**

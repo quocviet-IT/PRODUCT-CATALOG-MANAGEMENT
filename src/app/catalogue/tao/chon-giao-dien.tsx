@@ -5,7 +5,7 @@ import type { BoChu } from "@/messages";
 import { NGON_NGU, NHAN_NGON_NGU } from "@/messages/ngon-ngu";
 import {
   BO_CUC, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_TEN_KHACH, DAI_TEN_SALE,
-  MAU_NHAN, NHAN, THONG_SO, TONE,
+  MAU_NHAN, NHAN, NHAN_GOI_Y, THONG_SO, TONE,
   type BoCuc, type GiaoDienCatalogue, type Nhan, type ThongSo, type Tone,
 } from "@/modules/catalogue-share/giao-dien.model";
 
@@ -54,12 +54,22 @@ function nhanBoCuc(t: BoChu): Record<BoCuc, { ten: string; moTa: string }> {
   };
 }
 
-function nhanTone(t: BoChu): Record<Tone, string> {
+/**
+ * Ten va dong goi y cua tung tong. Dong goi y noi tong do HOP VOI nhom san pham
+ * nao — nguoi dung xin chon theme "theo tung nhom san pham hoac phong cach", va
+ * tam o mau thi khong tu noi duoc dieu do.
+ */
+function nhanTone(t: BoChu): Record<Tone, { ten: string; moTa: string }> {
+  const m = t.mau_giao_dien;
   return {
-    beige: t.mau_giao_dien.tone_beige,
-    trang: t.mau_giao_dien.tone_trang,
-    toi: t.mau_giao_dien.tone_toi,
-    reu: t.mau_giao_dien.tone_reu,
+    beige: { ten: m.tone_beige, moTa: m.tone_beige_mo_ta },
+    trang: { ten: m.tone_trang, moTa: m.tone_trang_mo_ta },
+    toi: { ten: m.tone_toi, moTa: m.tone_toi_mo_ta },
+    reu: { ten: m.tone_reu, moTa: m.tone_reu_mo_ta },
+    "hoa-van": { ten: m.tone_hoa_van, moTa: m.tone_hoa_van_mo_ta },
+    champagne: { ten: m.tone_champagne, moTa: m.tone_champagne_mo_ta },
+    "bach-kim": { ten: m.tone_bach_kim, moTa: m.tone_bach_kim_mo_ta },
+    "hong-phan": { ten: m.tone_hong_phan, moTa: m.tone_hong_phan_mo_ta },
   };
 }
 
@@ -72,12 +82,20 @@ function nhanMauNhan(t: BoChu): Record<Nhan, string> {
   };
 }
 
-/** Mau thuc te cua tung tong — trung voi bang bien trong globals.css. */
+/**
+ * Mau thuc te cua tung tong — trung voi bang bien trong globals.css. O vuong nho
+ * chi 24px nen khong ve noi hoa van mo; tong hoa van dung cham hong lam dau hieu,
+ * con hoa van that thi hien ngay tren khung xem thu.
+ */
 const O_MAU: Record<Tone, { nen: string; muc: string }> = {
   beige: { nen: "#F7F1EB", muc: "#2A2725" },
   trang: { nen: "#FFFFFF", muc: "#1B1A19" },
   toi: { nen: "#1A1815", muc: "#F4EEE6" },
   reu: { nen: "#1B231D", muc: "#EDF0E9" },
+  "hoa-van": { nen: "#F7F1EB", muc: "#E91D79" },
+  champagne: { nen: "#F5EDDD", muc: "#2B2419" },
+  "bach-kim": { nen: "#F1F2F4", muc: "#1D2125" },
+  "hong-phan": { nen: "#F8EDEC", muc: "#2E2325" },
 };
 
 function nhanThongSo(t: BoChu): Record<ThongSo, string> {
@@ -197,6 +215,12 @@ export function ChonGiaoDien({
     khiDoi({ ...gia, ...phan });
   }
 
+  /** Chon tong moi thi doi luon mau nhan goi y (xem NHAN_GOI_Y); tong cu thi giu nguyen. */
+  function datTone(k: Tone) {
+    const goiY = NHAN_GOI_Y[k];
+    dat(goiY ? { tone: k, nhan: goiY } : { tone: k });
+  }
+
   function datBia(phan: Partial<typeof bia>) {
     const moi = { ...bia, ...phan };
     // Xoa het chu thi khong con trang bia — dung dung quy tac cua docGiaoDien
@@ -268,7 +292,7 @@ export function ChonGiaoDien({
                 name="tone"
                 value={k}
                 checked={gia.tone === k}
-                onChange={() => dat({ tone: k })}
+                onChange={() => datTone(k)}
                 className="sr-only"
               />
               <span
@@ -278,10 +302,15 @@ export function ChonGiaoDien({
               >
                 <span className="h-2 w-2" style={{ background: O_MAU[k].muc }} />
               </span>
-              <span className="text-sm text-hp-body">{tone[k]}</span>
+              <span className="text-sm text-hp-body">{tone[k].ten}</span>
             </label>
           ))}
         </div>
+        {/* Goi y cua tong DANG CHON: hop voi nhom san pham nao. aria-live de trinh
+            doc man hinh doc lai khi sale doi tong. */}
+        <p aria-live="polite" className="mt-3 text-xs leading-relaxed text-hp-muted">
+          {tone[gia.tone].moTa}
+        </p>
       </fieldset>
 
       {/* --- Mau nhan --- */}
