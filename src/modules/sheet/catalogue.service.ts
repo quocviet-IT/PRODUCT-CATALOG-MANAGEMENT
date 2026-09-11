@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { getEnv } from "@/lib/env";
+import { ganAnhDaiDien } from "./anh-dai-dien";
 import { anhXaBang, type DongCatalogue, type OTho } from "./catalogue.mapper";
 import { docBangTho } from "./sheet.client";
 import { lietKeAnhTrongThuMuc, type AnhTrongThuMuc } from "./drive.client";
@@ -99,14 +100,29 @@ export async function layDanhSachCatalogue(): Promise<DongCatalogue[]> {
     if (!env.CATALOGUE_SHEET_ID) throw new LoiThieuSheetId();
     tho = await docBangTho(env.CATALOGUE_SHEET_ID, env.CATALOGUE_SHEET_TAB);
   }
-  const ds = anhXaBang(tho);
+  let ds = anhXaBang(tho);
+
+  // Anh thu nho = anh dau tien thu muc cot "Hinh da xu ly" (xem anh-dai-dien.ts).
+  // Chi khi nguon co ban do anh. Doc hong thi van tra danh sach — mot man hinh
+  // khong duoc trang chi vi thieu anh thu nho; luoi se lui ve cot HINH.
+  if (env.CATALOGUE_TEP_ANH_MAU) {
+    try {
+      const banDo = JSON.parse(
+        await docTepMau(env.CATALOGUE_TEP_ANH_MAU),
+      ) as Record<string, AnhTrongThuMuc[]>;
+      ds = ganAnhDaiDien(ds, banDo);
+    } catch (loi) {
+      console.error("[catalogue] khong doc duoc ban do anh de gan anh thu nho:", loi);
+    }
+  }
+
   // Chi ghi bo dem SAU khi ca hai buoc thanh cong — khong dem ket qua loi.
   boDem = { luc: Date.now(), ds };
   return ds;
 }
 
 // ---------------------------------------------------------------------------
-// Anh cua mot mau: toan bo tep trong thu muc ma cot FOLDER HINH tro toi.
+// Anh cua mot mau: toan bo tep trong thu muc ma cot "Hinh da xu ly" tro toi.
 // ---------------------------------------------------------------------------
 
 /** Danh sach thu muc doi cham hon bang tinh nhieu, nen dem lau hon. */

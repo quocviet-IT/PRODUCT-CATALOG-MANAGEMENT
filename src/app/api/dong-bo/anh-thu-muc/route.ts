@@ -11,12 +11,17 @@ import {
 /**
  * Nhận một LÔ thư mục vừa liệt kê và GỘP vào bản đồ đã có.
  *
- * Gộp chứ không ghi đè: việc liệt kê 1.476 thư mục Drive không xong trong một
- * lượt chạy Apps Script (6 phút), nên nó phải chia nhiều lượt. Ghi đè ở đây là
- * mỗi lượt xoá sạch công của lượt trước, và bản đồ không bao giờ đầy.
+ * Gộp chứ không ghi đè: việc liệt kê hàng nghìn thư mục Drive không xong trong
+ * một lượt chạy Apps Script (6 phút), nên nó phải chia nhiều lượt. Ghi đè ở đây
+ * là mỗi lượt xoá sạch công của lượt trước, và bản đồ không bao giờ đầy.
  *
  * Một thư mục thật sự rỗng vẫn phải được gửi lên với mảng rỗng — có mặt trong
  * bản đồ nghĩa là "đã liệt kê rồi", và đó là thứ ngăn script hỏi lại nó mãi.
+ *
+ * NHƯNG từ 11/09/2026 thư mục được liệt kê LẠI mỗi 30 phút, nên mảng rỗng gửi
+ * lên cho một thư mục ĐANG có ảnh thì bị bỏ qua (giuLai) — script gửi mảng rỗng
+ * cả khi không mở được thư mục, và một lần Drive trục trặc không được phép xoá
+ * sạch thư viện ảnh của mẫu đang nằm trên catalogue.
  */
 
 const KHONG_LUU_DEM = { "Cache-Control": "private, no-store" };
@@ -58,11 +63,11 @@ export async function POST(req: Request): Promise<Response> {
   // So dem lay THANG tu buoc gop — no da cam ban do trong tay. Khong cong don
   // so cua rieng lo nay: cong don thi chay lai mot lo se dem hai lan, va dong
   // chu trang thai bao sai.
-  const { tong, themMoi, soAnh } = await gopAnhThuMuc(than.anhThuMuc);
+  const { tong, themMoi, soAnh, giuLai } = await gopAnhThuMuc(than.anhThuMuc);
   const truoc = await docTrangThai();
   if (truoc) {
     await ghiTrangThai({ ...truoc, luc: new Date().toISOString(), soThuMuc: tong, soAnh });
   }
 
-  return Response.json({ tong, themMoi, soAnh }, { headers: KHONG_LUU_DEM });
+  return Response.json({ tong, themMoi, soAnh, giuLai }, { headers: KHONG_LUU_DEM });
 }

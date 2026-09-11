@@ -4,21 +4,25 @@ import {
   KHOA_BANG,
   LoiChuaBatDongBo,
   docAnhThuMuc,
+  docLucThuMuc,
   kiemKhoa,
 } from "@/modules/sheet/dong-bo";
+import { thuMucCanLietKe } from "@/modules/sheet/thu-muc-can-liet-ke";
 
 /**
- * Tra lại những thư mục ảnh CHƯA được liệt kê.
+ * Tra lại những thư mục ảnh cần Apps Script liệt kê: CHƯA liệt kê, và (từ
+ * 11/09/2026) đã liệt kê QUÁ 30 PHÚT.
  *
- * VÌ SAO CẦN: bảng tính lớn từ 71 lên 1.854 mẫu, trỏ tới 1.476 thư mục Drive.
- * DriveApp liệt kê mất khoảng nửa giây một thư mục — hơn 13 phút cho cả lượt,
- * trong khi Apps Script cắt ngang ở 6 phút. Lượt chạy đầy đủ vì thế chết giữa
- * chừng và không bao giờ tới bước gửi kết quả, nên bản đồ thư mục đóng băng ở
- * 65 cái từ hồi bảng còn nhỏ: 1.625 mẫu mất sạch thư viện ảnh.
- *
- * Chia thành nhiều lượt thì phải có chỗ hỏi "còn thiếu cái nào" — chính là đây.
+ * VÌ SAO CẦN: bảng tính từng trỏ tới 1.476 thư mục Drive. DriveApp liệt kê mất
+ * hơn một giây một thư mục, trong khi Apps Script cắt ngang ở 6 phút — nên phải
+ * chia nhiều lượt, và chia lượt thì phải có chỗ hỏi "còn cái nào" — chính là đây.
  * Cùng lối với `/api/dong-bo/thieu-anh`: máy chủ tự suy ra từ bản chụp vừa nhận,
  * script không phải mang theo danh sách.
+ *
+ * LIỆT KÊ LẠI: trước đây mỗi thư mục chỉ được liệt kê một lần, nên thêm hay bớt
+ * ảnh BÊN TRONG một thư mục "Hình đã xử lý" đã có thì web không bao giờ thấy.
+ * Nay thư mục mới đứng trước, rồi tới thư mục quá hạn — cũ nhất trước. Xem
+ * modules/sheet/thu-muc-can-liet-ke.ts.
  */
 
 const KHONG_LUU_DEM = { "Cache-Control": "private, no-store" };
@@ -48,13 +52,21 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   const daCo = await docAnhThuMuc();
-  const canCo = new Set<string>();
-  for (const d of anhXaBang(bang)) if (d.idThuMuc) canCo.add(d.idThuMuc);
+  const lucLietKe = await docLucThuMuc();
+  const canCo: string[] = [];
+  for (const d of anhXaBang(bang)) if (d.idThuMuc) canCo.push(d.idThuMuc);
 
-  const thieu = [...canCo].filter((id) => !(id in daCo));
+  const { moi, cu } = thuMucCanLietKe(canCo, daCo, lucLietKe, Date.now());
+  const thieu = [...moi, ...cu];
 
   return Response.json(
-    { thieu: thieu.slice(0, SO_TRA_TOI_DA), tongThieu: thieu.length, tong: canCo.size },
+    {
+      thieu: thieu.slice(0, SO_TRA_TOI_DA),
+      tongThieu: thieu.length,
+      tong: new Set(canCo).size,
+      soMoi: moi.length,
+      soCu: cu.length,
+    },
     { headers: KHONG_LUU_DEM },
   );
 }

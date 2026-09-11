@@ -32,6 +32,7 @@ import { nhanCo } from "./nhan-co";
 import { PhanTrang } from "@/ui/phan-trang";
 import { BangDieuKhien } from "./bang-dieu-khien";
 import { AnhTai } from "@/ui/anh-tai";
+import { anhThuNho } from "@/modules/sheet/anh-dai-dien";
 import { KetQuaLoc, NguonLoc } from "@/ui/vung-loc";
 
 /**
@@ -111,9 +112,9 @@ async function The({ d, lap }: { d: DongCatalogue; lap: boolean }) {
                  duration-150 hover:border-hp-ink"
     >
       <div className="flex aspect-[4/5] items-center justify-center bg-hp-inset">
-        {d.fileIdAnh ? (
+        {anhThuNho(d) ? (
           <AnhTai
-            src={`/api/anh-drive/${d.fileIdAnh}`}
+            src={`/api/anh-drive/${anhThuNho(d)}`}
             alt={d.maMau ?? t.catalogue_sheet.anh_chua_co_ma_mau}
             lop="h-full w-full object-contain"
           />

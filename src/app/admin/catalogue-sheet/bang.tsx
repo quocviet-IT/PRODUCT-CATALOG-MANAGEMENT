@@ -7,6 +7,7 @@ import { LienKetDrive } from "./lien-ket-drive";
 import { AnhTai } from "@/ui/anh-tai";
 import { DauCot } from "./dau-cot";
 import { dongLapMa, type CotAnDuoc, type KhoaSap, type SapXep } from "@/modules/sheet/catalogue.view";
+import { anhThuNho } from "@/modules/sheet/anh-dai-dien";
 
 
 /** Chuan tieng Viet dung dau phay thap phan, du bang tinh ghi dau cham. */
@@ -123,9 +124,9 @@ export async function BangCatalogue({
               </td>
               <td className={O_DU_LIEU}>
                 <div className="flex h-11 w-11 items-center justify-center bg-hp-inset">
-                  {d.fileIdAnh ? (
+                  {anhThuNho(d) ? (
                     <AnhTai
-                      src={`/api/anh-drive/${d.fileIdAnh}`}
+                      src={`/api/anh-drive/${anhThuNho(d)}`}
                       alt={d.maMau ?? t.catalogue_sheet.anh_chua_co_ma_mau}
                       lop="h-full w-full object-contain"
                     />

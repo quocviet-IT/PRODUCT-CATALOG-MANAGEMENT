@@ -37,6 +37,13 @@ export type DongCatalogue = {
   urlThuMuc: string | null;
   /** ID thu muc Drive chua TOAN BO anh cua mau, tach tu urlThuMuc. */
   idThuMuc: string | null;
+  /**
+   * Anh thu nho tren luoi: anh DAU TIEN trong thu muc cot "Hinh da xu ly".
+   * Mapper KHONG dat truong nay — dich vu gan sau khi doc ban do anh (xem
+   * anh-dai-dien.ts). undefined = nguon khong co ban do anh; null = da tinh,
+   * thu muc khong co anh.
+   */
+  anhDaiDien?: string | null;
   /** Cot "Hinh raw - concept": thu muc anh y tuong, tach hoan toan voi anh mau. */
   urlAnhConcept: string | null;
   /** Cot "Source clip tho": thu muc video quay tho. */
