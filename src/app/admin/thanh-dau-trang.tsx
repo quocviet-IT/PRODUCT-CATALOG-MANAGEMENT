@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronUp, Inbox, Menu, Users } from "lucide-react";
-import { DoiNgonNgu, useChu } from "@/messages/dung-chu";
+import { useChu } from "@/messages/dung-chu";
 import { MUC_CHINH, laTrangDangMo, lopDongMenu } from "./dieu-huong";
 
 /**
@@ -16,11 +16,13 @@ import { MUC_CHINH, laTrangDangMo, lopDongMenu } from "./dieu-huong";
  *
  * Nay chia theo tan suat dung:
  *  - Ba trang lam viec hang ngay nam ngang, chi chu, co gach duoi trang dang mo.
- *  - Moi thu con lai vao menu cua nguoi dung o goc phai — nhung thu mot tuan bam
- *    vai lan thi khong can chiem cho tren thanh moi ngay.
- *  - Duoi 1024px: ca ba trang cung vao menu, thanh chi con logo va nut "Menu".
- *    Nguong la 1024 chu khong phai 768: do that o 768px, logo + ba muc + mot ten
- *    dai da tran ra ngoai mep phai.
+ *  - Doi ngon ngu VI / EN nam ngay tren thanh (xem layout.tsx): de trong menu
+ *    thi nguoi dung khong biet la co ban tieng Anh.
+ *  - Moi thu con lai (hop gop y, tai khoan, dang xuat) vao menu cua nguoi dung o
+ *    goc phai — nhung thu mot tuan bam vai lan thi khong can cho tren thanh.
+ *  - Duoi 1024px: ca ba trang cung vao menu, thanh chi con logo, ngon ngu va nut
+ *    "Menu". Nguong la 1024 chu khong phai 768: do that o 768px, logo + ba muc +
+ *    mot ten dai da tran ra ngoai mep phai.
  */
 
 const MUC = "text-[11px] uppercase tracking-[0.14em] whitespace-nowrap transition-colors duration-150";
@@ -105,7 +107,7 @@ export function MenuTaiKhoan({
   const dong = () => setMoTai(null);
 
   return (
-    <div ref={khung} className="ml-auto flex items-center self-stretch lg:relative">
+    <div ref={khung} className="flex items-center self-stretch lg:relative">
       <button
         ref={nut}
         type="button"
@@ -119,7 +121,9 @@ export function MenuTaiKhoan({
           {t.dieu_huong.menu}
         </span>
         <span className="hidden items-center gap-1.5 lg:flex">
-          <span className="max-w-[14rem] truncate">{hoTen}</span>
+          {/* 12rem chu khong rong hon: tu khi doi ngon ngu nam tren thanh, o 1024px
+              mot ten dai hon the nay se day ca thanh tran ra mep phai. */}
+          <span className="max-w-[12rem] truncate">{hoTen}</span>
           {mo ? <ChevronUp {...ICON} /> : <ChevronDown {...ICON} />}
         </span>
       </button>
@@ -129,7 +133,7 @@ export function MenuTaiKhoan({
           id={idBang}
           // Duoi 1024px: trai ngang duoi thanh. Tu 1024px: mot bang 18rem bam vao
           // goc phai, mep tren trung duong ke day thanh. z-[60] de nam TREN tab gop
-          // y noi (z-[55]) — tren dien thoai tab do de len chu "EN" cua dong ngon ngu.
+          // y noi (z-[55]) — tren dien thoai tab do de len noi dung cua menu.
           className="absolute inset-x-0 top-full z-[60] border-b border-hp-rule bg-hp-card
                      lg:inset-x-auto lg:right-0 lg:-mt-px lg:w-72 lg:border
                      lg:shadow-[0_12px_40px_rgba(42,39,37,0.08)]"
@@ -186,13 +190,6 @@ export function MenuTaiKhoan({
               </Link>
             </div>
           )}
-
-          <div className="flex items-center justify-between border-b border-hp-rule px-5 py-3">
-            <span className="text-[10px] uppercase tracking-[0.14em] text-hp-muted">
-              {t.dieu_huong.ngon_ngu}
-            </span>
-            <DoiNgonNgu />
-          </div>
 
           <div className="py-2">{nutDangXuat}</div>
         </div>

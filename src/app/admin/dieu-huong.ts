@@ -3,9 +3,10 @@ import type { BoChu } from "@/messages";
 /**
  * Ba trang lam viec hang ngay — nam ngang tren thanh dau trang.
  *
- * Nhung thu con lai (hop gop y, tai khoan, ngon ngu, dang xuat) vao menu cua
- * nguoi dung o goc phai: truoc 11/09/2026 ca tam muc nam ngang hang tren mot
- * thanh, man hinh 1280px la chu da xuong dong va thanh dau trang cao gap doi.
+ * Doi ngon ngu cung nam tren thanh; nhung thu con lai (hop gop y, tai khoan,
+ * dang xuat) vao menu cua nguoi dung o goc phai: truoc 11/09/2026 ca tam muc nam
+ * ngang hang tren mot thanh, man hinh 1280px la chu da xuong dong va thanh dau
+ * trang cao gap doi.
  */
 export const MUC_CHINH = [
   { href: "/admin/catalogue-sheet", chu: (t: BoChu) => t.catalogue_sheet.tieu_de },
