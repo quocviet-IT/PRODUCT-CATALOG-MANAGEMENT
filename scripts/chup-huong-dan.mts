@@ -252,6 +252,13 @@ async function main(): Promise<void> {
     ]);
 
     // --- 3. Tich chon ---
+    // Xoa o tim kiem truoc khi tich. Tu 11/09/2026 tab Catalogue-OL chi con 12
+    // dong, va loc "nhan" chi con MOT mau — ma buoc 5 can it nhat hai mau trong
+    // gio (the thu hai co nut "Go mau nay"): lan chup do dung o buoc 5 vi het 30
+    // giay doi. Tich tren ca danh sach thi khong phu thuoc bang tinh co bao nhieu
+    // nhan.
+    await page.fill("#q", "");
+    await page.waitForTimeout(800);
     // Dong danh sach GOI Y truoc da. O tim kiem con giu tieu diem tu buoc 2 nen
     // danh sach goi y van mo, va no nam de len hang dau cua bang — Playwright
     // bao "subtree intercepts pointer events" roi doi het 30 giay. Nguoi that
