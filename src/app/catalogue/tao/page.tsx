@@ -22,13 +22,7 @@ export default async function TrangTaoCatalogue() {
   await requireUser();
   return (
     <main className="mx-auto min-h-screen max-w-5xl px-6 py-10">
-      {/* Nut gop y phai co CA o day, du man hinh nay nam ngoai khung /admin.
-          Day la cho sale lam viec that va cung la cho hay hong nhat — bat ho
-          quay ve mot man hinh khac moi bao duoc loi la mat luon cai loi. */}
-      <div className="flex items-center justify-between gap-4">
-        <Logo alt={t.catalogue_sheet.thuong_hieu} />
-        <NutGopY />
-      </div>
+      <Logo alt={t.catalogue_sheet.thuong_hieu} />
       <h1 className="mt-2 font-title text-[32px] leading-none tracking-[0.02em] text-hp-ink">
         {t.chia_se.tao_tieu_de}
       </h1>
@@ -36,6 +30,12 @@ export default async function TrangTaoCatalogue() {
       <div className="mt-5 mb-8 h-px bg-hp-rule" />
 
       <TaoCatalogue />
+
+      {/* Nut gop y phai co CA o day, du man hinh nay nam ngoai khung /admin.
+          Day la cho sale lam viec that va cung la cho hay hong nhat — bat ho
+          quay ve mot man hinh khac moi bao duoc loi la mat luon cai loi. No la
+          tab NOI o mep phai nen dat o dau trong cay cung duoc. */}
+      <NutGopY />
     </main>
   );
 }

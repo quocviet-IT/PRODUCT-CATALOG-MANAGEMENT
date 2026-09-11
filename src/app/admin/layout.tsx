@@ -41,9 +41,9 @@ export default async function KhungQuanTri({ children }: { children: React.React
             choi. */}
         {user.mucQuyen === "admin" && (
           <>
-            {/* "Hop gop y" chu khong phai "Gop y": ngay ben canh la NUT gop
-                y ma ai cung bam duoc. Hai chu giong het nhau tren cung mot
-                thanh la nguoi dung phai thu ca hai moi biet cai nao la cai gi. */}
+            {/* "Hop gop y" chu khong phai "Gop y": tab gop y noi o mep phai ma
+                ai cung bam duoc cung mang chu "Gop y". Hai cho cung mot chu la
+                nguoi dung phai thu ca hai moi biet cai nao la cai gi. */}
             <Link href="/admin/gop-y" className={MUC}>
               <Inbox {...ICON} />
               {t.gop_y.nut_menu}
@@ -69,7 +69,6 @@ export default async function KhungQuanTri({ children }: { children: React.React
         <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
           {user.fullName}
         </span>
-        <NutGopY />
         <DoiNgonNgu />
         <form action={dangXuat}>
           <NutGui
@@ -86,6 +85,10 @@ export default async function KhungQuanTri({ children }: { children: React.React
           noi dung. Thieu no thi bang rong day ca vung noi dung vuot man hinh va
           toan trang truot ngang, thay vi bang tu cuon trong khung cua no. */}
       <main className="min-w-0 flex-1 p-8">{children}</main>
+
+      {/* Tab NOI o mep phai, bam duoc o moi vi tri cuon — nen nam ngoai thanh
+          dau trang (xem nut-gop-y.tsx). */}
+      <NutGopY />
     </div>
   );
 }
