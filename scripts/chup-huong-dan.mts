@@ -267,7 +267,13 @@ async function main(): Promise<void> {
     await page.locator("#q").blur();
     await page.waitForTimeout(300);
 
-    const oTich = page.locator('input[type="checkbox"]');
+    // CHI tich dong CO ANH. Buoc 5 chup thu vien anh cua mau thu hai trong gio,
+    // ma bang tinh that co luc co dong chua co anh nao (vua them, thu muc chua
+    // co anh) — tich trung dong do la buoc 5 doi het 30 giay (11/09/2026).
+    const oTich = page
+      .locator("tbody tr")
+      .filter({ has: page.locator("img") })
+      .locator('input[type="checkbox"]');
     const soO = Math.min(await oTich.count(), 3);
     for (let i = 0; i < soO; i++) await oTich.nth(i).check();
     await page.waitForTimeout(400);
