@@ -31,9 +31,17 @@
  *  4. Chon ham chayThuMotLan roi bam Run. Google se hoi cap quyen — dong y.
  *  5. Chon ham datLichChay roi bam Run. Tu day no tu chay.
  *
- * BA LICH CHAY: dongBoBang moi phut (chi bang tinh), dongBoThuMuc moi 10 phut
- * (liet ke thu muc anh, chay dan cho toi khi het), dongBoAnh moi 10 phut (nap
- * anh vao bo dem). Lan dau day du mat khoang mot tieng.
+ * BA LICH CHAY: dongBoBang moi phut (bang tinh), dongBoThuMuc moi 10 phut (liet
+ * ke thu muc anh, chay dan cho toi khi het), dongBoAnh moi 5 phut (nap anh vao
+ * bo dem). Lan dau day du mat khoang mot tieng.
+ *
+ * NOI BUOC (tu 11/09/2026): khi dongBoBang thay bang tinh THAT SU doi, no liet ke
+ * luon thu muc cot Q MOI va day anh ngay trong luot do — dong moi hien du anh sau
+ * khoang 1-2 phut thay vi 8-16 phut. Hai lich kia van giu de du phong. Bang khong
+ * doi thi khong ton them loi goi nao. Xem noiBuoc_.
+ *
+ * CAP NHAT TU BAN CU: dan de toan bo tep nay len Code.gs roi bam Save. Ten ba ham
+ * lich chay khong doi, nen KHONG can chay lai datLichChay.
  *
  * KHOA BI MAT nam trong Script Properties chu khong trong ma nguon: ma nguon
  * co the bi chia se, sao chep, dan vao chat.
@@ -58,6 +66,27 @@ var NGAN_SACH_MS = 4.5 * 60 * 1000;
  * bat dau.
  */
 var NGAN_SACH_ANH_MS = 4 * 60 * 1000;
+
+/**
+ * Ngan sach cua duong NOI BUOC, chay ben trong dongBoBang.
+ *
+ * Nho hon hai lich du phong: noi buoc chi can lo cho DONG MOI — thuong mot vai
+ * thu muc va vai chuc anh. Phan ton dong (bang tinh vua dan them hang tram dong)
+ * de lich 10 phut va 5 phut lo theo nhip cua chung. Cong lai duoi 4,5 phut, xa
+ * tran 6 phut cua mot luot.
+ */
+var NGAN_SACH_NOI_THU_MUC_MS = 60 * 1000;
+var NGAN_SACH_NOI_ANH_MS = 3 * 60 * 1000;
+
+/**
+ * Mot "cho" (xem giuCho_) giu lau nhat bang mot luot Apps Script dai nhat (6
+ * phut). Apps Script giet luot qua han ma KHONG chay finally, nen cho khong co
+ * han se khoa viec do mai mai sau mot lan bi giet.
+ */
+var HAN_GIU_CHO_MS = 6 * 60 * 1000;
+
+/** Script Property danh dau "bang vua doi, can noi buoc". Gia tri la moc ms. */
+var KHOA_CAN_NOI = 'CAN_NOI';
 
 /**
  * Bao nhieu anh mot goi tin. Vercel chan than yeu cau o 4,5 MB va base64 lam
@@ -183,6 +212,66 @@ function goiWeb_(c, duong, than) {
 }
 
 // ---------------------------------------------------------------------------
+// Chong chay chong
+// ---------------------------------------------------------------------------
+
+/**
+ * Giu "cho" cho mot viec nang ('THU_MUC' hoac 'ANH'). Tra false khi dang co
+ * mot luot khac giu cho do — nguoi goi phai bo qua luot nay.
+ *
+ * VI SAO CAN: tu khi co noi buoc, dongBoBang moi phut co the tu lam hai viec
+ * nay, trong luc lich 10 phut va 5 phut van chay du phong. Khong giu cho thi hai
+ * luot cung hoi mot danh sach anh thieu roi tai VE CUNG NHUNG ANH DO — dot hai
+ * lan han muc de duoc dung mot lan viec.
+ *
+ * Moi viec MOT cho rieng, khong khoa chung ca luot bang LockService: liet ke thu
+ * muc va day anh la hai viec khac nhau, van chay song song duoc nhu truoc. Khoa
+ * chung thi luot anh phai dung cho luot thu muc 4,5 phut.
+ *
+ * LockService chi dung de doc-roi-ghi Script Property cho nguyen tu, giu trong
+ * vai mili giay. Cho co han — xem HAN_GIU_CHO_MS.
+ */
+function giuCho_(ten) {
+  var khoa = LockService.getScriptLock();
+  if (!khoa.tryLock(10 * 1000)) return false;
+  try {
+    var p = PropertiesService.getScriptProperties();
+    var het = Number(p.getProperty('CHO_' + ten) || 0);
+    if (het > Date.now()) return false;
+    p.setProperty('CHO_' + ten, String(Date.now() + HAN_GIU_CHO_MS));
+    return true;
+  } finally {
+    khoa.releaseLock();
+  }
+}
+
+function traCho_(ten) {
+  PropertiesService.getScriptProperties().deleteProperty('CHO_' + ten);
+}
+
+function danhDauCanNoi_() {
+  PropertiesService.getScriptProperties().setProperty(KHOA_CAN_NOI, String(Date.now()));
+}
+
+/**
+ * Xoa dau "can noi buoc" CHI KHI no van la cai minh da doc luc bat dau. Neu trong
+ * luc dang noi, bang tinh lai doi va mot luot dongBoBang khac da dat dau moi, thi
+ * lan sua do can mot luot noi rieng — xoa di la bo quen no.
+ */
+function xoaDauNeuChuaDoi_(dau) {
+  var khoa = LockService.getScriptLock();
+  // Khong lay duoc khoa thi de nguyen dau: phut sau noi them mot luot, ton vai
+  // loi goi, con hon lam mat mot lan sua bang.
+  if (!khoa.tryLock(10 * 1000)) return;
+  try {
+    var p = PropertiesService.getScriptProperties();
+    if (p.getProperty(KHOA_CAN_NOI) === dau) p.deleteProperty(KHOA_CAN_NOI);
+  } finally {
+    khoa.releaseLock();
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Doc bang tinh
 // ---------------------------------------------------------------------------
 
@@ -260,11 +349,12 @@ function lietKeAnh_(idThuMuc) {
 // ---------------------------------------------------------------------------
 
 /**
- * Chi bang tinh, KHONG liet ke thu muc Drive. ~2 giay.
+ * Bang tinh moi phut, ~2 giay — va NOI BUOC khi bang vua doi.
  *
  * Day la ham chay moi phut, va la ham DUY NHAT dung toi bang tinh. Viec liet ke
- * thu muc anh nam han o dongBoThuMuc: no ton hang chuc phut, con doc bang tinh
- * chi ton vai giay. Gop chung lai thi khong the chay moi phut duoc.
+ * thu muc anh va day anh nam o dongBoThuMuc / dongBoAnh: chung ton hang phut, con
+ * doc bang tinh chi ton vai giay. Ham nay chi GOI toi chung qua noiBuoc_, va chi
+ * khi bang that su doi.
  */
 function dongBoBang() {
   var c = cauHinh_();
@@ -274,11 +364,65 @@ function dongBoBang() {
     kq.doiBang
       ? 'BANG TINH DA DOI -> da day ' + kq.soDong + ' dong.'
       : 'Bang tinh khong doi (' + kq.soDong + ' dong).');
+
+  if (kq.doiBang) danhDauCanNoi_();
+  // Loi o duong noi KHONG duoc lam hong luot bang tinh: bang da day xong roi, va
+  // hai lich du phong van chay — loi that se hien ra o luot cua chung.
+  try {
+    noiBuoc_(c);
+  } catch (e) {
+    Logger.log('NOI BUOC loi, de lich du phong lam: ' + e);
+  }
   return kq;
 }
 
 /**
- * Liet ke thu muc anh — CHAY DAN qua nhieu luot.
+ * NOI BUOC — dong moi hien du anh sau khoang 1-2 phut thay vi 8-16 phut.
+ *
+ * Truoc day mot dong moi phai CHO lan luot qua ba lich rieng: bang (<=1 phut) ->
+ * liet ke thu muc (<=10 phut) -> day anh (<=5 phut). Gan nhu toan bo thoi gian la
+ * ngoi cho toi luot, khong phai lam viec.
+ *
+ * Nay khi dongBoBang thay bang doi, no dat dau CAN_NOI roi lam luon: liet ke CHI
+ * thu muc MOI, roi day anh. Dau chi duoc xoa khi buoc day anh da chay — neu mot
+ * lich du phong dang giu cho thi de nguyen dau, phut sau thu lai.
+ *
+ * Bang KHONG doi va khong con dau: ham nay chi doc mot Script Property roi thoi,
+ * khong mot loi goi mang nao.
+ */
+function noiBuoc_(c) {
+  var dau = PropertiesService.getScriptProperties().getProperty(KHOA_CAN_NOI);
+  if (!dau) return null;
+
+  if (!giuCho_('THU_MUC')) {
+    Logger.log('NOI BUOC: dang co luot liet ke thu muc khac, phut sau thu lai.');
+    return null;
+  }
+  try {
+    lietKeThuMuc_(c, NGAN_SACH_NOI_THU_MUC_MS, true);
+  } finally {
+    traCho_('THU_MUC');
+  }
+
+  if (!giuCho_('ANH')) {
+    // Luot day anh dang chay da hoi danh sach anh thieu TRUOC khi thu muc moi
+    // duoc liet ke, nen no khong lo anh cua dong moi. Giu dau de phut sau lam.
+    Logger.log('NOI BUOC: dang co luot day anh khac, phut sau thu lai.');
+    return null;
+  }
+  var kq;
+  try {
+    kq = dayAnh_(c, NGAN_SACH_NOI_ANH_MS);
+  } finally {
+    traCho_('ANH');
+  }
+
+  xoaDauNeuChuaDoi_(dau);
+  return kq;
+}
+
+/**
+ * Liet ke thu muc anh — lich 10 phut, CHAY DAN qua nhieu luot.
  *
  * VI SAO PHAI CHIA LO: bang tinh lon tu 71 len 1.854 mau, tro toi 1.476 thu muc
  * Drive. DriveApp liet ke mat khoang nua giay mot thu muc — hon 13 phut cho ca
@@ -290,14 +434,35 @@ function dongBoBang() {
  * va cong GOP THEM chu khong ghi de. Vai luot la day.
  */
 function dongBoThuMuc() {
-  var c = cauHinh_();
-  var het = Date.now() + NGAN_SACH_MS;
+  if (!giuCho_('THU_MUC')) {
+    Logger.log('Dang co mot luot liet ke thu muc khac chay, bo qua luot nay.');
+    return { xong: 0, hong: 0, boQua: true };
+  }
+  try {
+    return lietKeThuMuc_(cauHinh_(), NGAN_SACH_MS, false);
+  } finally {
+    traCho_('THU_MUC');
+  }
+}
+
+/**
+ * chiMoi = true: CHI nhung thu muc chua liet ke lan nao — thu muc cua dong moi.
+ * Duong noi buoc dung che do nay. May chu xep them toi 30 thu muc QUA HAN phia
+ * sau thu muc moi (liet ke lai moi 30 phut); lam ca phan do moi lan bang doi la
+ * dot han muc vao viec lich 10 phut da lo. Doc so thu muc moi tu soMoi; may chu
+ * cu chua tra soMoi thi coi nhu 0 — khong liet ke gi, van an toan.
+ */
+function lietKeThuMuc_(c, nganSachMs, chiMoi) {
+  var het = Date.now() + nganSachMs;
 
   var hoi = goiWeb_(c, '/api/dong-bo/thieu-thu-muc', {});
+  var soMoi = hoi.soMoi || 0;
+  var thieu = chiMoi ? hoi.thieu.slice(0, soMoi) : hoi.thieu;
+  var tongCanLam = chiMoi ? soMoi : hoi.tongThieu;
   Logger.log(
-    'Thieu ' + hoi.tongThieu + '/' + hoi.tong + ' thu muc; luot nay lam toi ' +
-    hoi.thieu.length + ' cai.');
-  if (!hoi.thieu.length) return { xong: 0, hong: 0 };
+    (chiMoi ? 'NOI BUOC: ' + soMoi + ' thu muc moi' : 'Thieu ' + hoi.tongThieu + '/' + hoi.tong + ' thu muc') +
+    '; luot nay lam toi ' + thieu.length + ' cai.');
+  if (!thieu.length) return { xong: 0, hong: 0, conLai: 0 };
 
   var lo = {};
   var soTrongLo = 0;
@@ -315,9 +480,9 @@ function dongBoThuMuc() {
     byteLo = 0;
   }
 
-  for (var i = 0; i < hoi.thieu.length; i++) {
+  for (var i = 0; i < thieu.length; i++) {
     if (Date.now() > het) break;
-    var id = hoi.thieu[i];
+    var id = thieu[i];
     try {
       // Thu muc RONG van phai gui len (mang rong). Co mat trong ban do nghia la
       // "da liet ke roi" — thieu buoc do thi luot sau lai hoi dung nhung thu muc
@@ -347,8 +512,8 @@ function dongBoThuMuc() {
 
   Logger.log(
     'DA LIET KE: ' + xong + ' thu muc' + (hong ? ' (' + hong + ' cai loi)' : '') +
-    ', con lai ~' + (hoi.tongThieu - xong) + '.');
-  return { xong: xong, hong: hong, conLai: hoi.tongThieu - xong };
+    ', con lai ~' + (tongCanLam - xong) + '.');
+  return { xong: xong, hong: hong, conLai: tongCanLam - xong };
 }
 
 // ---------------------------------------------------------------------------
@@ -386,9 +551,21 @@ function taiAnhBase64_(fileId, rong) {
   return Utilities.base64Encode(anh.getBlob().getBytes());
 }
 
+/** Nap anh vao bo dem — lich 5 phut. */
 function dongBoAnh() {
-  var c = cauHinh_();
-  var het = Date.now() + NGAN_SACH_ANH_MS;
+  if (!giuCho_('ANH')) {
+    Logger.log('Dang co mot luot day anh khac chay, bo qua luot nay.');
+    return { xong: 0, hong: 0, conLai: 0, boQua: true };
+  }
+  try {
+    return dayAnh_(cauHinh_(), NGAN_SACH_ANH_MS);
+  } finally {
+    traCho_('ANH');
+  }
+}
+
+function dayAnh_(c, nganSachMs) {
+  var het = Date.now() + nganSachMs;
 
   var hoi = goiWeb_(c, '/api/dong-bo/thieu-anh', {});
   Logger.log(
@@ -473,6 +650,13 @@ function datLichChay() {
   var cu = ScriptApp.getProjectTriggers();
   for (var i = 0; i < cu.length; i++) ScriptApp.deleteTrigger(cu[i]);
 
+  // Cho giu va dau noi buoc con sot tu mot luot bi giet: dat lai lich la bat dau
+  // sach, khong de mot cho cu chan viec toi 6 phut.
+  var p = PropertiesService.getScriptProperties();
+  p.deleteProperty('CHO_THU_MUC');
+  p.deleteProperty('CHO_ANH');
+  p.deleteProperty(KHOA_CAN_NOI);
+
   // Bang tinh: moi phut. Day la thu nguoi dung sua va cho thay ket qua.
   ScriptApp.newTrigger('dongBoBang').timeBased().everyMinutes(1).create();
   // Liet ke thu muc anh, chay dan. Cung nhip voi phan nap anh.
@@ -504,7 +688,7 @@ function ngungLichChay() {
 // Chay tay
 // ---------------------------------------------------------------------------
 
-/** Chay ca hai buoc mot lan, de xem thu truoc khi dat lich. */
+/** Chay ca ba buoc mot lan, de xem thu truoc khi dat lich. */
 function chayThuMotLan() {
   dongBoBang();
   dongBoThuMuc();

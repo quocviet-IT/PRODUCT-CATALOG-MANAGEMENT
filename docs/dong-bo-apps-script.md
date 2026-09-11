@@ -31,26 +31,37 @@ công ty. Hai đường kia đều phải để một khoá riêng tư nằm tr�
 
 ```
 Apps Script (chạy trong Google)
-   │  mỗi PHÚT   — đọc bảng tính Catalogue-OL, kèm chip Drive   (~2 giây)
-   │  mỗi GIỜ    — thêm bước liệt kê ảnh trong ~65 thư mục      (~36 giây)
-   │  mỗi 10 PHÚT— bù ảnh còn thiếu vào bộ đệm
+   │  mỗi PHÚT    — dongBoBang: đọc bảng tính Catalogue-OL, kèm chip Drive (~2 giây)
+   │                bảng vừa ĐỔI → nối luôn: liệt kê thư mục cột Q MỚI + đẩy ảnh
+   │  mỗi 10 PHÚT — dongBoThuMuc: liệt kê thư mục ảnh (mới trước, rồi quá 30 phút)
+   │  mỗi 5 PHÚT  — dongBoAnh: bù ảnh còn thiếu vào bộ đệm
    ▼
 POST hpcatalogue.app/api/dong-bo/…   ─ kèm khoá bí mật
    ▼
 Supabase Storage:  dong-bo/bang.json
                    dong-bo/anh-thu-muc.json
+                   dong-bo/thu-muc-luc.json
                    dong-bo/trang-thai.json
                    sheet-cache/<id>-600.webp, <id>-1400.webp
    ▼
 Web đọc từ đây. Không gọi Google lần nào nữa.
 ```
 
+**Nối bước (từ 11/09/2026).** Trước đây một dòng mới phải chờ lần lượt qua ba lịch:
+bảng (≤1 phút) → liệt kê thư mục (≤10 phút) → đẩy ảnh (≤5 phút), tức 8–16 phút —
+gần như toàn bộ là ngồi chờ tới lượt. Nay khi `dongBoBang` thấy bảng **thật sự
+đổi**, nó liệt kê luôn thư mục **mới** và đẩy ảnh ngay trong lượt đó: dòng mới hiện
+đủ ảnh sau khoảng **1–2 phút**. Hai lịch kia giữ để dự phòng. Bảng không đổi thì
+không tốn thêm lời gọi nào. Mỗi việc nặng giữ một "chỗ" (Script Property
+`CHO_THU_MUC`, `CHO_ANH`, hạn 6 phút) để hai lượt không cùng tải một ảnh; dấu
+`CAN_NOI` nhắc lượt sau làm nốt khi chỗ đang bận.
+
 Bốn cổng nhận:
 
 | Cổng | Việc |
 |---|---|
 | `POST /api/dong-bo/du-lieu` | Nhận bảng thô, lưu lại. Bỏ qua `anhThuMuc` nếu có. |
-| `POST /api/dong-bo/thieu-thu-muc` | Trả về những thư mục ảnh **chưa** được liệt kê. |
+| `POST /api/dong-bo/thieu-thu-muc` | Trả về thư mục ảnh **chưa** liệt kê (`soMoi`), rồi thư mục đã liệt kê **quá 30 phút** — tối đa 30 cái mỗi lượt. |
 | `POST /api/dong-bo/anh-thu-muc` | Nhận một lô thư mục vừa liệt kê và **gộp** vào bản đồ đã có. |
 | `POST /api/dong-bo/thieu-anh` | Trả về những ảnh chưa có trong bộ đệm, ảnh đại diện xếp trước. |
 | `POST /api/dong-bo/anh` | Nhận ảnh, thu nhỏ thành 600px và 1400px, cất vào bộ đệm. |
@@ -156,9 +167,16 @@ Trước khi Apps Script đẩy lần đầu, trang catalogue sẽ ghi *"Đang c
 
    | Function | Nhịp | Việc |
    |---|---|---|
-   | `dongBoBang` | mỗi phút | chỉ bảng tính — thứ người dùng sửa và chờ thấy |
-   | `dongBoThuMuc` | mỗi 10 phút | liệt kê thư mục ảnh, chạy dần cho tới khi hết |
-   | `dongBoAnh` | mỗi 10 phút | nạp ảnh vào bộ đệm |
+   | `dongBoBang` | mỗi phút | bảng tính — thứ người dùng sửa và chờ thấy; bảng vừa đổi thì nối luôn liệt kê thư mục mới + đẩy ảnh |
+   | `dongBoThuMuc` | mỗi 10 phút | liệt kê thư mục ảnh, chạy dần cho tới khi hết (dự phòng) |
+   | `dongBoAnh` | mỗi 5 phút | nạp ảnh vào bộ đệm (dự phòng) |
+
+### Cập nhật script khi `DongBo.gs` trong repo đổi
+
+Mở project trên script.google.com → `Code.gs` → xoá hết, dán bản mới → **Save**.
+Tên ba hàm lịch chạy không đổi thì **không cần** chạy lại `datLichChay` (bản nối
+bước 11/09/2026 giữ nguyên tên). Kiểm bằng **Executions**: lượt `dongBoBang` ngay
+sau một lần sửa bảng phải có dòng `NOI BUOC: … thu muc moi`, rồi `DA DAY ANH`.
 
 ### Bước 4 — Đợi ảnh đuổi kịp
 
