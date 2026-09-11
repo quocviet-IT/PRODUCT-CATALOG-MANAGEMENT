@@ -212,10 +212,13 @@ export function NutGopY() {
           disabled={dangChup}
           aria-busy={dangChup}
           aria-label={dangChup ? t.gop_y.dang_chup : t.gop_y.nut}
+          // Nen muc dac, chu sang — cung kieu nut chinh "Tao catalogue". Ban dau la
+          // nen the + chu xam nhu cac muc phu; tren nen be no chim mat, va sep gop
+          // y "qua mo" (11/09/2026): nguoi can bao loi khong thay cho nao ma bam.
           className="fixed right-0 top-1/2 z-[55] flex -translate-y-1/2 flex-col items-center
-                     gap-2 border border-r-0 border-hp-rule bg-hp-card px-1.5 py-3 text-[11px]
-                     uppercase tracking-[0.14em] text-hp-muted transition-colors duration-150
-                     hover:border-hp-ink hover:bg-hp-ink hover:text-hp-foundation
+                     gap-2.5 border border-r-0 border-hp-ink bg-hp-ink px-2 py-4 text-[11px]
+                     uppercase tracking-[0.14em] text-hp-foundation transition-colors duration-150
+                     hover:border-hp-body hover:bg-hp-body
                      disabled:cursor-wait disabled:opacity-60"
         >
           <MessageSquare {...ICON} />
