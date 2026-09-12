@@ -147,18 +147,33 @@ function ThongSoDong({ ds, lop }: { ds: [string, string][]; lop?: string }) {
   );
 }
 
-/** Thong so xep cot, co nhan — dung o bo cuc con nhieu cho. */
-function ThongSoBang({ ds, lop }: { ds: [string, string][]; lop?: string }) {
+/**
+ * Thong so xep cot, co nhan — dung o bo cuc con nhieu cho. `gon` cho hang cua Bang mau:
+ * khoang cach nho hon de nhieu mau vua mot trang.
+ */
+function ThongSoBang({ ds, lop, gon }: { ds: [string, string][]; lop?: string; gon?: boolean }) {
   if (ds.length === 0) return null;
+  const khoang = gon ? "gap-x-6 gap-y-2" : "gap-x-8 gap-y-4";
   return (
-    <dl className={`grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4 ${lop ?? ""}`}>
+    <dl className={`grid grid-cols-2 ${khoang} sm:grid-cols-4 ${lop ?? ""}`}>
       {ds.map(([nhan, v]) => (
         <div key={nhan}>
           <dt className="text-[10px] uppercase tracking-[0.14em] text-hp-muted">{nhan}</dt>
-          <dd className="mt-1.5 text-sm text-hp-body">{v}</dd>
+          <dd className={`${gon ? "mt-0.5" : "mt-1.5"} text-sm text-hp-body`}>{v}</dd>
         </div>
       ))}
     </dl>
+  );
+}
+
+/** Duong trang tri: vach – hat thoi mau nhan – vach. `lop` dat be rong va khoang cach. */
+function DuongTrangTri({ lop }: { lop: string }) {
+  return (
+    <div aria-hidden className={`flex items-center ${lop}`}>
+      <span className="h-px flex-grow bg-hp-rule" />
+      <span className="h-1.5 w-1.5 rotate-45 bg-hp-pink" />
+      <span className="h-px flex-grow bg-hp-rule" />
+    </div>
   );
 }
 
@@ -456,11 +471,7 @@ function KhungCoDien({ muc, g, t }: DoiSo) {
               </span>
 
               {/* Duong phan cach co mot vien kim cuong o giua. */}
-              <div aria-hidden className="flex w-full items-center gap-3">
-                <span className="h-px flex-grow bg-hp-rule" />
-                <span className="h-1.5 w-1.5 rotate-45 bg-hp-pink" />
-                <span className="h-px flex-grow bg-hp-rule" />
-              </div>
+              <DuongTrangTri lop="w-full gap-3" />
 
               {ct.length > 0 && (
                 <dl className="flex flex-wrap justify-center gap-x-8 gap-y-4">
@@ -588,16 +599,7 @@ function BangMau({ muc, g, t }: DoiSo) {
 
             <div className="min-w-0">
               <MaMau m={m} t={t} />
-              {ct.length > 0 && (
-                <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-2 sm:grid-cols-4">
-                  {ct.map(([nhan, v]) => (
-                    <div key={nhan}>
-                      <dt className="text-[10px] uppercase tracking-[0.14em] text-hp-muted">{nhan}</dt>
-                      <dd className="mt-0.5 text-sm text-hp-body">{v}</dd>
-                    </div>
-                  ))}
-                </dl>
-              )}
+              <ThongSoBang ds={ct} gon lop="mt-2" />
               <GioiThieu m={m} lop="mt-2" />
             </div>
 
@@ -649,16 +651,12 @@ function ThuMoi({ muc, g, t }: DoiSo) {
               </div>
             )}
 
+            {/* Khong dung MaMau: o day ma mau la tieu de lon cua tam thiep, MaMau la nhan nho. */}
             <span className="font-title text-[30px] leading-none tracking-[0.06em] text-hp-ink">
               {m.maMau ?? t.catalogue_sheet.chua_co_ma_mau}
             </span>
 
-            {/* Duong trang tri ngan: vach – hat thoi mau nhan – vach. */}
-            <div aria-hidden className="flex w-24 items-center gap-2">
-              <span className="h-px flex-grow bg-hp-rule" />
-              <span className="h-1.5 w-1.5 rotate-45 bg-hp-pink" />
-              <span className="h-px flex-grow bg-hp-rule" />
-            </div>
+            <DuongTrangTri lop="w-24 gap-2" />
 
             <ThongSoDong ds={thongSo(m, g, t)} />
             <GioiThieu m={m} lop="mx-auto" />
