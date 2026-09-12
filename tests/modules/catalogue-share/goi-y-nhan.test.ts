@@ -20,4 +20,12 @@ describe("NHAN_GOI_Y — mau nhan di kem tong moi", () => {
     expect(NHAN_GOI_Y["bach-kim"]).toBe("luc");
     expect(NHAN_GOI_Y["hoa-van"]).toBe("hong");
   });
+
+  it("năm tông 12/09/2026 gợi ý đúng màu nhấn của chủ đề dùng tông đó", () => {
+    expect(NHAN_GOI_Y["do-ruou"]).toBe("hong");
+    expect(NHAN_GOI_Y["than-chi"]).toBe("sapphire");
+    expect(NHAN_GOI_Y["xanh-dem"]).toBe("dong");
+    expect(NHAN_GOI_Y["oai-huong"]).toBe("man");
+    expect(NHAN_GOI_Y["suong-bien"]).toBe("luc");
+  });
 });

@@ -77,7 +77,12 @@ body {
 .tone-hoa-van,
 .tone-champagne,
 .tone-bach-kim,
-.tone-hong-phan {
+.tone-hong-phan,
+.tone-do-ruou,
+.tone-than-chi,
+.tone-xanh-dem,
+.tone-oai-huong,
+.tone-suong-bien {
   background-color: var(--color-hp-foundation);
 }
 
@@ -178,11 +183,69 @@ body {
   --color-hp-pink-strong: #F08BBB;
 }
 
+/* Do ruou (12/09/2026) — tong toi am, cho Valentine va qua tang nguoi thuong. */
+.tone-do-ruou {
+  --color-hp-foundation:  #2A1418;
+  --color-hp-card:        #331A1F;
+  --color-hp-inset:       #3D2126;
+  --color-hp-ink:         #F6ECEA;
+  --color-hp-body:        #E2D1CF;
+  --color-hp-muted:       #B39A98;
+  --color-hp-rule:        #4A2C31;
+}
+
+/* Than chi — xam than lanh, cho trang suc nam. */
+.tone-than-chi {
+  --color-hp-foundation:  #1B1E22;
+  --color-hp-card:        #23272C;
+  --color-hp-inset:       #2B3036;
+  --color-hp-ink:         #EEF1F4;
+  --color-hp-body:        #D0D5DB;
+  --color-hp-muted:       #99A1AA;
+  --color-hp-rule:        #363C43;
+}
+
+/* Xanh dem — xanh dem sau, cho khach VIP. */
+.tone-xanh-dem {
+  --color-hp-foundation:  #141B2B;
+  --color-hp-card:        #1B2336;
+  --color-hp-inset:       #232C41;
+  --color-hp-ink:         #EEF1F7;
+  --color-hp-body:        #CFD6E3;
+  --color-hp-muted:       #98A2B6;
+  --color-hp-rule:        #2E3850;
+}
+
+/* Oai huong — tim nhat diu dang, cho Ngay cua Me. */
+.tone-oai-huong {
+  --color-hp-foundation:  #EFE9F6;
+  --color-hp-card:        #F9F6FC;
+  --color-hp-inset:       #E4DCEE;
+  --color-hp-ink:         #25202D;
+  --color-hp-body:        #423B4C;
+  --color-hp-muted:       #62596E;
+  --color-hp-rule:        #D9CFE6;
+}
+
+/* Suong bien — xanh suong nhat, cho ngoc trai. */
+.tone-suong-bien {
+  --color-hp-foundation:  #E6F0EE;
+  --color-hp-card:        #F5FAF9;
+  --color-hp-inset:       #D9E7E4;
+  --color-hp-ink:         #1A2624;
+  --color-hp-body:        #344543;
+  --color-hp-muted:       #536563;
+  --color-hp-rule:        #C9DBD7;
+}
+
 @media print {
   /* Ban in LUON la nen sang. Mot catalogue tong toi in ra se ngon nguyen mot
      hop muc va chu van kho doc — day la ban giay dua tan tay khach. */
   .tone-toi,
-  .tone-reu {
+  .tone-reu,
+  .tone-do-ruou,
+  .tone-than-chi,
+  .tone-xanh-dem {
     --color-hp-foundation:  #FFFFFF;
     --color-hp-card:        #FFFFFF;
     --color-hp-inset:       #F3F2F0;
@@ -217,13 +280,13 @@ body {
 }
 
 /* Nen toi: chu mau nhan dung sac sang. Nut chu trang van dung sac dam o tren. */
-.mau-nhan:is(.tone-toi, .tone-reu) {
+.mau-nhan:is(.tone-toi, .tone-reu, .tone-do-ruou, .tone-than-chi, .tone-xanh-dem) {
   --color-hp-pink:        var(--nhan-sang);
 }
 
 @media print {
   /* Ban in cua tong toi la nen trang — sac sang tren giay trang lai kho doc. */
-  .mau-nhan:is(.tone-toi, .tone-reu) {
+  .mau-nhan:is(.tone-toi, .tone-reu, .tone-do-ruou, .tone-than-chi, .tone-xanh-dem) {
     --color-hp-pink:        var(--nhan-nhat);
   }
 }

@@ -72,6 +72,11 @@ function nhanTone(t: BoChu): Record<Tone, { ten: string; moTa: string }> {
     champagne: { ten: m.tone_champagne, moTa: m.tone_champagne_mo_ta },
     "bach-kim": { ten: m.tone_bach_kim, moTa: m.tone_bach_kim_mo_ta },
     "hong-phan": { ten: m.tone_hong_phan, moTa: m.tone_hong_phan_mo_ta },
+    "do-ruou": { ten: m.tone_do_ruou, moTa: m.tone_do_ruou_mo_ta },
+    "than-chi": { ten: m.tone_than_chi, moTa: m.tone_than_chi_mo_ta },
+    "xanh-dem": { ten: m.tone_xanh_dem, moTa: m.tone_xanh_dem_mo_ta },
+    "oai-huong": { ten: m.tone_oai_huong, moTa: m.tone_oai_huong_mo_ta },
+    "suong-bien": { ten: m.tone_suong_bien, moTa: m.tone_suong_bien_mo_ta },
   };
 }
 
@@ -81,6 +86,9 @@ function nhanMauNhan(t: BoChu): Record<Nhan, string> {
     dong: t.mau_giao_dien.nhan_dong,
     luc: t.mau_giao_dien.nhan_luc,
     man: t.mau_giao_dien.nhan_man,
+    ruby: t.mau_giao_dien.nhan_ruby,
+    "luc-bao": t.mau_giao_dien.nhan_luc_bao,
+    sapphire: t.mau_giao_dien.nhan_sapphire,
   };
 }
 
@@ -98,6 +106,11 @@ const O_MAU: Record<Tone, { nen: string; muc: string }> = {
   champagne: { nen: "#F5EDDD", muc: "#2B2419" },
   "bach-kim": { nen: "#F1F2F4", muc: "#1D2125" },
   "hong-phan": { nen: "#F8EDEC", muc: "#2E2325" },
+  "do-ruou": { nen: "#2A1418", muc: "#F6ECEA" },
+  "than-chi": { nen: "#1B1E22", muc: "#EEF1F4" },
+  "xanh-dem": { nen: "#141B2B", muc: "#EEF1F7" },
+  "oai-huong": { nen: "#EFE9F6", muc: "#25202D" },
+  "suong-bien": { nen: "#E6F0EE", muc: "#1A2624" },
 };
 
 function nhanThongSo(t: BoChu): Record<ThongSo, string> {

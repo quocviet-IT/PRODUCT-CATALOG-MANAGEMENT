@@ -5,6 +5,7 @@ import {
   MAU_NHAN,
   NHAN,
   TONE,
+  TONE_TOI,
   THONG_SO,
   coThongSo,
   docGiaoDien,
@@ -326,7 +327,7 @@ describe("bố cục và màu nhấn mới", () => {
     for (const k of BO_CUC) expect(docGiaoDien({ boCuc: k }).boCuc).toBe(k);
   });
 
-  it("nhận cả tám nền và bốn màu nhấn", () => {
+  it("nhận mọi nền và mọi màu nhấn", () => {
     for (const k of TONE) expect(docGiaoDien({ tone: k }).tone).toBe(k);
     for (const k of NHAN) expect(docGiaoDien({ nhan: k }).nhan).toBe(k);
   });
@@ -357,5 +358,32 @@ describe("bố cục và màu nhấn mới", () => {
     expect(MAU_NHAN.dong).toMatchObject({ nhat: "#A96A00", dam: "#8A5600" });
     expect(MAU_NHAN.luc).toMatchObject({ nhat: "#00806B", dam: "#006956" });
     expect(MAU_NHAN.man).toMatchObject({ nhat: "#A0439B", dam: "#873781" });
+  });
+});
+
+describe("năm tông và ba màu nhấn mới (12/09/2026)", () => {
+  it("chỉ thêm vào cuối — thứ tự cũ giữ nguyên", () => {
+    expect(TONE).toEqual([
+      "beige", "trang", "toi", "reu", "hoa-van", "champagne", "bach-kim", "hong-phan",
+      "do-ruou", "than-chi", "xanh-dem", "oai-huong", "suong-bien",
+    ]);
+    expect(NHAN).toEqual(["hong", "dong", "luc", "man", "ruby", "luc-bao", "sapphire"]);
+  });
+
+  it("ba màu nhấn mới đúng giá trị đã đo", () => {
+    expect(MAU_NHAN.ruby).toEqual({ nhat: "#D33A3C", dam: "#B02A2D", sang: "#F47B74" });
+    expect(MAU_NHAN["luc-bao"]).toEqual({ nhat: "#009342", dam: "#007835", sang: "#53BE70" });
+    expect(MAU_NHAN.sapphire).toEqual({ nhat: "#2275E8", dam: "#145EC1", sang: "#68A5FF" });
+  });
+
+  it("tông tối là đúng năm tông", () => {
+    expect([...TONE_TOI].sort()).toEqual(["do-ruou", "reu", "than-chi", "toi", "xanh-dem"]);
+  });
+
+  it("docGiaoDien nhận tông và màu nhấn mới", () => {
+    expect(docGiaoDien({ tone: "xanh-dem", nhan: "sapphire" })).toMatchObject({
+      tone: "xanh-dem",
+      nhan: "sapphire",
+    });
   });
 });

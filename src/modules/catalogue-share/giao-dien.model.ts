@@ -28,18 +28,21 @@ export type BoCuc = (typeof BO_CUC)[number];
 export const TONE = [
   "beige", "trang", "toi", "reu",
   "hoa-van", "champagne", "bach-kim", "hong-phan",
+  // Nam tong 12/09/2026 cho hang Chu de (dip, nhom hang, khach).
+  "do-ruou", "than-chi", "xanh-dem", "oai-huong", "suong-bien",
 ] as const;
 export type Tone = (typeof TONE)[number];
 
 /**
  * Mau nhan.
  *
- * La mot DANH SACH DONG chu khong phai o chon mau tu do: bon mau nay cung do
- * sang va do tuoi trong oklch (L .58 / C .19), chi khac sac, nen ghep voi nen
- * nao cung khong choi. Mo cho chon mau bat ky la som muon cung co mot catalogue
- * gui khach voi chu vang chanh tren nen kem.
+ * La mot DANH SACH DONG chu khong phai o chon mau tu do: cac mau nay cung do
+ * sang va do tuoi trong oklch (L .58 / C toi da .19 trong gamut), chi khac sac, nen
+ * ghep voi nen nao cung khong choi. Mo cho chon mau bat ky la som muon cung co mot
+ * catalogue gui khach voi chu vang chanh tren nen kem. Ba mau cuoi them 12/09/2026,
+ * lap ba khoang trong 25°, 150°, 258° cua vong mau.
  */
-export const NHAN = ["hong", "dong", "luc", "man"] as const;
+export const NHAN = ["hong", "dong", "luc", "man", "ruby", "luc-bao", "sapphire"] as const;
 export type Nhan = (typeof NHAN)[number];
 
 /**
@@ -57,6 +60,9 @@ export const MAU_NHAN: Record<Nhan, { nhat: string; dam: string; sang: string }>
   dong: { nhat: "#A96A00", dam: "#8A5600", sang: "#E0911B" },
   luc:  { nhat: "#00806B", dam: "#006956", sang: "#07BFA1" },
   man:  { nhat: "#A0439B", dam: "#873781", sang: "#D87FD1" },
+  ruby: { nhat: "#D33A3C", dam: "#B02A2D", sang: "#F47B74" },
+  "luc-bao": { nhat: "#009342", dam: "#007835", sang: "#53BE70" },
+  sapphire: { nhat: "#2275E8", dam: "#145EC1", sang: "#68A5FF" },
 };
 
 /**
@@ -64,7 +70,7 @@ export const MAU_NHAN: Record<Nhan, { nhat: string; dam: string; sang: string }>
  * sang. Phai khop bo chon `.mau-nhan:is(...)` va khoi in trong globals.css — test
  * tests/app/mau-nhan-tuong-phan.test.ts doc thang CSS de doi chieu.
  */
-export const TONE_TOI: readonly Tone[] = ["toi", "reu"];
+export const TONE_TOI: readonly Tone[] = ["toi", "reu", "do-ruou", "than-chi", "xanh-dem"];
 
 /**
  * Mau nhan GOI Y khi sale chon mot tong moi: chon tong la doi luon mau nhan cho
@@ -78,6 +84,12 @@ export const NHAN_GOI_Y: Partial<Record<Tone, Nhan>> = {
   champagne: "dong",
   "bach-kim": "luc",
   "hong-phan": "hong",
+  // Tong 12/09/2026: dung mau nhan cua chu de dung tong do.
+  "do-ruou": "hong",
+  "than-chi": "sapphire",
+  "xanh-dem": "dong",
+  "oai-huong": "man",
+  "suong-bien": "luc",
 };
 
 /** Cac thong so co the bat/tat cho khach xem. Trung ten voi truong cua MucCatalogue. */

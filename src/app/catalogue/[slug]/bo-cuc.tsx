@@ -48,6 +48,11 @@ export const LOP_TONE: Record<Tone, string> = {
   champagne: "tone-champagne",
   "bach-kim": "tone-bach-kim",
   "hong-phan": "tone-hong-phan",
+  "do-ruou": "tone-do-ruou",
+  "than-chi": "tone-than-chi",
+  "xanh-dem": "tone-xanh-dem",
+  "oai-huong": "tone-oai-huong",
+  "suong-bien": "tone-suong-bien",
 };
 
 /**
