@@ -51,17 +51,20 @@ export const LOP_TONE: Record<Tone, string> = {
 };
 
 /**
- * Mau nhan cua catalogue, dat bang cach GHI DE hai bien mau hong.
+ * Mau nhan cua catalogue: gan BA sac cua mau nhan thanh bien --nhan-*.
  *
- * Nho vay moi cho dang dung `text-hp-pink` hay `bg-hp-pink-strong` deu doi theo
- * ma khong phai sua tung noi — va catalogue khong chon gi van ra dung hong
- * thuong hieu, vi mac dinh la "hong".
+ * Lop `mau-nhan` trong globals.css chon sac cho --color-hp-pink / --color-hp-pink-strong:
+ * nhat tren nen sang, sang tren nen toi, dam cho nut chu trang; ban in luon ve nhat.
+ * Khong gan thang --color-hp-pink o day nua — bien gan bang style thang moi lop CSS,
+ * nen truoc 12/09/2026 tong toi khong doi duoc sac. Phan tu nhan style nay PHAI co
+ * lop `mau-nhan`.
  */
 export function bienMauNhan(nhan: Nhan): React.CSSProperties {
   const m = MAU_NHAN[nhan] ?? MAU_NHAN.hong;
   return {
-    "--color-hp-pink": m.nhat,
-    "--color-hp-pink-strong": m.dam,
+    "--nhan-nhat": m.nhat,
+    "--nhan-dam": m.dam,
+    "--nhan-sang": m.sang,
   } as React.CSSProperties;
 }
 

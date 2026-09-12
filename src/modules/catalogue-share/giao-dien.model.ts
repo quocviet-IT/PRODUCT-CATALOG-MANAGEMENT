@@ -43,20 +43,28 @@ export const NHAN = ["hong", "dong", "luc", "man"] as const;
 export type Nhan = (typeof NHAN)[number];
 
 /**
- * Moi mau nhan co HAI sac.
+ * Moi mau nhan co BA sac.
  *
- * `nhat` de ve chu va duong ke tren nen; `dam` danh rieng cho nut co chu trang.
- * Hong thuong hieu chi dat 3.81:1 tren nen kem — du cho mot dong chu, khong du
- * cho chu trang tren nut.
+ * `nhat` de ve chu va duong ke tren nen SANG; `dam` danh rieng cho nut co chu trang;
+ * `sang` (oklch L .72 / C .15, them 12/09/2026) de ve chu tren nen TOI — sac nhat tren
+ * nen toi chi con 2.89–4.15:1. Hong thuong hieu chi dat 3.81:1 tren nen kem — du cho
+ * mot dong chu, khong du cho chu trang tren nut.
  */
-export const MAU_NHAN: Record<Nhan, { nhat: string; dam: string }> = {
+export const MAU_NHAN: Record<Nhan, { nhat: string; dam: string; sang: string }> = {
   // Hong dung DUNG hai token dang co: catalogue khong chon gi phai ra y het
   // hom nay, khong lech mot chut nao.
-  hong: { nhat: "#E91D79", dam: "#C4165F" },
-  dong: { nhat: "#A96A00", dam: "#8A5600" },
-  luc:  { nhat: "#00806B", dam: "#006956" },
-  man:  { nhat: "#A0439B", dam: "#873781" },
+  hong: { nhat: "#E91D79", dam: "#C4165F", sang: "#EF799D" },
+  dong: { nhat: "#A96A00", dam: "#8A5600", sang: "#E0911B" },
+  luc:  { nhat: "#00806B", dam: "#006956", sang: "#07BFA1" },
+  man:  { nhat: "#A0439B", dam: "#873781", sang: "#D87FD1" },
 };
+
+/**
+ * Cac tong NEN TOI. Tren cac tong nay chu mau nhan dung sac `sang`, va ban in ep ve nen
+ * sang. Phai khop bo chon `.mau-nhan:is(...)` va khoi in trong globals.css — test
+ * tests/app/mau-nhan-tuong-phan.test.ts doc thang CSS de doi chieu.
+ */
+export const TONE_TOI: readonly Tone[] = ["toi", "reu"];
 
 /**
  * Mau nhan GOI Y khi sale chon mot tong moi: chon tong la doi luon mau nhan cho

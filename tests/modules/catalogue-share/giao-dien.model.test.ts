@@ -340,14 +340,22 @@ describe("bố cục và màu nhấn mới", () => {
     expect(g.nhan).toBe("hong");
   });
 
-  it("mỗi màu nhấn có đủ hai sắc, và sắc đậm khác sắc nhạt", () => {
+  it("mỗi màu nhấn có đủ ba sắc, và ba sắc khác nhau", () => {
     // Sắc đậm dành riêng cho nút có chữ trắng; dùng chung một sắc là chữ trắng
-    // trên hồng thương hiệu, chỉ đạt 3.81:1.
+    // trên hồng thương hiệu, chỉ đạt 3.81:1. Sắc sáng để vẽ chữ trên nền tối.
     for (const k of NHAN) {
       const m = MAU_NHAN[k];
       expect(m.nhat).toMatch(/^#[0-9A-F]{6}$/i);
       expect(m.dam).toMatch(/^#[0-9A-F]{6}$/i);
-      expect(m.dam).not.toBe(m.nhat);
+      expect(m.sang).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(new Set([m.nhat, m.dam, m.sang]).size).toBe(3);
     }
+  });
+
+  it("bốn màu nhấn cũ giữ đúng hai sắc cũ — catalogue tông sáng đã gửi không đổi", () => {
+    expect(MAU_NHAN.hong).toMatchObject({ nhat: "#E91D79", dam: "#C4165F" });
+    expect(MAU_NHAN.dong).toMatchObject({ nhat: "#A96A00", dam: "#8A5600" });
+    expect(MAU_NHAN.luc).toMatchObject({ nhat: "#00806B", dam: "#006956" });
+    expect(MAU_NHAN.man).toMatchObject({ nhat: "#A0439B", dam: "#873781" });
   });
 });

@@ -201,6 +201,34 @@ body {
 }
 
 /*
+ * Mau nhan cua catalogue (12/09/2026).
+ *
+ * bienMauNhan() chi gan ba bien --nhan-nhat / --nhan-dam / --nhan-sang len phan tu
+ * ngoai cung; CSS o day quyet dinh dung sac nao. Truoc day ham do gan thang
+ * --color-hp-pink bang style — bien gan truc tiep thang moi lop, nen tong toi khong
+ * doi duoc sang sac sang hon va Man chin tren Xanh reu chi con 2.89:1.
+ *
+ * Dat SAU cac khoi .tone-*: cung do uu tien thi khoi viet sau thang. Danh sach tong toi
+ * phai khop TONE_TOI trong giao-dien.model.ts (co test doi chieu).
+ */
+.mau-nhan {
+  --color-hp-pink:        var(--nhan-nhat);
+  --color-hp-pink-strong: var(--nhan-dam);
+}
+
+/* Nen toi: chu mau nhan dung sac sang. Nut chu trang van dung sac dam o tren. */
+.mau-nhan:is(.tone-toi, .tone-reu) {
+  --color-hp-pink:        var(--nhan-sang);
+}
+
+@media print {
+  /* Ban in cua tong toi la nen trang — sac sang tren giay trang lai kho doc. */
+  .mau-nhan:is(.tone-toi, .tone-reu) {
+    --color-hp-pink:        var(--nhan-nhat);
+  }
+}
+
+/*
  * Ai da bao he dieu hanh la minh khong chiu duoc chuyen dong thi khong duoc
  * nhan them mot man hinh day o xam nhap nhay. Cac o cho van con — chi la no
  * dung yen. Chung van lam dung viec cua minh: giu dung cho, dung kich thuoc.

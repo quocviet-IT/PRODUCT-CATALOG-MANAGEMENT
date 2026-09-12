@@ -101,7 +101,7 @@ export default async function TrangKhachXem({
 
   return (
     <NguonNgonNgu ngonNgu={nn}>
-      <div className={`min-h-screen ${LOP_TONE[g.tone]}`} style={bienMauNhan(g.nhan)}>
+      <div className={`mau-nhan min-h-screen ${LOP_TONE[g.tone]}`} style={bienMauNhan(g.nhan)}>
         <main className="mx-auto max-w-4xl px-6 py-10 print:max-w-none print:py-0">
           {g.bia && (
             <TrangBia
