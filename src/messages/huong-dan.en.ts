@@ -123,19 +123,33 @@ export const HUONG_DAN_EN: BoChu["huong_dan"] = {
     ],
   },
 
+  chu_de: {
+    ten: "Pick a theme",
+    mo_ta: "The Theme row at the top of the Presentation box sets a matching layout, colour and accent for an occasion, a product group or a kind of client. Optional.",
+    chu: [
+      "Themes come in three groups: by occasion, by product and by client.",
+      "Pick a theme and the layout, colour and accent below change to match — the chosen one gets a dark border.",
+      "Change the layout, colour or accent by hand and no theme stays selected; the catalogue follows exactly what you chose.",
+    ],
+    meo: [
+      "A theme is only a shortcut: pick none and the catalogue works as before.",
+      "VIP clients and Bridal use the Invitation layout — fill in the customer name under Cover page so every page gets a “Specially for” line.",
+    ],
+  },
+
   bo_cuc_mau: {
     ten: "Choose layout, colour and accent",
     mo_ta: "The Presentation box decides how your customer sees the catalogue. Click an option to choose it.",
     chu: [
-      "Six layouts: Vertical list (default, easy to compare), Image grid (many models), Lookbook and Gallery (few models, big pictures), Classic frame (easiest to read details), Magazine (quickest to skim).",
-      "Eight background colours. Pink toile or Blush switches the accent to Brand pink, Champagne to Antique gold, Platinum to Teal — you can still change it back.",
+      "Eight layouts: Vertical list (default, easy to compare), Image grid (many models), Lookbook and Gallery (few models, big pictures), Classic frame (easiest to read details), Magazine (quickest to skim), Line sheet (wholesale, prints tight), Invitation (one page per model, for VIP clients and bridal).",
+      "Thirteen background colours. Many switch the accent to match — Champagne to Antique gold, Graphite to Sapphire blue, for example — and you can still change it back.",
       "The hint line says which kind of jewellery the chosen colour suits.",
-      "Accent colour: the colour of the HUNG PHAT logo, the numbers and the Call button on the customer page.",
+      "Accent colour: the colour of the HUNG PHAT logo, the numbers and the Call button on the customer page. On dark backgrounds the accent text turns lighter so it stays easy to read.",
     ],
     meo: [
       "Everything in this box is locked in when you press Create customer link. Changing it for a later catalogue does not touch ones already sent.",
       "Not sure which looks best? Press Preview in the bottom bar — change, close and reopen as often as you like before creating.",
-      "The PDF always prints on a light background, even with Dark or Deep green chosen.",
+      "The PDF always prints on a light background, even with a dark colour chosen (Dark, Deep green, Wine red, Graphite, Midnight blue).",
     ],
   },
 
@@ -204,7 +218,7 @@ export const HUONG_DAN_EN: BoChu["huong_dan"] = {
       "Remove this model from the catalogue.",
     ],
     meo: [
-      "The text appears right under the model's details in all six layouts; in Image grid it sits under the model's first picture.",
+      "The text appears right under the model's details in every layout; in Image grid it sits under the model's first picture.",
       "It is not translated when you choose English — write it in your customer's language.",
     ],
   },

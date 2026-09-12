@@ -65,6 +65,7 @@ function cacPhan(t: BoChu): Phan[] {
       ten: h.phan.tao,
       buoc: [
         { anh: "06-ten-link", nd: h.ten_link },
+        { anh: "07-chu-de", nd: h.chu_de },
         { anh: "07-bo-cuc-mau", nd: h.bo_cuc_mau },
         { anh: "08-thong-so-ngon-ngu", nd: h.thong_so_ngon_ngu },
         { anh: "09-lien-he", nd: h.lien_he },

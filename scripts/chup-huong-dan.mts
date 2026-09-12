@@ -435,17 +435,38 @@ async function chupMotNgonNgu(trinhDuyet: Browser, nn: NgonNgu): Promise<void> {
       { o: page.getByText(dau(ch.ten_link_se_la)), huong: "trai" },
     ], await khungTu(page, page.locator("main").first(), page.getByText(co(ch.ten_link_ma)), 0, 40));
 
-    // --- 7. Bo cuc, tong mau, mau nhan ---
-    await page.setViewportSize({ width: RONG, height: 1400 });
+    // --- 7. Chu de --- (khung Kieu trinh bay cao ~1700px nen tach thanh hai anh)
+    await page.setViewportSize({ width: RONG, height: 1600 });
     const kieu = page.locator("section").filter({ has: page.getByRole("heading", { name: dung(gd.tieu_de) }) }).first();
+    const chuDe = khoi(page, dung(gd.chu_de_nhan));
+    const boCucKhoi = khoi(page, dung(gd.bo_cuc_nhan));
     await cuonToi(page, kieu, 40);
+    await chuDe.getByText(dung(gd.chu_de_valentine)).click();
+    await page.waitForTimeout(300);
+    await chup(luot, page, "07-chu-de", [
+      // "phai" (ra le trai khung), khong phai "trai": dong mo ta cua fieldset chi cach
+      // nhom dau tien 12px, khong du cho o so ma khong de len chu (soat 12/09/2026).
+      { o: chuDe.getByText(dung(gd.chu_de_nhom_dip)), huong: "phai" },
+      // O so ben TRAI o dang chon (ra le khung): ben phai la o chu de ke tiep.
+      { o: chuDe.locator("label").filter({ has: page.locator("input:checked") }), huong: "phai" },
+      { o: boCucKhoi.locator("legend"), huong: "trai" },
+    ], await khungTu(page, kieu, boCucKhoi.locator("legend"), 24, 60));
+    // Tra ve mac dinh: cac buoc sau (xem truoc, trang khach) chup bo cuc Danh sach doc,
+    // tong Be co dien, mau nhan Hong thuong hieu.
+    await kieu.getByText(dung(gd.bo_cuc_danh_sach)).click();
+    await kieu.getByText(dung(gd.tone_beige)).click();
+    await kieu.getByText(dung(gd.nhan_hong)).click();
+    await page.waitForTimeout(300);
+
+    // --- 7b. Bo cuc, tong mau, mau nhan ---
+    await cuonToi(page, boCucKhoi, 40);
     await chup(luot, page, "07-bo-cuc-mau", [
       { o: kieu.getByText(dung(gd.bo_cuc_danh_sach)), huong: "duoi" },
       { o: khoi(page, dung(gd.tone_nhan)).locator("legend"), huong: "trai" },
       { o: kieu.getByText(dau(gd.tone_beige_mo_ta)), huong: "phai" },
       // O mau nhan CUOI: dat canh chu "Mau nhan" thi de len dong mo ta.
       { o: khoi(page, dung(gd.nhan_mau_nhan)).locator("label").last(), huong: "trai" },
-    ], await khungTu(page, kieu, khoi(page, dung(gd.nhan_mau_nhan))));
+    ], await khungTu(page, boCucKhoi, khoi(page, dung(gd.nhan_mau_nhan))));
 
     // --- 8. Thong so va ngon ngu ---
     const thongSo = khoi(page, dung(gd.hien_nhan));

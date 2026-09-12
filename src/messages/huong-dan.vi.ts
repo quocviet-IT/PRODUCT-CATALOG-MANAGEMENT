@@ -124,19 +124,33 @@ export const HUONG_DAN_VI = {
     ],
   },
 
+  chu_de: {
+    ten: "Chọn nhanh một chủ đề",
+    mo_ta: "Hàng Chủ đề ở đầu khung Kiểu trình bày đặt sẵn bố cục, tông màu và màu nhấn hợp nhau cho một dịp, một nhóm hàng hay một kiểu khách. Không bắt buộc.",
+    chu: [
+      "Chủ đề chia ba nhóm: theo dịp, theo nhóm hàng và theo khách.",
+      "Bấm một chủ đề là bố cục, tông màu và màu nhấn bên dưới đổi theo ngay — ô đang chọn có viền đậm.",
+      "Chỉnh tay bố cục, tông hay màu nhấn thì không còn chủ đề nào được chọn; catalogue theo đúng lựa chọn của anh.",
+    ],
+    meo: [
+      "Chủ đề chỉ là lối tắt: không chọn chủ đề nào thì catalogue vẫn như trước.",
+      "Chủ đề Khách VIP và Đồ cưới dùng bố cục Thư mời — điền tên khách ở Trang bìa để mỗi trang có dòng “Dành riêng cho” tên khách.",
+    ],
+  },
+
   bo_cuc_mau: {
     ten: "Chọn bố cục, tông màu và màu nhấn",
     mo_ta: "Khung Kiểu trình bày quyết định khách thấy catalogue ra sao. Bấm vào ô nào là chọn ô đó.",
     chu: [
-      "Sáu bố cục: Danh sách dọc (mặc định, dễ so sánh), Lưới ảnh (hợp nhiều mẫu), Lookbook và Triển lãm (ít mẫu, ảnh lớn), Khung cổ điển (dễ đọc thông số), Tạp chí (lướt nhanh).",
-      "Tám tông màu nền. Chọn Hoa văn hồng hoặc Hồng phấn thì màu nhấn chuyển sang Hồng thương hiệu, Champagne sang Vàng đồng, Bạch kim sang Xanh cổ vịt — vẫn đổi lại được.",
+      "Tám bố cục: Danh sách dọc (mặc định, dễ so sánh), Lưới ảnh (hợp nhiều mẫu), Lookbook và Triển lãm (ít mẫu, ảnh lớn), Khung cổ điển (dễ đọc thông số), Tạp chí (lướt nhanh), Bảng mẫu (khách sỉ, in gọn), Thư mời (mỗi mẫu một trang, cho khách VIP và đồ cưới).",
+      "Mười ba tông màu nền. Nhiều tông tự chuyển màu nhấn cho hợp — ví dụ Champagne sang Vàng đồng, Than chì sang Xanh sapphire — vẫn đổi lại được.",
       "Dòng gợi ý cho biết tông đang chọn hợp với nhóm sản phẩm nào.",
-      "Màu nhấn: màu của logo HUNG PHAT, số thứ tự và nút Gọi trên trang khách.",
+      "Màu nhấn: màu của logo HUNG PHAT, số thứ tự và nút Gọi trên trang khách. Trên nền tối, chữ màu nhấn tự sáng hơn cho dễ đọc.",
     ],
     meo: [
       "Mọi lựa chọn trong khung này được chốt lúc bấm Tạo link. Đổi kiểu cho catalogue sau không ảnh hưởng catalogue đã gửi.",
       "Chưa chắc kiểu nào đẹp thì bấm Xem trước ở thanh dưới cùng — đổi, đóng, mở lại thoải mái trước khi tạo.",
-      "Bản in PDF luôn dùng nền sáng cho dễ in, dù đang chọn Nền tối hay Xanh rêu.",
+      "Bản in PDF luôn dùng nền sáng cho dễ in, dù đang chọn tông tối (Nền tối, Xanh rêu, Đỏ rượu, Than chì, Xanh đêm).",
     ],
   },
 
@@ -205,7 +219,7 @@ export const HUONG_DAN_VI = {
       "Gỡ mẫu này khỏi catalogue.",
     ],
     meo: [
-      "Lời giới thiệu hiện ngay dưới thông số của mẫu ở cả sáu bố cục; ở Lưới ảnh nó nằm dưới ảnh đầu tiên của mẫu.",
+      "Lời giới thiệu hiện ngay dưới thông số của mẫu ở mọi bố cục; ở Lưới ảnh nó nằm dưới ảnh đầu tiên của mẫu.",
       "Lời giới thiệu không tự dịch khi chọn English — viết bằng thứ tiếng khách đọc.",
     ],
   },
