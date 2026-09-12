@@ -383,6 +383,10 @@ export const vi = {
     bo_cuc_khung_mo_ta: "Mỗi mẫu một khung kẻ đôi, thông số căn giữa. Trang trọng, dễ đọc thông số.",
     bo_cuc_tap_chi: "Tạp chí",
     bo_cuc_tap_chi_mo_ta: "Ảnh một bên, chữ bên kia, so le từng mẫu. Lướt nhanh nhất.",
+    bo_cuc_bang_mau: "Bảng mẫu",
+    bo_cuc_bang_mau_mo_ta: "Mỗi mẫu một hàng gọn: ảnh nhỏ cạnh thông số. Hợp khách sỉ, gửi nhiều mẫu, in gọn.",
+    bo_cuc_thu_moi: "Thư mời",
+    bo_cuc_thu_moi_mo_ta: "Mỗi mẫu một trang riêng, căn giữa, có dòng “Dành riêng cho” tên khách. Hợp khách VIP, đồ cưới.",
 
     tone_reu: "Xanh rêu",
 
@@ -536,6 +540,9 @@ export const vi = {
 
     // Trang khach xem
     khach_gom: "{n} mẫu",
+    // Bo cuc Bang mau / Thu moi (12/09/2026). {n} = so anh, {ten} = ten khach tren trang bia.
+    bang_mau_so_anh: "{n} ảnh",
+    thu_moi_danh_cho: "Dành riêng cho {ten}",
     tai_pdf: "Tải PDF",
     phong_to: "Xem ảnh lớn",
     anh_truoc: "Ảnh trước",

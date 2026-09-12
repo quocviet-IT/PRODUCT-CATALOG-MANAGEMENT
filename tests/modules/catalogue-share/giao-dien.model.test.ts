@@ -323,7 +323,7 @@ describe("soGoiDuoc", () => {
 });
 
 describe("bố cục và màu nhấn mới", () => {
-  it("nhận cả sáu bố cục", () => {
+  it("nhận mọi bố cục", () => {
     for (const k of BO_CUC) expect(docGiaoDien({ boCuc: k }).boCuc).toBe(k);
   });
 
@@ -385,5 +385,19 @@ describe("năm tông và ba màu nhấn mới (12/09/2026)", () => {
       tone: "xanh-dem",
       nhan: "sapphire",
     });
+  });
+});
+
+describe("hai bố cục mới (12/09/2026)", () => {
+  it("chỉ thêm vào cuối — thứ tự cũ giữ nguyên", () => {
+    expect(BO_CUC).toEqual([
+      "danh-sach", "luoi", "lookbook", "trien-lam", "khung-co-dien", "tap-chi",
+      "bang-mau", "thu-moi",
+    ]);
+  });
+
+  it("docGiaoDien nhận Bảng mẫu và Thư mời", () => {
+    expect(docGiaoDien({ boCuc: "bang-mau" }).boCuc).toBe("bang-mau");
+    expect(docGiaoDien({ boCuc: "thu-moi" }).boCuc).toBe("thu-moi");
   });
 });

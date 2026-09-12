@@ -53,6 +53,14 @@ function nhanBoCuc(t: BoChu): Record<BoCuc, { ten: string; moTa: string }> {
       ten: t.mau_giao_dien.bo_cuc_tap_chi,
       moTa: t.mau_giao_dien.bo_cuc_tap_chi_mo_ta,
     },
+    "bang-mau": {
+      ten: t.mau_giao_dien.bo_cuc_bang_mau,
+      moTa: t.mau_giao_dien.bo_cuc_bang_mau_mo_ta,
+    },
+    "thu-moi": {
+      ten: t.mau_giao_dien.bo_cuc_thu_moi,
+      moTa: t.mau_giao_dien.bo_cuc_thu_moi_mo_ta,
+    },
   };
 }
 
@@ -132,6 +140,33 @@ function nhanThongSo(t: BoChu): Record<ThongSo, string> {
  */
 function HinhBoCuc({ kieu }: { kieu: BoCuc }) {
   const o = "bg-hp-rule";
+  if (kieu === "bang-mau") {
+    return (
+      <div aria-hidden className="mx-auto max-w-[150px] divide-y divide-hp-rule border-y border-hp-rule">
+        {Array.from({ length: 3 }, (_, i) => (
+          <div key={i} className="flex items-center gap-2 py-1.5">
+            <div className={`${o} aspect-[4/3] w-9 shrink-0`} />
+            <div className="flex flex-grow flex-col gap-1">
+              <div className="h-1.5 w-1/2 bg-hp-ink/40" />
+              <div className="h-1 w-full bg-hp-rule" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (kieu === "thu-moi") {
+    return (
+      <div aria-hidden className="mx-auto flex max-w-[150px] flex-col items-center gap-1.5">
+        <div className="h-1 w-1/3 bg-hp-rule" />
+        <div className="w-4/5 border border-hp-rule p-1">
+          <div className={`${o} aspect-[4/3]`} />
+        </div>
+        <div className="h-1.5 w-1/3 bg-hp-ink/40" />
+        <div className="h-1 w-1/2 bg-hp-rule" />
+      </div>
+    );
+  }
   if (kieu === "trien-lam") {
     return (
       <div aria-hidden className="mx-auto max-w-[150px] space-y-1.5">

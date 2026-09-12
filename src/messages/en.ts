@@ -372,6 +372,10 @@ export const en: BoChu = {
     bo_cuc_khung_mo_ta: "Each model in a double-ruled frame, details centred. Formal, and the easiest to read.",
     bo_cuc_tap_chi: "Magazine",
     bo_cuc_tap_chi_mo_ta: "Image one side, text the other, alternating. The quickest to skim.",
+    bo_cuc_bang_mau: "Line sheet",
+    bo_cuc_bang_mau_mo_ta: "One compact row per model: a small picture beside its details. Suits wholesale buyers and long lists; prints tight.",
+    bo_cuc_thu_moi: "Invitation",
+    bo_cuc_thu_moi_mo_ta: "Each model on its own page, centred, with a “Specially for” line using the client's name. Suits VIP clients and bridal.",
 
     tone_reu: "Deep green",
 
@@ -518,6 +522,8 @@ export const en: BoChu = {
     vua_tao: "Created on this device",
 
     khach_gom: "{n} models",
+    bang_mau_so_anh: "{n} images",
+    thu_moi_danh_cho: "Specially for {ten}",
     tai_pdf: "Download PDF",
     phong_to: "View larger",
     anh_truoc: "Previous image",

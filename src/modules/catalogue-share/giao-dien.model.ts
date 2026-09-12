@@ -15,6 +15,8 @@ import { docNgonNgu, type NgonNgu } from "@/messages/ngon-ngu";
 export const BO_CUC = [
   "danh-sach", "luoi", "lookbook",
   "trien-lam", "khung-co-dien", "tap-chi",
+  // 12/09/2026: Bang mau cho khach si, Thu moi cho khach VIP va do cuoi.
+  "bang-mau", "thu-moi",
 ] as const;
 export type BoCuc = (typeof BO_CUC)[number];
 
