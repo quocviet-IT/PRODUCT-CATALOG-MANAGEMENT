@@ -459,7 +459,7 @@ export const en: BoChu = {
     bia_loi_chao_goi_y: "A selection of 18K wedding bands chosen for you…",
 
     lien_he_nhan: "Ordering contact",
-    lien_he_mo_ta: "Shown at the end of the customer page with a call button and a message button of your choice. Leave blank to hide it.",
+    lien_he_mo_ta: "Shown at the end of the customer page with a call button and a message button of your choice. Leave the consultant and phone blank and keep the default call to action to hide it.",
     lien_he_ten: "Consultant",
     lien_he_ten_goi_y: "Ngoc Anh",
     lien_he_dien_thoai: "Phone",
@@ -472,6 +472,7 @@ export const en: BoChu = {
     cach_nhan_khong: "Call only",
     loi_keu_goi_nhan: "Call to action",
     loi_keu_goi_mo_ta: "The heading of the contact block. Each ready-made line is shown exactly as your customer reads it — in the catalogue's language, with the consultant's name filled in.",
+    loi_keu_goi_chua_lien_he: "No consultant or phone yet: your customer sees the call to action only, without call or message buttons.",
     loi_keu_goi_tu_viet: "Write your own",
     loi_keu_goi_tu_viet_goi_y: "For example: Wishing you the perfect ring, Ms Lan",
     hien_nhan: "Details the customer sees",

@@ -468,7 +468,7 @@ export const vi = {
     bia_loi_chao_goi_y: "Kính gửi chị bộ sưu tập nhẫn cưới 18K…",
 
     lien_he_nhan: "Liên hệ đặt hàng",
-    lien_he_mo_ta: "Hiện ở cuối trang khách, kèm nút gọi và nút nhắn tin theo cách chọn bên dưới. Bỏ trống thì không hiện khối này.",
+    lien_he_mo_ta: "Hiện ở cuối trang khách, kèm nút gọi và nút nhắn tin theo cách chọn bên dưới. Bỏ trống người tư vấn, điện thoại và để lời kêu gọi mặc định thì không hiện khối này.",
     lien_he_ten: "Người tư vấn",
     lien_he_ten_goi_y: "Ngọc Anh",
     lien_he_dien_thoai: "Điện thoại",
@@ -481,6 +481,7 @@ export const vi = {
     cach_nhan_khong: "Chỉ gọi điện",
     loi_keu_goi_nhan: "Lời kêu gọi",
     loi_keu_goi_mo_ta: "Dòng tiêu đề của khối liên hệ. Câu có sẵn hiện đúng như khách đọc — theo ngôn ngữ catalogue, đã điền tên người tư vấn.",
+    loi_keu_goi_chua_lien_he: "Chưa có người tư vấn và số điện thoại: khách chỉ thấy lời kêu gọi, không có nút gọi hay nhắn tin.",
     loi_keu_goi_tu_viet: "Tự viết",
     loi_keu_goi_tu_viet_goi_y: "Ví dụ: Chúc chị Lan chọn được mẫu thật ưng ý",
     hien_nhan: "Thông số cho khách xem",

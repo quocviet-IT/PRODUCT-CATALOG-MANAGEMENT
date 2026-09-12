@@ -16,6 +16,7 @@ import {
   CACH_NHAN,
   LOI_KEU_GOI,
   cauKeuGoi,
+  coKhoiLienHe,
   goiYCachNhan,
   lienKetNhan,
   soGoiDuoc,
@@ -261,6 +262,39 @@ describe("lời kêu gọi (góp ý 11/09/2026)", () => {
     expect(cauKeuGoi({ mau: "tu-viet", tuViet: "Chúc chị Lan chọn được mẫu ưng ý" }, "", en))
       .toBe("Chúc chị Lan chọn được mẫu ưng ý");
     expect(cauKeuGoi({ mau: "tu-viet", tuViet: "  " }, "", vi)).toBe(vi.cta_tieu_de);
+  });
+});
+
+describe("coKhoiLienHe — khi nào khối liên hệ hiện ra", () => {
+  // Lỗi thật 12/09/2026: sale tự viết lời kêu gọi nhưng bỏ trống người tư vấn và
+  // số điện thoại → lienHe null → khối liên hệ (chứa lời kêu gọi) không hiện ở cả
+  // Xem trước lẫn trang khách, dù câu đã lưu đúng.
+  const mac = { mau: "mac-dinh", tuViet: "" } as const;
+  const lh = { ten: "Ngọc Anh", dienThoai: "", cachNhan: "zalo" } as const;
+
+  it("BẢN GHI CŨ không có liên hệ, lời kêu gọi mặc định: vẫn KHÔNG hiện, như lúc gửi", () => {
+    expect(coKhoiLienHe({ lienHe: null, loiKeuGoi: mac })).toBe(false);
+    expect(coKhoiLienHe(docGiaoDien({}))).toBe(false);
+  });
+
+  it("có người tư vấn hoặc số điện thoại thì hiện", () => {
+    expect(coKhoiLienHe({ lienHe: lh, loiKeuGoi: mac })).toBe(true);
+  });
+
+  it("chưa có liên hệ nhưng đã chọn câu có sẵn thì vẫn hiện", () => {
+    expect(coKhoiLienHe({ lienHe: null, loiKeuGoi: { mau: "custom", tuViet: "" } })).toBe(true);
+  });
+
+  it("chưa có liên hệ nhưng đã tự viết thì hiện — đúng dữ liệu của lỗi", () => {
+    const g = docGiaoDien({
+      loiKeuGoi: { mau: "tu-viet", tuViet: "Nhận custom theo yêu cầu ạ, thích gọi cho em qua số điện thoại" },
+    });
+    expect(g.lienHe).toBeNull();
+    expect(coKhoiLienHe(g)).toBe(true);
+  });
+
+  it("bấm Tự viết mà chưa gõ chữ nào thì chưa hiện", () => {
+    expect(coKhoiLienHe({ lienHe: null, loiKeuGoi: { mau: "tu-viet", tuViet: "   " } })).toBe(false);
   });
 });
 

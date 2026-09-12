@@ -6,7 +6,7 @@ import { boChu, type BoChu } from "@/messages";
 import { NGON_NGU, NHAN_NGON_NGU } from "@/messages/ngon-ngu";
 import {
   BO_CUC, CACH_NHAN, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_LOI_KEU_GOI, DAI_TEN_KHACH, DAI_TEN_SALE,
-  LOI_KEU_GOI, MAU_NHAN, NHAN, NHAN_GOI_Y, THONG_SO, TONE, cauKeuGoi, goiYCachNhan,
+  LOI_KEU_GOI, MAU_NHAN, NHAN, NHAN_GOI_Y, THONG_SO, TONE, cauKeuGoi, coKhoiLienHe, goiYCachNhan,
   type BoCuc, type CachNhan, type GiaoDienCatalogue, type LienHe, type Nhan, type ThongSo,
   type Tone,
 } from "@/modules/catalogue-share/giao-dien.model";
@@ -485,6 +485,11 @@ export function ChonGiaoDien({
         <fieldset className="mt-5">
           <legend className="text-xs text-hp-muted">{t.mau_giao_dien.loi_keu_goi_nhan}</legend>
           <p className="mt-0.5 text-xs text-hp-muted">{t.mau_giao_dien.loi_keu_goi_mo_ta}</p>
+          {/* Da chon loi keu goi ma chua co ten hay so: noi truoc rang khach chi
+              thay cau nay, khong co nut goi hay nhan (loi that 12/09/2026). */}
+          {gia.lienHe === null && coKhoiLienHe(gia) && (
+            <p className="mt-1 text-xs text-hp-body">{t.mau_giao_dien.loi_keu_goi_chua_lien_he}</p>
+          )}
           <div className="mt-2 grid gap-2">
             {LOI_KEU_GOI.map((k) => (
               <label

@@ -5,6 +5,7 @@ import type { MucCatalogue } from "@/modules/catalogue-share/chia-se.model";
 import {
   MAU_NHAN,
   cauKeuGoi,
+  coKhoiLienHe,
   lienKetNhan,
   soGoiDuoc,
   type Bia,
@@ -612,30 +613,37 @@ export function KhoiLienHe({
   loiKeuGoi,
   t,
 }: {
-  lienHe: LienHe;
+  /**
+   * null = sale chua dien nguoi tu van hay so nhung da chon loi keu goi: khoi chi
+   * con loi keu goi va dong mo ta, khong co nut.
+   */
+  lienHe: LienHe | null;
   /** Cau sale chon luc tao. Catalogue cu doc ra "mac-dinh" — y nhu luc gui. */
   loiKeuGoi: LoiKeuGoi;
   t: BoChu;
 }) {
-  const so = soGoiDuoc(lienHe.dienThoai);
-  const nhan = lienKetNhan(lienHe);
+  // Quyet dinh hien hay an nam O DAY chu khong o cho goi: trang khach va ban xem
+  // truoc cung goi thanh phan nay, dat dieu kien hai noi la hai noi lech nhau.
+  if (!coKhoiLienHe({ lienHe, loiKeuGoi })) return null;
+  const so = lienHe ? soGoiDuoc(lienHe.dienThoai) : "";
+  const nhan = lienHe ? lienKetNhan(lienHe) : null;
 
   return (
     <section className="mt-20 border-t border-hp-rule pt-10">
       <h2 className="font-title text-2xl leading-tight text-hp-ink">
-        {cauKeuGoi(loiKeuGoi, lienHe.ten, t.chia_se)}
+        {cauKeuGoi(loiKeuGoi, lienHe?.ten ?? "", t.chia_se)}
       </h2>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-hp-body">
         {t.chia_se.cta_mo_ta}
       </p>
 
-      {lienHe.ten && (
+      {lienHe?.ten && (
         <p className="mt-6 text-[11px] uppercase tracking-[0.14em] text-hp-muted">
           {t.chia_se.cta_nguoi_tu_van} · <span className="text-hp-ink">{lienHe.ten}</span>
         </p>
       )}
 
-      {so !== "" && (
+      {lienHe && so !== "" && (
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <a
             href={`tel:${so}`}

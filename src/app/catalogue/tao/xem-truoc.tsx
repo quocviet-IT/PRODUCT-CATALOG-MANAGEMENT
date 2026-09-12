@@ -147,7 +147,7 @@ export function XemTruoc({
 
               <ThanCatalogue muc={danhSach} g={gia} t={k} />
 
-              {gia.lienHe && <KhoiLienHe lienHe={gia.lienHe} loiKeuGoi={gia.loiKeuGoi} t={k} />}
+              <KhoiLienHe lienHe={gia.lienHe} loiKeuGoi={gia.loiKeuGoi} t={k} />
 
               <footer className="mt-14 border-t border-hp-rule pt-6 text-xs text-hp-muted">
                 {k.chia_se.lien_he}

@@ -139,7 +139,9 @@ export default async function TrangKhachXem({
             <ThanCatalogue muc={c.noiDung.muc} g={g} t={t} />
           </PhongToAnh>
 
-          {g.lienHe && <KhoiLienHe lienHe={g.lienHe} loiKeuGoi={g.loiKeuGoi} t={t} />}
+          {/* KhoiLienHe tu quyet dinh hien hay an (coKhoiLienHe): co the chi co loi
+              keu goi ma chua co ten hay so. */}
+          <KhoiLienHe lienHe={g.lienHe} loiKeuGoi={g.loiKeuGoi} t={t} />
 
           {moIn && <MoHopThoaiIn />}
 

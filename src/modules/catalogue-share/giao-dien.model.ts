@@ -319,6 +319,21 @@ export function cauKeuGoi(lkg: LoiKeuGoi, tenTuVan: string, chu: ChuKeuGoi): str
 }
 
 /**
+ * Khoi lien he co hien ra khong.
+ *
+ * Co nguoi tu van hay so dien thoai thi hien, nhu truoc. VA hien ca khi sale da chon
+ * mot loi keu goi khac mac dinh hay da tu viet, du chua dien lien he. Loi that
+ * 12/09/2026: sale tu viet loi keu goi, bo trong ten va so, nen khoi bi an — khach
+ * khong thay gi ca, du cau da luu dung. Catalogue cu (khong lien he, cau mac dinh)
+ * van an nhu luc gui.
+ */
+export function coKhoiLienHe(g: Pick<GiaoDienCatalogue, "lienHe" | "loiKeuGoi">): boolean {
+  if (g.lienHe !== null) return true;
+  const { mau, tuViet } = g.loiKeuGoi;
+  return mau === "tu-viet" ? tuViet.trim() !== "" : mau !== "mac-dinh";
+}
+
+/**
  * Chi giu chu so cua so dien thoai, kem dau + neu co o dau.
  *
  * Sale go so kieu "0909 123 456" hay "(408) 555-0199" cho de doc; nhung tel:
