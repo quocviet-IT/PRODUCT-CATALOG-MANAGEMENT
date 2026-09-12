@@ -355,7 +355,7 @@ export const vi = {
     b4_c3: "Tông màu, thông số cho khách xem, ngôn ngữ, liên hệ đặt hàng, và trang bìa." + " Điền số điện thoại thì trang khách có nút gọi và nút nhắn tin — Zalo, tin nhắn hoặc WhatsApp, tuỳ anh chọn.",
 
     b5_ten: "Bỏ bớt ảnh",
-    b5_mo_ta: "Mặc định giữ hết ảnh của mẫu. Bấm vào ảnh nào để bỏ ảnh đó ra khỏi catalogue. Cần gỡ nguyên một mẫu thì bấm Gỡ mẫu này. Muốn đổi thứ tự mẫu thì kéo ở khung Thứ tự trình bày; muốn giới thiệu thêm thì ghi ở ô Giới thiệu của từng mẫu — cả hai đều không bắt buộc.",
+    b5_mo_ta: "Mặc định giữ hết ảnh của mẫu. Bấm vào ảnh nào để bỏ ảnh đó ra khỏi catalogue. Kéo ảnh hoặc bấm mũi tên dưới ảnh để đổi thứ tự — ảnh được tích đầu tiên là ảnh chính. Cần gỡ nguyên một mẫu thì bấm Gỡ mẫu này. Muốn đổi thứ tự mẫu thì kéo ở khung Thứ tự trình bày; muốn giới thiệu thêm thì ghi ở ô Giới thiệu của từng mẫu — các bước này đều không bắt buộc.",
     b5_c1: "Bấm vào ảnh để bỏ / lấy lại.",
     b5_c2: "Số ảnh đang giữ trên tổng số ảnh của mẫu.",
     b5_c3: "Gỡ cả mẫu khỏi catalogue.",
@@ -551,6 +551,14 @@ export const vi = {
     gioi_thieu_nhan: "Giới thiệu mẫu này",
     gioi_thieu_tuy_chon: "Không bắt buộc. Hiện ngay dưới thông số trên trang khách.",
     gioi_thieu_goi_y: "Ví dụ: Dây khoen lật đan tay, đeo lâu không xoắn — hợp làm quà.",
+    anh_thu_tu_mo_ta: "Kéo ảnh hoặc bấm mũi tên để đổi thứ tự — khách thấy ảnh đúng thứ tự này. Ảnh được tích đầu tiên là ảnh chính, hiện to nhất ở Lookbook, Triển lãm và Tạp chí.",
+    anh_chinh: "Ảnh chính",
+    anh_dat_chinh: "Đặt {ten} làm ảnh chính",
+    anh_len_truoc: "Đưa {ten} lên trước",
+    anh_ra_sau: "Đưa {ten} ra sau",
+    anh_keo: "Kéo để đổi chỗ {ten}",
+    anh_da_chuyen: "Đã chuyển {ten} tới vị trí {n}.",
+    anh_da_dat_chinh: "Đã đặt {ten} làm ảnh chính.",
 
     // Sau khi tao
     xong_tieu_de: "Đã tạo xong",

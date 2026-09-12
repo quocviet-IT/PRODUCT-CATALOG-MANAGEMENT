@@ -7,6 +7,7 @@ import { SO_NGAY_SONG } from "@/modules/catalogue-share/hieu-luc.model";
 import { DoiTenLink } from "@/app/admin/catalogue/doi-ten-link";
 import { XemTruocLink } from "./xem-truoc-link";
 import { ThuTuTrinhBay } from "./thu-tu-trinh-bay";
+import { LuoiAnhMau } from "./luoi-anh-mau";
 import {
   chupGio, datGio,
 } from "@/modules/catalogue-share/gio-chon";
@@ -14,7 +15,6 @@ import {
   ArrowLeft, Check, Copy, Eye, ExternalLink, FolderOpen, Link2, Plus, Printer, X,
 } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
-import { AnhTai } from "@/ui/anh-tai";
 import {
   GIAO_DIEN_MAC_DINH, type GiaoDienCatalogue,
 } from "@/modules/catalogue-share/giao-dien.model";
@@ -111,6 +111,11 @@ export function TaoCatalogue() {
     });
   }
 
+  /** Doi thu tu anh cua mot mau (gop y 12/09/2026) — sua thang `m.anh`. */
+  function doiAnh(ma: string, anh: MucDeChon["anh"]) {
+    setMuc((truoc) => truoc.map((x) => (x.ma === ma ? { ...x, anh } : x)));
+  }
+
   function goMau(ma: string) {
     setMuc((truoc) => truoc.filter((m) => m.ma !== ma));
     // Go khoi man hinh nay thi cung go khoi gio, khong thi quay lai danh sach
@@ -129,8 +134,16 @@ export function TaoCatalogue() {
           ten,
           tenLink,
           // Thu tu cua `muc` CHINH LA thu tu khach thay — khung Thu tu trinh bay sua
-          // thang mang nay.
-          chon: muc.map((m) => ({ ma: m.ma, anh: anhGiu[m.ma] ?? [], gioiThieu: gioiThieu[m.ma] ?? "" })),
+          // thang mang nay. Anh cung vay: lay theo thu tu `m.anh` (sale keo o luoi anh),
+          // KHONG theo mang anhGiu — o do anh vua tich lai bi day xuong cuoi.
+          chon: muc.map((m) => {
+            const giu = new Set(anhGiu[m.ma] ?? []);
+            return {
+              ma: m.ma,
+              anh: m.anh.filter((a) => giu.has(a.fileId)).map((a) => a.fileId),
+              gioiThieu: gioiThieu[m.ma] ?? "",
+            };
+          }),
           giaoDien,
         }),
       });
@@ -235,7 +248,7 @@ export function TaoCatalogue() {
 
       {/* Thu tu trinh bay (gop y 11/09/2026): sua thang mang `muc`, nen cac the mau
           ben duoi, Xem truoc va catalogue tao ra deu theo dung thu tu nay. */}
-      <ThuTuTrinhBay muc={muc} thuTuGoc={thuTuGoc} khiDoi={setMuc} />
+      <ThuTuTrinhBay muc={muc} anhGiu={anhGiu} thuTuGoc={thuTuGoc} khiDoi={setMuc} />
 
       <ul className="space-y-8">
         {muc.map((m) => {
@@ -284,42 +297,14 @@ export function TaoCatalogue() {
                 )}
               </label>
 
-              {m.anh.length === 0 ? (
-                <p className="mt-4 text-sm text-hp-muted">{t.chia_se.khong_co_anh}</p>
-              ) : (
-                <ul className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6">
-                  {m.anh.map((a) => {
-                    const dangGiu = giu.includes(a.fileId);
-                    return (
-                      <li key={a.fileId}>
-                        <label
-                          className={`block cursor-pointer border transition-colors duration-150
-                                      ${dangGiu ? "border-hp-ink" : "border-hp-rule opacity-45"}`}
-                        >
-                          <div className="flex aspect-square items-center justify-center bg-hp-inset">
-                            <AnhTai
-                              src={`/api/anh-drive/${a.fileId}`}
-                              alt={a.ten}
-                              lop="h-full w-full object-contain"
-                            />
-                          </div>
-                          <span className="flex items-center gap-2 px-2 py-1.5">
-                            <input
-                              type="checkbox"
-                              checked={dangGiu}
-                              onChange={() => daoAnh(m.ma, a.fileId)}
-                              className="h-3.5 w-3.5 shrink-0 accent-hp-ink"
-                            />
-                            <span className="truncate text-[10px] text-hp-muted" title={a.ten}>
-                              {a.ten}
-                            </span>
-                          </span>
-                        </label>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
+              {/* Luoi anh: tich de giu/bo, keo hoac bam mui ten de doi thu tu (gop y
+                  12/09/2026). Anh duoc tich dau tien la anh chinh. */}
+              <LuoiAnhMau
+                m={m}
+                giu={giu}
+                khiDao={(fileId) => daoAnh(m.ma, fileId)}
+                khiDoi={(anh) => doiAnh(m.ma, anh)}
+              />
             </li>
           );
         })}

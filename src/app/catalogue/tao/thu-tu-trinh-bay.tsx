@@ -27,10 +27,16 @@ const ICON = { "aria-hidden": true, strokeWidth: 1.5, className: "h-4 w-4 shrink
  */
 export function ThuTuTrinhBay({
   muc,
+  anhGiu,
   thuTuGoc,
   khiDoi,
 }: {
   muc: MucDeChon[];
+  /**
+   * ma -> fileId dang giu. Hinh thu nho la ANH CHINH (anh duoc tich dau tien theo thu
+   * tu sale xep), khong phai anh dau thu muc — anh do co khi da bi bo tich.
+   */
+  anhGiu: Record<string, string[]>;
   /** Danh sach ma luc tai trang — "Thu tu luc tich chon" tro ve day. */
   thuTuGoc: string[];
   khiDoi: (moi: MucDeChon[]) => void;
@@ -126,13 +132,19 @@ export function ThuTuTrinhBay({
               {String(i + 1).padStart(2, "0")}
             </span>
             <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-hp-inset">
-              {m.anh[0] && (
-                <AnhTai
-                  src={`/api/anh-drive/${m.anh[0].fileId}`}
-                  alt=""
-                  lop="h-full w-full object-contain"
-                />
-              )}
+              {/* Anh chinh = anh duoc tich dau tien theo thu tu sale xep. Khong tich anh
+                  nao thi o trong, dung nhu khach se thay. */}
+              {m.anh
+                .filter((a) => (anhGiu[m.ma] ?? []).includes(a.fileId))
+                .slice(0, 1)
+                .map((a) => (
+                  <AnhTai
+                    key={a.fileId}
+                    src={`/api/anh-drive/${a.fileId}`}
+                    alt=""
+                    lop="h-full w-full object-contain"
+                  />
+                ))}
             </span>
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm text-hp-ink">{tenMau(m)}</span>

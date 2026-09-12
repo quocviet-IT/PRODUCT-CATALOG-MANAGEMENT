@@ -349,7 +349,7 @@ export const en: BoChu = {
     b4_c3: "Colour, the details your customer sees, language, the ordering contact, and the cover page." + " Fill in a phone number and the customer page gets a call button and a message button — Zalo, text message or WhatsApp, whichever you choose.",
 
     b5_ten: "Drop the images you do not want",
-    b5_mo_ta: "Every image is kept by default. Click an image to take it out. To remove a whole model, press Remove this model. To change the order, drag in the Presentation order box; to say more about a piece, write in its About box — both are optional.",
+    b5_mo_ta: "Every image is kept by default. Click an image to take it out. Drag images, or use the arrows under them, to reorder — the first ticked image is the main one. To remove a whole model, press Remove this model. To change the model order, drag in the Presentation order box; to say more about a piece, write in its About box — all of these are optional.",
     b5_c1: "Click an image to drop or restore it.",
     b5_c2: "How many images are kept out of the model's total.",
     b5_c3: "Remove the whole model from the catalogue.",
@@ -537,6 +537,14 @@ export const en: BoChu = {
     gioi_thieu_nhan: "About this piece",
     gioi_thieu_tuy_chon: "Optional. Shown right under the details on the customer page.",
     gioi_thieu_goi_y: "For example: A hand-woven chain that lies flat — a lovely gift.",
+    anh_thu_tu_mo_ta: "Drag an image or use the arrows to reorder — the customer sees images in this order. The first ticked image is the main image, shown largest in Lookbook, Gallery and Magazine.",
+    anh_chinh: "Main image",
+    anh_dat_chinh: "Make {ten} the main image",
+    anh_len_truoc: "Move {ten} earlier",
+    anh_ra_sau: "Move {ten} later",
+    anh_keo: "Drag to move {ten}",
+    anh_da_chuyen: "Moved {ten} to position {n}.",
+    anh_da_dat_chinh: "{ten} is now the main image.",
 
     xong_tieu_de: "Ready",
     xong_mo_ta: "Send this link to your customer. It stays open for {n} days from today.",
