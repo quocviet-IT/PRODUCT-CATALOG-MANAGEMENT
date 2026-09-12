@@ -2,8 +2,9 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { ArrowUp } from "lucide-react";
 import { requireUser } from "@/auth/guard";
-import { layChu } from "@/messages/may-chu";
+import { layChu, layNgonNgu } from "@/messages/may-chu";
 import type { BoChu } from "@/messages";
+import { NGON_NGU, type NgonNgu } from "@/messages/ngon-ngu";
 import { AnhChuThich, ChuaCoAnh, type Diem } from "./anh-chu-thich";
 
 export async function generateMetadata() {
@@ -11,7 +12,15 @@ export async function generateMetadata() {
   return { title: t.huong_dan.tieu_de };
 }
 
-const THU_MUC_ANH = "huong-dan";
+/**
+ * Moi ngon ngu mot bo anh chup rieng (12/09/2026): nguoi doc huong dan bang tieng Anh
+ * phai thay dung man hinh tieng Anh ho dang dung, khong phai nut "Tao link gui khach"
+ * trong khi chu thich noi "Create customer link". Chup bang npm run huong-dan:anh.
+ */
+const THU_MUC_ANH: Record<NgonNgu, string> = {
+  vi: "huong-dan",
+  en: "huong-dan/en",
+};
 
 /** Chu cua mot buoc, lay nguyen tu bo chu (huong-dan.vi.ts / huong-dan.en.ts). */
 type NoiDungBuoc = { ten: string; mo_ta: string; chu: readonly string[]; meo: readonly string[] };
@@ -90,24 +99,35 @@ function cacPhan(t: BoChu): Phan[] {
 type ViTri = { x: number; y: number; huong: Diem["huong"] };
 
 /**
- * Vi tri mui ten, do tu chinh trang luc chup (npm run huong-dan:anh).
+ * Vi tri mui ten cua MOT bo anh, do tu chinh trang luc chup va ghi ra diem.json cua thu
+ * muc do. Truoc day toa do go tay vao tep nay; moi lan bo cuc xe dich la mui ten tro vao
+ * cho trong ma khong ai biet.
  *
- * Truoc day toa do go tay vao tep nay, do bang mat tren anh. Moi lan bo cuc xe
- * dich mot chut la mui ten tro vao cho trong ma khong ai biet — huong dan noi
- * doi mot cach im lang. Gio script do tu DOM va ghi ra diem.json.
- *
- * Doc MOT lan luc nap module: tep nay nam trong ma nguon, khong doi luc chay.
- * Thieu tep hay tep hong deu KHONG duoc lam sap trang — huong dan mat mui ten
- * van con doc duoc, mot trang loi thi khong.
+ * Thieu tep hay tep hong deu KHONG duoc lam sap trang — huong dan mat mui ten van con
+ * doc duoc, mot trang loi thi khong.
  */
-const VI_TRI: Record<string, ViTri[]> = (() => {
+function docViTri(thuMuc: string): Record<string, ViTri[]> {
   try {
-    const tho = readFileSync(join(process.cwd(), "public", THU_MUC_ANH, "diem.json"), "utf8");
+    const tho = readFileSync(join(process.cwd(), "public", thuMuc, "diem.json"), "utf8");
     return JSON.parse(tho) as Record<string, ViTri[]>;
   } catch {
     return {};
   }
-})();
+}
+
+/** Doc MOT lan luc nap module: cac tep nay nam trong ma nguon, khong doi luc chay. */
+const VI_TRI = Object.fromEntries(NGON_NGU.map((nn) => [nn, docViTri(THU_MUC_ANH[nn])])) as Record<
+  NgonNgu,
+  Record<string, ViTri[]>
+>;
+
+/**
+ * Bo anh dung cho mot buoc: bo cua ngon ngu dang xem; buoc nao ngon ngu do chua chup thi
+ * lui ve anh tieng Viet. Anh tieng Viet kem chu thich tieng Anh con hon mot o "chua chup".
+ */
+function nguonAnh(nn: NgonNgu, anh: string): NgonNgu {
+  return VI_TRI[nn][anh] ? nn : "vi";
+}
 
 /**
  * Ghep cau chu voi vi tri theo thu tu.
@@ -140,6 +160,7 @@ function VeMucLuc({ chu }: { chu: string }) {
 export default async function TrangHuongDan() {
   const toi = await requireUser();
   const t = await layChu();
+  const nn = await layNgonNgu();
   const h = t.huong_dan;
   // Loc theo MUC QUYEN chu khong theo ten vai tro: mot vai tro tu dat mang bac
   // quan tri thi cung phai thay phan nay.
@@ -230,7 +251,8 @@ export default async function TrangHuongDan() {
             <ol className="space-y-20">
               {p.buoc.map((b, j) => {
                 const n = soDau[i] + j + 1;
-                const diem = ghep(b.nd.chu, VI_TRI[b.anh]);
+                const nguon = nguonAnh(nn, b.anh);
+                const diem = ghep(b.nd.chu, VI_TRI[nguon][b.anh]);
                 return (
                   <li key={b.anh} id={`buoc-${n}`} className="scroll-mt-8">
                     <span className={NHAN_NHO}>{h.buoc.replace("{n}", String(n))}</span>
@@ -239,7 +261,11 @@ export default async function TrangHuongDan() {
 
                     <div className="mt-6">
                       {diem.length > 0 ? (
-                        <AnhChuThich src={`/${THU_MUC_ANH}/${b.anh}.png`} alt={b.nd.ten} diem={diem} />
+                        <AnhChuThich
+                          src={`/${THU_MUC_ANH[nguon]}/${b.anh}.png`}
+                          alt={b.nd.ten}
+                          diem={diem}
+                        />
                       ) : (
                         <ChuaCoAnh t={t} />
                       )}
