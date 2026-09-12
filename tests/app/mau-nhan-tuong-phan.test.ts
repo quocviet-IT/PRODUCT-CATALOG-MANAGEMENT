@@ -58,4 +58,15 @@ describe("tuong phan cua mau nhan", () => {
       expect(co, `ban in chua ep .tone-${tone} ve nen trang`).toBe(true);
     }
   });
+
+  it("khoi .mau-nhan dat SAU moi khoi .tone-* — cung do uu tien thi khoi viet sau thang", () => {
+    const viTriMauNhan = CSS.indexOf(".mau-nhan {");
+    expect(viTriMauNhan, "khong tim thay khoi .mau-nhan {").toBeGreaterThan(-1);
+    for (const tone of TONE) {
+      if (tone === "beige") continue;
+      const khoi = [...CSS.matchAll(new RegExp(`^\\s*\\.tone-${tone}\\s*[{,]`, "gm"))];
+      const cuoi = khoi.at(-1)?.index ?? -1;
+      expect(cuoi, `.tone-${tone} khai bao sau .mau-nhan`).toBeLessThan(viTriMauNhan);
+    }
+  });
 });

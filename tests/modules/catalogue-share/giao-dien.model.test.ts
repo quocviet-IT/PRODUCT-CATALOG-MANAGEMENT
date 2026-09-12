@@ -8,6 +8,7 @@ import {
   TONE_TOI,
   CHU_DE,
   NHOM_CHU_DE,
+  NHAN_GOI_Y,
   chuDeDangChon,
   THONG_SO,
   coThongSo,
@@ -445,5 +446,12 @@ describe("chủ đề sẵn (12/09/2026)", () => {
     expect(chuDeDangChon({ boCuc: "thu-moi", tone: "trang", nhan: "dong" })).toBe("cuoi");
     expect(chuDeDangChon({ boCuc: "thu-moi", tone: "xanh-dem", nhan: "hong" })).toBeNull();
     expect(chuDeDangChon({ boCuc: "lookbook", tone: "xanh-dem", nhan: "dong" })).toBeNull();
+  });
+
+  it("gợi ý màu nhấn của tông không cãi màu nhấn của chủ đề dùng tông đó", () => {
+    for (const c of CHU_DE) {
+      const goiY = NHAN_GOI_Y[c.tone];
+      expect(goiY === undefined || goiY === c.nhan, `${c.khoa}: tong ${c.tone} goi y ${goiY}, chu de ${c.nhan}`).toBe(true);
+    }
   });
 });

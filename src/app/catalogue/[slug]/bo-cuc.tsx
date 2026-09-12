@@ -405,9 +405,10 @@ function TrienLam({ muc, g, t }: DoiSo) {
                     uuTien={dau === 0}
                   />
                 </div>
+                {/* Nen cua trang sau con so: so de len mep anh (nen gan trang), tren tong toi sac sang cua mau nhan khong doc duoc neu khong co nen nay. */}
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute -bottom-6 left-0 font-title
+                  className="pointer-events-none absolute -bottom-6 left-0 bg-hp-foundation pr-3 font-title
                              text-[64px] leading-none text-hp-pink sm:text-[76px]"
                 >
                   {String(i + 1).padStart(2, "0")}
@@ -811,7 +812,7 @@ export function KhoiLienHe({
             href={`tel:${so}`}
             className="flex items-center gap-2 bg-hp-pink-strong px-6 py-3 text-[11px]
                        uppercase tracking-[0.14em] text-white transition-colors
-                       duration-150 hover:bg-hp-ink"
+                       duration-150 hover:bg-hp-ink hover:text-hp-foundation"
           >
             <Phone aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
             {t.chia_se.cta_goi} {lienHe.dienThoai}
