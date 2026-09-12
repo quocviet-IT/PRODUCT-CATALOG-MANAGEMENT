@@ -457,6 +457,9 @@ async function chupMotNgonNgu(trinhDuyet: Browser, nn: NgonNgu): Promise<void> {
     await kieu.getByText(dung(gd.tone_beige)).click();
     await kieu.getByText(dung(gd.nhan_hong)).click();
     await page.waitForTimeout(300);
+    // Dua chuot ra goc trang: sau khi cuon, chuot con nam tren mot o bo cuc va vien hover
+    // lam anh trong nhu hai o cung duoc chon.
+    await page.mouse.move(0, 0);
 
     // --- 7b. Bo cuc, tong mau, mau nhan ---
     await cuonToi(page, boCucKhoi, 40);
@@ -740,6 +743,13 @@ async function main(): Promise<void> {
 
   const id = await taoTaiKhoanTam();
   const trinhDuyet = await chromium.launch();
+  // Hen gio: treo ma khong timeout nao ban thi finally khong chay va tai khoan admin tam nam
+  // lai trong co so du lieu. Qua 20 phut thi dong trinh duyet de loi ban ra va finally don dep.
+  const henGio = setTimeout(() => {
+    console.error("[chup] qua 20 phut — dong trinh duyet de don tai khoan tam");
+    void trinhDuyet.close().catch(() => {});
+  }, 20 * 60_000);
+  henGio.unref();
   try {
     for (const nn of cacNgonNgu) await chupMotNgonNgu(trinhDuyet, nn);
   } finally {
