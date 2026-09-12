@@ -12,6 +12,10 @@ import {
   maCuaSlug,
   phanTenCuaSlug,
   slugDoiTen,
+  DAI_GIOI_THIEU,
+  doiCho,
+  sapXepMuc,
+  tuoiVangCaoNhat,
   tenHienThi,
   type NguonMau,
 } from "@/modules/catalogue-share/chia-se.model";
@@ -235,6 +239,73 @@ describe("doi ten link (11/09/2026)", () => {
     const moi = slugDoiTen("zxhpnhyrtpu3", "Dây chuyền ".repeat(20))!;
     expect(moi.length).toBeLessThanOrEqual(80);
     expect(moi.endsWith("-zxhpnhyrtpu3")).toBe(true);
+  });
+});
+
+describe("gioi thieu tung mau (gop y 11/09/2026)", () => {
+  it("giu loi gioi thieu da cat khoang trang va cat do dai", () => {
+    const [m] = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["a1"], gioiThieu: "  Dây đan tay  " }]).muc;
+    expect(m.gioiThieu).toBe("Dây đan tay");
+    const [dai] = dungNoiDung(NGUON, [{ ma: "D12741", anh: [], gioiThieu: "x".repeat(1000) }]).muc;
+    expect(dai.gioiThieu).toHaveLength(DAI_GIOI_THIEU);
+  });
+
+  it("khong go gi thi KHONG co truong — hinh dang muc y nhu cu", () => {
+    const [m] = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["a1"], gioiThieu: "   " }]).muc;
+    expect(m).not.toHaveProperty("gioiThieu");
+  });
+
+  it("co gioi thieu thi ranh gioi rieng tu chi them dung truong do", () => {
+    const [m] = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["a1"], gioiThieu: "Quà tặng" }]).muc;
+    expect(Object.keys(m).sort()).toEqual(
+      ["anh", "chatLieu", "gioiThieu", "loaiSp", "mau", "maMau", "size", "tlVang"].sort(),
+    );
+  });
+});
+
+describe("sap xep nhanh va doi cho (gop y 11/09/2026)", () => {
+  const m = (ma: string, loaiSp: string | null, chatLieu: string | null) => ({ ma, loaiSp, chatLieu });
+  const ds = [
+    m("A", "NHẪN", "14K"),
+    m("B", "DÂY CHUYỀN", "18K, 14K"),
+    m("C", null, null),
+    m("D", "BÔNG TAI", "24K"),
+    m("E", "DÂY CHUYỀN", "10K"),
+  ];
+  const ma = (x: { ma: string }[]) => x.map((y) => y.ma);
+
+  it("loai san pham A→Z theo tieng Viet; cung loai giu thu tu; khong co loai xep cuoi", () => {
+    expect(ma(sapXepMuc(ds, "loai-sp", []))).toEqual(["D", "B", "E", "A", "C"]);
+  });
+
+  it("loai vang cao → thap theo tuoi cao nhat; khong ghi tuoi vang xep cuoi", () => {
+    expect(ma(sapXepMuc(ds, "loai-vang", []))).toEqual(["D", "B", "A", "E", "C"]);
+  });
+
+  it("thu tu luc tich chon: tro ve dung danh sach goc sau khi da sap", () => {
+    const daSap = sapXepMuc(ds, "loai-sp", []);
+    expect(ma(sapXepMuc(daSap, "da-chon", ["A", "B", "C", "D", "E"]))).toEqual(["A", "B", "C", "D", "E"]);
+  });
+
+  it("khong sua danh sach dau vao", () => {
+    const truoc = ma(ds);
+    sapXepMuc(ds, "loai-vang", []);
+    expect(ma(ds)).toEqual(truoc);
+  });
+
+  it("tuoi vang cao nhat trong cot Chat lieu", () => {
+    expect(tuoiVangCaoNhat("18K, 14K")).toBe(18);
+    expect(tuoiVangCaoNhat("14k")).toBe(14);
+    expect(tuoiVangCaoNhat("Bạc 925")).toBeNull();
+    expect(tuoiVangCaoNhat(null)).toBeNull();
+  });
+
+  it("doi cho: chuyen mot mau toi vi tri moi; ngoai bien hay trung vi tri thi giu nguyen", () => {
+    expect(doiCho(["a", "b", "c", "d"], 0, 2)).toEqual(["b", "c", "a", "d"]);
+    expect(doiCho(["a", "b", "c", "d"], 3, 0)).toEqual(["d", "a", "b", "c"]);
+    const goc = ["a", "b"];
+    expect(doiCho(goc, 0, 5)).toBe(goc);
+    expect(doiCho(goc, 1, 1)).toBe(goc);
   });
 });
 

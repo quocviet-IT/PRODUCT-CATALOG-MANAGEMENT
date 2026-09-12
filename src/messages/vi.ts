@@ -355,7 +355,7 @@ export const vi = {
     b4_c3: "Tông màu, thông số cho khách xem, ngôn ngữ, liên hệ đặt hàng, và trang bìa." + " Điền số điện thoại thì trang khách có nút gọi và nút nhắn tin — Zalo, tin nhắn hoặc WhatsApp, tuỳ anh chọn.",
 
     b5_ten: "Bỏ bớt ảnh",
-    b5_mo_ta: "Mặc định giữ hết ảnh của mẫu. Bấm vào ảnh nào để bỏ ảnh đó ra khỏi catalogue. Cần gỡ nguyên một mẫu thì bấm Gỡ mẫu này.",
+    b5_mo_ta: "Mặc định giữ hết ảnh của mẫu. Bấm vào ảnh nào để bỏ ảnh đó ra khỏi catalogue. Cần gỡ nguyên một mẫu thì bấm Gỡ mẫu này. Muốn đổi thứ tự mẫu thì kéo ở khung Thứ tự trình bày; muốn giới thiệu thêm thì ghi ở ô Giới thiệu của từng mẫu — cả hai đều không bắt buộc.",
     b5_c1: "Bấm vào ảnh để bỏ / lấy lại.",
     b5_c2: "Số ảnh đang giữ trên tổng số ảnh của mẫu.",
     b5_c3: "Gỡ cả mẫu khỏi catalogue.",
@@ -537,6 +537,20 @@ export const vi = {
     loi_tao_rong: "Những mẫu đã chọn không còn trên bảng tính. Chọn lại giúp em.",
     dem_anh_chon: "{n}/{t} ảnh",
     khong_co_anh: "Mẫu này chưa có ảnh nào.",
+    // Thu tu trinh bay + gioi thieu tung mau (gop y 11/09/2026)
+    thu_tu_nhan: "Thứ tự trình bày",
+    thu_tu_mo_ta: "Kéo tay cầm hoặc bấm mũi tên để đổi thứ tự — khách thấy đúng thứ tự này. Không đụng tới thì giữ thứ tự lúc tích chọn.",
+    sap_nhanh: "Sắp xếp nhanh",
+    sap_da_chon: "Thứ tự lúc tích chọn",
+    sap_loai_sp: "Loại sản phẩm",
+    sap_loai_vang: "Loại vàng (cao → thấp)",
+    dua_len: "Đưa {ma} lên",
+    dua_xuong: "Đưa {ma} xuống",
+    keo_doi_cho: "Kéo để đổi chỗ {ma}",
+    da_chuyen: "Đã chuyển {ma} tới vị trí {n}.",
+    gioi_thieu_nhan: "Giới thiệu mẫu này",
+    gioi_thieu_tuy_chon: "Không bắt buộc. Hiện ngay dưới thông số trên trang khách.",
+    gioi_thieu_goi_y: "Ví dụ: Dây khoen lật đan tay, đeo lâu không xoắn — hợp làm quà.",
 
     // Sau khi tao
     xong_tieu_de: "Đã tạo xong",

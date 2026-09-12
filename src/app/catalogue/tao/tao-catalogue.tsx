@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import type { MucDeChon } from "@/modules/catalogue-share/chia-se.model";
+import { DAI_GIOI_THIEU, type MucDeChon } from "@/modules/catalogue-share/chia-se.model";
 import { SO_NGAY_SONG } from "@/modules/catalogue-share/hieu-luc.model";
 import { DoiTenLink } from "@/app/admin/catalogue/doi-ten-link";
 import { XemTruocLink } from "./xem-truoc-link";
+import { ThuTuTrinhBay } from "./thu-tu-trinh-bay";
 import {
   chupGio, datGio,
 } from "@/modules/catalogue-share/gio-chon";
@@ -50,6 +51,10 @@ export function TaoCatalogue() {
   const [muc, setMuc] = useState<MucDeChon[]>([]);
   /** ma -> tap fileId dang giu. Mac dinh giu HET, sale bo bot. */
   const [anhGiu, setAnhGiu] = useState<Record<string, string[]>>({});
+  /** Danh sach ma luc tai trang — "Thu tu luc tich chon" o khung sap xep tro ve day. */
+  const [thuTuGoc, setThuTuGoc] = useState<string[]>([]);
+  /** ma -> loi gioi thieu sale dang go. Khong bat buoc. */
+  const [gioiThieu, setGioiThieu] = useState<Record<string, string>>({});
   const [ten, setTen] = useState("");
   // Ten link di theo ten catalogue cho toi khi sale tu sua o ten link. Hai state
   // rieng + mot co, KHONG chep ten sang bang effect: effect goi setState la mot
@@ -84,6 +89,7 @@ export function TaoCatalogue() {
         const d = (await res.json()) as { muc: MucDeChon[] };
         if (!con) return;
         setMuc(d.muc);
+        setThuTuGoc(d.muc.map((m) => m.ma));
         setAnhGiu(Object.fromEntries(d.muc.map((m) => [m.ma, m.anh.map((a) => a.fileId)])));
         setTrangThai("san-sang");
       } catch {
@@ -122,7 +128,9 @@ export function TaoCatalogue() {
         body: JSON.stringify({
           ten,
           tenLink,
-          chon: muc.map((m) => ({ ma: m.ma, anh: anhGiu[m.ma] ?? [] })),
+          // Thu tu cua `muc` CHINH LA thu tu khach thay — khung Thu tu trinh bay sua
+          // thang mang nay.
+          chon: muc.map((m) => ({ ma: m.ma, anh: anhGiu[m.ma] ?? [], gioiThieu: gioiThieu[m.ma] ?? "" })),
           giaoDien,
         }),
       });
@@ -225,9 +233,14 @@ export function TaoCatalogue() {
         <ChonGiaoDien gia={giaoDien} khiDoi={setGiaoDien} />
       </div>
 
+      {/* Thu tu trinh bay (gop y 11/09/2026): sua thang mang `muc`, nen cac the mau
+          ben duoi, Xem truoc va catalogue tao ra deu theo dung thu tu nay. */}
+      <ThuTuTrinhBay muc={muc} thuTuGoc={thuTuGoc} khiDoi={setMuc} />
+
       <ul className="space-y-8">
         {muc.map((m) => {
           const giu = anhGiu[m.ma] ?? [];
+          const gt = gioiThieu[m.ma] ?? "";
           return (
             <li key={m.ma} className="border border-hp-rule bg-hp-card p-6">
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -245,6 +258,31 @@ export function TaoCatalogue() {
                 </button>
               </div>
               <ThongSo m={m} />
+
+              {/* Loi gioi thieu tung mau (gop y 11/09/2026) — khong bat buoc; hien ngay
+                  duoi dong thong so tren trang khach. */}
+              <label className="mt-4 block">
+                <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+                  {t.chia_se.gioi_thieu_nhan}
+                </span>
+                <span className="ml-2 text-xs text-hp-muted">{t.chia_se.gioi_thieu_tuy_chon}</span>
+                <textarea
+                  value={gt}
+                  onChange={(e) => setGioiThieu((truoc) => ({ ...truoc, [m.ma]: e.target.value }))}
+                  maxLength={DAI_GIOI_THIEU}
+                  rows={2}
+                  placeholder={t.chia_se.gioi_thieu_goi_y}
+                  className="mt-2 block w-full resize-y border-0 border-b border-hp-rule bg-transparent
+                             px-0.5 py-1.5 text-sm text-hp-body transition-colors duration-150
+                             placeholder:text-hp-rule focus:border-b-2 focus:border-hp-pink
+                             focus:pb-[5px] focus:outline-none"
+                />
+                {gt.length > 0 && (
+                  <span className="mt-1 block text-right text-[11px] tabular-nums text-hp-muted">
+                    {gt.length}/{DAI_GIOI_THIEU}
+                  </span>
+                )}
+              </label>
 
               {m.anh.length === 0 ? (
                 <p className="mt-4 text-sm text-hp-muted">{t.chia_se.khong_co_anh}</p>
@@ -330,6 +368,7 @@ export function TaoCatalogue() {
         <XemTruoc
           muc={muc}
           anhGiu={anhGiu}
+          gioiThieu={gioiThieu}
           gia={giaoDien}
           ten={ten}
           khiDong={() => setMoXemTruoc(false)}

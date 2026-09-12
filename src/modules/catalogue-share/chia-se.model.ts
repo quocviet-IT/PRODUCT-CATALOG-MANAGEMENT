@@ -29,6 +29,12 @@ export type MucCatalogue = {
   size: string | null;
   tlVang: number | null;
   anh: AnhTrongCatalogue[];
+  /**
+   * Loi gioi thieu SALE tu viet cho khach (gop y 11/09/2026). Khong phai du lieu
+   * noi bo nao chep sang, nen duoc phep o ranh gioi nay. Chi co khi sale co go —
+   * catalogue cu va mau khong ai viet gi thi khong co truong nay.
+   */
+  gioiThieu?: string;
 };
 
 /**
@@ -38,8 +44,8 @@ export type MucCatalogue = {
  */
 export type NoiDungCatalogue = { phienBan: 1; muc: MucCatalogue[] };
 
-/** Mot lua chon cua sale: mot mau, kem nhung anh ho giu lai. */
-export type LuaChon = { ma: string; anh: string[] };
+/** Mot lua chon cua sale: mot mau, kem nhung anh ho giu lai va loi gioi thieu neu co. */
+export type LuaChon = { ma: string; anh: string[]; gioiThieu?: string };
 
 /** Nguon de dung anh chup: dong bang tinh + thu vien anh cua no. */
 export type NguonMau = { d: DongCatalogue; anh: AnhTrongThuMuc[] };
@@ -86,6 +92,9 @@ export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogu
     daCo.add(c.ma);
 
     const giu = new Set(c.anh);
+    // Loi gioi thieu: cat khoang trang va do dai O DAY, khong tin trinh duyet. Rong
+    // thi khong ghi truong — mau khong ai viet gi giu dung hinh dang cu.
+    const gioiThieu = (c.gioiThieu ?? "").trim().slice(0, DAI_GIOI_THIEU);
     muc.push({
       maMau: n.d.maMau,
       loaiSp: n.d.loaiSp,
@@ -94,10 +103,69 @@ export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogu
       size: n.d.size,
       tlVang: n.d.tlVang,
       anh: n.anh.filter((a) => giu.has(a.fileId)).map((a) => ({ fileId: a.fileId, ten: a.ten })),
+      ...(gioiThieu ? { gioiThieu } : {}),
     });
   }
 
   return { phienBan: 1, muc };
+}
+
+/** Loi gioi thieu mot mau: vai cau cho khach, khong phai mot bai viet. */
+export const DAI_GIOI_THIEU = 300;
+
+/**
+ * Cach "Sap xep nhanh" o khung Thu tu trinh bay. "da-chon" = thu tu luc tich chon.
+ * Anh chot 12/09/2026: chi loai san pham va loai vang.
+ */
+export const CACH_SAP_NHANH = ["da-chon", "loai-sp", "loai-vang"] as const;
+export type CachSapNhanh = (typeof CACH_SAP_NHANH)[number];
+
+/** Tuoi vang cao nhat ghi trong cot Chat lieu ("18K, 14K" -> 18). Khong ghi tuoi -> null. */
+export function tuoiVangCaoNhat(chatLieu: string | null): number | null {
+  if (!chatLieu) return null;
+  const so = [...chatLieu.matchAll(/(\d{1,2})\s*K/gi)].map((x) => Number(x[1]));
+  return so.length > 0 ? Math.max(...so) : null;
+}
+
+/**
+ * Sap lai danh sach mau MOT LAN theo tieu chi — sau do sale van keo chinh tay.
+ *
+ * On dinh (Array.sort on dinh tu ES2019): hai mau bang nhau giu thu tu dang co.
+ * Tra ve mang MOI, khong sua mang dau vao (do la state cua React).
+ */
+export function sapXepMuc<T extends { ma: string; loaiSp: string | null; chatLieu: string | null }>(
+  ds: T[],
+  cach: CachSapNhanh,
+  thuTuGoc: string[],
+): T[] {
+  const ra = [...ds];
+  if (cach === "da-chon") {
+    const goc = new Map(thuTuGoc.map((ma, i) => [ma, i]));
+    const viTri = (x: T) => goc.get(x.ma) ?? Number.MAX_SAFE_INTEGER;
+    return ra.sort((a, b) => viTri(a) - viTri(b));
+  }
+  if (cach === "loai-sp") {
+    return ra.sort((a, b) => {
+      if (a.loaiSp === b.loaiSp) return 0;
+      if (a.loaiSp === null) return 1;
+      if (b.loaiSp === null) return -1;
+      return a.loaiSp.localeCompare(b.loaiSp, "vi", { sensitivity: "base" });
+    });
+  }
+  const tuoi = (x: T) => tuoiVangCaoNhat(x.chatLieu) ?? -1;
+  return ra.sort((a, b) => tuoi(b) - tuoi(a));
+}
+
+/**
+ * Chuyen phan tu o vi tri `tu` toi vi tri `den`. Vi tri ngoai bien hay trung nhau thi
+ * tra LAI CHINH mang cu — nguoi goi so sanh === de biet co gi doi khong.
+ */
+export function doiCho<T>(ds: T[], tu: number, den: number): T[] {
+  if (tu === den || tu < 0 || den < 0 || tu >= ds.length || den >= ds.length) return ds;
+  const ra = [...ds];
+  const [x] = ra.splice(tu, 1);
+  ra.splice(den, 0, x);
+  return ra;
 }
 
 /**

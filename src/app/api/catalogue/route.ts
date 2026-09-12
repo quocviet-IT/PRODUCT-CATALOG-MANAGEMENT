@@ -31,6 +31,9 @@ const Than = z.object({
       z.object({
         ma: z.string().min(1).max(80),
         anh: z.array(z.string().min(1).max(120)).max(SO_ANH_TOI_DA),
+        // Loi gioi thieu tung mau. Chan tho o day; cat ve DAI_GIOI_THIEU trong
+        // dungNoiDung — mot noi quyet dinh do dai, khong phai hai.
+        gioiThieu: z.string().max(2000).optional(),
       }),
     )
     .min(1)

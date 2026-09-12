@@ -154,6 +154,19 @@ function ThongSoBang({ ds, lop }: { ds: [string, string][]; lop?: string }) {
   );
 }
 
+/**
+ * Loi gioi thieu sale tu viet cho mot mau (gop y 11/09/2026). Giu dung cho xuong
+ * dong sale go. Catalogue cu khong co truong nay thi khong ve gi.
+ */
+function GioiThieu({ m, lop }: { m: MucCatalogue; lop?: string }) {
+  if (!m.gioiThieu) return null;
+  return (
+    <p className={`max-w-2xl whitespace-pre-line text-sm leading-relaxed text-hp-body ${lop ?? ""}`}>
+      {m.gioiThieu}
+    </p>
+  );
+}
+
 type DoiSo = { muc: MucCatalogue[]; g: GiaoDienCatalogue; t: BoChu };
 
 /**
@@ -199,6 +212,7 @@ function DanhSach({ muc, g, t }: DoiSo) {
             </div>
 
             <ThongSoDong ds={thongSo(m, g, t)} lop="mt-2" />
+            <GioiThieu m={m} lop="mt-3" />
 
             {m.anh.length > 0 && (
               <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -257,6 +271,13 @@ function Luoi({ muc, g, t }: DoiSo) {
               {x.chiTiet.map(([, v]) => v).join(" · ")}
             </p>
           )}
+          {/* Luoi anh: gioi thieu chi o o dau cua mau, chu nho — cung ly do voi dong
+              thong so o tren. */}
+          {x.dauMuc && x.m.gioiThieu && (
+            <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-hp-body">
+              {x.m.gioiThieu}
+            </p>
+          )}
         </li>
       ))}
     </ul>
@@ -307,6 +328,7 @@ function Lookbook({ muc, g, t }: DoiSo) {
             </div>
 
             <ThongSoBang ds={ct} lop="mt-6 border-t border-hp-rule pt-6" />
+            <GioiThieu m={m} lop="mt-5" />
 
             {phu.length > 0 && (
               <ul className="mt-6 grid grid-cols-4 gap-3">
@@ -373,6 +395,7 @@ function TrienLam({ muc, g, t }: DoiSo) {
             <div className="mt-11 flex flex-col gap-2">
               <MaMau m={m} t={t} />
               <ThongSoDong ds={thongSo(m, g, t)} />
+              <GioiThieu m={m} lop="mt-2" />
             </div>
 
             {phu.length > 0 && (
@@ -441,6 +464,7 @@ function KhungCoDien({ muc, g, t }: DoiSo) {
                   ))}
                 </dl>
               )}
+              <GioiThieu m={m} lop="text-center" />
 
               {m.anh.length > 2 && (
                 <ul className="grid w-full grid-cols-3 gap-3 sm:grid-cols-4">
@@ -498,6 +522,7 @@ function TapChi({ muc, g, t }: DoiSo) {
                     ))}
                   </div>
                 )}
+                <GioiThieu m={m} lop="mt-1" />
               </div>
             </div>
 
