@@ -91,7 +91,18 @@ export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogu
     if (!n) continue;
     daCo.add(c.ma);
 
-    const giu = new Set(c.anh);
+    // Anh theo THU TU sale xep (gop y 12/09/2026), khong theo thu muc Drive: anh dau la
+    // anh chinh o Lookbook / Trien lam / Tap chi. Van chi nhan fileId co trong thu vien
+    // that cua chinh mau nay, va moi anh mot lan.
+    const thuVien = new Map(n.anh.map((a) => [a.fileId, a]));
+    const daLay = new Set<string>();
+    const anh: AnhTrongCatalogue[] = [];
+    for (const id of c.anh) {
+      const a = thuVien.get(id);
+      if (!a || daLay.has(id)) continue;
+      daLay.add(id);
+      anh.push({ fileId: a.fileId, ten: a.ten });
+    }
     // Loi gioi thieu: cat khoang trang va do dai O DAY, khong tin trinh duyet. Rong
     // thi khong ghi truong — mau khong ai viet gi giu dung hinh dang cu.
     const gioiThieu = (c.gioiThieu ?? "").trim().slice(0, DAI_GIOI_THIEU);
@@ -102,7 +113,7 @@ export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogu
       mau: n.d.mau,
       size: n.d.size,
       tlVang: n.d.tlVang,
-      anh: n.anh.filter((a) => giu.has(a.fileId)).map((a) => ({ fileId: a.fileId, ten: a.ten })),
+      anh,
       ...(gioiThieu ? { gioiThieu } : {}),
     });
   }

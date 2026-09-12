@@ -5,10 +5,11 @@ import { useChu } from "@/messages/dung-chu";
 import { boChu, type BoChu } from "@/messages";
 import { NGON_NGU, NHAN_NGON_NGU } from "@/messages/ngon-ngu";
 import {
-  BO_CUC, CACH_NHAN, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_LOI_KEU_GOI, DAI_TEN_KHACH, DAI_TEN_SALE,
-  LOI_KEU_GOI, MAU_NHAN, NHAN, NHAN_GOI_Y, THONG_SO, TONE, cauKeuGoi, coKhoiLienHe, goiYCachNhan,
-  type BoCuc, type CachNhan, type GiaoDienCatalogue, type LienHe, type Nhan, type ThongSo,
-  type Tone,
+  BO_CUC, CACH_NHAN, CHU_DE, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_LOI_KEU_GOI, DAI_TEN_KHACH,
+  DAI_TEN_SALE, LOI_KEU_GOI, MAU_NHAN, NHAN, NHAN_GOI_Y, NHOM_CHU_DE, THONG_SO, TONE, TONE_TOI,
+  cauKeuGoi, chuDeDangChon, coKhoiLienHe, goiYCachNhan,
+  type BoCuc, type CachNhan, type GiaoDienCatalogue, type KhoaChuDe, type LienHe, type Nhan,
+  type NhomChuDe, type ThongSo, type Tone,
 } from "@/modules/catalogue-share/giao-dien.model";
 
 /**
@@ -53,6 +54,14 @@ function nhanBoCuc(t: BoChu): Record<BoCuc, { ten: string; moTa: string }> {
       ten: t.mau_giao_dien.bo_cuc_tap_chi,
       moTa: t.mau_giao_dien.bo_cuc_tap_chi_mo_ta,
     },
+    "bang-mau": {
+      ten: t.mau_giao_dien.bo_cuc_bang_mau,
+      moTa: t.mau_giao_dien.bo_cuc_bang_mau_mo_ta,
+    },
+    "thu-moi": {
+      ten: t.mau_giao_dien.bo_cuc_thu_moi,
+      moTa: t.mau_giao_dien.bo_cuc_thu_moi_mo_ta,
+    },
   };
 }
 
@@ -72,6 +81,35 @@ function nhanTone(t: BoChu): Record<Tone, { ten: string; moTa: string }> {
     champagne: { ten: m.tone_champagne, moTa: m.tone_champagne_mo_ta },
     "bach-kim": { ten: m.tone_bach_kim, moTa: m.tone_bach_kim_mo_ta },
     "hong-phan": { ten: m.tone_hong_phan, moTa: m.tone_hong_phan_mo_ta },
+    "do-ruou": { ten: m.tone_do_ruou, moTa: m.tone_do_ruou_mo_ta },
+    "than-chi": { ten: m.tone_than_chi, moTa: m.tone_than_chi_mo_ta },
+    "xanh-dem": { ten: m.tone_xanh_dem, moTa: m.tone_xanh_dem_mo_ta },
+    "oai-huong": { ten: m.tone_oai_huong, moTa: m.tone_oai_huong_mo_ta },
+    "suong-bien": { ten: m.tone_suong_bien, moTa: m.tone_suong_bien_mo_ta },
+  };
+}
+
+function nhanChuDe(t: BoChu): Record<KhoaChuDe, { ten: string; moTa: string }> {
+  const m = t.mau_giao_dien;
+  return {
+    valentine: { ten: m.chu_de_valentine, moTa: m.chu_de_valentine_mo_ta },
+    "ngay-cua-me": { ten: m.chu_de_ngay_cua_me, moTa: m.chu_de_ngay_cua_me_mo_ta },
+    "giang-sinh": { ten: m.chu_de_giang_sinh, moTa: m.chu_de_giang_sinh_mo_ta },
+    nam: { ten: m.chu_de_nam, moTa: m.chu_de_nam_mo_ta },
+    cuoi: { ten: m.chu_de_cuoi, moTa: m.chu_de_cuoi_mo_ta },
+    "ngoc-trai": { ten: m.chu_de_ngoc_trai, moTa: m.chu_de_ngoc_trai_mo_ta },
+    "khach-my": { ten: m.chu_de_khach_my, moTa: m.chu_de_khach_my_mo_ta },
+    "viet-kieu": { ten: m.chu_de_viet_kieu, moTa: m.chu_de_viet_kieu_mo_ta },
+    "khach-si": { ten: m.chu_de_khach_si, moTa: m.chu_de_khach_si_mo_ta },
+    vip: { ten: m.chu_de_vip, moTa: m.chu_de_vip_mo_ta },
+  };
+}
+
+function nhanNhomChuDe(t: BoChu): Record<NhomChuDe, string> {
+  return {
+    dip: t.mau_giao_dien.chu_de_nhom_dip,
+    "nhom-hang": t.mau_giao_dien.chu_de_nhom_nhom_hang,
+    khach: t.mau_giao_dien.chu_de_nhom_khach,
   };
 }
 
@@ -81,6 +119,9 @@ function nhanMauNhan(t: BoChu): Record<Nhan, string> {
     dong: t.mau_giao_dien.nhan_dong,
     luc: t.mau_giao_dien.nhan_luc,
     man: t.mau_giao_dien.nhan_man,
+    ruby: t.mau_giao_dien.nhan_ruby,
+    "luc-bao": t.mau_giao_dien.nhan_luc_bao,
+    sapphire: t.mau_giao_dien.nhan_sapphire,
   };
 }
 
@@ -98,6 +139,11 @@ const O_MAU: Record<Tone, { nen: string; muc: string }> = {
   champagne: { nen: "#F5EDDD", muc: "#2B2419" },
   "bach-kim": { nen: "#F1F2F4", muc: "#1D2125" },
   "hong-phan": { nen: "#F8EDEC", muc: "#2E2325" },
+  "do-ruou": { nen: "#2A1418", muc: "#F6ECEA" },
+  "than-chi": { nen: "#1B1E22", muc: "#EEF1F4" },
+  "xanh-dem": { nen: "#141B2B", muc: "#EEF1F7" },
+  "oai-huong": { nen: "#EFE9F6", muc: "#25202D" },
+  "suong-bien": { nen: "#E6F0EE", muc: "#1A2624" },
 };
 
 function nhanThongSo(t: BoChu): Record<ThongSo, string> {
@@ -119,6 +165,33 @@ function nhanThongSo(t: BoChu): Record<ThongSo, string> {
  */
 function HinhBoCuc({ kieu }: { kieu: BoCuc }) {
   const o = "bg-hp-rule";
+  if (kieu === "bang-mau") {
+    return (
+      <div aria-hidden className="mx-auto max-w-[150px] divide-y divide-hp-rule border-y border-hp-rule">
+        {Array.from({ length: 3 }, (_, i) => (
+          <div key={i} className="flex items-center gap-2 py-1.5">
+            <div className={`${o} aspect-[4/3] w-9 shrink-0`} />
+            <div className="flex flex-grow flex-col gap-1">
+              <div className="h-1.5 w-1/2 bg-hp-ink/40" />
+              <div className="h-1 w-full bg-hp-rule" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  if (kieu === "thu-moi") {
+    return (
+      <div aria-hidden className="mx-auto flex max-w-[150px] flex-col items-center gap-1.5">
+        <div className="h-1 w-1/3 bg-hp-rule" />
+        <div className="w-4/5 border border-hp-rule p-1">
+          <div className={`${o} aspect-[4/3]`} />
+        </div>
+        <div className="h-1.5 w-1/3 bg-hp-ink/40" />
+        <div className="h-1 w-1/2 bg-hp-rule" />
+      </div>
+    );
+  }
   if (kieu === "trien-lam") {
     return (
       <div aria-hidden className="mx-auto max-w-[150px] space-y-1.5">
@@ -206,6 +279,9 @@ export function ChonGiaoDien({
   khiDoi: (moi: GiaoDienCatalogue) => void;
 }) {
   const t = useChu();
+  const chuDe = nhanChuDe(t);
+  const nhomChuDe = nhanNhomChuDe(t);
+  const chuDeChon = chuDeDangChon(gia);
   const boCuc = nhanBoCuc(t);
   const tone = nhanTone(t);
   const mauNhan = nhanMauNhan(t);
@@ -264,6 +340,63 @@ export function ChonGiaoDien({
         {t.mau_giao_dien.tieu_de}
       </h2>
       <p className="mt-2 text-xs text-hp-muted">{t.mau_giao_dien.mo_ta}</p>
+
+      {/* --- Chu de --- (12/09/2026) Loi tat dat bo cuc + tong + mau nhan hop nhau. Khong
+          luu xuong ban ghi: o nao khop ca ba gia tri dang chon thi o do duoc chon. */}
+      <fieldset className="mt-7">
+        <legend className={NHAN_NHOM}>{t.mau_giao_dien.chu_de_nhan}</legend>
+        <p className="mt-1 text-xs text-hp-muted">{t.mau_giao_dien.chu_de_mo_ta}</p>
+        <div className="mt-3 grid gap-5 sm:grid-cols-3">
+          {NHOM_CHU_DE.map((nhom) => (
+            <div key={nhom}>
+              <span className="text-xs text-hp-muted">{nhomChuDe[nhom]}</span>
+              <div className="mt-2 grid gap-2">
+                {CHU_DE.filter((c) => c.nhom === nhom).map((c) => (
+                  <label
+                    key={c.khoa}
+                    className={
+                      "flex cursor-pointer items-start gap-3 border px-3 py-2.5 " +
+                      "transition-colors duration-150 " +
+                      (chuDeChon === c.khoa
+                        ? "border-hp-ink bg-hp-inset"
+                        : "border-hp-rule hover:border-hp-ink")
+                    }
+                  >
+                    <input
+                      type="radio"
+                      name="chu_de"
+                      value={c.khoa}
+                      checked={chuDeChon === c.khoa}
+                      onChange={() => dat({ boCuc: c.boCuc, tone: c.tone, nhan: c.nhan })}
+                      className="sr-only"
+                    />
+                    {/* O mau: nen cua tong + cham mau nhan, dung sac khach se thay (nen toi
+                        thi sac sang). */}
+                    <span
+                      aria-hidden
+                      className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center border border-hp-rule"
+                      style={{ background: O_MAU[c.tone].nen }}
+                    >
+                      <span
+                        className="h-2 w-2"
+                        style={{
+                          background: TONE_TOI.includes(c.tone) ? MAU_NHAN[c.nhan].sang : MAU_NHAN[c.nhan].nhat,
+                        }}
+                      />
+                    </span>
+                    <span>
+                      <span className="block text-sm text-hp-ink">{chuDe[c.khoa].ten}</span>
+                      <span className="mt-0.5 block text-xs leading-relaxed text-hp-muted">
+                        {chuDe[c.khoa].moTa}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </fieldset>
 
       {/* --- Bo cuc --- */}
       <fieldset className="mt-7">

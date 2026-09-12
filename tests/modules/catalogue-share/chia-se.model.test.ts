@@ -57,13 +57,25 @@ describe("khoaMau", () => {
 });
 
 describe("dungNoiDung", () => {
-  it("giu dung nhung anh sale chon, dung thu tu thu vien", () => {
+  it("giu dung nhung anh sale chon, theo THU TU sale xep (gop y 12/09/2026)", () => {
+    // Anh dau la anh chinh o Lookbook / Trien lam / Tap chi: thu tu anh la y do cua
+    // sale, khong phai thu tu thu muc Drive.
     const kq = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["a3", "a1"] }]);
     expect(kq.muc).toHaveLength(1);
     expect(kq.muc[0].anh).toEqual([
-      { fileId: "a1", ten: "anh 1.jpg" },
       { fileId: "a3", ten: "anh 3.jpg" },
+      { fileId: "a1", ten: "anh 1.jpg" },
     ]);
+  });
+
+  it("mot anh gui len hai lan chi giu lan dau", () => {
+    const [m] = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["a2", "a1", "a2"] }]).muc;
+    expect(m.anh.map((a) => a.fileId)).toEqual(["a2", "a1"]);
+  });
+
+  it("loc fileId la ma van giu thu tu cua phan con lai", () => {
+    const [m] = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["bia-dat", "a3", "b1", "a2"] }]).muc;
+    expect(m.anh.map((a) => a.fileId)).toEqual(["a3", "a2"]);
   });
 
   it("giu THU TU sale da chon, khong sap lai theo bang tinh", () => {

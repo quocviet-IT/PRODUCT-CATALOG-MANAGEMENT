@@ -48,20 +48,28 @@ export const LOP_TONE: Record<Tone, string> = {
   champagne: "tone-champagne",
   "bach-kim": "tone-bach-kim",
   "hong-phan": "tone-hong-phan",
+  "do-ruou": "tone-do-ruou",
+  "than-chi": "tone-than-chi",
+  "xanh-dem": "tone-xanh-dem",
+  "oai-huong": "tone-oai-huong",
+  "suong-bien": "tone-suong-bien",
 };
 
 /**
- * Mau nhan cua catalogue, dat bang cach GHI DE hai bien mau hong.
+ * Mau nhan cua catalogue: gan BA sac cua mau nhan thanh bien --nhan-*.
  *
- * Nho vay moi cho dang dung `text-hp-pink` hay `bg-hp-pink-strong` deu doi theo
- * ma khong phai sua tung noi — va catalogue khong chon gi van ra dung hong
- * thuong hieu, vi mac dinh la "hong".
+ * Lop `mau-nhan` trong globals.css chon sac cho --color-hp-pink / --color-hp-pink-strong:
+ * nhat tren nen sang, sang tren nen toi, dam cho nut chu trang; ban in luon ve nhat.
+ * Khong gan thang --color-hp-pink o day nua — bien gan bang style thang moi lop CSS,
+ * nen truoc 12/09/2026 tong toi khong doi duoc sac. Phan tu nhan style nay PHAI co
+ * lop `mau-nhan`.
  */
 export function bienMauNhan(nhan: Nhan): React.CSSProperties {
   const m = MAU_NHAN[nhan] ?? MAU_NHAN.hong;
   return {
-    "--color-hp-pink": m.nhat,
-    "--color-hp-pink-strong": m.dam,
+    "--nhan-nhat": m.nhat,
+    "--nhan-dam": m.dam,
+    "--nhan-sang": m.sang,
   } as React.CSSProperties;
 }
 
@@ -139,18 +147,33 @@ function ThongSoDong({ ds, lop }: { ds: [string, string][]; lop?: string }) {
   );
 }
 
-/** Thong so xep cot, co nhan — dung o bo cuc con nhieu cho. */
-function ThongSoBang({ ds, lop }: { ds: [string, string][]; lop?: string }) {
+/**
+ * Thong so xep cot, co nhan — dung o bo cuc con nhieu cho. `gon` cho hang cua Bang mau:
+ * khoang cach nho hon de nhieu mau vua mot trang.
+ */
+function ThongSoBang({ ds, lop, gon }: { ds: [string, string][]; lop?: string; gon?: boolean }) {
   if (ds.length === 0) return null;
+  const khoang = gon ? "gap-x-6 gap-y-2" : "gap-x-8 gap-y-4";
   return (
-    <dl className={`grid grid-cols-2 gap-x-8 gap-y-4 sm:grid-cols-4 ${lop ?? ""}`}>
+    <dl className={`grid grid-cols-2 ${khoang} sm:grid-cols-4 ${lop ?? ""}`}>
       {ds.map(([nhan, v]) => (
         <div key={nhan}>
           <dt className="text-[10px] uppercase tracking-[0.14em] text-hp-muted">{nhan}</dt>
-          <dd className="mt-1.5 text-sm text-hp-body">{v}</dd>
+          <dd className={`${gon ? "mt-0.5" : "mt-1.5"} text-sm text-hp-body`}>{v}</dd>
         </div>
       ))}
     </dl>
+  );
+}
+
+/** Duong trang tri: vach – hat thoi mau nhan – vach. `lop` dat be rong va khoang cach. */
+function DuongTrangTri({ lop }: { lop: string }) {
+  return (
+    <div aria-hidden className={`flex items-center ${lop}`}>
+      <span className="h-px flex-grow bg-hp-rule" />
+      <span className="h-1.5 w-1.5 rotate-45 bg-hp-pink" />
+      <span className="h-px flex-grow bg-hp-rule" />
+    </div>
   );
 }
 
@@ -196,7 +219,7 @@ function mocAnh(muc: MucCatalogue[]): number[] {
 function DanhSach({ muc, g, t }: DoiSo) {
   const moc = mocAnh(muc);
   return (
-    <ul className="space-y-16">
+    <ul data-bo-cuc="danh-sach" className="space-y-16">
       {muc.map((m, i) => {
         const dau = moc[i];
         return (
@@ -254,7 +277,7 @@ function Luoi({ muc, g, t }: DoiSo) {
     m.anh.map((a, j) => ({ m, a, dauMuc: j === 0, chiTiet: thongSo(m, g, t) })),
   );
   return (
-    <ul className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3">
+    <ul data-bo-cuc="luoi" className="grid grid-cols-2 gap-x-4 gap-y-10 sm:grid-cols-3">
       {o.map((x, i) => (
         <li key={`${x.a.fileId}-${i}`} className="break-inside-avoid">
           <Anh
@@ -297,7 +320,7 @@ function Luoi({ muc, g, t }: DoiSo) {
 function Lookbook({ muc, g, t }: DoiSo) {
   const moc = mocAnh(muc);
   return (
-    <ul className="space-y-24 print:space-y-0">
+    <ul data-bo-cuc="lookbook" className="space-y-24 print:space-y-0">
       {muc.map((m, i) => {
         const dau = moc[i];
         const ct = thongSo(m, g, t);
@@ -363,7 +386,7 @@ function Lookbook({ muc, g, t }: DoiSo) {
 function TrienLam({ muc, g, t }: DoiSo) {
   const moc = mocAnh(muc);
   return (
-    <ul className="space-y-20 print:space-y-0">
+    <ul data-bo-cuc="trien-lam" className="space-y-20 print:space-y-0">
       {muc.map((m, i) => {
         const dau = moc[i];
         const [chinh, ...phu] = m.anh;
@@ -382,9 +405,10 @@ function TrienLam({ muc, g, t }: DoiSo) {
                     uuTien={dau === 0}
                   />
                 </div>
+                {/* Nen cua trang sau con so: so de len mep anh (nen gan trang), tren tong toi sac sang cua mau nhan khong doc duoc neu khong co nen nay. */}
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute -bottom-6 left-0 font-title
+                  className="pointer-events-none absolute -bottom-6 left-0 bg-hp-foundation pr-3 font-title
                              text-[64px] leading-none text-hp-pink sm:text-[76px]"
                 >
                   {String(i + 1).padStart(2, "0")}
@@ -425,7 +449,7 @@ function TrienLam({ muc, g, t }: DoiSo) {
 function KhungCoDien({ muc, g, t }: DoiSo) {
   const moc = mocAnh(muc);
   return (
-    <ul className="space-y-8">
+    <ul data-bo-cuc="khung-co-dien" className="space-y-8">
       {muc.map((m, i) => {
         const dau = moc[i];
         const ct = thongSo(m, g, t);
@@ -448,11 +472,7 @@ function KhungCoDien({ muc, g, t }: DoiSo) {
               </span>
 
               {/* Duong phan cach co mot vien kim cuong o giua. */}
-              <div aria-hidden className="flex w-full items-center gap-3">
-                <span className="h-px flex-grow bg-hp-rule" />
-                <span className="h-1.5 w-1.5 rotate-45 bg-hp-pink" />
-                <span className="h-px flex-grow bg-hp-rule" />
-              </div>
+              <DuongTrangTri lop="w-full gap-3" />
 
               {ct.length > 0 && (
                 <dl className="flex flex-wrap justify-center gap-x-8 gap-y-4">
@@ -493,7 +513,7 @@ function KhungCoDien({ muc, g, t }: DoiSo) {
 function TapChi({ muc, g, t }: DoiSo) {
   const moc = mocAnh(muc);
   return (
-    <ul className="space-y-10">
+    <ul data-bo-cuc="tap-chi" className="space-y-10">
       {muc.map((m, i) => {
         const dau = moc[i];
         const ct = thongSo(m, g, t);
@@ -543,6 +563,122 @@ function TapChi({ muc, g, t }: DoiSo) {
   );
 }
 
+/**
+ * Bo cuc 7 — bang mau (line sheet, 12/09/2026).
+ *
+ * Cho KHACH SI va danh sach dai: moi mau mot hang gon, anh chinh nho canh thong so, in
+ * duoc nhieu mau mot trang. Chi hien anh CHINH: bam vao la mo khung phong to va luot
+ * duoc moi anh — khung do tim anh theo fileId trong mang anh phang, khong can o cho
+ * cac anh con lai.
+ */
+function BangMau({ muc, g, t }: DoiSo) {
+  const moc = mocAnh(muc);
+  return (
+    <ul data-bo-cuc="bang-mau" className="border-t border-hp-rule">
+      {muc.map((m, i) => {
+        const [chinh] = m.anh;
+        const ct = thongSo(m, g, t);
+        return (
+          <li
+            key={`${m.maMau ?? "x"}-${i}`}
+            className="grid break-inside-avoid grid-cols-[120px_1fr] gap-4 border-b border-hp-rule py-4
+                       sm:grid-cols-[180px_1fr_auto] sm:gap-6"
+          >
+            <div>
+              {chinh ? (
+                <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={600}
+                     tyLe="aspect-[4/3]" uuTien={moc[i] === 0} />
+              ) : (
+                <div aria-hidden className="aspect-[4/3] bg-hp-plate" />
+              )}
+              {m.anh.length > 1 && (
+                <span className="mt-1.5 block text-[11px] tabular-nums text-hp-muted">
+                  {t.chia_se.bang_mau_so_anh.replace("{n}", String(m.anh.length))}
+                </span>
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <MaMau m={m} t={t} />
+              <ThongSoBang ds={ct} gon lop="mt-2" />
+              <GioiThieu m={m} lop="mt-2" />
+            </div>
+
+            <span className="hidden text-[11px] tabular-nums text-hp-muted sm:block">
+              {String(i + 1).padStart(2, "0")}
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/**
+ * Bo cuc 8 — thu moi (12/09/2026).
+ *
+ * Cho KHACH VIP va DO CUOI: moi mau mot trang rieng, can giua nhu mot tam thiep — dong
+ * "Danh rieng cho <ten khach>" lay tu trang bia, anh chinh trong khung ke mong, ma mau
+ * chu tieu de. Khac Khung co dien (xep lien nhau, ke doi, hai anh canh nhau) va Lookbook
+ * (anh tran be ngang, bang thong so): o day moi mau chiem mot man hinh, mot to giay.
+ */
+function ThuMoi({ muc, g, t }: DoiSo) {
+  const moc = mocAnh(muc);
+  const tenKhach = g.bia?.tenKhach ?? "";
+  return (
+    <ul data-bo-cuc="thu-moi">
+      {muc.map((m, i) => {
+        const [chinh, ...phu] = m.anh;
+        return (
+          <li
+            key={`${m.maMau ?? "x"}-${i}`}
+            className="flex min-h-[85vh] break-inside-avoid flex-col items-center justify-center gap-5
+                       border-t border-hp-rule py-14 text-center first:border-t-0
+                       print:min-h-0 print:break-after-page"
+          >
+            {tenKhach && (
+              <span className="text-[11px] uppercase tracking-[0.18em] text-hp-muted">
+                {t.chia_se.thu_moi_danh_cho.replace("{ten}", tenKhach)}
+              </span>
+            )}
+            <span className="text-[11px] tabular-nums text-hp-muted">
+              {String(i + 1).padStart(2, "0")} / {String(muc.length).padStart(2, "0")}
+            </span>
+
+            {chinh && (
+              <div className="w-full max-w-xl border border-hp-rule p-3">
+                <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={1600}
+                     tyLe="aspect-[4/3]" uuTien={moc[i] === 0} />
+              </div>
+            )}
+
+            {/* Khong dung MaMau: o day ma mau la tieu de lon cua tam thiep, MaMau la nhan nho. */}
+            <span className="font-title text-[30px] leading-none tracking-[0.06em] text-hp-ink">
+              {m.maMau ?? t.catalogue_sheet.chua_co_ma_mau}
+            </span>
+
+            <DuongTrangTri lop="w-24 gap-2" />
+
+            <ThongSoDong ds={thongSo(m, g, t)} />
+            <GioiThieu m={m} lop="mx-auto" />
+
+            {phu.length > 0 && (
+              <ul className="mt-2 grid w-full max-w-xl grid-cols-4 gap-2">
+                {phu.map((a) => (
+                  <li key={a.fileId}>
+                    <Anh m={m} fileId={a.fileId} ten={a.ten} rong={500}
+                         tyLe="aspect-[4/3]" uuTien={false} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 const BANG: Record<BoCuc, (p: DoiSo) => React.ReactElement> = {
   "danh-sach": DanhSach,
   luoi: Luoi,
@@ -550,6 +686,8 @@ const BANG: Record<BoCuc, (p: DoiSo) => React.ReactElement> = {
   "trien-lam": TrienLam,
   "khung-co-dien": KhungCoDien,
   "tap-chi": TapChi,
+  "bang-mau": BangMau,
+  "thu-moi": ThuMoi,
 };
 
 export function ThanCatalogue(p: DoiSo) {
@@ -674,7 +812,7 @@ export function KhoiLienHe({
             href={`tel:${so}`}
             className="flex items-center gap-2 bg-hp-pink-strong px-6 py-3 text-[11px]
                        uppercase tracking-[0.14em] text-white transition-colors
-                       duration-150 hover:bg-hp-ink"
+                       duration-150 hover:bg-hp-ink hover:text-hp-foundation"
           >
             <Phone aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
             {t.chia_se.cta_goi} {lienHe.dienThoai}

@@ -5,6 +5,11 @@ import {
   MAU_NHAN,
   NHAN,
   TONE,
+  TONE_TOI,
+  CHU_DE,
+  NHOM_CHU_DE,
+  NHAN_GOI_Y,
+  chuDeDangChon,
   THONG_SO,
   coThongSo,
   docGiaoDien,
@@ -322,11 +327,11 @@ describe("soGoiDuoc", () => {
 });
 
 describe("bố cục và màu nhấn mới", () => {
-  it("nhận cả sáu bố cục", () => {
+  it("nhận mọi bố cục", () => {
     for (const k of BO_CUC) expect(docGiaoDien({ boCuc: k }).boCuc).toBe(k);
   });
 
-  it("nhận cả tám nền và bốn màu nhấn", () => {
+  it("nhận mọi nền và mọi màu nhấn", () => {
     for (const k of TONE) expect(docGiaoDien({ tone: k }).tone).toBe(k);
     for (const k of NHAN) expect(docGiaoDien({ nhan: k }).nhan).toBe(k);
   });
@@ -340,14 +345,113 @@ describe("bố cục và màu nhấn mới", () => {
     expect(g.nhan).toBe("hong");
   });
 
-  it("mỗi màu nhấn có đủ hai sắc, và sắc đậm khác sắc nhạt", () => {
+  it("mỗi màu nhấn có đủ ba sắc, và ba sắc khác nhau", () => {
     // Sắc đậm dành riêng cho nút có chữ trắng; dùng chung một sắc là chữ trắng
-    // trên hồng thương hiệu, chỉ đạt 3.81:1.
+    // trên hồng thương hiệu, chỉ đạt 3.81:1. Sắc sáng để vẽ chữ trên nền tối.
     for (const k of NHAN) {
       const m = MAU_NHAN[k];
       expect(m.nhat).toMatch(/^#[0-9A-F]{6}$/i);
       expect(m.dam).toMatch(/^#[0-9A-F]{6}$/i);
-      expect(m.dam).not.toBe(m.nhat);
+      expect(m.sang).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(new Set([m.nhat, m.dam, m.sang]).size).toBe(3);
+    }
+  });
+
+  it("bốn màu nhấn cũ giữ đúng hai sắc cũ — catalogue tông sáng đã gửi không đổi", () => {
+    expect(MAU_NHAN.hong).toMatchObject({ nhat: "#E91D79", dam: "#C4165F" });
+    expect(MAU_NHAN.dong).toMatchObject({ nhat: "#A96A00", dam: "#8A5600" });
+    expect(MAU_NHAN.luc).toMatchObject({ nhat: "#00806B", dam: "#006956" });
+    expect(MAU_NHAN.man).toMatchObject({ nhat: "#A0439B", dam: "#873781" });
+  });
+});
+
+describe("năm tông và ba màu nhấn mới (12/09/2026)", () => {
+  it("chỉ thêm vào cuối — thứ tự cũ giữ nguyên", () => {
+    expect(TONE).toEqual([
+      "beige", "trang", "toi", "reu", "hoa-van", "champagne", "bach-kim", "hong-phan",
+      "do-ruou", "than-chi", "xanh-dem", "oai-huong", "suong-bien",
+    ]);
+    expect(NHAN).toEqual(["hong", "dong", "luc", "man", "ruby", "luc-bao", "sapphire"]);
+  });
+
+  it("ba màu nhấn mới đúng giá trị đã đo", () => {
+    expect(MAU_NHAN.ruby).toEqual({ nhat: "#D33A3C", dam: "#B02A2D", sang: "#F47B74" });
+    expect(MAU_NHAN["luc-bao"]).toEqual({ nhat: "#009342", dam: "#007835", sang: "#53BE70" });
+    expect(MAU_NHAN.sapphire).toEqual({ nhat: "#2275E8", dam: "#145EC1", sang: "#68A5FF" });
+  });
+
+  it("tông tối là đúng năm tông", () => {
+    expect([...TONE_TOI].sort()).toEqual(["do-ruou", "reu", "than-chi", "toi", "xanh-dem"]);
+  });
+
+  it("docGiaoDien nhận tông và màu nhấn mới", () => {
+    expect(docGiaoDien({ tone: "xanh-dem", nhan: "sapphire" })).toMatchObject({
+      tone: "xanh-dem",
+      nhan: "sapphire",
+    });
+  });
+});
+
+describe("hai bố cục mới (12/09/2026)", () => {
+  it("chỉ thêm vào cuối — thứ tự cũ giữ nguyên", () => {
+    expect(BO_CUC).toEqual([
+      "danh-sach", "luoi", "lookbook", "trien-lam", "khung-co-dien", "tap-chi",
+      "bang-mau", "thu-moi",
+    ]);
+  });
+
+  it("docGiaoDien nhận Bảng mẫu và Thư mời", () => {
+    expect(docGiaoDien({ boCuc: "bang-mau" }).boCuc).toBe("bang-mau");
+    expect(docGiaoDien({ boCuc: "thu-moi" }).boCuc).toBe("thu-moi");
+  });
+});
+
+describe("chủ đề sẵn (12/09/2026)", () => {
+  it("đúng như thiết kế đã duyệt", () => {
+    expect(CHU_DE.map((c) => [c.khoa, c.nhom, c.boCuc, c.tone, c.nhan])).toEqual([
+      ["valentine", "dip", "lookbook", "do-ruou", "hong"],
+      ["ngay-cua-me", "dip", "trien-lam", "oai-huong", "man"],
+      ["giang-sinh", "dip", "khung-co-dien", "reu", "ruby"],
+      ["nam", "nhom-hang", "tap-chi", "than-chi", "sapphire"],
+      ["cuoi", "nhom-hang", "thu-moi", "trang", "dong"],
+      ["ngoc-trai", "nhom-hang", "lookbook", "suong-bien", "luc"],
+      ["khach-my", "khach", "trien-lam", "trang", "sapphire"],
+      ["viet-kieu", "khach", "danh-sach", "beige", "ruby"],
+      ["khach-si", "khach", "bang-mau", "trang", "hong"],
+      ["vip", "khach", "thu-moi", "xanh-dem", "dong"],
+    ]);
+  });
+
+  it("mọi giá trị hợp lệ và nhóm nào cũng có chủ đề", () => {
+    for (const nhom of NHOM_CHU_DE) expect(CHU_DE.some((c) => c.nhom === nhom)).toBe(true);
+    for (const c of CHU_DE) {
+      expect(NHOM_CHU_DE).toContain(c.nhom);
+      expect(BO_CUC).toContain(c.boCuc);
+      expect(TONE).toContain(c.tone);
+      expect(NHAN).toContain(c.nhan);
+    }
+  });
+
+  it("khoá không trùng, bộ ba bố cục + tông + màu nhấn không trùng", () => {
+    expect(new Set(CHU_DE.map((c) => c.khoa)).size).toBe(CHU_DE.length);
+    expect(new Set(CHU_DE.map((c) => `${c.boCuc}|${c.tone}|${c.nhan}`)).size).toBe(CHU_DE.length);
+  });
+
+  it("không chủ đề nào trùng mặc định — catalogue không chọn gì không hiện như đang chọn chủ đề", () => {
+    expect(chuDeDangChon(GIAO_DIEN_MAC_DINH)).toBeNull();
+  });
+
+  it("chuDeDangChon khớp đủ ba chiều; lệch một chiều là null", () => {
+    expect(chuDeDangChon({ boCuc: "thu-moi", tone: "xanh-dem", nhan: "dong" })).toBe("vip");
+    expect(chuDeDangChon({ boCuc: "thu-moi", tone: "trang", nhan: "dong" })).toBe("cuoi");
+    expect(chuDeDangChon({ boCuc: "thu-moi", tone: "xanh-dem", nhan: "hong" })).toBeNull();
+    expect(chuDeDangChon({ boCuc: "lookbook", tone: "xanh-dem", nhan: "dong" })).toBeNull();
+  });
+
+  it("gợi ý màu nhấn của tông không cãi màu nhấn của chủ đề dùng tông đó", () => {
+    for (const c of CHU_DE) {
+      const goiY = NHAN_GOI_Y[c.tone];
+      expect(goiY === undefined || goiY === c.nhan, `${c.khoa}: tong ${c.tone} goi y ${goiY}, chu de ${c.nhan}`).toBe(true);
     }
   });
 });
