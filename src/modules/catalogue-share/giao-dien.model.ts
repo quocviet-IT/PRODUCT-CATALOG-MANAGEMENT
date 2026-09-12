@@ -94,6 +94,43 @@ export const NHAN_GOI_Y: Partial<Record<Tone, Nhan>> = {
   "suong-bien": "luc",
 };
 
+/** Nhom cua hang Chu de tren man hinh tao catalogue. */
+export const NHOM_CHU_DE = ["dip", "nhom-hang", "khach"] as const;
+export type NhomChuDe = (typeof NHOM_CHU_DE)[number];
+
+type DinhNghiaChuDe = { khoa: string; nhom: NhomChuDe; boCuc: BoCuc; tone: Tone; nhan: Nhan };
+
+/**
+ * Chu de san (12/09/2026) — LOI TAT: bam mot lan dat bo cuc + tong + mau nhan hop nhau
+ * cho mot dip, mot nhom hang hay mot kieu khach. KHONG luu xuong ban ghi: chu de "dang
+ * chon" suy ra bang chuDeDangChon, nen doi hay bo chu de khong dong gi toi catalogue
+ * da gui.
+ *
+ * Bo ba cua cac chu de khac nhau va KHONG trung mac dinh (danh-sach, beige, hong) — trung
+ * thi catalogue khong chon gi se hien nhu dang chon mot chu de. Co test khoa lai.
+ */
+export const CHU_DE = [
+  { khoa: "valentine", nhom: "dip", boCuc: "lookbook", tone: "do-ruou", nhan: "hong" },
+  { khoa: "ngay-cua-me", nhom: "dip", boCuc: "trien-lam", tone: "oai-huong", nhan: "man" },
+  { khoa: "giang-sinh", nhom: "dip", boCuc: "khung-co-dien", tone: "reu", nhan: "ruby" },
+  { khoa: "nam", nhom: "nhom-hang", boCuc: "tap-chi", tone: "than-chi", nhan: "sapphire" },
+  { khoa: "cuoi", nhom: "nhom-hang", boCuc: "thu-moi", tone: "trang", nhan: "dong" },
+  { khoa: "ngoc-trai", nhom: "nhom-hang", boCuc: "lookbook", tone: "suong-bien", nhan: "luc" },
+  { khoa: "khach-my", nhom: "khach", boCuc: "trien-lam", tone: "trang", nhan: "sapphire" },
+  { khoa: "viet-kieu", nhom: "khach", boCuc: "danh-sach", tone: "beige", nhan: "ruby" },
+  { khoa: "khach-si", nhom: "khach", boCuc: "bang-mau", tone: "trang", nhan: "hong" },
+  { khoa: "vip", nhom: "khach", boCuc: "thu-moi", tone: "xanh-dem", nhan: "dong" },
+] as const satisfies readonly DinhNghiaChuDe[];
+
+export type ChuDe = (typeof CHU_DE)[number];
+export type KhoaChuDe = ChuDe["khoa"];
+
+/** Chu de khop DU ca bo cuc, tong va mau nhan dang chon; lech mot chieu thi null. */
+export function chuDeDangChon(g: Pick<GiaoDienCatalogue, "boCuc" | "tone" | "nhan">): KhoaChuDe | null {
+  const c = CHU_DE.find((x) => x.boCuc === g.boCuc && x.tone === g.tone && x.nhan === g.nhan);
+  return c ? c.khoa : null;
+}
+
 /** Cac thong so co the bat/tat cho khach xem. Trung ten voi truong cua MucCatalogue. */
 export const THONG_SO = ["loaiSp", "chatLieu", "mau", "size", "tlVang"] as const;
 export type ThongSo = (typeof THONG_SO)[number];

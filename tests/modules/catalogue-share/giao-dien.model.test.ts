@@ -6,6 +6,9 @@ import {
   NHAN,
   TONE,
   TONE_TOI,
+  CHU_DE,
+  NHOM_CHU_DE,
+  chuDeDangChon,
   THONG_SO,
   coThongSo,
   docGiaoDien,
@@ -399,5 +402,48 @@ describe("hai bố cục mới (12/09/2026)", () => {
   it("docGiaoDien nhận Bảng mẫu và Thư mời", () => {
     expect(docGiaoDien({ boCuc: "bang-mau" }).boCuc).toBe("bang-mau");
     expect(docGiaoDien({ boCuc: "thu-moi" }).boCuc).toBe("thu-moi");
+  });
+});
+
+describe("chủ đề sẵn (12/09/2026)", () => {
+  it("đúng như thiết kế đã duyệt", () => {
+    expect(CHU_DE.map((c) => [c.khoa, c.nhom, c.boCuc, c.tone, c.nhan])).toEqual([
+      ["valentine", "dip", "lookbook", "do-ruou", "hong"],
+      ["ngay-cua-me", "dip", "trien-lam", "oai-huong", "man"],
+      ["giang-sinh", "dip", "khung-co-dien", "reu", "ruby"],
+      ["nam", "nhom-hang", "tap-chi", "than-chi", "sapphire"],
+      ["cuoi", "nhom-hang", "thu-moi", "trang", "dong"],
+      ["ngoc-trai", "nhom-hang", "lookbook", "suong-bien", "luc"],
+      ["khach-my", "khach", "trien-lam", "trang", "sapphire"],
+      ["viet-kieu", "khach", "danh-sach", "beige", "ruby"],
+      ["khach-si", "khach", "bang-mau", "trang", "hong"],
+      ["vip", "khach", "thu-moi", "xanh-dem", "dong"],
+    ]);
+  });
+
+  it("mọi giá trị hợp lệ và nhóm nào cũng có chủ đề", () => {
+    for (const nhom of NHOM_CHU_DE) expect(CHU_DE.some((c) => c.nhom === nhom)).toBe(true);
+    for (const c of CHU_DE) {
+      expect(NHOM_CHU_DE).toContain(c.nhom);
+      expect(BO_CUC).toContain(c.boCuc);
+      expect(TONE).toContain(c.tone);
+      expect(NHAN).toContain(c.nhan);
+    }
+  });
+
+  it("khoá không trùng, bộ ba bố cục + tông + màu nhấn không trùng", () => {
+    expect(new Set(CHU_DE.map((c) => c.khoa)).size).toBe(CHU_DE.length);
+    expect(new Set(CHU_DE.map((c) => `${c.boCuc}|${c.tone}|${c.nhan}`)).size).toBe(CHU_DE.length);
+  });
+
+  it("không chủ đề nào trùng mặc định — catalogue không chọn gì không hiện như đang chọn chủ đề", () => {
+    expect(chuDeDangChon(GIAO_DIEN_MAC_DINH)).toBeNull();
+  });
+
+  it("chuDeDangChon khớp đủ ba chiều; lệch một chiều là null", () => {
+    expect(chuDeDangChon({ boCuc: "thu-moi", tone: "xanh-dem", nhan: "dong" })).toBe("vip");
+    expect(chuDeDangChon({ boCuc: "thu-moi", tone: "trang", nhan: "dong" })).toBe("cuoi");
+    expect(chuDeDangChon({ boCuc: "thu-moi", tone: "xanh-dem", nhan: "hong" })).toBeNull();
+    expect(chuDeDangChon({ boCuc: "lookbook", tone: "xanh-dem", nhan: "dong" })).toBeNull();
   });
 });
