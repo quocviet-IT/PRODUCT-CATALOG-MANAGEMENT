@@ -1,3 +1,5 @@
+import { HUONG_DAN_VI } from "./huong-dan.vi";
+
 export const vi = {
   chung: {
     luu: "Lưu",
@@ -323,60 +325,8 @@ export const vi = {
     anh_chua_co_ma_mau: "Ảnh sản phẩm chưa có mã mẫu",
     size_nhan: "Size",
   },
-  huong_dan: {
-    tieu_de: "Hướng dẫn sử dụng",
-    nut_menu: "Hướng dẫn",
-    mo_ta: "Từ lúc tìm mẫu đến lúc gửi link cho khách. Mỗi bước có ảnh màn hình, số trên ảnh ứng với số trong phần chú thích.",
-    buoc: "Bước {n}",
-    chua_co_anh: "Ảnh minh hoạ cho bước này chưa được chụp.",
-
-    b1_ten: "Đăng nhập",
-    b1_mo_ta: "Vào hpcatalogue.app rồi bấm Đăng nhập bằng Google với Gmail công ty. Không dùng được Google thì bấm dòng chữ nhỏ bên dưới để đăng nhập bằng email và mật khẩu quản trị cấp.",
-    b1_c1: "Bấm đây nếu dùng Gmail công ty.",
-    b1_c2: "Bấm đây nếu quản trị cấp cho anh email và mật khẩu.",
-
-    b2_ten: "Tìm mẫu",
-    b2_mo_ta: "Gõ vào ô tìm kiếm là danh sách lọc ngay, không cần bấm Enter. Tìm được cả mã mẫu, SKU, MO, SO và mô tả — gõ tiếng Việt có dấu hay không dấu đều ra.",
-    b2_c1: "Ô tìm kiếm. Gõ tới đâu lọc tới đó.",
-    b2_c2: "Bảy ô lọc: chất liệu, loại SP, dòng SP, màu, size, loại xoàn, cảnh báo. Số trong ngoặc là số mẫu còn lại.",
-    b2_c3: "Đổi giữa kiểu bảng và kiểu lưới ảnh.",
-
-    b2_c4: "Bấm vào một ô chỉ số là lọc ngay theo cảnh báo đó. Bấm lần nữa để bỏ.",
-    b3_ten: "Tích chọn mẫu",
-    b3_mo_ta: "Tích vào ô vuông đầu mỗi dòng. Chọn xong bao nhiêu mẫu cũng được, thanh dưới cùng màn hình luôn hiện số đang chọn.",
-    b3_c1: "Ô tích ở đầu dòng.",
-    b3_c2: "Thanh này nổi lên khi đã chọn ít nhất một mẫu.",
-    b3_c3: "Bấm Tạo catalogue để sang bước sau.",
-
-    b4_ten: "Đặt tên và chọn kiểu trình bày",
-    b4_mo_ta: "Đặt tên để sau này tìm lại cho dễ. Ô Tên link tự lấy theo tên catalogue — tên catalogue có tên khách thì nên đặt tên link riêng, ví dụ “Dây chuyền khoen lật”. Bỏ trống cả hai thì hệ thống tự đánh số.",
-    b4_c1: "Tên catalogue. Bỏ trống thì thành “Catalogue #12”.",
-    b4_c2: "Ba bố cục. Bấm vào ô nào là chọn ô đó.",
-    b4_c3: "Tông màu, thông số cho khách xem, ngôn ngữ, liên hệ đặt hàng, và trang bìa." + " Điền số điện thoại thì trang khách có nút gọi và nút nhắn tin — Zalo, tin nhắn hoặc WhatsApp, tuỳ anh chọn.",
-
-    b5_ten: "Bỏ bớt ảnh",
-    b5_mo_ta: "Mặc định giữ hết ảnh của mẫu. Bấm vào ảnh nào để bỏ ảnh đó ra khỏi catalogue. Kéo ảnh hoặc bấm mũi tên dưới ảnh để đổi thứ tự — ảnh được tích đầu tiên là ảnh chính. Cần gỡ nguyên một mẫu thì bấm Gỡ mẫu này. Muốn đổi thứ tự mẫu thì kéo ở khung Thứ tự trình bày; muốn giới thiệu thêm thì ghi ở ô Giới thiệu của từng mẫu — các bước này đều không bắt buộc.",
-    b5_c1: "Bấm vào ảnh để bỏ / lấy lại.",
-    b5_c2: "Số ảnh đang giữ trên tổng số ảnh của mẫu.",
-    b5_c3: "Gỡ cả mẫu khỏi catalogue.",
-
-    b6_ten: "Tạo link và gửi khách",
-    b6_mo_ta: "Bấm Xem trước để ngó đúng thứ khách sẽ thấy, rồi mới bấm Tạo link gửi khách." + " Nội dung được đóng băng ngay lúc tạo — bảng tính sửa về sau cũng không làm đổi cái khách đang xem.",
-    b6_c1: "Bấm Chép link rồi dán vào Zalo hoặc email.",
-    b6_c2: "Mở thử để xem đúng thứ khách sẽ thấy.",
-    b6_c3: "Tải PDF là bản in — chỉ anh thấy nút này, khách thì không.",
-
-    b7_ten: "Xem lại catalogue đã tạo",
-    b7_mo_ta: "Mọi link đã tạo đều nằm ở mục Catalogue đã tạo. Sale thấy của mình, quản trị thấy của cả công ty. Muốn đặt lại tên link thì bấm Đổi tên link ngay dưới đường dẫn — link cũ đã gửi khách vẫn mở được.",
-    b7_c1: "Vào từ thanh trên cùng.",
-    b7_c2: "Chép lại link cũ mà không cần tạo lại.",
-    b7_c3: "Tải PDF của một catalogue cũ.",
-    b8_ten: "Cấp tài khoản và phân vai trò",
-    b8_mo_ta: "Chỉ quản trị thấy bước này. Mở bằng cách bấm tên của anh ở góc trên bên phải, rồi chọn Tài khoản. Vai trò là cái TÊN anh tự đặt cho hợp với công ty — GSNB, R&D, thực tập sinh. Nhưng quyền thì hệ thống chỉ cưỡng chế được hai bậc, nên mỗi vai trò buộc phải chọn một trong hai.",
-    b8_c1: "Cột Quyền mới là thứ quyết định người đó làm được gì: Quản trị vào được mọi màn hình, Thường chỉ tạo catalogue. Hai vai trò gốc không đổi được bậc và không xoá được.",
-    b8_c2: "Thêm vai trò mới ở đây. Vai trò còn người giữ thì không xoá được — chuyển họ sang vai trò khác trước.",
-    b8_c3: "Đổi vai trò của một người: chọn ở ô này rồi bấm Đổi vai trò bên cạnh.",
-  },
+  // Trang Huong dan: noi dung dai, nam o huong-dan.vi.ts.
+  huong_dan: HUONG_DAN_VI,
   danh_sach_catalogue: {
     tieu_de: "Catalogue đã tạo",
     nut_menu: "Catalogue đã tạo",

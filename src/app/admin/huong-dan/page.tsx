@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { ArrowUp } from "lucide-react";
 import { requireUser } from "@/auth/guard";
 import { layChu } from "@/messages/may-chu";
 import type { BoChu } from "@/messages";
@@ -12,65 +13,76 @@ export async function generateMetadata() {
 
 const THU_MUC_ANH = "huong-dan";
 
-/**
- * Mot buoc: cau chu do nguoi viet dat, vi tri mui ten do may do.
- *
- * `chiAdmin` cho nhung buoc noi ve man hinh ma sale khong mo duoc. Day la de
- * KHOI BAY ra mot huong dan lam nguoi ta di tim mot nut khong ton tai voi ho —
- * khong phai de giau bi mat, vi noi dung buoc do khong co gi bi mat ca.
- */
-type Buoc = { ten: string; moTa: string; anh: string; chu: string[]; chiAdmin?: true };
+/** Chu cua mot buoc, lay nguyen tu bo chu (huong-dan.vi.ts / huong-dan.en.ts). */
+type NoiDungBuoc = { ten: string; mo_ta: string; chu: readonly string[]; meo: readonly string[] };
 
-function cacBuoc(t: BoChu): Buoc[] {
+/** Mot buoc: cau chu do nguoi viet dat, vi tri mui ten do may do (theo ten anh). */
+type Buoc = { anh: string; nd: NoiDungBuoc };
+
+/**
+ * Mot phan cua huong dan.
+ *
+ * `chiAdmin` cho nhung man hinh sale khong mo duoc. Day la de KHOI BAY ra mot huong
+ * dan lam nguoi ta di tim mot nut khong ton tai voi ho — khong phai de giau bi mat,
+ * vi noi dung khong co gi bi mat ca. Phan do de CUOI de so buoc cua sale va cua quan
+ * tri trung nhau o moi phan truoc no.
+ */
+type Phan = { ten: string; buoc: Buoc[]; chiAdmin?: true };
+
+/**
+ * Ten anh o day phai trung ten anh trong scripts/chup-huong-dan.mts, va so chu thich
+ * (`chu`) phai bang so moc cua anh do. Trang lay phan giao nen lech thi mat mui ten chu
+ * khong tro bay.
+ */
+function cacPhan(t: BoChu): Phan[] {
+  const h = t.huong_dan;
   return [
     {
-      ten: t.huong_dan.b1_ten,
-      moTa: t.huong_dan.b1_mo_ta,
-      anh: "01-dang-nhap",
-      chu: [t.huong_dan.b1_c1, t.huong_dan.b1_c2],
+      ten: h.phan.bat_dau,
+      buoc: [
+        { anh: "01-dang-nhap", nd: h.dang_nhap },
+        { anh: "02-thanh-dau-trang", nd: h.thanh_dau_trang },
+      ],
     },
     {
-      ten: t.huong_dan.b2_ten,
-      moTa: t.huong_dan.b2_mo_ta,
-      anh: "02-tim-mau",
-      chu: [t.huong_dan.b2_c1, t.huong_dan.b2_c2, t.huong_dan.b2_c3, t.huong_dan.b2_c4],
+      ten: h.phan.chon_mau,
+      buoc: [
+        { anh: "03-tim-mau", nd: h.tim_mau },
+        { anh: "04-chi-tiet-mau", nd: h.chi_tiet_mau },
+        { anh: "05-tich-chon", nd: h.tich_chon },
+      ],
     },
     {
-      ten: t.huong_dan.b3_ten,
-      moTa: t.huong_dan.b3_mo_ta,
-      anh: "03-tich-chon",
-      chu: [t.huong_dan.b3_c1, t.huong_dan.b3_c2, t.huong_dan.b3_c3],
+      ten: h.phan.tao,
+      buoc: [
+        { anh: "06-ten-link", nd: h.ten_link },
+        { anh: "07-bo-cuc-mau", nd: h.bo_cuc_mau },
+        { anh: "08-thong-so-ngon-ngu", nd: h.thong_so_ngon_ngu },
+        { anh: "09-lien-he", nd: h.lien_he },
+        { anh: "10-trang-bia", nd: h.trang_bia },
+        { anh: "11-thu-tu", nd: h.thu_tu },
+        { anh: "12-gioi-thieu", nd: h.gioi_thieu },
+        { anh: "13-anh-mau", nd: h.anh_mau },
+        { anh: "14-xem-truoc", nd: h.xem_truoc },
+        { anh: "15-tao-link", nd: h.tao_link },
+      ],
     },
     {
-      ten: t.huong_dan.b4_ten,
-      moTa: t.huong_dan.b4_mo_ta,
-      anh: "04-dat-ten-va-kieu",
-      chu: [t.huong_dan.b4_c1, t.huong_dan.b4_c2, t.huong_dan.b4_c3],
+      ten: h.phan.khach,
+      buoc: [
+        { anh: "16-trang-khach", nd: h.trang_khach },
+        { anh: "17-lien-he-khach", nd: h.lien_he_khach },
+      ],
     },
+    { ten: h.phan.quan_ly, buoc: [{ anh: "18-danh-sach", nd: h.danh_sach }] },
+    { ten: h.phan.gop_y, buoc: [{ anh: "19-gop-y", nd: h.gop_y }] },
     {
-      ten: t.huong_dan.b5_ten,
-      moTa: t.huong_dan.b5_mo_ta,
-      anh: "05-bo-anh",
-      chu: [t.huong_dan.b5_c1, t.huong_dan.b5_c2, t.huong_dan.b5_c3],
-    },
-    {
-      ten: t.huong_dan.b6_ten,
-      moTa: t.huong_dan.b6_mo_ta,
-      anh: "06-tao-link",
-      chu: [t.huong_dan.b6_c1, t.huong_dan.b6_c2, t.huong_dan.b6_c3],
-    },
-    {
-      ten: t.huong_dan.b7_ten,
-      moTa: t.huong_dan.b7_mo_ta,
-      anh: "07-danh-sach",
-      chu: [t.huong_dan.b7_c1, t.huong_dan.b7_c2, t.huong_dan.b7_c3],
-    },
-    {
-      ten: t.huong_dan.b8_ten,
-      moTa: t.huong_dan.b8_mo_ta,
-      anh: "08-tai-khoan-vai-tro",
-      chu: [t.huong_dan.b8_c1, t.huong_dan.b8_c2, t.huong_dan.b8_c3],
+      ten: h.phan.quan_tri,
       chiAdmin: true,
+      buoc: [
+        { anh: "20-hop-gop-y", nd: h.hop_gop_y },
+        { anh: "21-tai-khoan", nd: h.tai_khoan },
+      ],
     },
   ];
 }
@@ -105,50 +117,176 @@ const VI_TRI: Record<string, ViTri[]> = (() => {
  * script. Lay phan giao: tha thieu mot mui ten con hon hien mot mui ten tro vao
  * cho trong.
  */
-function ghep(chu: string[], viTri: ViTri[] | undefined): Diem[] {
+function ghep(chu: readonly string[], viTri: ViTri[] | undefined): Diem[] {
   if (!viTri) return [];
   return viTri.slice(0, chu.length).map((v, i) => ({ ...v, chu: chu[i] }));
+}
+
+const NHAN_NHO = "block text-[11px] uppercase tracking-[0.14em] text-hp-muted";
+
+function VeMucLuc({ chu }: { chu: string }) {
+  return (
+    <a
+      href="#muc-luc"
+      className="mt-12 inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em]
+                 text-hp-muted transition-colors duration-150 hover:text-hp-ink"
+    >
+      <ArrowUp aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
+      {chu}
+    </a>
+  );
 }
 
 export default async function TrangHuongDan() {
   const toi = await requireUser();
   const t = await layChu();
+  const h = t.huong_dan;
   // Loc theo MUC QUYEN chu khong theo ten vai tro: mot vai tro tu dat mang bac
-  // quan tri thi cung phai thay buoc nay.
-  const buoc = cacBuoc(t).filter((b) => !b.chiAdmin || toi.mucQuyen === "admin");
+  // quan tri thi cung phai thay phan nay.
+  const phan = cacPhan(t).filter((p) => !p.chiAdmin || toi.mucQuyen === "admin");
+  // So buoc chay LIEN qua cac phan: so thu tu cua buoc dau moi phan.
+  const soDau = phan.map((_, i) => phan.slice(0, i).reduce((n, p) => n + p.buoc.length, 0));
 
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-10">
         <h1 className="font-title text-[32px] leading-none tracking-[0.02em] text-hp-ink">
-          {t.huong_dan.tieu_de}
+          {h.tieu_de}
         </h1>
-        <p className="mt-3 text-sm leading-relaxed text-hp-body">{t.huong_dan.mo_ta}</p>
+        <p className="mt-3 text-sm leading-relaxed text-hp-body">{h.mo_ta}</p>
         <div className="mt-5 h-px bg-hp-rule" />
       </div>
 
-      <ol className="space-y-16">
-        {buoc.map((b, i) => {
-          const diem = ghep(b.chu, VI_TRI[b.anh]);
-          return (
-            <li key={b.anh}>
-              <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
-                {t.huong_dan.buoc.replace("{n}", String(i + 1))}
-              </span>
-              <h2 className="mt-2 font-title text-2xl leading-tight text-hp-ink">{b.ten}</h2>
-              <p className="mt-3 text-sm leading-relaxed text-hp-body">{b.moTa}</p>
-
-              <div className="mt-6">
-                {diem.length > 0 ? (
-                  <AnhChuThich src={`/${THU_MUC_ANH}/${b.anh}.png`} alt={b.ten} diem={diem} />
-                ) : (
-                  <ChuaCoAnh t={t} />
-                )}
-              </div>
+      {/* Muc luc: trang dai hai muoi buoc, khong co muc luc thi nguoi can dung mot
+          buoc phai cuon qua het nhung buoc kia. */}
+      <nav
+        id="muc-luc"
+        aria-labelledby="muc-luc-ten"
+        className="mb-20 scroll-mt-8 border border-hp-rule bg-hp-card p-6 sm:p-8"
+      >
+        <h2 id="muc-luc-ten" className={NHAN_NHO}>{h.muc_luc}</h2>
+        <ol className="mt-5 space-y-6">
+          {phan.map((p, i) => (
+            <li key={p.ten}>
+              <a
+                href={`#phan-${i + 1}`}
+                className="font-title text-lg leading-tight text-hp-ink transition-colors
+                           duration-150 hover:underline"
+              >
+                {p.ten}
+              </a>
+              <ol className="mt-2 grid gap-x-8 gap-y-1.5 sm:grid-cols-2">
+                {p.buoc.map((b, j) => {
+                  const n = soDau[i] + j + 1;
+                  return (
+                    <li key={b.anh}>
+                      <a
+                        href={`#buoc-${n}`}
+                        className="flex gap-2 text-sm leading-snug text-hp-body transition-colors
+                                   duration-150 hover:text-hp-ink hover:underline"
+                      >
+                        <span className="w-5 shrink-0 text-right tabular-nums text-hp-muted">{n}.</span>
+                        {b.nd.ten}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ol>
             </li>
-          );
-        })}
-      </ol>
+          ))}
+          <li>
+            <a
+              href="#hoi-dap"
+              className="font-title text-lg leading-tight text-hp-ink transition-colors
+                         duration-150 hover:underline"
+            >
+              {h.hoi_dap}
+            </a>
+          </li>
+        </ol>
+      </nav>
+
+      <div className="space-y-24">
+        {phan.map((p, i) => (
+          <section
+            key={p.ten}
+            id={`phan-${i + 1}`}
+            aria-labelledby={`phan-${i + 1}-ten`}
+            className="scroll-mt-8"
+          >
+            <div className="mb-12 border-b border-hp-rule pb-5">
+              <span className={NHAN_NHO}>
+                {h.phan_so.replace("{n}", String(i + 1))}
+                {p.chiAdmin && ` · ${h.chi_quan_tri}`}
+              </span>
+              <h2
+                id={`phan-${i + 1}-ten`}
+                className="mt-2 font-title text-[28px] leading-tight tracking-[0.01em] text-hp-ink"
+              >
+                {p.ten}
+              </h2>
+            </div>
+
+            <ol className="space-y-20">
+              {p.buoc.map((b, j) => {
+                const n = soDau[i] + j + 1;
+                const diem = ghep(b.nd.chu, VI_TRI[b.anh]);
+                return (
+                  <li key={b.anh} id={`buoc-${n}`} className="scroll-mt-8">
+                    <span className={NHAN_NHO}>{h.buoc.replace("{n}", String(n))}</span>
+                    <h3 className="mt-2 font-title text-2xl leading-tight text-hp-ink">{b.nd.ten}</h3>
+                    <p className="mt-3 text-sm leading-relaxed text-hp-body">{b.nd.mo_ta}</p>
+
+                    <div className="mt-6">
+                      {diem.length > 0 ? (
+                        <AnhChuThich src={`/${THU_MUC_ANH}/${b.anh}.png`} alt={b.nd.ten} diem={diem} />
+                      ) : (
+                        <ChuaCoAnh t={t} />
+                      )}
+                    </div>
+
+                    {b.nd.meo.length > 0 && (
+                      <div className="mt-6 border-l-2 border-hp-rule bg-hp-inset/60 px-5 py-4">
+                        <p className={NHAN_NHO}>{h.luu_y}</p>
+                        <ul
+                          className="mt-2 list-disc space-y-1.5 pl-5 text-sm leading-relaxed
+                                     text-hp-body marker:text-hp-muted"
+                        >
+                          {b.nd.meo.map((m) => (
+                            <li key={m}>{m}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+
+            <VeMucLuc chu={h.ve_muc_luc} />
+          </section>
+        ))}
+
+        <section id="hoi-dap" aria-labelledby="hoi-dap-ten" className="scroll-mt-8">
+          <div className="mb-8 border-b border-hp-rule pb-5">
+            <h2
+              id="hoi-dap-ten"
+              className="font-title text-[28px] leading-tight tracking-[0.01em] text-hp-ink"
+            >
+              {h.hoi_dap}
+            </h2>
+          </div>
+          <dl className="divide-y divide-hp-rule border-b border-hp-rule">
+            {h.cau_hoi.map((c) => (
+              <div key={c.hoi} className="py-5 first:pt-0">
+                <dt className="text-base font-medium leading-snug text-hp-ink">{c.hoi}</dt>
+                <dd className="mt-2 text-sm leading-relaxed text-hp-body">{c.dap}</dd>
+              </div>
+            ))}
+          </dl>
+          <VeMucLuc chu={h.ve_muc_luc} />
+        </section>
+      </div>
     </div>
   );
 }

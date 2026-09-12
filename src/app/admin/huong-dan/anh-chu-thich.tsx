@@ -31,11 +31,17 @@ export type Diem = {
  * Moi huong can ba thu khop nhau: chieu xep (mui ten truoc hay so truoc), goc
  * xoay cua mui ten, va cach keo ca cum ra khoi diem cham.
  */
-const KIEU: Record<NonNullable<Diem["huong"]>, { xep: string; xoay: string; keo: string }> = {
-  trai: { xep: "flex-row", xoay: "rotate-0", keo: "-translate-y-1/2" },
-  phai: { xep: "flex-row-reverse", xoay: "rotate-180", keo: "-translate-x-full -translate-y-1/2" },
-  tren: { xep: "flex-col", xoay: "rotate-90", keo: "-translate-x-1/2" },
-  duoi: { xep: "flex-col-reverse", xoay: "-rotate-90", keo: "-translate-x-1/2 -translate-y-full" },
+const KIEU: Record<
+  NonNullable<Diem["huong"]>,
+  { xep: string; xoay: string; keo: string; khung: string }
+> = {
+  trai: { xep: "flex-row", xoay: "rotate-0", keo: "-translate-y-1/2", khung: "h-3 w-6" },
+  phai: { xep: "flex-row-reverse", xoay: "rotate-180", keo: "-translate-x-full -translate-y-1/2", khung: "h-3 w-6" },
+  // Mui ten DOC: svg ngang xoay 90 do van giu khung 24x12 nam ngang, nen dau mui ten lo
+  // ra 6px ngoai khung va de len chinh chu no dang chi (soat anh huong dan 12/09/2026).
+  // Khung boc 12x24 cho kich thuoc bang dung hinh sau khi xoay.
+  tren: { xep: "flex-col", xoay: "rotate-90", keo: "-translate-x-1/2", khung: "h-6 w-3" },
+  duoi: { xep: "flex-col-reverse", xoay: "-rotate-90", keo: "-translate-x-1/2 -translate-y-full", khung: "h-6 w-3" },
 };
 
 export function AnhChuThich({
@@ -61,13 +67,14 @@ export function AnhChuThich({
               style={{ left: `${d.x}%`, top: `${d.y}%` }}
               className={`absolute flex items-center ${k.xep} ${k.keo}`}
             >
-              <svg
-                viewBox="0 0 24 12"
-                aria-hidden
-                className={`h-3 w-6 shrink-0 fill-hp-pink drop-shadow-[0_0_2px_rgba(255,255,255,0.9)] ${k.xoay}`}
-              >
-                <path d="M0 6 L8 1 L8 4 L24 4 L24 8 L8 8 L8 11 Z" />
-              </svg>
+              <span aria-hidden className={`flex shrink-0 items-center justify-center ${k.khung}`}>
+                <svg
+                  viewBox="0 0 24 12"
+                  className={`h-3 w-6 shrink-0 fill-hp-pink drop-shadow-[0_0_2px_rgba(255,255,255,0.9)] ${k.xoay}`}
+                >
+                  <path d="M0 6 L8 1 L8 4 L24 4 L24 8 L8 8 L8 11 Z" />
+                </svg>
+              </span>
               <span
                 className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full
                            bg-hp-pink text-[12px] font-medium tabular-nums text-white

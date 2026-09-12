@@ -1,4 +1,5 @@
 import type { BoChu } from "./index";
+import { HUONG_DAN_EN } from "./huong-dan.en";
 
 /**
  * Ban tieng Anh. Kieu BoChu ep no phai co DUNG nhung khoa cua ban tieng Viet —
@@ -317,60 +318,7 @@ export const en: BoChu = {
     anh_chua_co_ma_mau: "Product image without a model code",
     size_nhan: "Size",
   },
-  huong_dan: {
-    tieu_de: "How to use it",
-    nut_menu: "Guide",
-    mo_ta: "From finding a model to sending your customer a link. Each step has a screenshot; the numbers on the picture match the numbers in the notes.",
-    buoc: "Step {n}",
-    chua_co_anh: "The screenshot for this step has not been captured yet.",
-
-    b1_ten: "Sign in",
-    b1_mo_ta: "Open hpcatalogue.app and sign in with your company Google account. If Google will not work, use the small line underneath to sign in with an email and password from your administrator.",
-    b1_c1: "Use this with your company Google account.",
-    b1_c2: "Use this if your administrator gave you an email and password.",
-
-    b2_ten: "Find a model",
-    b2_mo_ta: "Type in the search box and the list narrows as you go — no need to press Enter. It searches model code, SKU, MO, SO and the description, with or without Vietnamese accents.",
-    b2_c1: "Search box. It filters as you type.",
-    b2_c2: "Seven filters: material, type, line, colour, size, diamond type, warnings. The number in brackets is how many models are left.",
-    b2_c3: "Switch between the table and the image grid.",
-
-    b2_c4: "Click a metric card to filter by that warning. Click it again to clear.",
-    b3_ten: "Tick the models",
-    b3_mo_ta: "Tick the box at the start of each row. Pick as many as you like — the bar at the bottom always shows how many are selected.",
-    b3_c1: "The tick box at the start of the row.",
-    b3_c2: "This bar appears once at least one model is selected.",
-    b3_c3: "Press Create catalogue to move on.",
-
-    b4_ten: "Name it and choose the presentation",
-    b4_mo_ta: "A name makes it easy to find later. The Link name box follows the catalogue name — if that name includes the customer's name, give the link its own name, for example “Hinged link chain”. Leave both blank and the system numbers it for you.",
-    b4_c1: "Catalogue name. Blank becomes “Catalogue #12”.",
-    b4_c2: "Three layouts. Click a card to choose it.",
-    b4_c3: "Colour, the details your customer sees, language, the ordering contact, and the cover page." + " Fill in a phone number and the customer page gets a call button and a message button — Zalo, text message or WhatsApp, whichever you choose.",
-
-    b5_ten: "Drop the images you do not want",
-    b5_mo_ta: "Every image is kept by default. Click an image to take it out. Drag images, or use the arrows under them, to reorder — the first ticked image is the main one. To remove a whole model, press Remove this model. To change the model order, drag in the Presentation order box; to say more about a piece, write in its About box — all of these are optional.",
-    b5_c1: "Click an image to drop or restore it.",
-    b5_c2: "How many images are kept out of the model's total.",
-    b5_c3: "Remove the whole model from the catalogue.",
-
-    b6_ten: "Create the link and send it",
-    b6_mo_ta: "Press Preview to see exactly what your customer will see, then press Create customer link." + " The contents are frozen at that moment — later edits to the spreadsheet do not change what your customer sees.",
-    b6_c1: "Press Copy link, then paste it into Zalo or an email.",
-    b6_c2: "Open it to see exactly what your customer will see.",
-    b6_c3: "Download PDF is the print view — only you see this button, never the customer.",
-
-    b7_ten: "Look back at what you created",
-    b7_mo_ta: "Every link you created is under Catalogues. Sales staff see their own; administrators see everyone's. To rename a link, press Rename link under its address — links you already sent keep working.",
-    b7_c1: "Reach it from the top bar.",
-    b7_c2: "Copy an old link again without recreating it.",
-    b7_c3: "Download the PDF of an older catalogue.",
-    b8_ten: "Create accounts and assign roles",
-    b8_mo_ta: "Administrators only. Open it by clicking your name at the top right, then Accounts. A role is a NAME you choose to match your company — internal audit, R&D, interns. Access, though, comes in only two levels the system can enforce, so every role has to pick one.",
-    b8_c1: "The Access column is what decides what someone can do: Administrator reaches every screen, Standard only builds catalogues. The two built-in roles cannot change level and cannot be deleted.",
-    b8_c2: "Add a new role here. A role someone still holds cannot be deleted — move them to another role first.",
-    b8_c3: "To change someone's role: pick it in this box, then press Change role beside it.",
-  },
+  huong_dan: HUONG_DAN_EN,
   danh_sach_catalogue: {
     tieu_de: "Catalogues created",
     nut_menu: "Catalogues",
