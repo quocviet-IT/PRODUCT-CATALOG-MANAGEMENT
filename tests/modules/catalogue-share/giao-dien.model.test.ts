@@ -12,13 +12,17 @@ import {
   DAI_LOI_CHAO,
   DAI_TEN_KHACH,
   DAI_TEN_SALE,
+  DAI_LOI_KEU_GOI,
   CACH_NHAN,
+  LOI_KEU_GOI,
+  cauKeuGoi,
   goiYCachNhan,
   lienKetNhan,
   soGoiDuoc,
   type CachNhan,
   type LienHe,
 } from "@/modules/catalogue-share/giao-dien.model";
+import { boChu } from "@/messages";
 
 describe("docGiaoDien", () => {
   it("cot rong cua catalogue cu doc ra dung bo mac dinh", () => {
@@ -90,7 +94,7 @@ describe("docGiaoDien", () => {
   it("bo qua khoa la, khong chep no vao ket qua", () => {
     const g = docGiaoDien({ boCuc: "luoi", giaBan: 5_000_000, noiBo: "SO-123" });
     expect(Object.keys(g).sort()).toEqual(
-      ["bia", "boCuc", "hien", "lienHe", "ngonNgu", "nhan", "phienBan", "tone"],
+      ["bia", "boCuc", "hien", "lienHe", "loiKeuGoi", "ngonNgu", "nhan", "phienBan", "tone"],
     );
   });
 
@@ -211,6 +215,52 @@ describe("lienKetNhan", () => {
   it("Chỉ gọi điện, hoặc không có số, thì không có nút nhắn", () => {
     expect(lienKetNhan(lh("khong"))).toBeNull();
     expect(lienKetNhan(lh("zalo", ""))).toBeNull();
+  });
+});
+
+describe("lời kêu gọi (góp ý 11/09/2026)", () => {
+  const vi = boChu("vi").chia_se;
+  const en = boChu("en").chia_se;
+
+  it("BẢN GHI CŨ không có loiKeuGoi: vẫn là câu mặc định như lúc gửi", () => {
+    expect(docGiaoDien({}).loiKeuGoi).toEqual({ mau: "mac-dinh", tuViet: "" });
+    expect(cauKeuGoi(docGiaoDien({}).loiKeuGoi, "Ngọc Anh", vi)).toBe(vi.cta_tieu_de);
+  });
+
+  it("giữ câu đã chọn; khoá lạ hay sai kiểu thì về mặc định", () => {
+    for (const k of LOI_KEU_GOI.filter((x) => x !== "tu-viet")) {
+      expect(docGiaoDien({ loiKeuGoi: { mau: k } }).loiKeuGoi.mau).toBe(k);
+    }
+    expect(docGiaoDien({ loiKeuGoi: { mau: "khuyen-mai" } }).loiKeuGoi.mau).toBe("mac-dinh");
+    expect(docGiaoDien({ loiKeuGoi: "goi-ngay" }).loiKeuGoi.mau).toBe("mac-dinh");
+  });
+
+  it("tự viết: cắt khoảng trắng và độ dài; ô trống thì về mặc định", () => {
+    expect(docGiaoDien({ loiKeuGoi: { mau: "tu-viet", tuViet: "  Chúc chị Lan  " } }).loiKeuGoi)
+      .toEqual({ mau: "tu-viet", tuViet: "Chúc chị Lan" });
+    expect(docGiaoDien({ loiKeuGoi: { mau: "tu-viet", tuViet: "x".repeat(500) } }).loiKeuGoi.tuViet)
+      .toHaveLength(DAI_LOI_KEU_GOI);
+    expect(docGiaoDien({ loiKeuGoi: { mau: "tu-viet", tuViet: "   " } }).loiKeuGoi.mau).toBe("mac-dinh");
+  });
+
+  it("gọi ngay: điền tên người tư vấn; chưa có tên thì không để trống chỗ tên", () => {
+    const goiNgay = { mau: "goi-ngay", tuViet: "" } as const;
+    expect(cauKeuGoi(goiNgay, "Ngọc Anh", vi)).toBe("Hãy gọi ngay cho Ngọc Anh để được tư vấn");
+    expect(cauKeuGoi(goiNgay, "  ", vi)).toBe("Hãy gọi ngay cho em để được tư vấn");
+    expect(cauKeuGoi(goiNgay, "Ngoc Anh", en)).toBe("Call Ngoc Anh now for personal advice");
+  });
+
+  it("câu có sẵn đi theo ngôn ngữ catalogue", () => {
+    expect(cauKeuGoi({ mau: "custom", tuViet: "" }, "", vi)).toBe("Nhận custom theo yêu cầu");
+    expect(cauKeuGoi({ mau: "custom", tuViet: "" }, "", en)).toBe("Custom pieces made to order");
+    expect(cauKeuGoi({ mau: "size-mau", tuViet: "" }, "", vi)).toBe("Cần size hay màu vàng khác, cứ nhắn em");
+    expect(cauKeuGoi({ mau: "hen-xem", tuViet: "" }, "", en)).toBe("Book a visit to see it in person");
+  });
+
+  it("tự viết hiện đúng chữ sale gõ, không dịch; ô trống thì về câu mặc định", () => {
+    expect(cauKeuGoi({ mau: "tu-viet", tuViet: "Chúc chị Lan chọn được mẫu ưng ý" }, "", en))
+      .toBe("Chúc chị Lan chọn được mẫu ưng ý");
+    expect(cauKeuGoi({ mau: "tu-viet", tuViet: "  " }, "", vi)).toBe(vi.cta_tieu_de);
   });
 });
 

@@ -479,6 +479,10 @@ export const vi = {
     cach_nhan_tin_nhan: "Tin nhắn (SMS/iMessage)",
     cach_nhan_whatsapp: "WhatsApp",
     cach_nhan_khong: "Chỉ gọi điện",
+    loi_keu_goi_nhan: "Lời kêu gọi",
+    loi_keu_goi_mo_ta: "Dòng tiêu đề của khối liên hệ. Câu có sẵn hiện đúng như khách đọc — theo ngôn ngữ catalogue, đã điền tên người tư vấn.",
+    loi_keu_goi_tu_viet: "Tự viết",
+    loi_keu_goi_tu_viet_goi_y: "Ví dụ: Chúc chị Lan chọn được mẫu thật ưng ý",
     hien_nhan: "Thông số cho khách xem",
     hien_mo_ta: "Bỏ tích thì khách không thấy dòng đó.",
 
@@ -564,6 +568,12 @@ export const vi = {
     cta_zalo: "Nhắn Zalo",
     cta_tin_nhan: "Nhắn tin",
     cta_whatsapp: "Nhắn WhatsApp",
+    // Cau keu goi co san (gop y 11/09/2026). {ten} = ten nguoi tu van.
+    cta_goi_ngay: "Hãy gọi ngay cho {ten} để được tư vấn",
+    cta_goi_ngay_khong_ten: "Hãy gọi ngay cho em để được tư vấn",
+    cta_custom: "Nhận custom theo yêu cầu",
+    cta_size_mau: "Cần size hay màu vàng khác, cứ nhắn em",
+    cta_hen_xem: "Hẹn xem mẫu tận tay tại cửa hàng",
     lien_he: "Liên hệ nhân viên tư vấn để biết thêm chi tiết.",
   },
 } as const;

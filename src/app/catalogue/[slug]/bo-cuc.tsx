@@ -4,12 +4,14 @@ import { AnhTai } from "@/ui/anh-tai";
 import type { MucCatalogue } from "@/modules/catalogue-share/chia-se.model";
 import {
   MAU_NHAN,
+  cauKeuGoi,
   lienKetNhan,
   soGoiDuoc,
   type Bia,
   type BoCuc,
   type GiaoDienCatalogue,
   type LienHe,
+  type LoiKeuGoi,
   type Nhan,
   type Tone,
 } from "@/modules/catalogue-share/giao-dien.model";
@@ -605,14 +607,23 @@ function thuocTinhNutNhan(cach: LienHe["cachNhan"]) {
   return cach === "tin-nhan" ? {} : { target: "_blank", rel: "noreferrer" };
 }
 
-export function KhoiLienHe({ lienHe, t }: { lienHe: LienHe; t: BoChu }) {
+export function KhoiLienHe({
+  lienHe,
+  loiKeuGoi,
+  t,
+}: {
+  lienHe: LienHe;
+  /** Cau sale chon luc tao. Catalogue cu doc ra "mac-dinh" — y nhu luc gui. */
+  loiKeuGoi: LoiKeuGoi;
+  t: BoChu;
+}) {
   const so = soGoiDuoc(lienHe.dienThoai);
   const nhan = lienKetNhan(lienHe);
 
   return (
     <section className="mt-20 border-t border-hp-rule pt-10">
       <h2 className="font-title text-2xl leading-tight text-hp-ink">
-        {t.chia_se.cta_tieu_de}
+        {cauKeuGoi(loiKeuGoi, lienHe.ten, t.chia_se)}
       </h2>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-hp-body">
         {t.chia_se.cta_mo_ta}

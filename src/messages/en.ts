@@ -470,6 +470,10 @@ export const en: BoChu = {
     cach_nhan_tin_nhan: "Text message (SMS/iMessage)",
     cach_nhan_whatsapp: "WhatsApp",
     cach_nhan_khong: "Call only",
+    loi_keu_goi_nhan: "Call to action",
+    loi_keu_goi_mo_ta: "The heading of the contact block. Each ready-made line is shown exactly as your customer reads it — in the catalogue's language, with the consultant's name filled in.",
+    loi_keu_goi_tu_viet: "Write your own",
+    loi_keu_goi_tu_viet_goi_y: "For example: Wishing you the perfect ring, Ms Lan",
     hien_nhan: "Details the customer sees",
     hien_mo_ta: "Untick a row and the customer will not see it.",
 
@@ -545,6 +549,11 @@ export const en: BoChu = {
     cta_zalo: "Message on Zalo",
     cta_tin_nhan: "Text me",
     cta_whatsapp: "Message on WhatsApp",
+    cta_goi_ngay: "Call {ten} now for personal advice",
+    cta_goi_ngay_khong_ten: "Call me now for personal advice",
+    cta_custom: "Custom pieces made to order",
+    cta_size_mau: "Need another size or gold colour? Just message me",
+    cta_hen_xem: "Book a visit to see it in person",
     lien_he: "Please contact your sales consultant for further details.",
   },
 } as const;

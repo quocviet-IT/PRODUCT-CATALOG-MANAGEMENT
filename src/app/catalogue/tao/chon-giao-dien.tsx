@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useChu } from "@/messages/dung-chu";
-import type { BoChu } from "@/messages";
+import { boChu, type BoChu } from "@/messages";
 import { NGON_NGU, NHAN_NGON_NGU } from "@/messages/ngon-ngu";
 import {
-  BO_CUC, CACH_NHAN, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_TEN_KHACH, DAI_TEN_SALE,
-  MAU_NHAN, NHAN, NHAN_GOI_Y, THONG_SO, TONE, goiYCachNhan,
+  BO_CUC, CACH_NHAN, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_LOI_KEU_GOI, DAI_TEN_KHACH, DAI_TEN_SALE,
+  LOI_KEU_GOI, MAU_NHAN, NHAN, NHAN_GOI_Y, THONG_SO, TONE, cauKeuGoi, goiYCachNhan,
   type BoCuc, type CachNhan, type GiaoDienCatalogue, type LienHe, type Nhan, type ThongSo,
   type Tone,
 } from "@/modules/catalogue-share/giao-dien.model";
@@ -476,6 +476,49 @@ export function ChonGiaoDien({
                 {nhanCachNhan[k]}
               </label>
             ))}
+          </div>
+        </fieldset>
+
+        {/* Loi keu goi — dong tieu de to cua khoi lien he (gop y 11/09/2026: cho
+            chon cau co san hoac tu viet). Moi cau hien DUNG nhu khach se doc:
+            theo ngon ngu catalogue, da dien ten nguoi tu van. */}
+        <fieldset className="mt-5">
+          <legend className="text-xs text-hp-muted">{t.mau_giao_dien.loi_keu_goi_nhan}</legend>
+          <p className="mt-0.5 text-xs text-hp-muted">{t.mau_giao_dien.loi_keu_goi_mo_ta}</p>
+          <div className="mt-2 grid gap-2">
+            {LOI_KEU_GOI.map((k) => (
+              <label
+                key={k}
+                className={
+                  "block cursor-pointer border px-4 py-2 text-sm transition-colors duration-150 " +
+                  (gia.loiKeuGoi.mau === k
+                    ? "border-hp-ink bg-hp-inset text-hp-ink"
+                    : "border-hp-rule text-hp-body hover:border-hp-ink")
+                }
+              >
+                <input
+                  type="radio"
+                  name="loi_keu_goi"
+                  value={k}
+                  checked={gia.loiKeuGoi.mau === k}
+                  onChange={() => dat({ loiKeuGoi: { ...gia.loiKeuGoi, mau: k } })}
+                  className="sr-only"
+                />
+                {k === "tu-viet"
+                  ? t.mau_giao_dien.loi_keu_goi_tu_viet
+                  : cauKeuGoi({ mau: k, tuViet: "" }, lienHe.ten, boChu(gia.ngonNgu).chia_se)}
+              </label>
+            ))}
+            {/* Go vao day la chon luon "Tu viet": bat sale bam nut roi moi go la
+                mot buoc thua. */}
+            <input
+              value={gia.loiKeuGoi.tuViet}
+              onChange={(e) => dat({ loiKeuGoi: { mau: "tu-viet", tuViet: e.target.value } })}
+              maxLength={DAI_LOI_KEU_GOI}
+              aria-label={t.mau_giao_dien.loi_keu_goi_tu_viet}
+              placeholder={t.mau_giao_dien.loi_keu_goi_tu_viet_goi_y}
+              className={O_NHAP}
+            />
           </div>
         </fieldset>
       </fieldset>

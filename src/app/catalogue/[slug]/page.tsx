@@ -139,7 +139,7 @@ export default async function TrangKhachXem({
             <ThanCatalogue muc={c.noiDung.muc} g={g} t={t} />
           </PhongToAnh>
 
-          {g.lienHe && <KhoiLienHe lienHe={g.lienHe} t={t} />}
+          {g.lienHe && <KhoiLienHe lienHe={g.lienHe} loiKeuGoi={g.loiKeuGoi} t={t} />}
 
           {moIn && <MoHopThoaiIn />}
 

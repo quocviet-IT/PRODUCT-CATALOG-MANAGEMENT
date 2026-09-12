@@ -95,6 +95,18 @@ export type CachNhan = (typeof CACH_NHAN)[number];
  */
 export type LienHe = { ten: string; dienThoai: string; cachNhan: CachNhan };
 
+/**
+ * Loi keu goi — dong tieu de to cua khoi lien he ("Thich mau nao, nhan em giu
+ * ngay").
+ *
+ * Gop y 11/09/2026: cho sale chon cau co san hoac tu viet. Cau co san luu bang
+ * KHOA chu khong luu chu: trang khach dung chu theo ngon ngu cua catalogue, va ten
+ * nguoi tu van dien vao luc hien. "tu-viet" thi hien dung chu sale go.
+ */
+export const LOI_KEU_GOI = ["mac-dinh", "goi-ngay", "custom", "size-mau", "hen-xem", "tu-viet"] as const;
+export type MauLoiKeuGoi = (typeof LOI_KEU_GOI)[number];
+export type LoiKeuGoi = { mau: MauLoiKeuGoi; tuViet: string };
+
 export type GiaoDienCatalogue = {
   phienBan: 1;
   boCuc: BoCuc;
@@ -103,6 +115,7 @@ export type GiaoDienCatalogue = {
   bia: Bia | null;
   /** null = khong hien khoi lien he. */
   lienHe: LienHe | null;
+  loiKeuGoi: LoiKeuGoi;
   nhan: Nhan;
   hien: Record<ThongSo, boolean>;
   ngonNgu: NgonNgu;
@@ -121,6 +134,7 @@ export const GIAO_DIEN_MAC_DINH: GiaoDienCatalogue = {
   tone: "beige",
   bia: null,
   lienHe: null,
+  loiKeuGoi: { mau: "mac-dinh", tuViet: "" },
   nhan: "hong",
   hien: { loaiSp: true, chatLieu: true, mau: true, size: true, tlVang: true },
   ngonNgu: "vi",
@@ -130,6 +144,8 @@ export const DAI_TEN_KHACH = 80;
 export const DAI_TEN_SALE = 80;
 export const DAI_LOI_CHAO = 300;
 export const DAI_DIEN_THOAI = 24;
+/** Mot cau tieu de, khong phai mot doan van: dai hon la vo khoi lien he. */
+export const DAI_LOI_KEU_GOI = 120;
 
 function cat(tho: unknown, toiDa: number): string {
   return typeof tho === "string" ? tho.trim().slice(0, toiDa) : "";
@@ -256,10 +272,50 @@ export function docGiaoDien(tho: unknown): GiaoDienCatalogue {
     tone: trong(TONE, o.tone, GIAO_DIEN_MAC_DINH.tone),
     bia: docBia(o.bia),
     lienHe: docLienHe(o),
+    loiKeuGoi: docLoiKeuGoi(o.loiKeuGoi),
     nhan: trong(NHAN, o.nhan, GIAO_DIEN_MAC_DINH.nhan),
     hien: docHien(o.hien),
     ngonNgu: docNgonNgu(o.ngonNgu),
   };
+}
+
+/**
+ * Doc loi keu goi. THIEU truong (catalogue tao truoc 12/09/2026) = cau mac dinh,
+ * dung cau khach da thay luc nhan link.
+ */
+function docLoiKeuGoi(tho: unknown): LoiKeuGoi {
+  if (typeof tho !== "object" || tho === null) return GIAO_DIEN_MAC_DINH.loiKeuGoi;
+  const o = tho as Record<string, unknown>;
+  const tuViet = cat(o.tuViet, DAI_LOI_KEU_GOI);
+  const mau = trong(LOI_KEU_GOI, o.mau, "mac-dinh");
+  // "Tu viet" ma khong co chu nao thi khong phai loi keu goi: de nguyen la mot dong
+  // tieu de trong truoc mat khach.
+  return { mau: mau === "tu-viet" && tuViet === "" ? "mac-dinh" : mau, tuViet };
+}
+
+/** Nhung chu cauKeuGoi can — `t.chia_se` cua ca hai ngon ngu deu co du. */
+export type ChuKeuGoi = Record<
+  "cta_tieu_de" | "cta_goi_ngay" | "cta_goi_ngay_khong_ten" | "cta_custom" | "cta_size_mau" | "cta_hen_xem",
+  string
+>;
+
+/**
+ * Chu cua dong tieu de khoi lien he.
+ *
+ * Dung o CA trang khach lan nhan tung lua chon o trang tao, nen sale nhin thay dung
+ * cau khach se doc. "Tu viet" dang rong (sale vua xoa chu) thi ve cau mac dinh —
+ * cung quy tac voi docLoiKeuGoi.
+ */
+export function cauKeuGoi(lkg: LoiKeuGoi, tenTuVan: string, chu: ChuKeuGoi): string {
+  const ten = tenTuVan.trim();
+  if (lkg.mau === "tu-viet") return lkg.tuViet.trim() || chu.cta_tieu_de;
+  if (lkg.mau === "goi-ngay") {
+    return ten ? chu.cta_goi_ngay.replace("{ten}", ten) : chu.cta_goi_ngay_khong_ten;
+  }
+  if (lkg.mau === "custom") return chu.cta_custom;
+  if (lkg.mau === "size-mau") return chu.cta_size_mau;
+  if (lkg.mau === "hen-xem") return chu.cta_hen_xem;
+  return chu.cta_tieu_de;
 }
 
 /**
