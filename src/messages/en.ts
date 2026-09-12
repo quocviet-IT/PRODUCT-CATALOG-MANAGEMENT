@@ -346,7 +346,7 @@ export const en: BoChu = {
     b4_mo_ta: "A name makes it easy to find later. The Link name box follows the catalogue name — if that name includes the customer's name, give the link its own name, for example “Hinged link chain”. Leave both blank and the system numbers it for you.",
     b4_c1: "Catalogue name. Blank becomes “Catalogue #12”.",
     b4_c2: "Three layouts. Click a card to choose it.",
-    b4_c3: "Colour, the details your customer sees, language, the ordering contact, and the cover page." + " Fill in a phone number and the customer page gets call and Zalo buttons.",
+    b4_c3: "Colour, the details your customer sees, language, the ordering contact, and the cover page." + " Fill in a phone number and the customer page gets a call button and a message button — Zalo, text message or WhatsApp, whichever you choose.",
 
     b5_ten: "Drop the images you do not want",
     b5_mo_ta: "Every image is kept by default. Click an image to take it out. To remove a whole model, press Remove this model.",
@@ -459,11 +459,17 @@ export const en: BoChu = {
     bia_loi_chao_goi_y: "A selection of 18K wedding bands chosen for you…",
 
     lien_he_nhan: "Ordering contact",
-    lien_he_mo_ta: "Shown at the end of the customer page with call and Zalo buttons. Leave blank to hide it.",
+    lien_he_mo_ta: "Shown at the end of the customer page with a call button and a message button of your choice. Leave blank to hide it.",
     lien_he_ten: "Consultant",
     lien_he_ten_goi_y: "Ngoc Anh",
-    lien_he_dien_thoai: "Phone / Zalo",
-    lien_he_dien_thoai_goi_y: "0909 123 456",
+    lien_he_dien_thoai: "Phone",
+    lien_he_dien_thoai_goi_y: "0909 123 456 or (408) 555-0199",
+    lien_he_cach_nhan: "How customers message you",
+    lien_he_cach_nhan_mo_ta: "Picked from the number: Vietnamese numbers get Zalo, US numbers get Text message. You can change it.",
+    cach_nhan_zalo: "Zalo",
+    cach_nhan_tin_nhan: "Text message (SMS/iMessage)",
+    cach_nhan_whatsapp: "WhatsApp",
+    cach_nhan_khong: "Call only",
     hien_nhan: "Details the customer sees",
     hien_mo_ta: "Untick a row and the customer will not see it.",
 
@@ -537,6 +543,8 @@ export const en: BoChu = {
     cta_nguoi_tu_van: "Your consultant",
     cta_goi: "Call",
     cta_zalo: "Message on Zalo",
+    cta_tin_nhan: "Text me",
+    cta_whatsapp: "Message on WhatsApp",
     lien_he: "Please contact your sales consultant for further details.",
   },
 } as const;

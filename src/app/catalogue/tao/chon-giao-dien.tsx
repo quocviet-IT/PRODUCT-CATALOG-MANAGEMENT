@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useChu } from "@/messages/dung-chu";
 import type { BoChu } from "@/messages";
 import { NGON_NGU, NHAN_NGON_NGU } from "@/messages/ngon-ngu";
 import {
-  BO_CUC, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_TEN_KHACH, DAI_TEN_SALE,
-  MAU_NHAN, NHAN, NHAN_GOI_Y, THONG_SO, TONE,
-  type BoCuc, type GiaoDienCatalogue, type Nhan, type ThongSo, type Tone,
+  BO_CUC, CACH_NHAN, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_TEN_KHACH, DAI_TEN_SALE,
+  MAU_NHAN, NHAN, NHAN_GOI_Y, THONG_SO, TONE, goiYCachNhan,
+  type BoCuc, type CachNhan, type GiaoDienCatalogue, type LienHe, type Nhan, type ThongSo,
+  type Tone,
 } from "@/modules/catalogue-share/giao-dien.model";
 
 /**
@@ -208,8 +210,20 @@ export function ChonGiaoDien({
   const tone = nhanTone(t);
   const mauNhan = nhanMauNhan(t);
   const thongSo = nhanThongSo(t);
+  const nhanCachNhan: Record<CachNhan, string> = {
+    zalo: t.mau_giao_dien.cach_nhan_zalo,
+    "tin-nhan": t.mau_giao_dien.cach_nhan_tin_nhan,
+    whatsapp: t.mau_giao_dien.cach_nhan_whatsapp,
+    khong: t.mau_giao_dien.cach_nhan_khong,
+  };
+  /**
+   * Cach nhan sale TU bam chon. null = chua chon: cach nhan di theo dang so vua go
+   * (goiYCachNhan). Giu o day chu khong chi trong lienHe, vi lienHe con null khi
+   * chua go ten hay so — bam chon truoc roi moi go so thi khong duoc mat lua chon.
+   */
+  const [cachNhanTay, setCachNhanTay] = useState<CachNhan | null>(null);
   const bia = gia.bia ?? { tenKhach: "", loiChao: "" };
-  const lienHe = gia.lienHe ?? { ten: "", dienThoai: "" };
+  const lienHe: LienHe = gia.lienHe ?? { ten: "", dienThoai: "", cachNhan: cachNhanTay ?? "zalo" };
 
   function dat(phan: Partial<GiaoDienCatalogue>) {
     khiDoi({ ...gia, ...phan });
@@ -228,9 +242,20 @@ export function ChonGiaoDien({
     dat({ bia: moi.tenKhach || moi.loiChao ? moi : null });
   }
 
-  function datLienHe(phan: Partial<typeof lienHe>) {
+  function datLienHe(phan: Partial<LienHe>) {
     const moi = { ...lienHe, ...phan };
     dat({ lienHe: moi.ten || moi.dienThoai ? moi : null });
+  }
+
+  /** Go so thi cach nhan doi theo dang so (so My -> Tin nhan) — tru khi sale da tu chon. */
+  function datDienThoai(dienThoai: string) {
+    const goiY = cachNhanTay === null ? goiYCachNhan(dienThoai) : null;
+    datLienHe(goiY ? { dienThoai, cachNhan: goiY } : { dienThoai });
+  }
+
+  function datCachNhan(k: CachNhan) {
+    setCachNhanTay(k);
+    datLienHe({ cachNhan: k });
   }
 
   return (
@@ -415,7 +440,7 @@ export function ChonGiaoDien({
             <span className="text-xs text-hp-muted">{t.mau_giao_dien.lien_he_dien_thoai}</span>
             <input
               value={lienHe.dienThoai}
-              onChange={(e) => datLienHe({ dienThoai: e.target.value })}
+              onChange={(e) => datDienThoai(e.target.value)}
               maxLength={DAI_DIEN_THOAI}
               inputMode="tel"
               placeholder={t.mau_giao_dien.lien_he_dien_thoai_goi_y}
@@ -423,6 +448,36 @@ export function ChonGiaoDien({
             />
           </label>
         </div>
+
+        {/* Nut thu hai tren trang khach. Truoc 12/09/2026 no LUON la Zalo — sale
+            ben My bao khach cua ho khong dung Zalo. */}
+        <fieldset className="mt-5">
+          <legend className="text-xs text-hp-muted">{t.mau_giao_dien.lien_he_cach_nhan}</legend>
+          <p className="mt-0.5 text-xs text-hp-muted">{t.mau_giao_dien.lien_he_cach_nhan_mo_ta}</p>
+          <div className="mt-2 flex flex-wrap gap-3">
+            {CACH_NHAN.map((k) => (
+              <label
+                key={k}
+                className={
+                  "cursor-pointer border px-4 py-2 text-sm transition-colors duration-150 " +
+                  (lienHe.cachNhan === k
+                    ? "border-hp-ink bg-hp-inset text-hp-ink"
+                    : "border-hp-rule text-hp-body hover:border-hp-ink")
+                }
+              >
+                <input
+                  type="radio"
+                  name="cach_nhan"
+                  value={k}
+                  checked={lienHe.cachNhan === k}
+                  onChange={() => datCachNhan(k)}
+                  className="sr-only"
+                />
+                {nhanCachNhan[k]}
+              </label>
+            ))}
+          </div>
+        </fieldset>
       </fieldset>
 
       {/* --- Trang bia --- */}

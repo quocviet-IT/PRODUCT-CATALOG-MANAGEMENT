@@ -79,12 +79,21 @@ export type ThongSo = (typeof THONG_SO)[number];
 export type Bia = { tenKhach: string; loiChao: string };
 
 /**
- * Nguoi tu van, hien o cuoi trang khach kem nut goi va nut Zalo.
+ * Cach khach nhan tin cho sale, ben canh nut goi.
+ *
+ * Truoc 12/09/2026 nut thu hai LUON la Zalo — nhung khach o My khong dung Zalo
+ * (gop y cua sale ben My). "khong" = chi co nut goi.
+ */
+export const CACH_NHAN = ["zalo", "tin-nhan", "whatsapp", "khong"] as const;
+export type CachNhan = (typeof CACH_NHAN)[number];
+
+/**
+ * Nguoi tu van, hien o cuoi trang khach kem nut goi va nut nhan tin.
  *
  * Day la thu bien mot catalogue dep thanh mot don hang: khach dang thich mot
  * mau ma khong biet nhan ai thi ho dong tab.
  */
-export type LienHe = { ten: string; dienThoai: string };
+export type LienHe = { ten: string; dienThoai: string; cachNhan: CachNhan };
 
 export type GiaoDienCatalogue = {
   phienBan: 1;
@@ -157,6 +166,9 @@ function docLienHe(goc: Record<string, unknown>): LienHe | null {
     const lh: LienHe = {
       ten: cat(x.ten, DAI_TEN_SALE),
       dienThoai: cat(x.dienThoai, DAI_DIEN_THOAI),
+      // THIEU truong nay = catalogue tao truoc 12/09/2026, luc nut thu hai luon
+      // la Zalo. Link da gui phai hien y nhu luc gui, nen mac dinh la zalo.
+      cachNhan: trong(CACH_NHAN, x.cachNhan, "zalo"),
     };
     return lh.ten || lh.dienThoai ? lh : null;
   }
@@ -165,7 +177,52 @@ function docLienHe(goc: Record<string, unknown>): LienHe | null {
     typeof bia === "object" && bia !== null
       ? cat((bia as Record<string, unknown>).tenSale, DAI_TEN_SALE)
       : "";
-  return tenCu ? { ten: tenCu, dienThoai: "" } : null;
+  return tenCu ? { ten: tenCu, dienThoai: "", cachNhan: "zalo" } : null;
+}
+
+/**
+ * Cach nhan tin GOI Y theo so dien thoai sale vua go.
+ *
+ * So Viet Nam (0... hay +84) -> Zalo; so My (+1, 10 chu so khong bat dau bang 0,
+ * hay 11 chu so bat dau bang 1) -> Tin nhan. Khong nhan ra thi null: de nguyen
+ * lua chon dang co, khong doan bua.
+ */
+export function goiYCachNhan(dienThoai: string): CachNhan | null {
+  const so = soGoiDuoc(dienThoai);
+  if (so.startsWith("+84") || /^0\d{8,10}$/.test(so)) return "zalo";
+  if (so.startsWith("+1") || /^[2-9]\d{9}$/.test(so) || /^1[2-9]\d{9}$/.test(so)) {
+    return "tin-nhan";
+  }
+  return null;
+}
+
+/**
+ * Duong dan cua nut nhan tin, hoac null khi khong co nut (chi goi, hay so rong).
+ *
+ * Zalo giu Y NGUYEN cach cu (zalo.me/<so da lam sach>): link da gui khong duoc
+ * doi. WhatsApp bat buoc so co ma quoc gia — xem soQuocTe.
+ */
+export function lienKetNhan(lh: LienHe): string | null {
+  const so = soGoiDuoc(lh.dienThoai);
+  if (so === "") return null;
+  if (lh.cachNhan === "zalo") return `https://zalo.me/${so}`;
+  if (lh.cachNhan === "tin-nhan") return `sms:${so}`;
+  if (lh.cachNhan === "whatsapp") return `https://wa.me/${soQuocTe(so)}`;
+  return null;
+}
+
+/**
+ * So co ma quoc gia, chi chu so — dang ma wa.me doi hoi.
+ *
+ * Sale go so dia phuong la chuyen thuong ("0909 123 456", "(408) 555-0199"), ma
+ * wa.me/0909123456 thi WhatsApp bao so khong hop le. Chi doan ma quoc gia cho
+ * DUNG hai dang so goiYCachNhan nhan ra; dang khac giu nguyen.
+ */
+export function soQuocTe(so: string): string {
+  if (so.startsWith("+")) return so.slice(1);
+  if (/^0\d{8,10}$/.test(so)) return `84${so.slice(1)}`;
+  if (/^[2-9]\d{9}$/.test(so)) return `1${so}`;
+  return so;
 }
 
 function docHien(tho: unknown): Record<ThongSo, boolean> {

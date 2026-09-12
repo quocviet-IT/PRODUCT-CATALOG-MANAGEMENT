@@ -4,6 +4,7 @@ import { AnhTai } from "@/ui/anh-tai";
 import type { MucCatalogue } from "@/modules/catalogue-share/chia-se.model";
 import {
   MAU_NHAN,
+  lienKetNhan,
   soGoiDuoc,
   type Bia,
   type BoCuc,
@@ -589,8 +590,24 @@ export function TrangBia({
  * Nut goi dung hong DAM (--color-hp-pink-strong): hong thuong hieu chi dat
  * 3.81:1 tren nen kem, khong du cho chu trang tren nut.
  */
+/** Nhan cua nut nhan tin theo cach sale chon luc tao. */
+function nhanNutNhan(cach: LienHe["cachNhan"], t: BoChu): string {
+  return cach === "tin-nhan" ? t.chia_se.cta_tin_nhan
+    : cach === "whatsapp" ? t.chia_se.cta_whatsapp
+    : t.chia_se.cta_zalo;
+}
+
+/**
+ * Zalo va WhatsApp la trang web ngoai: mo tab moi de khach khong roi catalogue.
+ * Tin nhan (sms:) mo thang app Tin nhan cua may, khong co tab nao de mo.
+ */
+function thuocTinhNutNhan(cach: LienHe["cachNhan"]) {
+  return cach === "tin-nhan" ? {} : { target: "_blank", rel: "noreferrer" };
+}
+
 export function KhoiLienHe({ lienHe, t }: { lienHe: LienHe; t: BoChu }) {
   const so = soGoiDuoc(lienHe.dienThoai);
+  const nhan = lienKetNhan(lienHe);
 
   return (
     <section className="mt-20 border-t border-hp-rule pt-10">
@@ -618,17 +635,18 @@ export function KhoiLienHe({ lienHe, t }: { lienHe: LienHe; t: BoChu }) {
             <Phone aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
             {t.chia_se.cta_goi} {lienHe.dienThoai}
           </a>
-          <a
-            href={`https://zalo.me/${so}`}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 border border-hp-ink px-6 py-3 text-[11px]
-                       uppercase tracking-[0.14em] text-hp-ink transition-colors
-                       duration-150 hover:bg-hp-ink hover:text-hp-foundation"
-          >
-            <MessageCircle aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
-            {t.chia_se.cta_zalo}
-          </a>
+          {nhan && (
+            <a
+              href={nhan}
+              {...thuocTinhNutNhan(lienHe.cachNhan)}
+              className="flex items-center gap-2 border border-hp-ink px-6 py-3 text-[11px]
+                         uppercase tracking-[0.14em] text-hp-ink transition-colors
+                         duration-150 hover:bg-hp-ink hover:text-hp-foundation"
+            >
+              <MessageCircle aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
+              {nhanNutNhan(lienHe.cachNhan, t)}
+            </a>
+          )}
         </div>
       )}
     </section>
@@ -641,11 +659,14 @@ export function KhoiLienHe({ lienHe, t }: { lienHe: LienHe; t: BoChu }) {
  * Chi hien tren man hinh nho: tren may tinh khoi cuoi trang la du, con tren
  * dien thoai khach cuon rat lau va khoi do o mai tan duoi cung.
  *
+ * Sale chon "chi goi dien" thi nut goi chiem ca thanh.
+ *
  * print:hidden — mot thanh dinh khong co nghia gi tren giay.
  */
 export function ThanhLienHe({ lienHe, t }: { lienHe: LienHe; t: BoChu }) {
   const so = soGoiDuoc(lienHe.dienThoai);
   if (so === "") return null;
+  const nhan = lienKetNhan(lienHe);
 
   return (
     <div
@@ -660,16 +681,17 @@ export function ThanhLienHe({ lienHe, t }: { lienHe: LienHe; t: BoChu }) {
         <Phone aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
         {t.chia_se.cta_goi}
       </a>
-      <a
-        href={`https://zalo.me/${so}`}
-        target="_blank"
-        rel="noreferrer"
-        className="flex flex-1 items-center justify-center gap-2 bg-hp-card px-4 py-3.5
-                   text-[11px] uppercase tracking-[0.14em] text-hp-ink"
-      >
-        <MessageCircle aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
-        {t.chia_se.cta_zalo}
-      </a>
+      {nhan && (
+        <a
+          href={nhan}
+          {...thuocTinhNutNhan(lienHe.cachNhan)}
+          className="flex flex-1 items-center justify-center gap-2 bg-hp-card px-4 py-3.5
+                     text-[11px] uppercase tracking-[0.14em] text-hp-ink"
+        >
+          <MessageCircle aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
+          {nhanNutNhan(lienHe.cachNhan, t)}
+        </a>
+      )}
     </div>
   );
 }

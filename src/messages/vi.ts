@@ -352,7 +352,7 @@ export const vi = {
     b4_mo_ta: "Đặt tên để sau này tìm lại cho dễ. Ô Tên link tự lấy theo tên catalogue — tên catalogue có tên khách thì nên đặt tên link riêng, ví dụ “Dây chuyền khoen lật”. Bỏ trống cả hai thì hệ thống tự đánh số.",
     b4_c1: "Tên catalogue. Bỏ trống thì thành “Catalogue #12”.",
     b4_c2: "Ba bố cục. Bấm vào ô nào là chọn ô đó.",
-    b4_c3: "Tông màu, thông số cho khách xem, ngôn ngữ, liên hệ đặt hàng, và trang bìa." + " Điền số điện thoại thì trang khách có nút gọi và nút Zalo.",
+    b4_c3: "Tông màu, thông số cho khách xem, ngôn ngữ, liên hệ đặt hàng, và trang bìa." + " Điền số điện thoại thì trang khách có nút gọi và nút nhắn tin — Zalo, tin nhắn hoặc WhatsApp, tuỳ anh chọn.",
 
     b5_ten: "Bỏ bớt ảnh",
     b5_mo_ta: "Mặc định giữ hết ảnh của mẫu. Bấm vào ảnh nào để bỏ ảnh đó ra khỏi catalogue. Cần gỡ nguyên một mẫu thì bấm Gỡ mẫu này.",
@@ -468,11 +468,17 @@ export const vi = {
     bia_loi_chao_goi_y: "Kính gửi chị bộ sưu tập nhẫn cưới 18K…",
 
     lien_he_nhan: "Liên hệ đặt hàng",
-    lien_he_mo_ta: "Hiện ở cuối trang khách, kèm nút gọi và nút Zalo. Bỏ trống thì không hiện khối này.",
+    lien_he_mo_ta: "Hiện ở cuối trang khách, kèm nút gọi và nút nhắn tin theo cách chọn bên dưới. Bỏ trống thì không hiện khối này.",
     lien_he_ten: "Người tư vấn",
     lien_he_ten_goi_y: "Ngọc Anh",
-    lien_he_dien_thoai: "Điện thoại / Zalo",
-    lien_he_dien_thoai_goi_y: "0909 123 456",
+    lien_he_dien_thoai: "Điện thoại",
+    lien_he_dien_thoai_goi_y: "0909 123 456 hoặc (408) 555-0199",
+    lien_he_cach_nhan: "Cách nhắn tin",
+    lien_he_cach_nhan_mo_ta: "Tự chọn theo số: số Việt Nam là Zalo, số Mỹ là Tin nhắn. Đổi được.",
+    cach_nhan_zalo: "Zalo",
+    cach_nhan_tin_nhan: "Tin nhắn (SMS/iMessage)",
+    cach_nhan_whatsapp: "WhatsApp",
+    cach_nhan_khong: "Chỉ gọi điện",
     hien_nhan: "Thông số cho khách xem",
     hien_mo_ta: "Bỏ tích thì khách không thấy dòng đó.",
 
@@ -556,6 +562,8 @@ export const vi = {
     cta_nguoi_tu_van: "Người tư vấn",
     cta_goi: "Gọi",
     cta_zalo: "Nhắn Zalo",
+    cta_tin_nhan: "Nhắn tin",
+    cta_whatsapp: "Nhắn WhatsApp",
     lien_he: "Liên hệ nhân viên tư vấn để biết thêm chi tiết.",
   },
 } as const;
