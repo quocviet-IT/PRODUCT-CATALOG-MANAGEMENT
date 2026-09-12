@@ -20,7 +20,8 @@ vi.mock("@/modules/media/storage", () => ({ ghiTep, taiVe, lietKeTen }));
 const KHOA = "khoa-bi-mat-dai-hon-hai-muoi-bon-ky-tu";
 
 const duLieu = await import("@/app/api/dong-bo/du-lieu/route");
-const thuMuc = await import("@/app/api/dong-bo/thu-muc/route");
+const thieuThuMuc = await import("@/app/api/dong-bo/thieu-thu-muc/route");
+const anhThuMuc = await import("@/app/api/dong-bo/anh-thu-muc/route");
 const thieuAnh = await import("@/app/api/dong-bo/thieu-anh/route");
 const anh = await import("@/app/api/dong-bo/anh/route");
 
@@ -44,7 +45,8 @@ beforeEach(() => {
 describe("cong dong bo — khoa bi mat", () => {
   const moiCong: [string, (r: Request) => Promise<Response>][] = [
     ["du-lieu", duLieu.POST],
-    ["thu-muc", thuMuc.POST],
+    ["thieu-thu-muc", thieuThuMuc.POST],
+    ["anh-thu-muc", anhThuMuc.POST],
     ["thieu-anh", thieuAnh.POST],
     ["anh", anh.POST],
   ];
@@ -82,22 +84,25 @@ describe("cong dong bo — khoa bi mat", () => {
 });
 
 describe("POST /api/dong-bo/du-lieu", () => {
-  const thanTot = { hang: bangMau, anhThuMuc: { thuMucA: [{ fileId: "abc", ten: "1.jpg" }] } };
+  const thanTot = { hang: bangMau };
 
-  it("ghi ba doi tuong khi bang doc duoc", async () => {
+  it("ghi bang va moc thoi gian", async () => {
     const res = await duLieu.POST(goi("du-lieu", thanTot));
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { soDong: number; soThuMuc: number; soAnh: number };
-    expect(body.soDong).toBeGreaterThan(0);
-    expect(body.soThuMuc).toBe(1);
-    expect(body.soAnh).toBe(1);
+    expect(((await res.json()) as { soDong: number }).soDong).toBeGreaterThan(0);
 
-    const khoaDaGhi = ghiTep.mock.calls.map((c) => c[0]);
-    expect(khoaDaGhi).toEqual([
+    expect(ghiTep.mock.calls.map((c) => c[0])).toEqual([
       "dong-bo/bang.json",
-      "dong-bo/anh-thu-muc.json",
       "dong-bo/trang-thai.json",
     ]);
+  });
+
+  it("KHONG ghi de ban do thu muc, du than co mang anhThuMuc", async () => {
+    // Ban do thu muc duoc dung DAN qua nhieu luot (xem /anh-thu-muc). Mot script
+    // cu con gui ca ban do mot phan len day; ghi de la xoa sach cong cua ca chuc
+    // luot truoc do.
+    await duLieu.POST(goi("du-lieu", { hang: bangMau, anhThuMuc: { x: [] } }));
+    expect(ghiTep.mock.calls.map((c) => c[0])).not.toContain("dong-bo/anh-thu-muc.json");
   });
 
   it("khong kem anhThuMuc thi GIU NGUYEN danh sach anh cu, khong xoa", async () => {
@@ -173,25 +178,19 @@ describe("POST /api/dong-bo/du-lieu", () => {
     // va co bai kiem rieng. O day chi la nhung than khong dung hinh dang.
     expect((await duLieu.POST(goi("du-lieu", { hang: "khong phai mang" }))).status).toBe(400);
     expect((await duLieu.POST(goi("du-lieu", {}))).status).toBe(400);
-    expect((await duLieu.POST(goi("du-lieu", { hang: [[]], anhThuMuc: 5 }))).status).toBe(400);
-    expect(ghiTep).not.toHaveBeenCalled();
-  });
-});
-
-describe("POST /api/dong-bo/thu-muc", () => {
-  it("tra ID thu muc anh, khong trung, va khong ghi gi ca", async () => {
-    const res = await thuMuc.POST(goi("thu-muc", { hang: bangMau }));
-    expect(res.status).toBe(200);
-    const { thuMuc: ds } = (await res.json()) as { thuMuc: string[] };
-    expect(ds.length).toBeGreaterThan(0);
-    expect(new Set(ds).size).toBe(ds.length);
+    // Mot "hang" ma phan tu khong phai mang o — khong phai bang hai chieu.
+    expect((await duLieu.POST(goi("du-lieu", { hang: [{ a: 1 }] }))).status).toBe(400);
     expect(ghiTep).not.toHaveBeenCalled();
   });
 });
 
 describe("POST /api/dong-bo/thieu-anh", () => {
+  // Thu muc cot "Hinh da xu ly" cua dong thu hai trong bangMau (xem mapper test).
+  const Q = "1QqXuLy0000000000000000000000";
   const anhThuMuc = {
-    tm1: [{ fileId: "thuvien1", ten: "a.jpg" }, { fileId: "thuvien2", ten: "b.jpg" }],
+    [Q]: [{ fileId: "thuvien1", ten: "a.jpg" }, { fileId: "thuvien2", ten: "b.jpg" }],
+    // Thu muc cu con sot trong ban do — bang KHONG tro toi no nua.
+    "thu-muc-cu": [{ fileId: "cu1", ten: "c.jpg" }],
   };
 
   function datBanChup(hang: unknown = bangMau) {
@@ -212,16 +211,16 @@ describe("POST /api/dong-bo/thieu-anh", () => {
     }
   });
 
-  it("xep anh dai dien cua tung dong TRUOC thu vien anh", async () => {
-    // Thu tu la mot yeu cau that: hong giua chung thi cai hong phai la phan it
-    // ai mo, khong phai luoi catalogue ma ai cung nhin thay dau tien.
+  it("CHI nap anh thu muc cot Hinh da xu ly — khong anh cot HINH, khong thu muc cu", async () => {
+    // Chot 11/09/2026. Truoc day tuyen nay nap anh cot HINH truoc roi lap qua
+    // MOI thu muc trong ban do — ke ca 1.464 thu muc cu con sot sau khi tab rut
+    // tu 1.839 dong xuong 12.
     datBanChup();
     const res = await thieuAnh.POST(goi("thieu-anh", {}));
     const { thieu } = (await res.json()) as { thieu: string[] };
-    const viTriThuVien = thieu.indexOf("thuvien1");
-    expect(viTriThuVien).toBeGreaterThan(0);
-    // Moi thu dung truoc thu vien deu phai la anh dai dien.
-    expect(thieu.slice(0, viTriThuVien)).not.toContain("thuvien2");
+    expect(thieu).toEqual(["thuvien1", "thuvien2"]);
+    expect(thieu).not.toContain("18I_Y9I_tLtnizSbupQclY48QBxG3I3XB"); // anh cot HINH cua dong dau
+    expect(thieu).not.toContain("cu1"); // thu muc cu bang khong con tro toi
   });
 
   it("bo qua anh da co DU CA HAI co trong bo dem", async () => {
@@ -307,5 +306,171 @@ describe("POST /api/dong-bo/anh", () => {
     expect((await anh.POST(goi("anh", { anh: [] }))).status).toBe(400);
     expect((await anh.POST(goi("anh", { anh: Array(7).fill(mot) }))).status).toBe(400);
     expect(ghiTep).not.toHaveBeenCalled();
+  });
+});
+
+describe("liet ke thu muc theo lo", () => {
+  // Bang tinh tro toi 1.476 thu muc Drive; DriveApp liet ke mat ~0,55 giay mot
+  // cai, tuc hon 13 phut — ma Apps Script cat ngang o 6 phut. Nen phai chia lo,
+  // va chia lo thi phai GOP chu khong duoc ghi de.
+  const LUC = "dong-bo/thu-muc-luc.json";
+  function datBanChup(
+    banDo: Record<string, unknown[]> = {},
+    luc: Record<string, unknown> = {},
+    bang: unknown = bangMau,
+  ) {
+    taiVe.mockImplementation(async (khoa: string) =>
+      Buffer.from(
+        JSON.stringify(khoa === "dong-bo/bang.json" ? bang : khoa === LUC ? luc : banDo),
+        "utf8",
+      ),
+    );
+  }
+  const truocPhut = (phut: number) => new Date(Date.now() - phut * 60_000).toISOString();
+  const hoi = async () =>
+    (await (await thieuThuMuc.POST(goi("thieu-thu-muc", {}))).json()) as {
+      thieu: string[];
+      tongThieu: number;
+      soMoi: number;
+      soCu: number;
+    };
+
+  it("thieu-thu-muc: thu muc QUA HAN chi dua toi da SO_LIET_KE_LAI_MOI_LUOT cai moi luot, thu muc MOI dua het", async () => {
+    // Gio chay Apps Script dung chung ca ngay cho moi job: bang lon ma liet ke lai
+    // het moi 30 phut thi can han muc, va dongBoBang moi phut chet theo.
+    const { SO_LIET_KE_LAI_MOI_LUOT } = await import("@/modules/sheet/thu-muc-can-liet-ke");
+    const COT_SKU = 0;
+    const COT_MA_MAU = 4;
+    const COT_XU_LY = 13;
+    const ids = Array.from(
+      { length: SO_LIET_KE_LAI_MOI_LUOT + 6 },
+      (_, i) => `1QqLo${String(i).padStart(24, "0")}`,
+    );
+    const [idMoi, ...idCu] = ids;
+    // Nhan ban dong co cot "Hinh da xu ly" cua bang mau, moi dong mot thu muc rieng.
+    const bang = [
+      bangMau[0],
+      bangMau[1],
+      ...ids.map((id, i) =>
+        bangMau[3].map((o, cot) =>
+          cot === COT_XU_LY
+            ? { formattedValue: `xu-ly-${i}`, hyperlink: `https://drive.google.com/drive/folders/${id}` }
+            : cot === COT_MA_MAU
+              ? { formattedValue: `M${1000 + i}` }
+              : cot === COT_SKU
+                ? { formattedValue: String(300000 + i) }
+                : o,
+        ),
+      ),
+    ];
+    // idMoi chua liet ke; con lai da liet ke nhung chua co moc -> qua han het.
+    datBanChup(Object.fromEntries(idCu.map((id) => [id, []])), {}, bang);
+
+    const r = await hoi();
+    expect(r.soMoi).toBe(1);
+    expect(r.soCu).toBe(idCu.length);
+    expect(r.tongThieu).toBe(ids.length);
+    expect(r.thieu).toEqual([idMoi, ...idCu.slice(0, SO_LIET_KE_LAI_MOI_LUOT)]);
+  });
+
+  it("thieu-thu-muc: tra ve thu muc CHUA liet ke", async () => {
+    datBanChup({});
+    const res = await thieuThuMuc.POST(goi("thieu-thu-muc", {}));
+    expect(res.status).toBe(200);
+    const { thieu, tong } = (await res.json()) as { thieu: string[]; tong: number };
+    expect(tong).toBeGreaterThan(0);
+    expect(thieu.length).toBe(tong);
+  });
+
+  it("thieu-thu-muc: thu muc VUA liet ke thi khong hoi lai", async () => {
+    // Ke ca khi no RONG. Co mat trong ban do CUNG moc con han nghia la "vua liet
+    // ke xong" — do la thu ngan script hoi lai no o moi luot.
+    datBanChup({});
+    const dau = await hoi();
+    datBanChup(
+      Object.fromEntries(dau.thieu.map((id) => [id, []])),
+      Object.fromEntries(dau.thieu.map((id) => [id, truocPhut(1)])),
+    );
+    expect((await hoi()).tongThieu).toBe(0);
+  });
+
+  it("thieu-thu-muc: thu muc liet ke QUA 30 phut, hay chua co moc, thi hoi LAI", async () => {
+    // Truoc 11/09/2026 moi thu muc chi liet ke mot lan: them anh vao thu muc cu
+    // thi web khong bao gio thay.
+    datBanChup({});
+    const dau = await hoi();
+    const [id, ...conLai] = dau.thieu;
+    const banDo = Object.fromEntries(dau.thieu.map((x) => [x, []]));
+    const conHan = Object.fromEntries(conLai.map((x) => [x, truocPhut(1)]));
+
+    datBanChup(banDo, { ...conHan, [id]: truocPhut(45) });
+    const quaHan = await hoi();
+    expect(quaHan.thieu).toEqual([id]);
+    expect(quaHan.soMoi).toBe(0);
+    expect(quaHan.soCu).toBe(1);
+
+    datBanChup(banDo, conHan); // id khong co moc
+    expect((await hoi()).thieu).toEqual([id]);
+  });
+
+  it("thieu-thu-muc: chua co ban chup thi 409, khong phai 'khong thieu gi'", async () => {
+    taiVe.mockRejectedValue(new Error("khong co"));
+    const gianDiep = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      expect((await thieuThuMuc.POST(goi("thieu-thu-muc", {}))).status).toBe(409);
+    } finally {
+      gianDiep.mockRestore();
+    }
+  });
+
+  it("anh-thu-muc: GOP chu khong ghi de", async () => {
+    taiVe.mockResolvedValue(
+      Buffer.from(JSON.stringify({ cu: [{ fileId: "a", ten: "a.jpg" }] }), "utf8"),
+    );
+    const res = await anhThuMuc.POST(
+      goi("anh-thu-muc", { anhThuMuc: { moi: [{ fileId: "b", ten: "b.jpg" }] } }),
+    );
+    expect(res.status).toBe(200);
+
+    const ghi = ghiTep.mock.calls.find((c) => c[0] === "dong-bo/anh-thu-muc.json");
+    expect(ghi).toBeDefined();
+    const banDo = JSON.parse((ghi![1] as Buffer).toString("utf8")) as Record<string, unknown[]>;
+    expect(Object.keys(banDo).sort()).toEqual(["cu", "moi"]);
+  });
+
+  it("anh-thu-muc: tu choi lo qua lon", async () => {
+    const qua = Object.fromEntries(
+      Array.from({ length: 401 }, (_, i) => [`tm${i}`, []]),
+    );
+    expect((await anhThuMuc.POST(goi("anh-thu-muc", { anhThuMuc: qua }))).status).toBe(400);
+  });
+
+  it("anh-thu-muc: mang RONG khong xoa danh sach dang co anh — co the chi la Drive truc trac", async () => {
+    // Tu 11/09/2026 thu muc duoc liet ke LAI moi 30 phut. Apps Script gui mang
+    // rong ca khi khong mo duoc thu muc — ghi de theo no la mot lan Drive truc
+    // trac xoa sach thu vien anh cua mau dang nam tren catalogue.
+    const dangCo = [{ fileId: "a", ten: "a.jpg" }];
+    taiVe.mockResolvedValue(Buffer.from(JSON.stringify({ tm: dangCo }), "utf8"));
+    const res = await anhThuMuc.POST(goi("anh-thu-muc", { anhThuMuc: { tm: [] } }));
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { giuLai: number }).giuLai).toBe(1);
+
+    const ghi = ghiTep.mock.calls.find((c) => c[0] === "dong-bo/anh-thu-muc.json");
+    const banDo = JSON.parse((ghi![1] as Buffer).toString("utf8")) as Record<string, unknown[]>;
+    expect(banDo.tm).toEqual(dangCo);
+    // Khong cap moc cho thu muc bi giu lai: luot sau phai thu lai.
+    expect(ghiTep.mock.calls.map((c) => c[0])).not.toContain("dong-bo/thu-muc-luc.json");
+  });
+
+  it("anh-thu-muc: ghi moc thoi gian cho thu muc vua liet ke", async () => {
+    taiVe.mockResolvedValue(Buffer.from(JSON.stringify({}), "utf8"));
+    const res = await anhThuMuc.POST(
+      goi("anh-thu-muc", { anhThuMuc: { moi: [{ fileId: "b", ten: "b.jpg" }] } }),
+    );
+    expect(res.status).toBe(200);
+    const ghi = ghiTep.mock.calls.find((c) => c[0] === "dong-bo/thu-muc-luc.json");
+    expect(ghi).toBeDefined();
+    const luc = JSON.parse((ghi![1] as Buffer).toString("utf8")) as Record<string, string>;
+    expect(Number.isFinite(Date.parse(luc.moi))).toBe(true);
   });
 });

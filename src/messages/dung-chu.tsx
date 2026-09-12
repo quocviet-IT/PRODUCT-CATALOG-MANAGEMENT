@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { Globe } from "lucide-react";
 import { boChu, type BoChu } from ".";
 import { datNgonNgu } from "./hanh-dong";
 import { NutGui } from "@/ui/nut-gui";
@@ -69,6 +70,23 @@ export function DoiNgonNgu({ lop }: { lop?: string }) {
           </form>
         </span>
       ))}
+    </div>
+  );
+}
+
+/**
+ * Icon qua dia cau + VI / EN, co nhan "Ngon ngu" cho trinh doc man hinh.
+ *
+ * Dung CHUNG cho thanh dau trang khu noi bo va trang dang nhap (11/09/2026): hai
+ * cho phai trong giong het nhau thi nguoi dung moi nhan ra do la cung mot nut —
+ * va doi o trang dang nhap thi vao trong van giu ngon ngu do (cung mot cookie).
+ */
+export function NhomDoiNgonNgu() {
+  const t = useChu();
+  return (
+    <div role="group" aria-label={t.dieu_huong.ngon_ngu} className="flex items-center gap-2 text-hp-muted">
+      <Globe aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
+      <DoiNgonNgu />
     </div>
   );
 }

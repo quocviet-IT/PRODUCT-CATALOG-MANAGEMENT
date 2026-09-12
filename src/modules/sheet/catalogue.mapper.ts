@@ -37,10 +37,31 @@ export type DongCatalogue = {
   urlThuMuc: string | null;
   /** ID thu muc Drive chua TOAN BO anh cua mau, tach tu urlThuMuc. */
   idThuMuc: string | null;
+  /**
+   * Anh thu nho tren luoi: anh DAU TIEN trong thu muc cot "Hinh da xu ly".
+   * Mapper KHONG dat truong nay — dich vu gan sau khi doc ban do anh (xem
+   * anh-dai-dien.ts). undefined = nguon khong co ban do anh; null = da tinh,
+   * thu muc khong co anh.
+   */
+  anhDaiDien?: string | null;
   /** Cot "Hinh raw - concept": thu muc anh y tuong, tach hoan toan voi anh mau. */
   urlAnhConcept: string | null;
   /** Cot "Source clip tho": thu muc video quay tho. */
   urlClipTho: string | null;
+  /**
+   * Cot "Clip da xu ly" (cot R): MOT tep video .mp4 da dung xong, thuong gan
+   * bang chip Drive. Giu ca ten hien tren o ("C10068.mp4") — do la thu nguoi
+   * dung nhan ra tren bang tinh — lan lien ket de mo clip.
+   */
+  urlClipDaXuLy: string | null;
+  tenClipDaXuLy: string | null;
+  /**
+   * Hai cot mo ta bang chu cua nguoi ban hang: "Dây mân côi", "Nhẫn band xoàn
+   * lab"... Day la NGON NGU NGUOI TA GO khi tim, chu khong phai ma hang — nen
+   * chung phai nam trong vung tim kiem.
+   */
+  moTa1: string | null;
+  moTa2: string | null;
   co: CoBatThuong[];
 };
 
@@ -88,11 +109,20 @@ const COT = {
   // "FOLDER HINH" da doi ten thanh "Hinh raw - luu mau" (07/09/2026). Nhan ca hai
   // ten: mat cot nay la ca thu vien anh o trang chi tiet chet lang le.
   thuMuc:   { ten: "FOLDER HÌNH", batBuoc: false, nhan: ["hình raw - lưu mẫu", "folder hình"] },
+  // Anh da chinh sua, dep hon anh chup tho. Uu tien hon `thuMuc` — xem
+  // urlThuMuc ben duoi.
+  thuMucDaXuLy: { ten: "Hình đã xử lý", batBuoc: false, nhan: ["hình đã xử lý"] },
   // Hai cot nay bang tinh da co tu lau nhung he thong khong doc — nguoi dung
   // bao "thieu cot so voi sheet" (08/09/2026). Deu la lien ket Drive, deu co
   // the la chip hay hyperlink nhu cot tren.
   anhConcept: { ten: "Hình raw - concept", batBuoc: false, nhan: ["hình raw - concept"] },
   clipTho:    { ten: "Source clip thô",    batBuoc: false, nhan: ["source clip thô", "source clip tho"] },
+  // Cot R, clip dung xong cua tung mau (11/09/2026). Chip hay hyperlink deu doc.
+  clipDaXuLy: { ten: "Clip đã xử lý",      batBuoc: false, nhan: ["clip đã xử lý", "clip da xu ly"] },
+  // Hai cot mo ta. Nguoi dung bao tim "day man coi" khong ra gi (09/09/2026):
+  // ca hai cot deu chua bao gio duoc doc vao he thong.
+  moTa1:      { ten: "Mô tả 1",            batBuoc: false, nhan: ["mô tả 1"] },
+  moTa2:      { ten: "Mô tả 2",            batBuoc: false, nhan: ["mô tả 2"] },
 } as const;
 
 type TenTruong = keyof typeof COT;
@@ -171,7 +201,14 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
     const maMau = chu(lay(h, "maMau"));
     const mo = chu(lay(h, "mo"));
     const chiTiet = chu(lay(h, "chiTiet"));
-    const urlThuMuc = lienKet(lay(h, "thuMuc"));
+    // CHI cot "Hinh da xu ly" — KHONG lui ve cot "Hinh raw - luu mau" nua.
+    //
+    // Truoc 11/09/2026 co duong lui: luc chuyen (09/09) cot da xu ly moi co 7/71
+    // mau, doi han la 64 mau mat thu vien anh. Nay tab Catalogue-OL da lam lai,
+    // 12/12 dong deu co cot da xu ly, va cong ty chot: chi dong bo va chi hien
+    // anh DA XU LY. Giu duong lui la de anh raw lot vao catalogue gui khach moi
+    // khi mot dong quen dien cot Q — dung thu vua duoc yeu cau bo.
+    const urlThuMuc = lienKet(lay(h, "thuMucDaXuLy"));
     const fileIdAnh = tachFileIdAnh(lay(h, "hinh")?.userEnteredValue?.formulaValue);
 
     // includeGridData=true tra ca dong trong nhung con dinh dang (border,
@@ -206,6 +243,10 @@ export function anhXaBang(hang: OTho[][]): DongCatalogue[] {
       chatLieu: chu(lay(h, "chatLieu")),
       urlAnhConcept: lienKet(lay(h, "anhConcept")),
       urlClipTho: lienKet(lay(h, "clipTho")),
+      urlClipDaXuLy: lienKet(lay(h, "clipDaXuLy")),
+      tenClipDaXuLy: chu(lay(h, "clipDaXuLy")),
+      moTa1: chu(lay(h, "moTa1")),
+      moTa2: chu(lay(h, "moTa2")),
       loaiXoan: chiTiet === null ? null
         : /^LGDRI/i.test(chiTiet) ? "lab"
         : /^DIARI/i.test(chiTiet) ? "tu-nhien"

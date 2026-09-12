@@ -1,0 +1,381 @@
+"use client";
+
+import { useEffect, useRef, useState, useTransition } from "react";
+import { usePathname } from "next/navigation";
+import { Camera, MessageSquare, X } from "lucide-react";
+import type { BoChu } from "@/messages";
+import { useChu } from "@/messages/dung-chu";
+import { DAI_NOI_DUNG_TOI_DA, LOAI_GOP_Y } from "@/modules/gop-y/gop-y.model";
+import { NutGui } from "@/ui/nut-gui";
+import { guiGopY } from "./actions";
+
+/**
+ * Nut gop y: mot tab doc NOI o mep phai, giua man hinh, tren moi man hinh noi bo
+ * (khung /admin va trang tao catalogue).
+ *
+ * Vi sao noi, khong nam tren thanh dau trang (doi 11/09/2026): thanh dau khong
+ * dinh khi cuon. Cho hong nam o duoi thi nguoi dung phai cuon len moi bam duoc
+ * nut — va anh chup luc do la dau trang, khong phai cho hong.
+ *
+ * Vi sao mep phai giua man hinh, khong phai goc duoi: goc duoi da co thanh chon
+ * mau (fixed bottom-0, luoi mau) va thanh "Tao link" (sticky bottom-0, trang tao
+ * catalogue). Nut o goc do se che dung nut "Tao catalogue".
+ *
+ * Duong dan trang duoc gui kem tu dong: nguoi bao "cho nay hong" gan nhu khong
+ * bao gio nho ghi ho dang o man hinh nao, va nguoi doc thi can dung dieu do.
+ */
+
+const NUT_THANH =
+  "flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-hp-muted " +
+  "transition-colors duration-150 hover:text-hp-ink";
+const ICON = { "aria-hidden": true, strokeWidth: 1.5, className: "h-4 w-4 shrink-0" } as const;
+
+/**
+ * Thuoc tinh danh dau phan tu cua CHINH nut gop y (tab noi, dong "da gui") de bo
+ * chung khoi anh chup: anh la de xem cho hong, khong phai xem cai tab dang ghi
+ * "Dang chup". Phai khop voi thuoc tinh data-gop-y-nut tren JSX ben duoi.
+ */
+const DAU_NUT = "data-gop-y-nut";
+
+/**
+ * Chep trang thai o tich / nut radio vao THUOC TINH HTML truoc khi chup; tra ve
+ * ham hoan tac.
+ *
+ * modern-screenshot dung lai trang tu thuoc tinh HTML (no chi tu chep `value`
+ * cua o van ban). O tich React dieu khien thi trang thai nam o thuoc tinh JS
+ * `checked`, nen anh chup hien MOI o tich la chua tich — do that 11/09/2026: hai
+ * mau dang tich hien trong. Bao loi "tich mau roi bam khong duoc" ma anh sai
+ * trang thai o tich thi con te hon khong co anh.
+ *
+ * An toan voi o dang hien: o da duoc cham vao hay do script dat thi trinh duyet
+ * bo qua thuoc tinh HTML khi quyet dinh o co tich khong. Van hoan tac ngay sau
+ * khi chup de khong de lai dau vet.
+ *
+ * CO Y khong dong vao <select>: tra lai thuoc tinh `selected` cho mot lua chon
+ * chua tung duoc cham co the chon lai no, doi mat cai nguoi dung dang thay.
+ */
+function ghimTrangThaiOTich(): () => void {
+  const hoanTac: (() => void)[] = [];
+  const cacO = document.querySelectorAll<HTMLInputElement>('input[type="checkbox"], input[type="radio"]');
+  for (const o of cacO) {
+    const coSan = o.hasAttribute("checked");
+    if (o.checked !== coSan) {
+      o.toggleAttribute("checked", o.checked);
+      hoanTac.push(() => o.toggleAttribute("checked", coSan));
+    }
+  }
+  return () => {
+    for (const f of hoanTac) f();
+  };
+}
+
+function loiThanhChu(t: BoChu): Record<string, string> {
+  return {
+    thieu_noi_dung: t.gop_y.thieu_noi_dung,
+    noi_dung_qua_dai: t.gop_y.noi_dung_qua_dai,
+    anh_qua_lon: t.gop_y.anh_qua_lon,
+    loi_he_thong: t.nguoi_dung.loi_he_thong,
+  };
+}
+
+export function NutGopY() {
+  const t = useChu();
+  const duongDan = usePathname();
+  const [mo, setMo] = useState(false);
+  const [xong, setXong] = useState(false);
+  const [loi, setLoi] = useState<string | null>(null);
+  const [dangChay, batDau] = useTransition();
+  const [kemAnh, setKemAnh] = useState(true);
+  const [anh, setAnh] = useState<string | null>(null);
+  const [dangChup, setDangChup] = useState(false);
+  const [chupHong, setChupHong] = useState(false);
+  const oChu = useRef<HTMLTextAreaElement>(null);
+
+  /**
+   * Chup man hinh TRUOC khi mo hop thoai.
+   *
+   * Neu chup sau khi mo thi anh se la anh cua chinh cai hop thoai dang che mat
+   * cho hong — dung thu nguoi bao loi muon cho xem. Chup truoc, luu lai, roi
+   * moi mo.
+   *
+   * Thu vien nap theo yeu cau: no chi can den khi co nguoi bam bao loi, khong
+   * co ly do gi bat moi trang tai no san.
+   */
+  async function chup(): Promise<void> {
+    setDangChup(true);
+    setChupHong(false);
+    try {
+      const { domToJpeg } = await import("modern-screenshot");
+      // CHI phan dang hien tren man hinh, khong ca trang: nguoi bao loi muon cho
+      // xem dung cho ho dang nhin. Chup ca trang thi trang dai (Huong dan, luoi
+      // nhieu mau) vua cham vua de vuot tran anh — va cho hong chim giua mot anh
+      // cao vai met.
+      const rong = document.documentElement.clientWidth;
+      const hoanTac = ghimTrangThaiOTich();
+      let url: string;
+      try {
+        url = await domToJpeg(document.body, {
+          width: rong,
+          height: window.innerHeight,
+          // Keo noi dung len bang MARGIN AM, khong dung transform: transform bien
+          // body thanh khung chua cua moi phan tu fixed, nen thanh chon mau (fixed
+          // bottom-0) va ngan chi tiet (fixed right-0) bi keo len theo va mat khoi
+          // anh khi trang dang cuon. Margin thi de chung bam dung khung anh.
+          style: { marginTop: `${-window.scrollY}px`, marginLeft: `${-window.scrollX}px` },
+          filter: (nut) => !(nut instanceof Element && nut.hasAttribute(DAU_NUT)),
+          // Khung tu cuon ben trong (ngan chi tiet, bang cuon ngang) giu dung cho
+          // dang cuon toi, khong nhay ve dau.
+          features: { restoreScrollPosition: true },
+          // Anh rong toi da ~1100px: du ro de doc chu tren may tinh, con dien
+          // thoai (rong 390) giu ti le 1 thay vi thu nho toi khong doc duoc. JPEG
+          // 0,72 giu anh mot man hinh quanh vai chuc KB, xa duoi tran BYTE_ANH_TOI_DA.
+          scale: Math.min(1, Math.max(0.5, 1100 / rong)),
+          quality: 0.72,
+          backgroundColor: "#F7F1EB",
+          // Mot anh tai cham khong duoc giu nut o "Dang chup" mai: qua 8 giay thi
+          // bo anh do, chup phan con lai.
+          timeout: 8_000,
+        });
+      } finally {
+        hoanTac();
+      }
+      setAnh(url);
+    } catch (e) {
+      // Chup hong thi KHONG chan viec gui: cai anh la thu kem theo, con cau
+      // nguoi ta go moi la thu can giu.
+      console.error("[gop-y] khong chup duoc man hinh:", e);
+      setAnh(null);
+      setChupHong(true);
+    } finally {
+      setDangChup(false);
+    }
+  }
+
+  async function moHopThoai(): Promise<void> {
+    setXong(false);
+    setLoi(null);
+    setAnh(null);
+    setChupHong(false);
+    if (kemAnh) await chup();
+    setMo(true);
+  }
+
+  /**
+   * Doc THANG ket qua cua server action thay vi theo doi qua useActionState.
+   *
+   * Cach kia phai dung mot effect de biet "vua chay xong va khong loi", ma goi
+   * setState trong effect thi gay mot lan render day chuyen — va o day no con
+   * de sai: dong hop thoai ngay luc bam se lam mot gop y gui hong bien mat ma
+   * nguoi go khong biet. Cho await xong roi moi quyet dinh dong hay bao loi.
+   */
+  function gui(f: FormData) {
+    batDau(async () => {
+      if (kemAnh && anh) f.set("anh", anh);
+      const kq = await guiGopY(null, f);
+      if (kq === null) {
+        setLoi(null);
+        setMo(false);
+        setXong(true);
+      } else {
+        setLoi(kq);
+      }
+    });
+  }
+
+  useEffect(() => {
+    if (mo) oChu.current?.focus();
+  }, [mo]);
+
+  useEffect(() => {
+    if (!mo) return;
+    const thoat = (e: KeyboardEvent) => { if (e.key === "Escape") setMo(false); };
+    window.addEventListener("keydown", thoat);
+    return () => window.removeEventListener("keydown", thoat);
+  }, [mo]);
+
+  // Dong "Da gui" tu tat sau 4 giay: no noi de len noi dung, de mai la thanh rac.
+  useEffect(() => {
+    if (!xong) return;
+    const hen = window.setTimeout(() => setXong(false), 4_000);
+    return () => window.clearTimeout(hen);
+  }, [xong]);
+
+  return (
+    <>
+      {/* An khi hop thoai dang mo: tab nam tren lop phu (z-[55] > z-50) de van
+          bam duoc khi ngan chi tiet dang mo, nen phai tu lui di luc nay. */}
+      {!mo && (
+        <button
+          type="button"
+          data-gop-y-nut=""
+          onClick={() => { void moHopThoai(); }}
+          disabled={dangChup}
+          aria-busy={dangChup}
+          aria-label={dangChup ? t.gop_y.dang_chup : t.gop_y.nut}
+          // Nen muc dac, chu sang — cung kieu nut chinh "Tao catalogue". Ban dau la
+          // nen the + chu xam nhu cac muc phu; tren nen be no chim mat, va sep gop
+          // y "qua mo" (11/09/2026): nguoi can bao loi khong thay cho nao ma bam.
+          className="fixed right-0 top-1/2 z-[55] flex -translate-y-1/2 flex-col items-center
+                     gap-2.5 border border-r-0 border-hp-ink bg-hp-ink px-2 py-4 text-[11px]
+                     uppercase tracking-[0.14em] text-hp-foundation transition-colors duration-150
+                     hover:border-hp-body hover:bg-hp-body
+                     disabled:cursor-wait disabled:opacity-60"
+        >
+          <MessageSquare {...ICON} />
+          {/* Chu doc tu tren xuong. An tren man hinh hep: o do mot tab cao che
+              nhieu noi dung hon, va icon da du nhan ra. */}
+          <span aria-hidden="true" className="hidden [writing-mode:vertical-rl] sm:block">
+            {dangChup ? t.gop_y.dang_chup : t.gop_y.nut}
+          </span>
+        </button>
+      )}
+
+      {xong && !mo && (
+        <p
+          role="status"
+          data-gop-y-nut=""
+          className="fixed right-10 top-1/2 z-[55] -translate-y-1/2 border border-hp-rule
+                     bg-hp-card px-4 py-2 text-[11px] uppercase tracking-[0.14em] text-hp-ink"
+        >
+          {t.gop_y.da_gui}
+        </p>
+      )}
+
+      {mo && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto
+                     bg-hp-ink/40 px-4 py-10"
+          onClick={(e) => { if (e.target === e.currentTarget) setMo(false); }}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={t.gop_y.tieu_de}
+            className="w-full max-w-lg border border-hp-rule bg-hp-card p-6"
+          >
+            <div className="flex items-baseline">
+              <h2 className="font-title text-xl leading-none text-hp-ink">{t.gop_y.tieu_de}</h2>
+              <button
+                type="button"
+                onClick={() => setMo(false)}
+                aria-label={t.nguoi_dung.huy}
+                className={`ml-auto ${NUT_THANH}`}
+              >
+                <X {...ICON} />
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-hp-muted">
+              {t.gop_y.mo_ta.replace("{duong_dan}", duongDan)}
+            </p>
+
+            <form action={gui} className="mt-5 space-y-5">
+              <input type="hidden" name="duong_dan" value={duongDan} />
+
+              {/* Anh chup: hien de nguoi gui THAY dung cai minh sap gui di. Mot
+                  o tich "kem anh" ma khong cho xem la bat nguoi ta tin suong. */}
+              <div className="border border-hp-rule bg-hp-inset/40 p-3">
+                <label className="flex cursor-pointer items-center gap-2 text-sm text-hp-body">
+                  <input
+                    type="checkbox"
+                    checked={kemAnh}
+                    onChange={(e) => {
+                      setKemAnh(e.target.checked);
+                      if (!e.target.checked) { setAnh(null); setChupHong(false); }
+                    }}
+                    className="h-3.5 w-3.5 shrink-0 accent-hp-ink"
+                  />
+                  <Camera {...ICON} />
+                  {t.gop_y.kem_anh}
+                </label>
+
+                {kemAnh && anh && (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={anh}
+                      alt={t.gop_y.xem_anh}
+                      className="mt-3 max-h-48 w-full border border-hp-rule object-contain object-top"
+                    />
+                    <p className="mt-2 text-xs text-hp-muted">{t.gop_y.anh_mo_ta}</p>
+                  </>
+                )}
+                {kemAnh && chupHong && (
+                  <p className="mt-2 text-xs text-hp-muted">{t.gop_y.chup_hong}</p>
+                )}
+              </div>
+
+              <fieldset>
+                <legend className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+                  {t.gop_y.o_loai}
+                </legend>
+                <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2">
+                  {LOAI_GOP_Y.map((l, i) => (
+                    <label key={l} className="flex cursor-pointer items-center gap-2 text-sm text-hp-body">
+                      <input
+                        type="radio"
+                        name="loai"
+                        value={l}
+                        defaultChecked={i === 0}
+                        className="h-3.5 w-3.5 accent-hp-ink"
+                      />
+                      {l === "hong" ? t.gop_y.loai_hong : t.gop_y.loai_y_kien}
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              <div>
+                <label
+                  className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted"
+                  htmlFor="gop-y-noi-dung"
+                >
+                  {t.gop_y.o_noi_dung}
+                </label>
+                <textarea
+                  id="gop-y-noi-dung"
+                  ref={oChu}
+                  name="noi_dung"
+                  rows={5}
+                  required
+                  maxLength={DAI_NOI_DUNG_TOI_DA}
+                  placeholder={t.gop_y.goi_y}
+                  className="mt-2 w-full resize-y border border-hp-rule bg-transparent px-3 py-2
+                             font-body text-sm leading-relaxed text-hp-body transition-colors
+                             duration-150 placeholder:text-hp-muted/60 focus:border-hp-pink
+                             focus:outline-none"
+                />
+              </div>
+
+              {loi && (
+                <p role="alert" className="border-l-2 border-hp-pink bg-hp-inset px-4 py-3 text-sm text-hp-body">
+                  {loiThanhChu(t)[loi] ?? t.nguoi_dung.loi_he_thong}
+                </p>
+              )}
+
+              <div className="flex items-center gap-5">
+                <NutGui
+                  dangChay={dangChay}
+                  lop="border border-hp-ink bg-hp-ink px-6 py-2.5 text-[11px] uppercase
+                       tracking-[0.14em] text-hp-foundation transition-colors duration-150
+                       hover:border-hp-pink hover:bg-hp-pink
+                       disabled:cursor-not-allowed disabled:opacity-40"
+                  nhanCho={t.gop_y.dang_gui}
+                >
+                  {t.gop_y.nut_gui}
+                </NutGui>
+                <button
+                  type="button"
+                  onClick={() => setMo(false)}
+                  className="text-[11px] uppercase tracking-[0.14em] text-hp-muted
+                             transition-colors duration-150 hover:text-hp-ink hover:underline"
+                >
+                  {t.nguoi_dung.huy}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

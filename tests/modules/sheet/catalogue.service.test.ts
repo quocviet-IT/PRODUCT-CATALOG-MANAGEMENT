@@ -1,4 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { bangMau } from "./fixtures/bang-mau";
 
 const docBangTho = vi.fn();
@@ -59,6 +62,38 @@ describe("layDanhSachCatalogue", () => {
     getEnv.mockReturnValue({ CATALOGUE_SHEET_ID: undefined, CATALOGUE_SHEET_TAB: "test" });
     await expect(layDanhSachCatalogue()).rejects.toBeInstanceOf(LoiThieuSheetId);
     expect(docBangTho).not.toHaveBeenCalled();
+  });
+});
+
+describe("anh thu nho tu thu muc cot Hinh da xu ly", () => {
+  it("gan anh dai dien khi nguon co ban do anh", async () => {
+    const thuMuc = await mkdtemp(join(tmpdir(), "catalogue-test-"));
+    const tepBang = join(thuMuc, "bang.json");
+    const tepAnh = join(thuMuc, "anh.json");
+    await writeFile(tepBang, JSON.stringify(bangMau), "utf8");
+    // Dong thu hai cua bangMau tro toi thu muc cot "Hinh da xu ly" nay.
+    await writeFile(
+      tepAnh,
+      JSON.stringify({ "1QqXuLy0000000000000000000000": [{ fileId: "q-dau", ten: "a.jpg" }] }),
+      "utf8",
+    );
+    getEnv.mockReturnValue({
+      ...CAU_HINH_MAC_DINH,
+      CATALOGUE_TEP_MAU: tepBang,
+      CATALOGUE_TEP_ANH_MAU: tepAnh,
+    });
+
+    const ds = await layDanhSachCatalogue();
+    expect(ds[1].anhDaiDien).toBe("q-dau");
+    // Dong dau chi co cot raw -> khong co thu muc cot Q -> khong anh, bao thieu.
+    expect(ds[0].anhDaiDien).toBeNull();
+    expect(ds[0].co).toContain("thieu-anh");
+    expect(docBangTho).not.toHaveBeenCalled();
+  });
+
+  it("nguon khong co ban do anh thi khong gan — luoi lui ve cot HINH nhu cu", async () => {
+    const ds = await layDanhSachCatalogue();
+    expect(ds[0].anhDaiDien).toBeUndefined();
   });
 });
 

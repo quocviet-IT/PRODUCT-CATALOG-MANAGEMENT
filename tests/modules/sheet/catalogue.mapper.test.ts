@@ -90,15 +90,40 @@ describe("anhXaBang", () => {
     expect(ds[0].fileIdAnh).toBe("18I_Y9I_tLtnizSbupQclY48QBxG3I3XB");
   });
 
-  it("lay hyperlink lam duong dan thu muc", () => {
-    expect(ds[0].urlThuMuc).toContain("/drive/folders/");
+  it("lay hyperlink cot Hinh da xu ly lam duong dan thu muc", () => {
+    expect(ds[1].urlThuMuc).toContain("/drive/folders/");
+  });
+
+  describe("CHI lay thu muc cot Hinh da xu ly (chot 11/09/2026)", () => {
+    // Truoc day co duong lui ve cot raw "Hinh raw - luu mau" khi cot da xu ly
+    // trong (luc chuyen 09/09 cot moi chi co 7/71 mau). Tab Catalogue-OL da lam
+    // lai, 12/12 dong co cot da xu ly, va cong ty chot chi dong bo va hien anh
+    // DA XU LY — giu duong lui la de anh raw lot vao catalogue gui khach.
+    it("dong co CA HAI cot thi lay cot da xu ly", () => {
+      expect(ds[1].urlThuMuc).toContain("1QqXuLy");
+      expect(ds[1].idThuMuc).toBe("1QqXuLy0000000000000000000000");
+    });
+
+    it("dong chi co cot raw thi KHONG co thu muc anh — khong lui ve cot raw", () => {
+      expect(ds[0].urlThuMuc).toBeNull();
+      expect(ds[0].idThuMuc).toBeNull();
+    });
+
+    it("bang chua co cot da xu ly van doc duoc, chi la khong dong nao co thu muc", () => {
+      // Cot "Hinh da xu ly" KHONG bat buoc: mot ban sao bang tinh chua kip them
+      // cot van phai doc duoc — nhung khong con lay thu muc raw thay the.
+      const khongCotMoi = bangMau.map((h) => h.slice(0, 13));
+      const lai = anhXaBang(khongCotMoi);
+      expect(lai.length).toBe(ds.length);
+      expect(lai.every((d) => d.idThuMuc === null)).toBe(true);
+    });
   });
 
   describe("thu muc dat bang chip Drive", () => {
-    // Bang tinh dung CA HAI kieu trong cung cot FOLDER HINH: dong cu la
-    // hyperlink, dong moi la chip (chen bang @ hoac keo tep tu Drive). Google
-    // KHONG dat lien ket cua chip vao hyperlink — doc mot kieu thoi thi nhung
-    // dong dung chip mat thu vien anh ma khong bao loi gi.
+    // Bang tinh dung CA HAI kieu trong cung mot cot: dong cu la hyperlink, dong
+    // moi la chip (chen bang @ hoac keo tep tu Drive). Google KHONG dat lien ket
+    // cua chip vao hyperlink — doc mot kieu thoi thi nhung dong dung chip mat
+    // thu vien anh ma khong bao loi gi. Nay chi con doc cot Hinh da xu ly.
     const chip = (v: string, uri: string): OTho => ({
       formattedValue: v,
       chipRuns: [
@@ -109,10 +134,8 @@ describe("anhXaBang", () => {
 
     // Tim cot theo TIEU DE, khong ghi cung so thu tu: bang tinh doi cot lien
     // tuc, mot con so cung o day se lang le thay the nham cot khac.
-    const cotThuMuc = bangMau[1].findIndex((o) =>
-      ["hình raw - lưu mẫu", "folder hình"].includes(
-        chuanHoaTieuDe(o.formattedValue ?? "").toLowerCase(),
-      ),
+    const cotThuMuc = bangMau[1].findIndex(
+      (o) => chuanHoaTieuDe(o.formattedValue ?? "").toLowerCase() === "hình đã xử lý",
     );
 
     it("fixture co cot thu muc de thay the", () => {
@@ -141,6 +164,52 @@ describe("anhXaBang", () => {
       for (const o of [{ formattedValue: "x", chipRuns: [] }, { formattedValue: "x", chipRuns: [{}] }]) {
         expect(anhXaBang(dungBang(o))[0].urlThuMuc).toBeNull();
       }
+    });
+  });
+
+  describe("cot Clip da xu ly (cot R, 11/09/2026)", () => {
+    // Moi dong mot tep .mp4, thuong gan bang chip Drive. Cot KHONG bat buoc:
+    // ban sao bang tinh chua them cot van doc duoc, chi la khong dong nao co clip.
+    const URI_CLIP = "https://drive.google.com/file/d/1ClipDaXuLy000000000000000000/view?usp=drive_link";
+    const chipClip: OTho = {
+      formattedValue: "C10068.mp4",
+      chipRuns: [{ chip: { richLinkProperties: { mimeType: "video/mp4", uri: URI_CLIP } } }],
+    };
+
+    /** bangMau them MOT cot o cuoi; o du lieu dat theo chi so cua tieu de moi. */
+    function themCot(tieuDe: string, o: OTho): OTho[][] {
+      const tieuDeMoi = [...bangMau[1], { formattedValue: tieuDe }];
+      // Dong du lieu co the ngan hon hang tieu de (Sheets bo o trong cuoi dong),
+      // nen gan theo chi so chu khong noi vao cuoi dong.
+      const h = [...bangMau[2]];
+      h[tieuDeMoi.length - 1] = o;
+      return [bangMau[0], tieuDeMoi, h];
+    }
+
+    it("doc ten tep va lien ket tu chip", () => {
+      const [d] = anhXaBang(themCot("Clip đã xử lý", chipClip));
+      expect(d.tenClipDaXuLy).toBe("C10068.mp4");
+      expect(d.urlClipDaXuLy).toBe(URI_CLIP);
+    });
+
+    it("o dung hyperlink thuong cung doc duoc", () => {
+      const [d] = anhXaBang(themCot("Clip đã xử lý", { formattedValue: "L10370.mp4", hyperlink: URI_CLIP }));
+      expect(d.urlClipDaXuLy).toBe(URI_CLIP);
+      expect(d.tenClipDaXuLy).toBe("L10370.mp4");
+    });
+
+    it("tieu de go khong dau van nhan", () => {
+      expect(anhXaBang(themCot("CLIP DA XU LY", chipClip))[0].urlClipDaXuLy).toBe(URI_CLIP);
+    });
+
+    it("o trong thi ca ten lan lien ket deu null", () => {
+      const [d] = anhXaBang(themCot("Clip đã xử lý", {}));
+      expect(d.urlClipDaXuLy).toBeNull();
+      expect(d.tenClipDaXuLy).toBeNull();
+    });
+
+    it("bang chua co cot thi khong dong nao co clip", () => {
+      expect(ds.every((d) => d.urlClipDaXuLy === null && d.tenClipDaXuLy === null)).toBe(true);
     });
   });
 

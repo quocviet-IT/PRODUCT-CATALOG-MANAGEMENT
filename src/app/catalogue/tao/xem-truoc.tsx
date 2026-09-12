@@ -2,8 +2,11 @@
 
 import { useEffect, useRef } from "react";
 import { X } from "lucide-react";
-import { useChu } from "@/messages/dung-chu";
-import type { MucCatalogue, MucDeChon } from "@/modules/catalogue-share/chia-se.model";
+import { boChu } from "@/messages";
+import { NguonNgonNgu, useChu } from "@/messages/dung-chu";
+import {
+  DAI_GIOI_THIEU, type MucCatalogue, type MucDeChon,
+} from "@/modules/catalogue-share/chia-se.model";
 import type { GiaoDienCatalogue } from "@/modules/catalogue-share/giao-dien.model";
 import {
   KhoiLienHe,
@@ -26,9 +29,16 @@ import {
  */
 
 /** Dung danh sach muc y het cach may chu se dung khi thuc su tao. */
-function dungMuc(muc: MucDeChon[], anhGiu: Record<string, string[]>): MucCatalogue[] {
+function dungMuc(
+  muc: MucDeChon[],
+  anhGiu: Record<string, string[]>,
+  gioiThieu: Record<string, string>,
+): MucCatalogue[] {
   return muc.map((m) => {
     const giu = new Set(anhGiu[m.ma] ?? []);
+    // Cung quy tac cat voi dungNoiDung: xem truoc khong hien loi gioi thieu dai hon
+    // cai khach se thay.
+    const gt = (gioiThieu[m.ma] ?? "").trim().slice(0, DAI_GIOI_THIEU);
     return {
       maMau: m.maMau,
       loaiSp: m.loaiSp,
@@ -37,6 +47,7 @@ function dungMuc(muc: MucDeChon[], anhGiu: Record<string, string[]>): MucCatalog
       size: m.size,
       tlVang: m.tlVang,
       anh: m.anh.filter((a) => giu.has(a.fileId)),
+      ...(gt ? { gioiThieu: gt } : {}),
     };
   });
 }
@@ -44,17 +55,28 @@ function dungMuc(muc: MucDeChon[], anhGiu: Record<string, string[]>): MucCatalog
 export function XemTruoc({
   muc,
   anhGiu,
+  gioiThieu,
   gia,
   ten,
   khiDong,
 }: {
   muc: MucDeChon[];
   anhGiu: Record<string, string[]>;
+  /** ma -> loi gioi thieu sale dang go. */
+  gioiThieu: Record<string, string>;
   gia: GiaoDienCatalogue;
   ten: string;
   khiDong: () => void;
 }) {
+  /** Chu cua KHUNG xem truoc (tieu de, nut Dong): ngon ngu cua nhan vien. */
   const t = useChu();
+  /**
+   * Chu cua CATALOGUE ben trong: ngon ngu sale chot cho catalogue, dung nhu trang
+   * khach. Truoc 12/09/2026 ca catalogue dung `t` — chon English ma giao dien dang
+   * tieng Viet thi ban xem truoc van ra tieng Viet, trai voi dong "Dung thu khach
+   * se thay" ngay tren dau.
+   */
+  const k = boChu(gia.ngonNgu);
   const nutDong = useRef<HTMLButtonElement>(null);
 
   // Escape de dong, va khoa cuon cua trang ben duoi: khong khoa thi cuon trong
@@ -73,8 +95,8 @@ export function XemTruoc({
     };
   }, [khiDong]);
 
-  const danhSach = dungMuc(muc, anhGiu);
-  const tieuDe = ten.trim() || t.chia_se.xem_truoc_chua_dat_ten;
+  const danhSach = dungMuc(muc, anhGiu, gioiThieu);
+  const tieuDe = ten.trim() || k.chia_se.xem_truoc_chua_dat_ten;
 
   return (
     <div
@@ -107,20 +129,21 @@ export function XemTruoc({
         </button>
       </header>
 
-      {/* Khung cuon rieng, mang dung lop tong mau cua trang khach. */}
+      {/* Khung cuon rieng, mang dung lop tong mau cua trang khach. NguonNgonNgu nhu
+          trang khach: thanh phan con nao doc useChu() cung ra ngon ngu catalogue. */}
       <div className={`flex-1 overflow-y-auto ${LOP_TONE[gia.tone]}`} style={bienMauNhan(gia.nhan)}>
         <main className="mx-auto max-w-4xl px-6 py-10">
           {danhSach.length === 0 ? (
             <p className="text-sm text-hp-muted">{t.chia_se.xem_truoc_chua_co_mau}</p>
           ) : (
-            <>
+            <NguonNgonNgu ngonNgu={gia.ngonNgu}>
               {gia.bia && (
                 <TrangBia
                   bia={gia.bia}
                   lienHe={gia.lienHe}
                   tieuDe={tieuDe}
-                  thuongHieu={t.catalogue_sheet.thuong_hieu}
-                  t={t}
+                  thuongHieu={k.catalogue_sheet.thuong_hieu}
+                  t={k}
                 />
               )}
 
@@ -130,19 +153,19 @@ export function XemTruoc({
                     {tieuDe}
                   </h1>
                   <p className="mt-2 text-xs tabular-nums text-hp-muted">
-                    {t.chia_se.khach_gom.replace("{n}", String(danhSach.length))}
+                    {k.chia_se.khach_gom.replace("{n}", String(danhSach.length))}
                   </p>
                 </header>
               )}
 
-              <ThanCatalogue muc={danhSach} g={gia} t={t} />
+              <ThanCatalogue muc={danhSach} g={gia} t={k} />
 
-              {gia.lienHe && <KhoiLienHe lienHe={gia.lienHe} t={t} />}
+              <KhoiLienHe lienHe={gia.lienHe} loiKeuGoi={gia.loiKeuGoi} t={k} />
 
               <footer className="mt-14 border-t border-hp-rule pt-6 text-xs text-hp-muted">
-                {t.chia_se.lien_he}
+                {k.chia_se.lien_he}
               </footer>
-            </>
+            </NguonNgonNgu>
           )}
         </main>
       </div>

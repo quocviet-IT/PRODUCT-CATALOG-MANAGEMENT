@@ -13,6 +13,11 @@ export const KHOA_BANG = "dong-bo/bang.json";
 export const KHOA_ANH_THU_MUC = "dong-bo/anh-thu-muc.json";
 /** Moc thoi gian lan day gan nhat. */
 export const KHOA_TRANG_THAI = "dong-bo/trang-thai.json";
+/**
+ * idThuMuc -> luc liet ke gan nhat (ISO). De thu muc qua 30 phut duoc liet ke
+ * lai. Tach khoi ban do anh de ban do giu nguyen hinh dang.
+ */
+export const KHOA_LUC_THU_MUC = "dong-bo/thu-muc-luc.json";
 
 /** Gia tri phai dat cho CATALOGUE_TEP_MAU de doc ban do Apps Script day len. */
 export const NGUON_BANG_DONG_BO = `storage:${KHOA_BANG}`;

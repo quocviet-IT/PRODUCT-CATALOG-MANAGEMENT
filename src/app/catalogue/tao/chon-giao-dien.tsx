@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { useChu } from "@/messages/dung-chu";
-import type { BoChu } from "@/messages";
+import { boChu, type BoChu } from "@/messages";
 import { NGON_NGU, NHAN_NGON_NGU } from "@/messages/ngon-ngu";
 import {
-  BO_CUC, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_TEN_KHACH, DAI_TEN_SALE,
-  MAU_NHAN, NHAN, THONG_SO, TONE,
-  type BoCuc, type GiaoDienCatalogue, type Nhan, type ThongSo, type Tone,
+  BO_CUC, CACH_NHAN, DAI_DIEN_THOAI, DAI_LOI_CHAO, DAI_LOI_KEU_GOI, DAI_TEN_KHACH, DAI_TEN_SALE,
+  LOI_KEU_GOI, MAU_NHAN, NHAN, NHAN_GOI_Y, THONG_SO, TONE, cauKeuGoi, coKhoiLienHe, goiYCachNhan,
+  type BoCuc, type CachNhan, type GiaoDienCatalogue, type LienHe, type Nhan, type ThongSo,
+  type Tone,
 } from "@/modules/catalogue-share/giao-dien.model";
 
 /**
@@ -54,12 +56,22 @@ function nhanBoCuc(t: BoChu): Record<BoCuc, { ten: string; moTa: string }> {
   };
 }
 
-function nhanTone(t: BoChu): Record<Tone, string> {
+/**
+ * Ten va dong goi y cua tung tong. Dong goi y noi tong do HOP VOI nhom san pham
+ * nao — nguoi dung xin chon theme "theo tung nhom san pham hoac phong cach", va
+ * tam o mau thi khong tu noi duoc dieu do.
+ */
+function nhanTone(t: BoChu): Record<Tone, { ten: string; moTa: string }> {
+  const m = t.mau_giao_dien;
   return {
-    beige: t.mau_giao_dien.tone_beige,
-    trang: t.mau_giao_dien.tone_trang,
-    toi: t.mau_giao_dien.tone_toi,
-    reu: t.mau_giao_dien.tone_reu,
+    beige: { ten: m.tone_beige, moTa: m.tone_beige_mo_ta },
+    trang: { ten: m.tone_trang, moTa: m.tone_trang_mo_ta },
+    toi: { ten: m.tone_toi, moTa: m.tone_toi_mo_ta },
+    reu: { ten: m.tone_reu, moTa: m.tone_reu_mo_ta },
+    "hoa-van": { ten: m.tone_hoa_van, moTa: m.tone_hoa_van_mo_ta },
+    champagne: { ten: m.tone_champagne, moTa: m.tone_champagne_mo_ta },
+    "bach-kim": { ten: m.tone_bach_kim, moTa: m.tone_bach_kim_mo_ta },
+    "hong-phan": { ten: m.tone_hong_phan, moTa: m.tone_hong_phan_mo_ta },
   };
 }
 
@@ -72,12 +84,20 @@ function nhanMauNhan(t: BoChu): Record<Nhan, string> {
   };
 }
 
-/** Mau thuc te cua tung tong — trung voi bang bien trong globals.css. */
+/**
+ * Mau thuc te cua tung tong — trung voi bang bien trong globals.css. O vuong nho
+ * chi 24px nen khong ve noi hoa van mo; tong hoa van dung cham hong lam dau hieu,
+ * con hoa van that thi hien ngay tren khung xem thu.
+ */
 const O_MAU: Record<Tone, { nen: string; muc: string }> = {
   beige: { nen: "#F7F1EB", muc: "#2A2725" },
   trang: { nen: "#FFFFFF", muc: "#1B1A19" },
   toi: { nen: "#1A1815", muc: "#F4EEE6" },
   reu: { nen: "#1B231D", muc: "#EDF0E9" },
+  "hoa-van": { nen: "#F7F1EB", muc: "#E91D79" },
+  champagne: { nen: "#F5EDDD", muc: "#2B2419" },
+  "bach-kim": { nen: "#F1F2F4", muc: "#1D2125" },
+  "hong-phan": { nen: "#F8EDEC", muc: "#2E2325" },
 };
 
 function nhanThongSo(t: BoChu): Record<ThongSo, string> {
@@ -190,11 +210,29 @@ export function ChonGiaoDien({
   const tone = nhanTone(t);
   const mauNhan = nhanMauNhan(t);
   const thongSo = nhanThongSo(t);
+  const nhanCachNhan: Record<CachNhan, string> = {
+    zalo: t.mau_giao_dien.cach_nhan_zalo,
+    "tin-nhan": t.mau_giao_dien.cach_nhan_tin_nhan,
+    whatsapp: t.mau_giao_dien.cach_nhan_whatsapp,
+    khong: t.mau_giao_dien.cach_nhan_khong,
+  };
+  /**
+   * Cach nhan sale TU bam chon. null = chua chon: cach nhan di theo dang so vua go
+   * (goiYCachNhan). Giu o day chu khong chi trong lienHe, vi lienHe con null khi
+   * chua go ten hay so — bam chon truoc roi moi go so thi khong duoc mat lua chon.
+   */
+  const [cachNhanTay, setCachNhanTay] = useState<CachNhan | null>(null);
   const bia = gia.bia ?? { tenKhach: "", loiChao: "" };
-  const lienHe = gia.lienHe ?? { ten: "", dienThoai: "" };
+  const lienHe: LienHe = gia.lienHe ?? { ten: "", dienThoai: "", cachNhan: cachNhanTay ?? "zalo" };
 
   function dat(phan: Partial<GiaoDienCatalogue>) {
     khiDoi({ ...gia, ...phan });
+  }
+
+  /** Chon tong moi thi doi luon mau nhan goi y (xem NHAN_GOI_Y); tong cu thi giu nguyen. */
+  function datTone(k: Tone) {
+    const goiY = NHAN_GOI_Y[k];
+    dat(goiY ? { tone: k, nhan: goiY } : { tone: k });
   }
 
   function datBia(phan: Partial<typeof bia>) {
@@ -204,9 +242,20 @@ export function ChonGiaoDien({
     dat({ bia: moi.tenKhach || moi.loiChao ? moi : null });
   }
 
-  function datLienHe(phan: Partial<typeof lienHe>) {
+  function datLienHe(phan: Partial<LienHe>) {
     const moi = { ...lienHe, ...phan };
     dat({ lienHe: moi.ten || moi.dienThoai ? moi : null });
+  }
+
+  /** Go so thi cach nhan doi theo dang so (so My -> Tin nhan) — tru khi sale da tu chon. */
+  function datDienThoai(dienThoai: string) {
+    const goiY = cachNhanTay === null ? goiYCachNhan(dienThoai) : null;
+    datLienHe(goiY ? { dienThoai, cachNhan: goiY } : { dienThoai });
+  }
+
+  function datCachNhan(k: CachNhan) {
+    setCachNhanTay(k);
+    datLienHe({ cachNhan: k });
   }
 
   return (
@@ -268,7 +317,7 @@ export function ChonGiaoDien({
                 name="tone"
                 value={k}
                 checked={gia.tone === k}
-                onChange={() => dat({ tone: k })}
+                onChange={() => datTone(k)}
                 className="sr-only"
               />
               <span
@@ -278,10 +327,15 @@ export function ChonGiaoDien({
               >
                 <span className="h-2 w-2" style={{ background: O_MAU[k].muc }} />
               </span>
-              <span className="text-sm text-hp-body">{tone[k]}</span>
+              <span className="text-sm text-hp-body">{tone[k].ten}</span>
             </label>
           ))}
         </div>
+        {/* Goi y cua tong DANG CHON: hop voi nhom san pham nao. aria-live de trinh
+            doc man hinh doc lai khi sale doi tong. */}
+        <p aria-live="polite" className="mt-3 text-xs leading-relaxed text-hp-muted">
+          {tone[gia.tone].moTa}
+        </p>
       </fieldset>
 
       {/* --- Mau nhan --- */}
@@ -386,7 +440,7 @@ export function ChonGiaoDien({
             <span className="text-xs text-hp-muted">{t.mau_giao_dien.lien_he_dien_thoai}</span>
             <input
               value={lienHe.dienThoai}
-              onChange={(e) => datLienHe({ dienThoai: e.target.value })}
+              onChange={(e) => datDienThoai(e.target.value)}
               maxLength={DAI_DIEN_THOAI}
               inputMode="tel"
               placeholder={t.mau_giao_dien.lien_he_dien_thoai_goi_y}
@@ -394,6 +448,84 @@ export function ChonGiaoDien({
             />
           </label>
         </div>
+
+        {/* Nut thu hai tren trang khach. Truoc 12/09/2026 no LUON la Zalo — sale
+            ben My bao khach cua ho khong dung Zalo. */}
+        <fieldset className="mt-5">
+          <legend className="text-xs text-hp-muted">{t.mau_giao_dien.lien_he_cach_nhan}</legend>
+          <p className="mt-0.5 text-xs text-hp-muted">{t.mau_giao_dien.lien_he_cach_nhan_mo_ta}</p>
+          <div className="mt-2 flex flex-wrap gap-3">
+            {CACH_NHAN.map((k) => (
+              <label
+                key={k}
+                className={
+                  "cursor-pointer border px-4 py-2 text-sm transition-colors duration-150 " +
+                  (lienHe.cachNhan === k
+                    ? "border-hp-ink bg-hp-inset text-hp-ink"
+                    : "border-hp-rule text-hp-body hover:border-hp-ink")
+                }
+              >
+                <input
+                  type="radio"
+                  name="cach_nhan"
+                  value={k}
+                  checked={lienHe.cachNhan === k}
+                  onChange={() => datCachNhan(k)}
+                  className="sr-only"
+                />
+                {nhanCachNhan[k]}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+
+        {/* Loi keu goi — dong tieu de to cua khoi lien he (gop y 11/09/2026: cho
+            chon cau co san hoac tu viet). Moi cau hien DUNG nhu khach se doc:
+            theo ngon ngu catalogue, da dien ten nguoi tu van. */}
+        <fieldset className="mt-5">
+          <legend className="text-xs text-hp-muted">{t.mau_giao_dien.loi_keu_goi_nhan}</legend>
+          <p className="mt-0.5 text-xs text-hp-muted">{t.mau_giao_dien.loi_keu_goi_mo_ta}</p>
+          {/* Da chon loi keu goi ma chua co ten hay so: noi truoc rang khach chi
+              thay cau nay, khong co nut goi hay nhan (loi that 12/09/2026). */}
+          {gia.lienHe === null && coKhoiLienHe(gia) && (
+            <p className="mt-1 text-xs text-hp-body">{t.mau_giao_dien.loi_keu_goi_chua_lien_he}</p>
+          )}
+          <div className="mt-2 grid gap-2">
+            {LOI_KEU_GOI.map((k) => (
+              <label
+                key={k}
+                className={
+                  "block cursor-pointer border px-4 py-2 text-sm transition-colors duration-150 " +
+                  (gia.loiKeuGoi.mau === k
+                    ? "border-hp-ink bg-hp-inset text-hp-ink"
+                    : "border-hp-rule text-hp-body hover:border-hp-ink")
+                }
+              >
+                <input
+                  type="radio"
+                  name="loi_keu_goi"
+                  value={k}
+                  checked={gia.loiKeuGoi.mau === k}
+                  onChange={() => dat({ loiKeuGoi: { ...gia.loiKeuGoi, mau: k } })}
+                  className="sr-only"
+                />
+                {k === "tu-viet"
+                  ? t.mau_giao_dien.loi_keu_goi_tu_viet
+                  : cauKeuGoi({ mau: k, tuViet: "" }, lienHe.ten, boChu(gia.ngonNgu).chia_se)}
+              </label>
+            ))}
+            {/* Go vao day la chon luon "Tu viet": bat sale bam nut roi moi go la
+                mot buoc thua. */}
+            <input
+              value={gia.loiKeuGoi.tuViet}
+              onChange={(e) => dat({ loiKeuGoi: { mau: "tu-viet", tuViet: e.target.value } })}
+              maxLength={DAI_LOI_KEU_GOI}
+              aria-label={t.mau_giao_dien.loi_keu_goi_tu_viet}
+              placeholder={t.mau_giao_dien.loi_keu_goi_tu_viet_goi_y}
+              className={O_NHAP}
+            />
+          </div>
+        </fieldset>
       </fieldset>
 
       {/* --- Trang bia --- */}

@@ -4,9 +4,18 @@ import {
   SO_MUC_TOI_DA,
   docNoiDung,
   dungNoiDung,
+  dungMucDeChon,
+  chonDongTotNhat,
   khoaMau,
   chuanHoaSlug,
   dungSlug,
+  maCuaSlug,
+  phanTenCuaSlug,
+  slugDoiTen,
+  DAI_GIOI_THIEU,
+  doiCho,
+  sapXepMuc,
+  tuoiVangCaoNhat,
   tenHienThi,
   type NguonMau,
 } from "@/modules/catalogue-share/chia-se.model";
@@ -181,5 +190,182 @@ describe("dungSlug", () => {
     for (const ten of ["Chị Lan", "", "★"]) {
       expect(dungSlug(ten, 1, "zzzzzzzz").endsWith("-zzzzzzzz")).toBe(true);
     }
+  });
+});
+
+describe("doi ten link (11/09/2026)", () => {
+  // Sale muon doi "catalogue-65-abvbyxr2" thanh ten doc duoc sau khi da tao. Ma
+  // cuoi la dinh danh that: doi ten chi doi phan ten, link cu tim lai bang ma.
+  it("ma la cum sau dau gach cuoi, phan ten la phan truoc", () => {
+    expect(maCuaSlug("chi-lan-nhan-cuoi-18k-k3m9x2p4")).toBe("k3m9x2p4");
+    expect(phanTenCuaSlug("chi-lan-nhan-cuoi-18k-k3m9x2p4")).toBe("chi-lan-nhan-cuoi-18k");
+  });
+
+  it("slug doi cu khong co dau gach: ca chuoi la ma, phan ten rong", () => {
+    // 18/42 catalogue that dang dung dang nay (12 ky tu lien).
+    expect(maCuaSlug("zxhpnhyrtpu3")).toBe("zxhpnhyrtpu3");
+    expect(phanTenCuaSlug("zxhpnhyrtpu3")).toBe("");
+  });
+
+  it("doi ten giu nguyen ma va bo dau tieng Viet", () => {
+    expect(slugDoiTen("catalogue-65-abvbyxr2", "Dây chuyền khoen lật"))
+      .toBe("day-chuyen-khoen-lat-abvbyxr2");
+  });
+
+  it("chu Đ viet hoa cung thanh d", () => {
+    expect(slugDoiTen("x-abcdefgh", "ĐÔI BÔNG TAI")).toBe("doi-bong-tai-abcdefgh");
+  });
+
+  it("doi ten slug doi cu: ten dung truoc, van tim lai duoc bang ma cu", () => {
+    const moi = slugDoiTen("zxhpnhyrtpu3", "Nhẫn cưới");
+    expect(moi).toBe("nhan-cuoi-zxhpnhyrtpu3");
+    expect(maCuaSlug(moi!)).toBe("zxhpnhyrtpu3");
+  });
+
+  it("doi ten nhieu lan ma van giu nguyen", () => {
+    const lan1 = slugDoiTen("catalogue-65-abvbyxr2", "Dây chuyền")!;
+    const lan2 = slugDoiTen(lan1, "Nhẫn cưới — chị Lan")!;
+    expect(lan2).toBe("nhan-cuoi-chi-lan-abvbyxr2");
+    expect(maCuaSlug(lan2)).toBe("abvbyxr2");
+  });
+
+  it("ten khong con chu hay so thi khong doi — khong bia ten thay sale", () => {
+    expect(slugDoiTen("catalogue-65-abvbyxr2", "★★★")).toBeNull();
+    expect(slugDoiTen("catalogue-65-abvbyxr2", "   ")).toBeNull();
+  });
+
+  it("ten dai van giu duong dan trong tran 80 ky tu cua trang khach", () => {
+    // Trang /catalogue/[slug] tu choi duong dan dai hon 80 (DAI_SLUG_TOI_DA).
+    const moi = slugDoiTen("zxhpnhyrtpu3", "Dây chuyền ".repeat(20))!;
+    expect(moi.length).toBeLessThanOrEqual(80);
+    expect(moi.endsWith("-zxhpnhyrtpu3")).toBe(true);
+  });
+});
+
+describe("gioi thieu tung mau (gop y 11/09/2026)", () => {
+  it("giu loi gioi thieu da cat khoang trang va cat do dai", () => {
+    const [m] = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["a1"], gioiThieu: "  Dây đan tay  " }]).muc;
+    expect(m.gioiThieu).toBe("Dây đan tay");
+    const [dai] = dungNoiDung(NGUON, [{ ma: "D12741", anh: [], gioiThieu: "x".repeat(1000) }]).muc;
+    expect(dai.gioiThieu).toHaveLength(DAI_GIOI_THIEU);
+  });
+
+  it("khong go gi thi KHONG co truong — hinh dang muc y nhu cu", () => {
+    const [m] = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["a1"], gioiThieu: "   " }]).muc;
+    expect(m).not.toHaveProperty("gioiThieu");
+  });
+
+  it("co gioi thieu thi ranh gioi rieng tu chi them dung truong do", () => {
+    const [m] = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["a1"], gioiThieu: "Quà tặng" }]).muc;
+    expect(Object.keys(m).sort()).toEqual(
+      ["anh", "chatLieu", "gioiThieu", "loaiSp", "mau", "maMau", "size", "tlVang"].sort(),
+    );
+  });
+});
+
+describe("sap xep nhanh va doi cho (gop y 11/09/2026)", () => {
+  const m = (ma: string, loaiSp: string | null, chatLieu: string | null) => ({ ma, loaiSp, chatLieu });
+  const ds = [
+    m("A", "NHẪN", "14K"),
+    m("B", "DÂY CHUYỀN", "18K, 14K"),
+    m("C", null, null),
+    m("D", "BÔNG TAI", "24K"),
+    m("E", "DÂY CHUYỀN", "10K"),
+  ];
+  const ma = (x: { ma: string }[]) => x.map((y) => y.ma);
+
+  it("loai san pham A→Z theo tieng Viet; cung loai giu thu tu; khong co loai xep cuoi", () => {
+    expect(ma(sapXepMuc(ds, "loai-sp", []))).toEqual(["D", "B", "E", "A", "C"]);
+  });
+
+  it("loai vang cao → thap theo tuoi cao nhat; khong ghi tuoi vang xep cuoi", () => {
+    expect(ma(sapXepMuc(ds, "loai-vang", []))).toEqual(["D", "B", "A", "E", "C"]);
+  });
+
+  it("thu tu luc tich chon: tro ve dung danh sach goc sau khi da sap", () => {
+    const daSap = sapXepMuc(ds, "loai-sp", []);
+    expect(ma(sapXepMuc(daSap, "da-chon", ["A", "B", "C", "D", "E"]))).toEqual(["A", "B", "C", "D", "E"]);
+  });
+
+  it("khong sua danh sach dau vao", () => {
+    const truoc = ma(ds);
+    sapXepMuc(ds, "loai-vang", []);
+    expect(ma(ds)).toEqual(truoc);
+  });
+
+  it("tuoi vang cao nhat trong cot Chat lieu", () => {
+    expect(tuoiVangCaoNhat("18K, 14K")).toBe(18);
+    expect(tuoiVangCaoNhat("14k")).toBe(14);
+    expect(tuoiVangCaoNhat("Bạc 925")).toBeNull();
+    expect(tuoiVangCaoNhat(null)).toBeNull();
+  });
+
+  it("doi cho: chuyen mot mau toi vi tri moi; ngoai bien hay trung vi tri thi giu nguyen", () => {
+    expect(doiCho(["a", "b", "c", "d"], 0, 2)).toEqual(["b", "c", "a", "d"]);
+    expect(doiCho(["a", "b", "c", "d"], 3, 0)).toEqual(["d", "a", "b", "c"]);
+    const goc = ["a", "b"];
+    expect(doiCho(goc, 0, 5)).toBe(goc);
+    expect(doiCho(goc, 1, 1)).toBe(goc);
+  });
+});
+
+describe("nhieu dong cung mot ma mau", () => {
+  const dong = (v: Partial<DongCatalogue>): DongCatalogue => ({
+    dongSheet: 1, sku: null, maMau: "C10045", mo: null, so: null, dongSp: null,
+    loaiSp: null, mau: null, oChu: null, chiTiet: null, chatLieu: null,
+    loaiXoan: null, tlVang: null, size: null, fileIdAnh: null, urlThuMuc: null,
+    idThuMuc: null, urlAnhConcept: null, urlClipTho: null, urlClipDaXuLy: null,
+    tenClipDaXuLy: null, moTa1: null, moTa2: null, co: [], ...v,
+  });
+  const anh = (n: number) =>
+    Array.from({ length: n }, (_, i) => ({ fileId: `f${i}`, ten: `${i}.jpg` }));
+
+  it("chon dong CO ANH, khong phai dong cuoi", () => {
+    // Truoc day ca hai cho deu dung new Map(...) — Map giu cai CUOI. Mau C10045
+    // co dong 69 voi 4 anh va dong 615 voi thu muc rong, nen sale tich chon roi
+    // mo ra thay "Mau nay chua co anh nao" trong khi anh van nam day.
+    const nguon = [
+      { d: dong({ dongSheet: 69 }), anh: anh(4) },
+      { d: dong({ dongSheet: 615, tlVang: 21.67 }), anh: [] },
+    ];
+    const kq = dungMucDeChon(nguon);
+    expect(kq).toHaveLength(1);
+    expect(kq[0].anh).toHaveLength(4);
+  });
+
+  it("cung so anh thi chon dong khai bao day du hon", () => {
+    const nguon = [
+      { d: dong({ dongSheet: 5 }), anh: anh(2) },
+      { d: dong({ dongSheet: 9, sku: "1", chatLieu: "18K", tlVang: 3, size: "6" }), anh: anh(2) },
+    ];
+    expect(dungMucDeChon(nguon)[0].chatLieu).toBe("18K");
+  });
+
+  it("bang nhau het thi lay dong DAU — ket qua phai on dinh", () => {
+    const nguon = [
+      { d: dong({ dongSheet: 40 }), anh: anh(1) },
+      { d: dong({ dongSheet: 12 }), anh: anh(1) },
+    ];
+    expect(dungMucDeChon(nguon)[0].ma).toBe("C10045");
+    expect(chonDongTotNhat(nguon)[0].d.dongSheet).toBe(12);
+  });
+
+  it("ma mau khac nhau thi giu nguyen tat ca", () => {
+    const nguon = [
+      { d: dong({ dongSheet: 1, maMau: "A" }), anh: [] },
+      { d: dong({ dongSheet: 2, maMau: "B" }), anh: [] },
+    ];
+    expect(dungMucDeChon(nguon)).toHaveLength(2);
+  });
+
+  it("noi dung gui khach dung DUNG dong ma man hinh chon da hien", () => {
+    // Hai cho lech nhau la sale xem truoc thay anh, khach mo link ra thay trong.
+    const nguon = [
+      { d: dong({ dongSheet: 69 }), anh: anh(4) },
+      { d: dong({ dongSheet: 615 }), anh: [] },
+    ];
+    const hien = dungMucDeChon(nguon)[0];
+    const noiDung = dungNoiDung(nguon, [{ ma: "C10045", anh: hien.anh.map((a) => a.fileId) }]);
+    expect(noiDung.muc[0].anh).toHaveLength(4);
   });
 });

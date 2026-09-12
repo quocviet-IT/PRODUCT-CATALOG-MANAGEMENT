@@ -6,8 +6,14 @@ import { MA_HTML } from "@/messages/ngon-ngu";
 import type { BoChu } from "@/messages";
 import { ExternalLink, Plus, Printer } from "lucide-react";
 import { SO_NGAY_SONG, soNgayConLai, type TrangThaiLink } from "@/modules/catalogue-share/hieu-luc.model";
+import { locDanhSachDaTao } from "@/modules/catalogue-share/danh-sach.view";
+import { catTrang, docTrang } from "@/modules/sheet/catalogue.view";
+import { PhanTrang } from "@/ui/phan-trang";
+import { OTimNhanh } from "@/ui/o-tim-nhanh";
+import { KetQuaLoc, NguonLoc } from "@/ui/vung-loc";
 import { NutChep } from "./nut-chep";
 import { NutKhoa } from "./nut-khoa";
+import { DoiTenLink } from "./doi-ten-link";
 
 export async function generateMetadata() {
   const t = await layChu();
@@ -22,6 +28,14 @@ const NUT =
   "flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] text-hp-muted " +
   "transition-colors duration-150 hover:text-hp-ink";
 const ICON = { "aria-hidden": true, strokeWidth: 1.5, className: "h-4 w-4 shrink-0" } as const;
+
+/** Duong dan mot trang, giu nguyen cau tim dang go. */
+function urlTrang(sp: Record<string, string | undefined>, n: number): string {
+  const q = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) if (v && k !== "trang") q.set(k, v);
+  q.set("trang", String(n));
+  return `/admin/catalogue?${q.toString()}`;
+}
 
 /**
  * Danh sach catalogue da tao.
@@ -68,12 +82,19 @@ function NhanTrangThai({
   );
 }
 
-export default async function TrangDanhSachCatalogue() {
+export default async function TrangDanhSachCatalogue({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
   const user = await requireUser();
   const t = await layChu();
   const nn = await layNgonNgu();
-  const laAdmin = user.role === "admin";
-  const ds = await danhSachCatalogue(user.id, laAdmin);
+  const sp = await searchParams;
+  const laAdmin = user.mucQuyen === "admin";
+  const tatCa = await danhSachCatalogue(user.id, laAdmin);
+  const daLoc = locDanhSachDaTao(tatCa, sp.q?.trim() || null);
+  const { ds, trang, soTrang, tu, den } = catTrang(daLoc, docTrang(sp));
   const bayGio = new Date();
 
   return (
@@ -101,8 +122,23 @@ export default async function TrangDanhSachCatalogue() {
         {t.danh_sach_catalogue.nut_tao}
       </Link>
 
-      {ds.length === 0 ? (
+      {/* O tim chi hien khi da co du lieu de tim: mot o tim tren mot bang rong
+          chi lam nguoi ta go thu roi tuong minh go sai. */}
+      <NguonLoc>
+        {tatCa.length > 0 && (
+          <OTimNhanh
+            nhan={t.danh_sach_catalogue.tim_kiem_nhan}
+            goiY={t.danh_sach_catalogue.tim_kiem_goi_y}
+            nhanXoa={t.catalogue_sheet.xoa_loc}
+            chuDangCapNhat={t.phan_hoi.dang_cap_nhat}
+          />
+        )}
+
+      <KetQuaLoc>
+      {tatCa.length === 0 ? (
         <p className="text-sm text-hp-muted">{t.danh_sach_catalogue.chua_co}</p>
+      ) : daLoc.length === 0 ? (
+        <p className="text-sm text-hp-muted">{t.danh_sach_catalogue.khong_khop}</p>
       ) : (
         <div className="overflow-x-auto border border-hp-rule">
           <table className="w-full border-collapse">
@@ -124,13 +160,20 @@ export default async function TrangDanhSachCatalogue() {
               {ds.map((c) => (
                 <tr key={c.slug} className="bg-hp-card">
                   <td className={`${O} text-hp-ink`}>
+                    {/* data-ten-catalogue / data-duong-dan: kich ban chup anh huong
+                        dan tim dung hai o nay de thay bang chu minh hoa — ten hay
+                        mang ten khach, duong dan la link dang song. */}
                     <Link
                       href={`/catalogue/${c.slug}`}
+                      data-ten-catalogue
                       className="transition-colors duration-150 hover:text-hp-pink hover:underline"
                     >
                       {c.ten}
                     </Link>
-                    <span className="mt-0.5 block text-xs text-hp-muted">/{c.slug}</span>
+                    <span data-duong-dan className="mt-0.5 block text-xs text-hp-muted">
+                      /{c.slug}
+                    </span>
+                    <DoiTenLink slug={c.slug} />
                   </td>
                   <td className={`${O} whitespace-nowrap tabular-nums`}>
                     {t.danh_sach_catalogue.dem
@@ -185,6 +228,29 @@ export default async function TrangDanhSachCatalogue() {
           </table>
         </div>
       )}
+
+      {daLoc.length > 0 && (
+        <nav
+          aria-label={t.catalogue_sheet.trang_nhan}
+          className="mt-8 flex flex-wrap items-center justify-between gap-x-8 gap-y-4
+                     border-t border-hp-rule pt-5"
+        >
+          <PhanTrang
+            trang={trang}
+            soTrang={soTrang}
+            urlTrang={(n) => urlTrang(sp, n)}
+            t={t}
+          />
+          <span className="ml-auto text-xs tabular-nums text-hp-muted">
+            {t.danh_sach_catalogue.pham_vi
+              .replace("{tu}", String(tu))
+              .replace("{den}", String(den))
+              .replace("{tong}", String(daLoc.length))}
+          </span>
+        </nav>
+      )}
+      </KetQuaLoc>
+      </NguonLoc>
     </>
   );
 }

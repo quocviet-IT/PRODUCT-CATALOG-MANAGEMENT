@@ -1,6 +1,7 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
-import { layTheoSlug } from "@/modules/catalogue-share/chia-se.service";
+import { layTheoMa, layTheoSlug } from "@/modules/catalogue-share/chia-se.service";
+import { maCuaSlug } from "@/modules/catalogue-share/chia-se.model";
 import { conMoDuoc } from "@/modules/catalogue-share/hieu-luc.model";
 import { boChu } from "@/messages";
 import { NguonNgonNgu } from "@/messages/dung-chu";
@@ -30,13 +31,21 @@ function slugHopLe(s: string): boolean {
   return s.length <= DAI_SLUG_TOI_DA && DANG_SLUG.test(s);
 }
 
+/**
+ * Khop nguyen duong dan truoc; khong khop thi tim theo MA o cuoi — link cu sau
+ * khi sale doi ten link van phai mo duoc (xem layTheoMa).
+ */
+async function timCatalogue(slug: string) {
+  return (await layTheoSlug(slug)) ?? (await layTheoMa(maCuaSlug(slug)));
+}
+
 export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> },
 ): Promise<Metadata> {
   const { slug } = await params;
   const macDinh = boChu("vi").catalogue_sheet.tieu_de;
   if (!slugHopLe(slug)) return { title: macDinh };
-  const c = await layTheoSlug(slug);
+  const c = await timCatalogue(slug);
   // robots noindex da khai o layout goc — trang nay dac biet khong duoc len
   // ket qua tim kiem vi no la ban gui rieng cho mot khach.
   //
@@ -60,7 +69,7 @@ export default async function TrangKhachXem({
   const moIn = ts.in === "1";
   if (!slugHopLe(slug)) notFound();
 
-  const c = await layTheoSlug(slug);
+  const c = await timCatalogue(slug);
   if (!c) notFound();
 
   const g = c.giaoDien;
@@ -74,6 +83,14 @@ export default async function TrangKhachXem({
   if (!conMoDuoc(c.hetHanLuc, c.khoaLuc, new Date())) {
     return <LinkHetHieuLuc t={boChu(g.ngonNgu)} tone={g.tone} />;
   }
+
+  // Link cu, truoc khi sale doi ten: chuyen sang duong dan hien tai. Dat SAU buoc
+  // chan o tren — link da dong thi dung han tai cho, khong lo ra ten link moi.
+  //
+  // 307 (redirect) chu khong 308: sale co the doi ten lan nua, hay doi nguoc ve
+  // ten cu. Mot chuyen huong VINH VIEN bi trinh duyet nho lai se thanh vong lap.
+  if (c.slug !== slug) redirect(`/catalogue/${c.slug}${moIn ? "?in=1" : ""}`);
+
   // Ngon ngu do SALE chot luc tao catalogue, khach khong doi duoc (quyet dinh
   // 08/09/2026). Truoc day co nut VI/EN tren trang khach; bo di vi day la ban
   // gui rieng cho mot nguoi, sale da biet khach doc thu tieng nao.
@@ -122,7 +139,9 @@ export default async function TrangKhachXem({
             <ThanCatalogue muc={c.noiDung.muc} g={g} t={t} />
           </PhongToAnh>
 
-          {g.lienHe && <KhoiLienHe lienHe={g.lienHe} t={t} />}
+          {/* KhoiLienHe tu quyet dinh hien hay an (coKhoiLienHe): co the chi co loi
+              keu goi ma chua co ten hay so. */}
+          <KhoiLienHe lienHe={g.lienHe} loiKeuGoi={g.loiKeuGoi} t={t} />
 
           {moIn && <MoHopThoaiIn />}
 

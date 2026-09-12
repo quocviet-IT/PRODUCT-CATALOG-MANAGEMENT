@@ -7,17 +7,33 @@ import {
   taoCatalogue,
 } from "@/modules/catalogue-share/chia-se.service";
 import { docGiaoDien } from "@/modules/catalogue-share/giao-dien.model";
+import { SO_ANH_MOI_THU_MUC } from "@/modules/sheet/dong-bo";
 
-/** So anh toi da moi mau — thu vien lon nhat hien co la 8, 40 la thua rong rai. */
-const SO_ANH_TOI_DA = 40;
+/**
+ * So anh toi da moi mau — LAY THANG tu tran cua dong bo, khong dat rieng.
+ *
+ * Truoc day cho nay ghi 40 kem ghi chu "thu vien lon nhat hien co la 8". Cau
+ * do dung luc anh con lay tu mot o trong bang tinh. Tu khi dong bo quet thu
+ * muc Drive, mot mau mang trung binh 23 anh va nhieu nhat 166 — 112 thu muc
+ * vuot 40, tuc 7,7% mau bi tu choi bang loi 400 khong loi giai thich.
+ *
+ * Bai hoc: mot tran o day PHAI bang tran ma dong bo ghi vao, khong duoc doan
+ * lai. Nen no la mot bien duy nhat, dung chung.
+ */
+const SO_ANH_TOI_DA = SO_ANH_MOI_THU_MUC;
 
 const Than = z.object({
   ten: z.string().max(DAI_TEN_TOI_DA).default(""),
+  // Ten link rieng. Khong gui (trinh duyet cu) hay bo trong thi link theo ten.
+  tenLink: z.string().max(DAI_TEN_TOI_DA).default(""),
   chon: z
     .array(
       z.object({
         ma: z.string().min(1).max(80),
         anh: z.array(z.string().min(1).max(120)).max(SO_ANH_TOI_DA),
+        // Loi gioi thieu tung mau. Chan tho o day; cat ve DAI_GIOI_THIEU trong
+        // dungNoiDung — mot noi quyet dinh do dai, khong phai hai.
+        gioiThieu: z.string().max(2000).optional(),
       }),
     )
     .min(1)
@@ -49,6 +65,7 @@ export async function POST(req: Request): Promise<Response> {
       than.chon,
       docGiaoDien(than.giaoDien),
       user.id,
+      than.tenLink,
     );
     return Response.json(kq, { status: 201, headers: KHONG_LUU_DEM });
   } catch (loi) {

@@ -3,6 +3,7 @@ import { dangNhap, dangNhapGoogle } from "@/auth/actions";
 import { LoiMatKhau } from "./loi-mat-khau";
 import { NutGui } from "@/ui/nut-gui";
 import { layChu } from "@/messages/may-chu";
+import { NhomDoiNgonNgu } from "@/messages/dung-chu";
 import type { BoChu } from "@/messages";
 import { Logo } from "@/app/thuong-hieu";
 
@@ -45,50 +46,64 @@ export default async function TrangDangNhap({
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
-      <div className="border border-hp-rule bg-hp-card p-8 sm:p-10">
-        <Logo alt={t.catalogue_sheet.thuong_hieu} />
-        <h1 className="mt-3 font-title text-[28px] leading-none tracking-[0.02em] text-hp-ink">
-          {t.dang_nhap.tieu_de}
-        </h1>
-        <p className="mt-3 text-sm text-hp-body">{t.dang_nhap.mo_ta}</p>
-
-        {thongBao && (
-          // Loi dang nhap la mot trong ba cho duy nhat duoc dung mau hong tren
-          // man hinh nay — xem ngan sach hong cua he thiet ke.
-          <p
-            role="alert"
-            className="mt-5 border-l-2 border-hp-pink bg-hp-inset px-4 py-3 text-sm text-hp-body"
-          >
-            {thongBao}
-          </p>
-        )}
-
-        <form action={dangNhapGoogle} className="mt-7">
-          {/* Bam nut nay la roi khoi trang: server action chuyen huong sang
-              Google. Duong truyen cham thi man hinh dung im vai giay, va nguoi
-              dung bam lan hai — mo mot luong dang nhap thu hai chong len. */}
-          <NutGui
-            nhanCho={
-              <>
-                <LogoGoogle />
-                {t.dang_nhap.dang_vao}
-              </>
-            }
-            lop="flex w-full items-center justify-center gap-3 border border-hp-rule
-                 bg-hp-foundation px-5 py-3.5 text-sm text-hp-ink
-                 transition-colors duration-150 hover:border-hp-ink
-                 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            <LogoGoogle />
-            {t.dang_nhap.nut_google}
-          </NutGui>
-        </form>
-
-        {/* Duong lui bang mat khau: cac tai khoan co tu truoc van dung duoc, va
-            neu Google gap su co thi he thong khong bi khoa cung. */}
-        <LoiMatKhau guiForm={guiForm} />
+    <div className="relative flex min-h-screen flex-col">
+      {/* Doi ngon ngu o goc tren phai (anh gop y 11/09/2026): nguoi dung tieng
+          Anh phai doi duoc ngay tu man hinh DAU TIEN, truoc khi dang nhap. Cung
+          goc va cung mot nut voi thanh dau trang ben trong, nen vao roi van thay
+          no o cho quen; cookie dung chung nen ngon ngu chon o day giu nguyen sau
+          khi dang nhap. Nam NGOAI the: the dung giua man hinh, goc tren phai con
+          trong tren moi co man hinh, ke ca khi mo form mat khau tren dien thoai. */}
+      <div className="absolute right-5 top-5 sm:right-8 sm:top-6">
+        <NhomDoiNgonNgu />
       </div>
-    </main>
+
+      {/* KHONG w-full: the co theo noi dung nhu truoc khi co nut ngon ngu. Them
+          w-full hom 11/09/2026 lam the rong ra ~60px ma khong ai yeu cau. */}
+      <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-10">
+        <div className="border border-hp-rule bg-hp-card p-8 sm:p-10">
+          <Logo alt={t.catalogue_sheet.thuong_hieu} />
+          <h1 className="mt-3 font-title text-[28px] leading-none tracking-[0.02em] text-hp-ink">
+            {t.dang_nhap.tieu_de}
+          </h1>
+          <p className="mt-3 text-sm text-hp-body">{t.dang_nhap.mo_ta}</p>
+
+          {thongBao && (
+            // Loi dang nhap la mot trong ba cho duy nhat duoc dung mau hong tren
+            // man hinh nay — xem ngan sach hong cua he thiet ke.
+            <p
+              role="alert"
+              className="mt-5 border-l-2 border-hp-pink bg-hp-inset px-4 py-3 text-sm text-hp-body"
+            >
+              {thongBao}
+            </p>
+          )}
+
+          <form action={dangNhapGoogle} className="mt-7">
+            {/* Bam nut nay la roi khoi trang: server action chuyen huong sang
+                Google. Duong truyen cham thi man hinh dung im vai giay, va nguoi
+                dung bam lan hai — mo mot luong dang nhap thu hai chong len. */}
+            <NutGui
+              nhanCho={
+                <>
+                  <LogoGoogle />
+                  {t.dang_nhap.dang_vao}
+                </>
+              }
+              lop="flex w-full items-center justify-center gap-3 border border-hp-rule
+                   bg-hp-foundation px-5 py-3.5 text-sm text-hp-ink
+                   transition-colors duration-150 hover:border-hp-ink
+                   disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <LogoGoogle />
+              {t.dang_nhap.nut_google}
+            </NutGui>
+          </form>
+
+          {/* Duong lui bang mat khau: cac tai khoan co tu truoc van dung duoc, va
+              neu Google gap su co thi he thong khong bi khoa cung. */}
+          <LoiMatKhau guiForm={guiForm} />
+        </div>
+      </main>
+    </div>
   );
 }

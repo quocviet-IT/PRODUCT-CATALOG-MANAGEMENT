@@ -8,6 +8,8 @@ const anh = (id: string): OTho => ({
 const lien = (v: string, url: string): OTho => ({ formattedValue: v, hyperlink: url });
 
 const THU_MUC = "https://drive.google.com/drive/folders/1On2rBPpBzpLsU7xTyvg0H8v7MM12foE8";
+/** Thu muc anh DA XU LY — cot moi, luc chuyen chi vai mau co. */
+const THU_MUC_XU_LY = "https://drive.google.com/drive/folders/1QqXuLy0000000000000000000000";
 
 /**
  * Dong 1 la bang tieu de gop o. Dong 2 la tieu de cot.
@@ -19,18 +21,21 @@ export const bangMau: OTho[][] = [
   [
     o("SKU"), o("SO"), o("MO"), o("Chi tiết SP"), o("MÃ MẪU"), o("LOẠI"),
     o("DÒNG"), o("CHẤT LIỆU"), o("TL VÀNG\n (gr)"), o("SIZE"), o("Ổ chủ"),
-    o("HÌNH"), o("FOLDER HÌNH"),
+    o("HÌNH"), o("FOLDER HÌNH"), o("Hình đã xử lý"), o("Mô tả 1"), o("Mô tả 2"),
   ],
   // 3 — day du, size nam o cot SIZE, xoan lab
   [o("108632"), o("25.10006"), o("25.34648"),
    o("LGDRI: 14KY 7RD/0.326cts 2.85gr D12741 Size: 10"), o("D12741"), o("Complete"),
    o("NHẪN"), o("14KY"), o("2.78"), o("10"), rong,
-   anh("18I_Y9I_tLtnizSbupQclY48QBxG3I3XB"), lien("CQ1", THU_MUC)],
+   anh("18I_Y9I_tLtnizSbupQclY48QBxG3I3XB"), lien("CQ1", THU_MUC), rong,
+   rong, o("Nhẫn band xoàn lab")],
   // 4 — cot SIZE trong, size chi co trong mo ta, xoan tu nhien
   [o("204779"), o("25.10271"), o("25.35019"),
    o("DIARI: 18KW 11RD/0.398cts 4.07gr D11031 Size: 18VN"), o("D11031"), o("Complete"),
    o("NHẪN"), o("18KW"), o("3.99"), rong, rong,
-   anh("1aXAYbzgcH8J_4GkS_3gkUAvjQA6mR5be"), lien("CQ1", THU_MUC)],
+   anh("1aXAYbzgcH8J_4GkS_3gkUAvjQA6mR5be"), lien("CQ1", THU_MUC),
+   // Dong DUY NHAT co ca hai cot thu muc — de kiem thu tu uu tien.
+   lien("CQ1-xu-ly", THU_MUC_XU_LY), o("Dây mân côi"), rong],
   // 5 — MAT ANH (o HINH rong)
   [o("108930"), o("25.10272"), o("25.35020"),
    o("DIARI: 18KW 11RD/0.400cts 4.00gr D11032 Size: 6"), o("D11032"), o("Complete"),

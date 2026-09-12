@@ -2,6 +2,7 @@ import { CO_ANH_HOP_LE } from "@/modules/media/anh-drive";
 import { THU_MUC_DEM_ANH, dungKhoaAnhSheet } from "@/modules/media/khoa-anh";
 import { lietKeTen, taiVe } from "@/modules/media/storage";
 import { anhXaBang, type OTho } from "@/modules/sheet/catalogue.mapper";
+import { anhCanDongBo } from "@/modules/sheet/anh-can-dong-bo";
 import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 import { KHOA_ANH_THU_MUC, KHOA_BANG, LoiChuaBatDongBo, kiemKhoa } from "@/modules/sheet/dong-bo";
 
@@ -14,10 +15,11 @@ import { KHOA_ANH_THU_MUC, KHOA_BANG, LoiChuaBatDongBo, kiemKhoa } from "@/modul
  * phai tu giu danh sach giua cac luot thi no phai doc lai ca bang tinh va 65
  * thu muc Drive moi lan — trong khi may chu vua nhan dung danh sach do xong.
  *
- * Thu tu tra ve la CO Y: anh dai dien cua tung dong truoc (khoang 71 tam, xong
- * trong vai phut, du de ca luoi catalogue hien day du), roi moi den thu vien
- * anh cua tung mau. Hong giua chung thi cai hong la phan it ai mo, khong phai
- * trang chinh.
+ * CHI anh trong thu muc cot "Hinh da xu ly" cua nhung dong dang co trong bang
+ * (chot 11/09/2026) — xem modules/sheet/anh-can-dong-bo.ts. Khong con nap anh
+ * cot HINH, va khong con lap qua MOI thu muc trong ban do: ban do chi gop them,
+ * nen sau khi tab rut tu 1.839 dong xuong 12 no van giu 1.464 thu muc cu, va
+ * duong nay da nap tiep anh cua chung.
  *
  * Mot anh chi tinh la "da co" khi CA HAI co (600 va 1400) deu nam trong bo dem:
  * thieu ban lon thi khung xem phong to van phai goi Drive — dung thu ma duong
@@ -57,9 +59,7 @@ export async function POST(req: Request): Promise<Response> {
     return Response.json({ loi: "chua_co_bang" }, { status: 409, headers: KHONG_LUU_DEM });
   }
 
-  const thuTu: string[] = [];
-  for (const d of anhXaBang(bang)) if (d.fileIdAnh) thuTu.push(d.fileIdAnh);
-  for (const ds of Object.values(anhThuMuc)) for (const a of ds) thuTu.push(a.fileId);
+  const thuTu = anhCanDongBo(anhXaBang(bang), anhThuMuc);
 
   // Doi chieu bang KHOA DAY DU do chinh dungKhoaAnhSheet dung ra, khong tu ghep
   // lai chuoi o day: cach dat ten bo dem chi duoc dinh nghia o MOT noi, khong

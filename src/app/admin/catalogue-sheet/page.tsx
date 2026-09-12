@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { layDanhSachCatalogue, nguonDangDung } from "@/modules/sheet/catalogue.service";
 import { docTrangThai } from "@/modules/sheet/dong-bo";
 import { dinhDangLuc } from "@/lib/date";
@@ -10,19 +11,28 @@ import {
   thamSoCua,
   tinhDemLoc,
   tinhThongKe,
+  tuVungGoiY,
+  cotRong,
+  dongLapMa,
+  docSapXepTuUrl,
+  sapXepDanhSach,
+  type ChieuSap,
+  type KhoaSap,
+  type SapXep,
 } from "@/modules/sheet/catalogue.view";
 import type { DongCatalogue } from "@/modules/sheet/catalogue.mapper";
 import { khoaMau } from "@/modules/catalogue-share/chia-se.model";
-import { ChonMau, OTich } from "./chon-mau";
+import { ChonMau, DauCungMau, OTich } from "./chon-mau";
 import { BangCatalogue } from "./bang";
 import { ThanhBoLoc } from "./bo-loc";
 import { NganChiTiet } from "./ngan-chi-tiet";
 import { layChu } from "@/messages/may-chu";
 import type { BoChu } from "@/messages";
 import { nhanCo } from "./nhan-co";
-import { PhanTrang } from "./phan-trang";
+import { PhanTrang } from "@/ui/phan-trang";
 import { BangDieuKhien } from "./bang-dieu-khien";
 import { AnhTai } from "@/ui/anh-tai";
+import { anhThuNho } from "@/modules/sheet/anh-dai-dien";
 import { KetQuaLoc, NguonLoc } from "@/ui/vung-loc";
 
 /**
@@ -61,6 +71,22 @@ function urlDoi(
   return `/admin/catalogue-sheet?${q.toString()}`;
 }
 
+/**
+ * Bam vao dau cot: cot dang xep thi dao chieu, cot khac thi xep tang.
+ * Doi cach xep luon ve trang 1 — dong dang o trang 3 se nam cho khac han.
+ */
+function urlSapXep(
+  sp: Record<string, string | undefined>,
+  sap: SapXep,
+  khoa: KhoaSap,
+): string {
+  const chieu: ChieuSap = sap.khoa === khoa && sap.chieu === "tang" ? "giam" : "tang";
+  const conLai = Object.fromEntries(
+    Object.entries(sp).filter(([k]) => k !== "trang" && k !== "chieu"),
+  );
+  return urlDoi({ ...conLai, chieu }, "sap", khoa);
+}
+
 /** Doi kieu xem thi ve trang 1 — trang 3 cua bang co the khong ton tai o luoi. */
 function urlDoiKieuXem(sp: Record<string, string | undefined>, kieu: KieuXem): string {
   const conLai = Object.fromEntries(
@@ -74,7 +100,7 @@ function dinhDangGam(v: number | null): string | null {
   return v === null ? null : `${v.toFixed(2).replace(".", ",")} g`;
 }
 
-async function The({ d }: { d: DongCatalogue }) {
+async function The({ d, lap }: { d: DongCatalogue; lap: boolean }) {
   const t = await layChu();
   const trongLuong = dinhDangGam(d.tlVang);
   const coDongTrongLuongSize = trongLuong !== null || d.size !== null;
@@ -86,9 +112,9 @@ async function The({ d }: { d: DongCatalogue }) {
                  duration-150 hover:border-hp-ink"
     >
       <div className="flex aspect-[4/5] items-center justify-center bg-hp-inset">
-        {d.fileIdAnh ? (
+        {anhThuNho(d) ? (
           <AnhTai
-            src={`/api/anh-drive/${d.fileIdAnh}`}
+            src={`/api/anh-drive/${anhThuNho(d)}`}
             alt={d.maMau ?? t.catalogue_sheet.anh_chua_co_ma_mau}
             lop="h-full w-full object-contain"
           />
@@ -101,7 +127,7 @@ async function The({ d }: { d: DongCatalogue }) {
 
       <div className="p-5">
         <div className="mb-3">
-          <OTich ma={khoaMau(d)} />
+          {lap ? <DauCungMau ma={khoaMau(d)} /> : <OTich ma={khoaMau(d)} />}
         </div>
         {d.chatLieu && (
           <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
@@ -163,7 +189,8 @@ export default async function TrangCatalogueSheet({
       : nguon === "bang-tinh"
         ? t.catalogue_sheet.nguon_bang_tinh
         : await moTaDongBo(t);
-  const daLoc = locDanhSach(tatCa, loc);
+  const sap = docSapXepTuUrl(sp);
+  const daLoc = sapXepDanhSach(locDanhSach(tatCa, loc), sap);
   // Ba con so khac nhau, ba chu dich khac nhau — dung gop lai:
   //  - dem (theo tung chieu) -> so ben canh moi muc trong o tha xuong. Moi
   //    chieu tinh tren tap da loc boi cac chieu KHAC, nen con so tra loi dung
@@ -207,7 +234,10 @@ export default async function TrangCatalogueSheet({
         />
       </KetQuaLoc>
 
-      <ThanhBoLoc dem={dem} hienTai={loc} />
+      {/* Tu vung goi y tinh tren TOAN BO bang, khong theo bo loc dang bat:
+          goi y la de nguoi ta biet trong he thong CO nhung chu gi, ke ca khi
+          bo loc hien tai dang che chung di. */}
+      <ThanhBoLoc dem={dem} hienTai={loc} tuVung={tuVungGoiY(tatCa)} />
 
       <KetQuaLoc>
 
@@ -236,16 +266,65 @@ export default async function TrangCatalogueSheet({
         ))}
       </div>
 
+      {/* Luoi anh khong co hang tieu de de bam, nen cach xep phai co cho rieng.
+          Bang thi khong can — dau cot cua no chinh la nut xep. */}
+      {kieuXem === "luoi" && (
+        <div className="mb-6 flex flex-wrap items-baseline gap-x-5 gap-y-2">
+          <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+            {t.catalogue_sheet.sap_xep_nhan}
+          </span>
+          {([
+            ["dong", t.catalogue_sheet.sap_theo_dong],
+            ["maMau", t.catalogue_sheet.cot_ma_mau],
+            ["loaiSp", t.catalogue_sheet.cot_loai_sp],
+            ["chatLieu", t.catalogue_sheet.cot_chat_lieu],
+            ["tlVang", t.catalogue_sheet.cot_tl_vang],
+            ["size", t.catalogue_sheet.cot_size],
+          ] as const).map(([khoa, nhan]) => (
+            <Link
+              key={khoa}
+              href={urlSapXep(sp, sap, khoa)}
+              aria-current={sap.khoa === khoa ? "true" : undefined}
+              className={`inline-flex items-center gap-1 border-b-2 pb-0.5 text-[11px]
+                          uppercase tracking-[0.14em] transition-colors duration-150
+                          ${sap.khoa === khoa
+                            ? "border-hp-ink text-hp-ink"
+                            : "border-transparent text-hp-muted hover:text-hp-ink"}`}
+            >
+              {nhan}
+              <span className="flex h-3 w-3 shrink-0 items-center justify-center">
+                {sap.khoa === khoa &&
+                  (sap.chieu === "giam"
+                    ? <ChevronDown aria-hidden strokeWidth={2} className="h-3 w-3" />
+                    : <ChevronUp aria-hidden strokeWidth={2} className="h-3 w-3" />)}
+              </span>
+            </Link>
+          ))}
+        </div>
+      )}
+
       {ds.length === 0 ? (
         <p className="text-sm text-hp-muted">{t.catalogue_sheet.khong_khop}</p>
       ) : (
         <ChonMau>
           <NganChiTiet>
             {kieuXem === "bang" ? (
-              <BangCatalogue ds={ds} />
+              <BangCatalogue
+                ds={ds}
+                an={cotRong(tatCa)}
+                sap={sap}
+                urlSap={(khoa) => urlSapXep(sp, sap, khoa)}
+              />
             ) : (
               <ul className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-                {ds.map((d) => <The key={d.dongSheet} d={d} />)}
+                {(() => {
+                  // Mot ma mau trai tren nhieu dong thi chi the DAU mang o tich
+                  // — hai o cung khoa se tich/bo cung nhau. Xem dongLapMa.
+                  const lap = dongLapMa(ds, khoaMau);
+                  return ds.map((d) => (
+                    <The key={d.dongSheet} d={d} lap={lap.has(d.dongSheet)} />
+                  ));
+                })()}
               </ul>
             )}
           </NganChiTiet>

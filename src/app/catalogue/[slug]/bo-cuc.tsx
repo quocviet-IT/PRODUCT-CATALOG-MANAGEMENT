@@ -4,11 +4,15 @@ import { AnhTai } from "@/ui/anh-tai";
 import type { MucCatalogue } from "@/modules/catalogue-share/chia-se.model";
 import {
   MAU_NHAN,
+  cauKeuGoi,
+  coKhoiLienHe,
+  lienKetNhan,
   soGoiDuoc,
   type Bia,
   type BoCuc,
   type GiaoDienCatalogue,
   type LienHe,
+  type LoiKeuGoi,
   type Nhan,
   type Tone,
 } from "@/modules/catalogue-share/giao-dien.model";
@@ -40,6 +44,10 @@ export const LOP_TONE: Record<Tone, string> = {
   trang: "tone-trang",
   toi: "tone-toi",
   reu: "tone-reu",
+  "hoa-van": "tone-hoa-van",
+  champagne: "tone-champagne",
+  "bach-kim": "tone-bach-kim",
+  "hong-phan": "tone-hong-phan",
 };
 
 /**
@@ -146,6 +154,19 @@ function ThongSoBang({ ds, lop }: { ds: [string, string][]; lop?: string }) {
   );
 }
 
+/**
+ * Loi gioi thieu sale tu viet cho mot mau (gop y 11/09/2026). Giu dung cho xuong
+ * dong sale go. Catalogue cu khong co truong nay thi khong ve gi.
+ */
+function GioiThieu({ m, lop }: { m: MucCatalogue; lop?: string }) {
+  if (!m.gioiThieu) return null;
+  return (
+    <p className={`max-w-2xl whitespace-pre-line text-sm leading-relaxed text-hp-body ${lop ?? ""}`}>
+      {m.gioiThieu}
+    </p>
+  );
+}
+
 type DoiSo = { muc: MucCatalogue[]; g: GiaoDienCatalogue; t: BoChu };
 
 /**
@@ -191,6 +212,7 @@ function DanhSach({ muc, g, t }: DoiSo) {
             </div>
 
             <ThongSoDong ds={thongSo(m, g, t)} lop="mt-2" />
+            <GioiThieu m={m} lop="mt-3" />
 
             {m.anh.length > 0 && (
               <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -249,6 +271,13 @@ function Luoi({ muc, g, t }: DoiSo) {
               {x.chiTiet.map(([, v]) => v).join(" · ")}
             </p>
           )}
+          {/* Luoi anh: gioi thieu chi o o dau cua mau, chu nho — cung ly do voi dong
+              thong so o tren. */}
+          {x.dauMuc && x.m.gioiThieu && (
+            <p className="mt-2 whitespace-pre-line text-xs leading-relaxed text-hp-body">
+              {x.m.gioiThieu}
+            </p>
+          )}
         </li>
       ))}
     </ul>
@@ -299,6 +328,7 @@ function Lookbook({ muc, g, t }: DoiSo) {
             </div>
 
             <ThongSoBang ds={ct} lop="mt-6 border-t border-hp-rule pt-6" />
+            <GioiThieu m={m} lop="mt-5" />
 
             {phu.length > 0 && (
               <ul className="mt-6 grid grid-cols-4 gap-3">
@@ -365,6 +395,7 @@ function TrienLam({ muc, g, t }: DoiSo) {
             <div className="mt-11 flex flex-col gap-2">
               <MaMau m={m} t={t} />
               <ThongSoDong ds={thongSo(m, g, t)} />
+              <GioiThieu m={m} lop="mt-2" />
             </div>
 
             {phu.length > 0 && (
@@ -433,6 +464,7 @@ function KhungCoDien({ muc, g, t }: DoiSo) {
                   ))}
                 </dl>
               )}
+              <GioiThieu m={m} lop="text-center" />
 
               {m.anh.length > 2 && (
                 <ul className="grid w-full grid-cols-3 gap-3 sm:grid-cols-4">
@@ -490,6 +522,7 @@ function TapChi({ muc, g, t }: DoiSo) {
                     ))}
                   </div>
                 )}
+                <GioiThieu m={m} lop="mt-1" />
               </div>
             </div>
 
@@ -585,25 +618,57 @@ export function TrangBia({
  * Nut goi dung hong DAM (--color-hp-pink-strong): hong thuong hieu chi dat
  * 3.81:1 tren nen kem, khong du cho chu trang tren nut.
  */
-export function KhoiLienHe({ lienHe, t }: { lienHe: LienHe; t: BoChu }) {
-  const so = soGoiDuoc(lienHe.dienThoai);
+/** Nhan cua nut nhan tin theo cach sale chon luc tao. */
+function nhanNutNhan(cach: LienHe["cachNhan"], t: BoChu): string {
+  return cach === "tin-nhan" ? t.chia_se.cta_tin_nhan
+    : cach === "whatsapp" ? t.chia_se.cta_whatsapp
+    : t.chia_se.cta_zalo;
+}
+
+/**
+ * Zalo va WhatsApp la trang web ngoai: mo tab moi de khach khong roi catalogue.
+ * Tin nhan (sms:) mo thang app Tin nhan cua may, khong co tab nao de mo.
+ */
+function thuocTinhNutNhan(cach: LienHe["cachNhan"]) {
+  return cach === "tin-nhan" ? {} : { target: "_blank", rel: "noreferrer" };
+}
+
+export function KhoiLienHe({
+  lienHe,
+  loiKeuGoi,
+  t,
+}: {
+  /**
+   * null = sale chua dien nguoi tu van hay so nhung da chon loi keu goi: khoi chi
+   * con loi keu goi va dong mo ta, khong co nut.
+   */
+  lienHe: LienHe | null;
+  /** Cau sale chon luc tao. Catalogue cu doc ra "mac-dinh" — y nhu luc gui. */
+  loiKeuGoi: LoiKeuGoi;
+  t: BoChu;
+}) {
+  // Quyet dinh hien hay an nam O DAY chu khong o cho goi: trang khach va ban xem
+  // truoc cung goi thanh phan nay, dat dieu kien hai noi la hai noi lech nhau.
+  if (!coKhoiLienHe({ lienHe, loiKeuGoi })) return null;
+  const so = lienHe ? soGoiDuoc(lienHe.dienThoai) : "";
+  const nhan = lienHe ? lienKetNhan(lienHe) : null;
 
   return (
     <section className="mt-20 border-t border-hp-rule pt-10">
       <h2 className="font-title text-2xl leading-tight text-hp-ink">
-        {t.chia_se.cta_tieu_de}
+        {cauKeuGoi(loiKeuGoi, lienHe?.ten ?? "", t.chia_se)}
       </h2>
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-hp-body">
         {t.chia_se.cta_mo_ta}
       </p>
 
-      {lienHe.ten && (
+      {lienHe?.ten && (
         <p className="mt-6 text-[11px] uppercase tracking-[0.14em] text-hp-muted">
           {t.chia_se.cta_nguoi_tu_van} · <span className="text-hp-ink">{lienHe.ten}</span>
         </p>
       )}
 
-      {so !== "" && (
+      {lienHe && so !== "" && (
         <div className="mt-6 flex flex-wrap items-center gap-4">
           <a
             href={`tel:${so}`}
@@ -614,17 +679,18 @@ export function KhoiLienHe({ lienHe, t }: { lienHe: LienHe; t: BoChu }) {
             <Phone aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
             {t.chia_se.cta_goi} {lienHe.dienThoai}
           </a>
-          <a
-            href={`https://zalo.me/${so}`}
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 border border-hp-ink px-6 py-3 text-[11px]
-                       uppercase tracking-[0.14em] text-hp-ink transition-colors
-                       duration-150 hover:bg-hp-ink hover:text-hp-foundation"
-          >
-            <MessageCircle aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
-            {t.chia_se.cta_zalo}
-          </a>
+          {nhan && (
+            <a
+              href={nhan}
+              {...thuocTinhNutNhan(lienHe.cachNhan)}
+              className="flex items-center gap-2 border border-hp-ink px-6 py-3 text-[11px]
+                         uppercase tracking-[0.14em] text-hp-ink transition-colors
+                         duration-150 hover:bg-hp-ink hover:text-hp-foundation"
+            >
+              <MessageCircle aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
+              {nhanNutNhan(lienHe.cachNhan, t)}
+            </a>
+          )}
         </div>
       )}
     </section>
@@ -637,11 +703,14 @@ export function KhoiLienHe({ lienHe, t }: { lienHe: LienHe; t: BoChu }) {
  * Chi hien tren man hinh nho: tren may tinh khoi cuoi trang la du, con tren
  * dien thoai khach cuon rat lau va khoi do o mai tan duoi cung.
  *
+ * Sale chon "chi goi dien" thi nut goi chiem ca thanh.
+ *
  * print:hidden — mot thanh dinh khong co nghia gi tren giay.
  */
 export function ThanhLienHe({ lienHe, t }: { lienHe: LienHe; t: BoChu }) {
   const so = soGoiDuoc(lienHe.dienThoai);
   if (so === "") return null;
+  const nhan = lienKetNhan(lienHe);
 
   return (
     <div
@@ -656,16 +725,17 @@ export function ThanhLienHe({ lienHe, t }: { lienHe: LienHe; t: BoChu }) {
         <Phone aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
         {t.chia_se.cta_goi}
       </a>
-      <a
-        href={`https://zalo.me/${so}`}
-        target="_blank"
-        rel="noreferrer"
-        className="flex flex-1 items-center justify-center gap-2 bg-hp-card px-4 py-3.5
-                   text-[11px] uppercase tracking-[0.14em] text-hp-ink"
-      >
-        <MessageCircle aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
-        {t.chia_se.cta_zalo}
-      </a>
+      {nhan && (
+        <a
+          href={nhan}
+          {...thuocTinhNutNhan(lienHe.cachNhan)}
+          className="flex flex-1 items-center justify-center gap-2 bg-hp-card px-4 py-3.5
+                     text-[11px] uppercase tracking-[0.14em] text-hp-ink"
+        >
+          <MessageCircle aria-hidden strokeWidth={1.5} className="h-4 w-4 shrink-0" />
+          {nhanNutNhan(lienHe.cachNhan, t)}
+        </a>
+      )}
     </div>
   );
 }

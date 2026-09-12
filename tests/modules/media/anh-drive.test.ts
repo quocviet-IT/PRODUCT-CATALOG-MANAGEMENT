@@ -9,7 +9,7 @@ const taiAnhDrive = vi.fn();
 // logic — dung di tim nham cho.
 vi.mock("@/modules/sheet/drive.client", () => ({ taiAnhDrive }));
 
-const { layUrlAnhSheet, CANH_DAI_ANH_SHEET } = await import("@/modules/media/anh-drive");
+const { layAnhSheet, CANH_DAI_ANH_SHEET } = await import("@/modules/media/anh-drive");
 const { dungKhoaAnhSheet, tepTonTai, xoaTep } = await import("@/modules/media/storage");
 
 // randomUUID, khong dung Date.now(): bucket la that va dung chung giua cac lan
@@ -29,16 +29,18 @@ describe("dungKhoaAnhSheet", () => {
   });
 });
 
-describe("layUrlAnhSheet", () => {
-  it("tai tu Drive, thu nho, ghi vao Storage roi tra URL co ky", async () => {
+describe("layAnhSheet", () => {
+  it("tai tu Drive, thu nho, ghi vao Storage roi tra ve BYTES", async () => {
     const to = await sharp({
       create: { width: 2000, height: 1500, channels: 3, background: "#ffffff" },
     }).jpeg().toBuffer();
     taiAnhDrive.mockResolvedValue(to);
 
-    const url = await layUrlAnhSheet(FILE_ID);
+    const anh = await layAnhSheet(FILE_ID);
 
-    expect(url).toContain("http");
+    // Tra ve chinh bytes anh, khong phai mot URL: tuyen anh dat header cache
+    // dai len no de CDN giu lai. Xem chu thich trong anh-drive.ts.
+    expect((await sharp(anh).metadata()).format).toBe("webp");
     expect(await tepTonTai(khoa)).toBe(true);
     expect(taiAnhDrive).toHaveBeenCalledOnce();
   }, 30000);
@@ -49,8 +51,8 @@ describe("layUrlAnhSheet", () => {
     }).jpeg().toBuffer();
     taiAnhDrive.mockResolvedValue(to);
 
-    await layUrlAnhSheet(FILE_ID);
-    await layUrlAnhSheet(FILE_ID);
+    await layAnhSheet(FILE_ID);
+    await layAnhSheet(FILE_ID);
 
     expect(taiAnhDrive).toHaveBeenCalledOnce();
   }, 30000);
@@ -61,7 +63,7 @@ describe("layUrlAnhSheet", () => {
     }).jpeg().toBuffer();
     taiAnhDrive.mockResolvedValue(to);
 
-    await layUrlAnhSheet(FILE_ID);
+    await layAnhSheet(FILE_ID);
 
     // Doc lai chinh tep da ghi de kiem, thay vi tin vao gia tri trung gian.
     const { taiVe } = await import("@/modules/media/storage");
@@ -74,7 +76,7 @@ describe("layUrlAnhSheet", () => {
   it("tu choi voi loi mien nguyen khi Drive tra ve du lieu khong phai anh", async () => {
     taiAnhDrive.mockResolvedValue(Buffer.from("khong phai anh"));
 
-    await expect(layUrlAnhSheet(FILE_ID)).rejects.toBeInstanceOf(LoiAnhKhongHopLe);
+    await expect(layAnhSheet(FILE_ID)).rejects.toBeInstanceOf(LoiAnhKhongHopLe);
   }, 30000);
 
   it("tu choi voi loi mien nguyen khi anh bi cat ngang giua chung (metadata doc duoc nhung toBuffer vo)", async () => {
@@ -86,6 +88,6 @@ describe("layUrlAnhSheet", () => {
     const catNgang = to.subarray(0, Math.floor(to.length / 2));
     taiAnhDrive.mockResolvedValue(catNgang);
 
-    await expect(layUrlAnhSheet(FILE_ID)).rejects.toBeInstanceOf(LoiAnhKhongHopLe);
+    await expect(layAnhSheet(FILE_ID)).rejects.toBeInstanceOf(LoiAnhKhongHopLe);
   }, 30000);
 });

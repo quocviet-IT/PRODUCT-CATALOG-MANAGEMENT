@@ -29,6 +29,12 @@ export type MucCatalogue = {
   size: string | null;
   tlVang: number | null;
   anh: AnhTrongCatalogue[];
+  /**
+   * Loi gioi thieu SALE tu viet cho khach (gop y 11/09/2026). Khong phai du lieu
+   * noi bo nao chep sang, nen duoc phep o ranh gioi nay. Chi co khi sale co go —
+   * catalogue cu va mau khong ai viet gi thi khong co truong nay.
+   */
+  gioiThieu?: string;
 };
 
 /**
@@ -38,8 +44,8 @@ export type MucCatalogue = {
  */
 export type NoiDungCatalogue = { phienBan: 1; muc: MucCatalogue[] };
 
-/** Mot lua chon cua sale: mot mau, kem nhung anh ho giu lai. */
-export type LuaChon = { ma: string; anh: string[] };
+/** Mot lua chon cua sale: mot mau, kem nhung anh ho giu lai va loi gioi thieu neu co. */
+export type LuaChon = { ma: string; anh: string[]; gioiThieu?: string };
 
 /** Nguon de dung anh chup: dong bang tinh + thu vien anh cua no. */
 export type NguonMau = { d: DongCatalogue; anh: AnhTrongThuMuc[] };
@@ -70,7 +76,9 @@ export const SO_MUC_TOI_DA = 100;
  * bat ky vao anh chup, bien catalogue thanh cho tro toi tep la.
  */
 export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogue {
-  const theoKhoa = new Map(nguon.map((n) => [khoaMau(n.d), n]));
+  // Cung mot phep chon dong voi man hinh chon (chonDongTotNhat): sale xem
+  // truoc thay gi thi khach phai thay dung the.
+  const theoKhoa = new Map(chonDongTotNhat(nguon).map((n) => [khoaMau(n.d), n]));
   const muc: MucCatalogue[] = [];
   const daCo = new Set<string>();
 
@@ -84,6 +92,9 @@ export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogu
     daCo.add(c.ma);
 
     const giu = new Set(c.anh);
+    // Loi gioi thieu: cat khoang trang va do dai O DAY, khong tin trinh duyet. Rong
+    // thi khong ghi truong — mau khong ai viet gi giu dung hinh dang cu.
+    const gioiThieu = (c.gioiThieu ?? "").trim().slice(0, DAI_GIOI_THIEU);
     muc.push({
       maMau: n.d.maMau,
       loaiSp: n.d.loaiSp,
@@ -92,10 +103,69 @@ export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogu
       size: n.d.size,
       tlVang: n.d.tlVang,
       anh: n.anh.filter((a) => giu.has(a.fileId)).map((a) => ({ fileId: a.fileId, ten: a.ten })),
+      ...(gioiThieu ? { gioiThieu } : {}),
     });
   }
 
   return { phienBan: 1, muc };
+}
+
+/** Loi gioi thieu mot mau: vai cau cho khach, khong phai mot bai viet. */
+export const DAI_GIOI_THIEU = 300;
+
+/**
+ * Cach "Sap xep nhanh" o khung Thu tu trinh bay. "da-chon" = thu tu luc tich chon.
+ * Anh chot 12/09/2026: chi loai san pham va loai vang.
+ */
+export const CACH_SAP_NHANH = ["da-chon", "loai-sp", "loai-vang"] as const;
+export type CachSapNhanh = (typeof CACH_SAP_NHANH)[number];
+
+/** Tuoi vang cao nhat ghi trong cot Chat lieu ("18K, 14K" -> 18). Khong ghi tuoi -> null. */
+export function tuoiVangCaoNhat(chatLieu: string | null): number | null {
+  if (!chatLieu) return null;
+  const so = [...chatLieu.matchAll(/(\d{1,2})\s*K/gi)].map((x) => Number(x[1]));
+  return so.length > 0 ? Math.max(...so) : null;
+}
+
+/**
+ * Sap lai danh sach mau MOT LAN theo tieu chi — sau do sale van keo chinh tay.
+ *
+ * On dinh (Array.sort on dinh tu ES2019): hai mau bang nhau giu thu tu dang co.
+ * Tra ve mang MOI, khong sua mang dau vao (do la state cua React).
+ */
+export function sapXepMuc<T extends { ma: string; loaiSp: string | null; chatLieu: string | null }>(
+  ds: T[],
+  cach: CachSapNhanh,
+  thuTuGoc: string[],
+): T[] {
+  const ra = [...ds];
+  if (cach === "da-chon") {
+    const goc = new Map(thuTuGoc.map((ma, i) => [ma, i]));
+    const viTri = (x: T) => goc.get(x.ma) ?? Number.MAX_SAFE_INTEGER;
+    return ra.sort((a, b) => viTri(a) - viTri(b));
+  }
+  if (cach === "loai-sp") {
+    return ra.sort((a, b) => {
+      if (a.loaiSp === b.loaiSp) return 0;
+      if (a.loaiSp === null) return 1;
+      if (b.loaiSp === null) return -1;
+      return a.loaiSp.localeCompare(b.loaiSp, "vi", { sensitivity: "base" });
+    });
+  }
+  const tuoi = (x: T) => tuoiVangCaoNhat(x.chatLieu) ?? -1;
+  return ra.sort((a, b) => tuoi(b) - tuoi(a));
+}
+
+/**
+ * Chuyen phan tu o vi tri `tu` toi vi tri `den`. Vi tri ngoai bien hay trung nhau thi
+ * tra LAI CHINH mang cu — nguoi goi so sanh === de biet co gi doi khong.
+ */
+export function doiCho<T>(ds: T[], tu: number, den: number): T[] {
+  if (tu === den || tu < 0 || den < 0 || tu >= ds.length || den >= ds.length) return ds;
+  const ra = [...ds];
+  const [x] = ra.splice(tu, 1);
+  ra.splice(den, 0, x);
+  return ra;
 }
 
 /**
@@ -148,8 +218,88 @@ export function dungSlug(ten: string, so: number, duoi: string): string {
   return `${phanTen}-${duoi}`;
 }
 
+/**
+ * Ma khong doan duoc cua mot duong dan: cum ky tu sau dau gach CUOI CUNG.
+ *
+ * Day moi la phan DINH DANH cua catalogue — phan ten dung truoc chi de doc. Nho
+ * vay sale doi ten link duoc ma link cu da gui khach van tim ra dung catalogue:
+ * hai duong dan cung ma la cung mot catalogue.
+ *
+ * Slug doi cu ("zxhpnhyrtpu3", 12 ky tu lien, khong dau gach): ca chuoi la ma.
+ */
+export function maCuaSlug(slug: string): string {
+  const i = slug.lastIndexOf("-");
+  return i === -1 ? slug : slug.slice(i + 1);
+}
+
+/** Phan ten doc duoc cua duong dan, de dien san vao o doi ten. Slug doi cu: rong. */
+export function phanTenCuaSlug(slug: string): string {
+  const i = slug.lastIndexOf("-");
+  return i === -1 ? "" : slug.slice(0, i);
+}
+
+/**
+ * Ma ngan nhat duoc dem di tim catalogue. Ma that dai 8 (slug moi) hoac 12 (slug
+ * doi cu); chan duoi 8 de mot duong dan go bay kieu "abc-x" khong thanh mot lan do
+ * tren ca bang.
+ */
+export const DAI_MA_TOI_THIEU = 8;
+
+/**
+ * Duong dan moi khi sale doi ten link: ten moi + GIU NGUYEN ma cu.
+ *
+ * null khi ten moi khong con chu hay so nao sau khi bo dau (toan ky tu la, toan
+ * emoji) — khong tu bia mot ten thay sale.
+ */
+export function slugDoiTen(slugCu: string, tenLink: string): string | null {
+  const phanTen = chuanHoaSlug(tenLink);
+  return phanTen ? `${phanTen}-${maCuaSlug(slugCu)}` : null;
+}
+
 /** Mot muc tren man hinh tao catalogue: nhu muc khach xem, kem TOAN BO thu vien. */
 export type MucDeChon = MucCatalogue & { ma: string };
+
+/**
+ * Nhieu dong bang tinh CUNG mot ma mau thi chon lay MOT dong.
+ *
+ * VI SAO CO TINH HUONG NAY: khoa chon la ma mau (xem khoaMau), nhung bang tinh
+ * co 202/1.591 ma mau trai tren nhieu dong — cung mot mau, khac trong luong hay
+ * khac size. Man hinh chon va trang khach deu hien MOT the cho moi ma.
+ *
+ * VI SAO PHAI CHON CO CHU DICH: truoc day hai cho deu dung
+ * `new Map(nguon.map(n => [khoaMau(n.d), n]))`, ma Map thi giu lai cai CUOI
+ * CUNG. Dong cuoi trong bang tinh khong co ly do gi de la dong tot nhat — va
+ * that su thi mau C10045 co hai dong: dong 69 co thu muc 4 anh, dong 615 co
+ * mot thu muc rong. Sale tich chon, mo ra thay "Mau nay chua co anh nao",
+ * trong khi anh van nam day. Bon ma mau dang bi nhu vay.
+ *
+ * Thu tu uu tien: CO ANH truoc — day la thu nguoi dung mat khi chon nham dong;
+ * roi den dong khai bao day du hon; cuoi cung la dong dau trong bang tinh, de
+ * ket qua on dinh chu khong doi theo tung lan doc.
+ */
+function doDayDu(d: DongCatalogue): number {
+  return [d.sku, d.so, d.mo, d.chiTiet, d.loaiSp, d.dongSp, d.chatLieu, d.mau, d.size,
+          d.tlVang, d.moTa1, d.moTa2, d.urlThuMuc]
+    .filter((v) => v !== null && v !== "").length;
+}
+
+export function chonDongTotNhat(nguon: NguonMau[]): NguonMau[] {
+  const nhom = new Map<string, NguonMau[]>();
+  for (const n of nguon) {
+    const k = khoaMau(n.d);
+    const cu = nhom.get(k);
+    if (cu) cu.push(n);
+    else nhom.set(k, [n]);
+  }
+
+  return [...nhom.values()].map((ds) =>
+    ds.reduce((tot, n) =>
+      n.anh.length !== tot.anh.length ? (n.anh.length > tot.anh.length ? n : tot)
+      : doDayDu(n.d) !== doDayDu(tot.d) ? (doDayDu(n.d) > doDayDu(tot.d) ? n : tot)
+      : n.d.dongSheet < tot.d.dongSheet ? n : tot,
+    ),
+  );
+}
 
 /**
  * Du lieu cho man hinh tao catalogue.
@@ -159,7 +309,7 @@ export type MucDeChon = MucCatalogue & { ma: string };
  * thi sale se tuong khach cung thay chung.
  */
 export function dungMucDeChon(nguon: NguonMau[]): MucDeChon[] {
-  return nguon.map(({ d, anh }) => ({
+  return chonDongTotNhat(nguon).map(({ d, anh }) => ({
     ma: khoaMau(d),
     maMau: d.maMau,
     loaiSp: d.loaiSp,

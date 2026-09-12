@@ -4,7 +4,7 @@ import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { getEnv } from "@/lib/env";
-import { suyRaCachDangNhap, type CachDangNhap, type VaiTro } from "./nguoi-dung.model";
+import { suyRaCachDangNhap, type CachDangNhap } from "./nguoi-dung.model";
 
 /**
  * Quan tri tai khoan. CHI chay o may chu — "server-only" o dau tep khien build
@@ -27,7 +27,8 @@ export type NguoiDungHang = {
   id: string;
   email: string;
   hoTen: string;
-  vaiTro: VaiTro;
+  /** Ma vai tro (vai_tro.ma). Ten hien thi tra trong danh sach vai tro. */
+  vaiTro: string;
   dangHoatDong: boolean;
   taoLuc: Date;
   /** Suy ra tu Supabase Auth; null khi khong doc duoc phia Auth. */
@@ -107,7 +108,8 @@ export async function taoTaiKhoan(v: {
   email: string;
   matKhau: string;
   hoTen: string;
-  vaiTro: VaiTro;
+  /** Ma vai tro. Khoa ngoai se tu choi neu vai tro nay khong ton tai. */
+  vaiTro: string;
 }): Promise<void> {
   const email = v.email.trim().toLowerCase();
   const { data, error } = await layKho().auth.admin.createUser({
@@ -147,6 +149,6 @@ export async function datTrangThai(id: string, dangHoatDong: boolean): Promise<v
   await db.update(users).set({ isActive: dangHoatDong }).where(eq(users.id, id));
 }
 
-export async function datVaiTro(id: string, vaiTro: VaiTro): Promise<void> {
+export async function datVaiTro(id: string, vaiTro: string): Promise<void> {
   await db.update(users).set({ role: vaiTro }).where(eq(users.id, id));
 }

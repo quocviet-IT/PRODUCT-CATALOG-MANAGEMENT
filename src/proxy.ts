@@ -15,7 +15,21 @@ import { NextResponse, type NextRequest } from "next/server";
  * de o hai noi thi mot ngay nao do chung noi hai dieu khac nhau. Nho vay
  * /catalogue/<slug> va /api/anh-drive van cong khai binh thuong.
  */
+/**
+ * Cookie phien cua Supabase luon bat dau bang "sb-". Khong co cai nao nghia la
+ * KHONG CO PHIEN de gia han.
+ */
+function coPhien(req: NextRequest): boolean {
+  return req.cookies.getAll().some((c) => c.name.startsWith("sb-"));
+}
+
 export async function proxy(req: NextRequest) {
+  // Khong co cookie phien thi ve thang. getUser() la mot luot goi MANG sang
+  // Supabase Auth; chay no cho mot nguoi khong dang nhap la tra tien cho cau
+  // tra loi da biet truoc. Ma phan lon luot truy cap he thong nay lai chinh la
+  // khach mo /catalogue/<slug> — ho khong bao gio co phien.
+  if (!coPhien(req)) return NextResponse.next({ request: req });
+
   const res = NextResponse.next({ request: req });
 
   const supabase = createServerClient(
@@ -40,9 +54,11 @@ export async function proxy(req: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Chay cho moi duong dan TRU tep tinh va anh: chung khong mang cookie
-     * phien, cho chung di qua day chi ton mot lan goi mang moi tep.
+     * Chay cho moi duong dan TRU tep tinh, anh, va tuyen phuc vu anh: chung
+     * khong mang cookie phien, cho chung di qua day chi ton mot lan goi mang
+     * moi tep. Mot trang khach goi api/anh-drive vai chuc lan — tuyen do cong
+     * khai theo thiet ke va khong bao gio doc phien.
      */
-    "/((?!_next/static|_next/image|favicon.ico|robots.txt|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)",
+    "/((?!_next/static|_next/image|favicon.ico|robots.txt|api/anh-drive|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico)$).*)",
   ],
 };

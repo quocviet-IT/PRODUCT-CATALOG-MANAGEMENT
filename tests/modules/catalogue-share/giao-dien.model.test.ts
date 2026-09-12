@@ -12,8 +12,18 @@ import {
   DAI_LOI_CHAO,
   DAI_TEN_KHACH,
   DAI_TEN_SALE,
+  DAI_LOI_KEU_GOI,
+  CACH_NHAN,
+  LOI_KEU_GOI,
+  cauKeuGoi,
+  coKhoiLienHe,
+  goiYCachNhan,
+  lienKetNhan,
   soGoiDuoc,
+  type CachNhan,
+  type LienHe,
 } from "@/modules/catalogue-share/giao-dien.model";
+import { boChu } from "@/messages";
 
 describe("docGiaoDien", () => {
   it("cot rong cua catalogue cu doc ra dung bo mac dinh", () => {
@@ -85,7 +95,7 @@ describe("docGiaoDien", () => {
   it("bo qua khoa la, khong chep no vao ket qua", () => {
     const g = docGiaoDien({ boCuc: "luoi", giaBan: 5_000_000, noiBo: "SO-123" });
     expect(Object.keys(g).sort()).toEqual(
-      ["bia", "boCuc", "hien", "lienHe", "ngonNgu", "nhan", "phienBan", "tone"],
+      ["bia", "boCuc", "hien", "lienHe", "loiKeuGoi", "ngonNgu", "nhan", "phienBan", "tone"],
     );
   });
 
@@ -114,13 +124,14 @@ describe("docGiaoDien — khối liên hệ", () => {
 
   it("giữ tên và điện thoại, đã cắt khoảng trắng", () => {
     const g = docGiaoDien({ lienHe: { ten: " Ngọc Anh ", dienThoai: " 0909 123 456 " } });
-    expect(g.lienHe).toEqual({ ten: "Ngọc Anh", dienThoai: "0909 123 456" });
+    expect(g.lienHe).toEqual({ ten: "Ngọc Anh", dienThoai: "0909 123 456", cachNhan: "zalo" });
   });
 
   it("chỉ có điện thoại vẫn là một khối liên hệ hợp lệ", () => {
     expect(docGiaoDien({ lienHe: { dienThoai: "0909123456" } }).lienHe).toEqual({
       ten: "",
       dienThoai: "0909123456",
+      cachNhan: "zalo",
     });
   });
 
@@ -128,7 +139,7 @@ describe("docGiaoDien — khối liên hệ", () => {
     // Catalogue tạo trước 08/09/2026 lưu tên người tư vấn ở bia.tenSale. Bỏ qua
     // là những link đã gửi mất một dòng thông tin mà không ai biết.
     const g = docGiaoDien({ bia: { tenKhach: "Chị Lan", tenSale: "Ngọc Anh" } });
-    expect(g.lienHe).toEqual({ ten: "Ngọc Anh", dienThoai: "" });
+    expect(g.lienHe).toEqual({ ten: "Ngọc Anh", dienThoai: "", cachNhan: "zalo" });
     expect(g.bia).toEqual({ tenKhach: "Chị Lan", loiChao: "" });
   });
 
@@ -137,7 +148,7 @@ describe("docGiaoDien — khối liên hệ", () => {
       bia: { tenKhach: "Chị Lan", tenSale: "Tên cũ" },
       lienHe: { ten: "Tên mới", dienThoai: "0909" },
     });
-    expect(g.lienHe).toEqual({ ten: "Tên mới", dienThoai: "0909" });
+    expect(g.lienHe).toEqual({ ten: "Tên mới", dienThoai: "0909", cachNhan: "zalo" });
   });
 
   it("cắt chuỗi quá dài", () => {
@@ -146,6 +157,144 @@ describe("docGiaoDien — khối liên hệ", () => {
     });
     expect(g.lienHe!.ten).toHaveLength(DAI_TEN_SALE);
     expect(g.lienHe!.dienThoai).toHaveLength(DAI_DIEN_THOAI);
+  });
+
+  it("BẢN GHI CŨ không có cachNhan: vẫn là Zalo như lúc gửi", () => {
+    // Trước 12/09/2026 nút thứ hai luôn là Zalo. Đổi mặc định ở đây là đổi nút
+    // trên những link đang nằm trong máy khách.
+    expect(docGiaoDien({ lienHe: { ten: "A", dienThoai: "0909" } }).lienHe!.cachNhan).toBe("zalo");
+  });
+
+  it("giữ cách nhắn đã chọn; giá trị lạ thì về Zalo", () => {
+    for (const k of CACH_NHAN) {
+      expect(docGiaoDien({ lienHe: { dienThoai: "1", cachNhan: k } }).lienHe!.cachNhan).toBe(k);
+    }
+    expect(docGiaoDien({ lienHe: { dienThoai: "1", cachNhan: "telegram" } }).lienHe!.cachNhan)
+      .toBe("zalo");
+  });
+});
+
+describe("goiYCachNhan", () => {
+  it("số Việt Nam gợi ý Zalo", () => {
+    expect(goiYCachNhan("0909 123 456")).toBe("zalo");
+    expect(goiYCachNhan("+84 909 123 456")).toBe("zalo");
+  });
+
+  it("số Mỹ gợi ý Tin nhắn — kể cả đúng dạng trong ảnh góp ý (14083049094)", () => {
+    expect(goiYCachNhan("(408) 304-9094")).toBe("tin-nhan");
+    expect(goiYCachNhan("14083049094")).toBe("tin-nhan");
+    expect(goiYCachNhan("+1 408 304 9094")).toBe("tin-nhan");
+  });
+
+  it("chưa đủ số hay dạng lạ thì không gợi ý — giữ lựa chọn đang có", () => {
+    expect(goiYCachNhan("")).toBeNull();
+    expect(goiYCachNhan("408")).toBeNull();
+    expect(goiYCachNhan("+44 20 7946 0958")).toBeNull();
+  });
+});
+
+describe("lienKetNhan", () => {
+  const lh = (cachNhan: CachNhan, dienThoai = "0909 123 456"): LienHe =>
+    ({ ten: "", dienThoai, cachNhan });
+
+  it("Zalo giữ đúng dạng link cũ", () => {
+    expect(lienKetNhan(lh("zalo"))).toBe("https://zalo.me/0909123456");
+  });
+
+  it("Tin nhắn mở app Tin nhắn của máy", () => {
+    expect(lienKetNhan(lh("tin-nhan", "(408) 304-9094"))).toBe("sms:4083049094");
+    expect(lienKetNhan(lh("tin-nhan", "+1 408 304 9094"))).toBe("sms:+14083049094");
+  });
+
+  it("WhatsApp luôn có mã quốc gia, không dấu + — số địa phương vẫn ra link đúng", () => {
+    expect(lienKetNhan(lh("whatsapp", "(408) 304-9094"))).toBe("https://wa.me/14083049094");
+    expect(lienKetNhan(lh("whatsapp", "14083049094"))).toBe("https://wa.me/14083049094");
+    expect(lienKetNhan(lh("whatsapp", "0909 123 456"))).toBe("https://wa.me/84909123456");
+    expect(lienKetNhan(lh("whatsapp", "+84 909 123 456"))).toBe("https://wa.me/84909123456");
+  });
+
+  it("Chỉ gọi điện, hoặc không có số, thì không có nút nhắn", () => {
+    expect(lienKetNhan(lh("khong"))).toBeNull();
+    expect(lienKetNhan(lh("zalo", ""))).toBeNull();
+  });
+});
+
+describe("lời kêu gọi (góp ý 11/09/2026)", () => {
+  const vi = boChu("vi").chia_se;
+  const en = boChu("en").chia_se;
+
+  it("BẢN GHI CŨ không có loiKeuGoi: vẫn là câu mặc định như lúc gửi", () => {
+    expect(docGiaoDien({}).loiKeuGoi).toEqual({ mau: "mac-dinh", tuViet: "" });
+    expect(cauKeuGoi(docGiaoDien({}).loiKeuGoi, "Ngọc Anh", vi)).toBe(vi.cta_tieu_de);
+  });
+
+  it("giữ câu đã chọn; khoá lạ hay sai kiểu thì về mặc định", () => {
+    for (const k of LOI_KEU_GOI.filter((x) => x !== "tu-viet")) {
+      expect(docGiaoDien({ loiKeuGoi: { mau: k } }).loiKeuGoi.mau).toBe(k);
+    }
+    expect(docGiaoDien({ loiKeuGoi: { mau: "khuyen-mai" } }).loiKeuGoi.mau).toBe("mac-dinh");
+    expect(docGiaoDien({ loiKeuGoi: "goi-ngay" }).loiKeuGoi.mau).toBe("mac-dinh");
+  });
+
+  it("tự viết: cắt khoảng trắng và độ dài; ô trống thì về mặc định", () => {
+    expect(docGiaoDien({ loiKeuGoi: { mau: "tu-viet", tuViet: "  Chúc chị Lan  " } }).loiKeuGoi)
+      .toEqual({ mau: "tu-viet", tuViet: "Chúc chị Lan" });
+    expect(docGiaoDien({ loiKeuGoi: { mau: "tu-viet", tuViet: "x".repeat(500) } }).loiKeuGoi.tuViet)
+      .toHaveLength(DAI_LOI_KEU_GOI);
+    expect(docGiaoDien({ loiKeuGoi: { mau: "tu-viet", tuViet: "   " } }).loiKeuGoi.mau).toBe("mac-dinh");
+  });
+
+  it("gọi ngay: điền tên người tư vấn; chưa có tên thì không để trống chỗ tên", () => {
+    const goiNgay = { mau: "goi-ngay", tuViet: "" } as const;
+    expect(cauKeuGoi(goiNgay, "Ngọc Anh", vi)).toBe("Hãy gọi ngay cho Ngọc Anh để được tư vấn");
+    expect(cauKeuGoi(goiNgay, "  ", vi)).toBe("Hãy gọi ngay cho em để được tư vấn");
+    expect(cauKeuGoi(goiNgay, "Ngoc Anh", en)).toBe("Call Ngoc Anh now for personal advice");
+  });
+
+  it("câu có sẵn đi theo ngôn ngữ catalogue", () => {
+    expect(cauKeuGoi({ mau: "custom", tuViet: "" }, "", vi)).toBe("Nhận custom theo yêu cầu");
+    expect(cauKeuGoi({ mau: "custom", tuViet: "" }, "", en)).toBe("Custom pieces made to order");
+    expect(cauKeuGoi({ mau: "size-mau", tuViet: "" }, "", vi)).toBe("Cần size hay màu vàng khác, cứ nhắn em");
+    expect(cauKeuGoi({ mau: "hen-xem", tuViet: "" }, "", en)).toBe("Book a visit to see it in person");
+  });
+
+  it("tự viết hiện đúng chữ sale gõ, không dịch; ô trống thì về câu mặc định", () => {
+    expect(cauKeuGoi({ mau: "tu-viet", tuViet: "Chúc chị Lan chọn được mẫu ưng ý" }, "", en))
+      .toBe("Chúc chị Lan chọn được mẫu ưng ý");
+    expect(cauKeuGoi({ mau: "tu-viet", tuViet: "  " }, "", vi)).toBe(vi.cta_tieu_de);
+  });
+});
+
+describe("coKhoiLienHe — khi nào khối liên hệ hiện ra", () => {
+  // Lỗi thật 12/09/2026: sale tự viết lời kêu gọi nhưng bỏ trống người tư vấn và
+  // số điện thoại → lienHe null → khối liên hệ (chứa lời kêu gọi) không hiện ở cả
+  // Xem trước lẫn trang khách, dù câu đã lưu đúng.
+  const mac = { mau: "mac-dinh", tuViet: "" } as const;
+  const lh = { ten: "Ngọc Anh", dienThoai: "", cachNhan: "zalo" } as const;
+
+  it("BẢN GHI CŨ không có liên hệ, lời kêu gọi mặc định: vẫn KHÔNG hiện, như lúc gửi", () => {
+    expect(coKhoiLienHe({ lienHe: null, loiKeuGoi: mac })).toBe(false);
+    expect(coKhoiLienHe(docGiaoDien({}))).toBe(false);
+  });
+
+  it("có người tư vấn hoặc số điện thoại thì hiện", () => {
+    expect(coKhoiLienHe({ lienHe: lh, loiKeuGoi: mac })).toBe(true);
+  });
+
+  it("chưa có liên hệ nhưng đã chọn câu có sẵn thì vẫn hiện", () => {
+    expect(coKhoiLienHe({ lienHe: null, loiKeuGoi: { mau: "custom", tuViet: "" } })).toBe(true);
+  });
+
+  it("chưa có liên hệ nhưng đã tự viết thì hiện — đúng dữ liệu của lỗi", () => {
+    const g = docGiaoDien({
+      loiKeuGoi: { mau: "tu-viet", tuViet: "Nhận custom theo yêu cầu ạ, thích gọi cho em qua số điện thoại" },
+    });
+    expect(g.lienHe).toBeNull();
+    expect(coKhoiLienHe(g)).toBe(true);
+  });
+
+  it("bấm Tự viết mà chưa gõ chữ nào thì chưa hiện", () => {
+    expect(coKhoiLienHe({ lienHe: null, loiKeuGoi: { mau: "tu-viet", tuViet: "   " } })).toBe(false);
   });
 });
 
@@ -177,7 +326,7 @@ describe("bố cục và màu nhấn mới", () => {
     for (const k of BO_CUC) expect(docGiaoDien({ boCuc: k }).boCuc).toBe(k);
   });
 
-  it("nhận cả bốn nền và bốn màu nhấn", () => {
+  it("nhận cả tám nền và bốn màu nhấn", () => {
     for (const k of TONE) expect(docGiaoDien({ tone: k }).tone).toBe(k);
     for (const k of NHAN) expect(docGiaoDien({ nhan: k }).nhan).toBe(k);
   });

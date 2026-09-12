@@ -4,7 +4,6 @@ import { anhXaBang, type OTho } from "@/modules/sheet/catalogue.mapper";
 import {
   LoiChuaBatDongBo,
   docTrangThai,
-  ghiAnhThuMuc,
   ghiBang,
   ghiTrangThai,
   kiemKhoa,
@@ -18,10 +17,14 @@ import {
  * — luc script vua day len va con nguoi con dang nhin — chu khong phai lang le
  * ghi de len ban tot roi lam trang khach vo vao sang hom sau.
  *
- * `anhThuMuc` la TUY CHON. Liet ke 65 thu muc Drive mat ~36 giay, con doc rieng
- * bang tinh chi mat ~2 giay; ma thu muc thi hiem khi doi con bang tinh thi doi
- * suot. Nen script goi day du moi gio, va goi khong kem `anhThuMuc` moi phut.
- * Thieu truong do thi ban danh sach anh cu duoc GIU NGUYEN, khong bi xoa.
+ * `anhThuMuc` KHONG con duoc nhan o day nua — xem /api/dong-bo/anh-thu-muc.
+ * Bang tinh gio tro toi 1.476 thu muc Drive, khong liet ke het trong mot luot
+ * chay Apps Script, nen ban do thu muc duoc dung DAN qua nhieu luot va chi
+ * duoc phep GOP THEM. Neu tuyen nay con ghi de bang mot ban do mot phan thi
+ * mot script cu chay lai la xoa sach cong cua ca chuc luot.
+ *
+ * Van chap nhan truong do trong than de mot script cu khong bi 400 — chi la bo
+ * qua no.
  */
 
 const KHONG_LUU_DEM = { "Cache-Control": "private, no-store" };
@@ -35,12 +38,8 @@ const SO_O_TOI_DA = 100;
 
 const Than = z.object({
   hang: z.array(z.array(z.unknown()).max(SO_O_TOI_DA)).max(SO_DONG_TOI_DA),
-  anhThuMuc: z
-    .record(
-      z.string().min(1).max(200),
-      z.array(z.object({ fileId: z.string().min(1).max(120), ten: z.string().max(300) })).max(500),
-    )
-    .optional(),
+  // Nhan de khong lam gay script cu, nhung KHONG dung toi. Xem chu thich tren.
+  anhThuMuc: z.unknown().optional(),
 });
 
 export async function POST(req: Request): Promise<Response> {
@@ -92,13 +91,10 @@ export async function POST(req: Request): Promise<Response> {
   const doiBang = truoc?.bam !== bam;
   if (doiBang) await ghiBang(than.hang);
 
-  let soThuMuc = truoc?.soThuMuc ?? 0;
-  let soAnh = truoc?.soAnh ?? 0;
-  if (than.anhThuMuc !== undefined) {
-    await ghiAnhThuMuc(than.anhThuMuc);
-    soThuMuc = Object.keys(than.anhThuMuc).length;
-    soAnh = Object.values(than.anhThuMuc).reduce((t, x) => t + x.length, 0);
-  }
+  // So thu muc / so anh do rieng /api/dong-bo/anh-thu-muc cap nhat; o day chi
+  // mang sang, khong tinh lai.
+  const soThuMuc = truoc?.soThuMuc ?? 0;
+  const soAnh = truoc?.soAnh ?? 0;
 
   // Moc thoi gian van cap nhat du bang khong doi: nguoi dung doc dong chu nay
   // de biet dong bo CON SONG hay da chet. Mot moc dung im vi "khong co gi moi"

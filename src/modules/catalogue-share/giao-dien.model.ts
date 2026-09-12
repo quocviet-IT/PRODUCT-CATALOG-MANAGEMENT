@@ -18,7 +18,17 @@ export const BO_CUC = [
 ] as const;
 export type BoCuc = (typeof BO_CUC)[number];
 
-export const TONE = ["beige", "trang", "toi", "reu"] as const;
+/**
+ * Tong mau.
+ *
+ * Bon tong sau them 11/09/2026 theo yeu cau nguoi dung — chon theo nhom san pham
+ * hoac phong cach. Bon tong dau giu nguyen de catalogue da gui khong doi. THEM
+ * vao cuoi chu khong chen giua: thu tu nay la thu tu hien trong o chon.
+ */
+export const TONE = [
+  "beige", "trang", "toi", "reu",
+  "hoa-van", "champagne", "bach-kim", "hong-phan",
+] as const;
 export type Tone = (typeof TONE)[number];
 
 /**
@@ -48,6 +58,20 @@ export const MAU_NHAN: Record<Nhan, { nhat: string; dam: string }> = {
   man:  { nhat: "#A0439B", dam: "#873781" },
 };
 
+/**
+ * Mau nhan GOI Y khi sale chon mot tong moi: chon tong la doi luon mau nhan cho
+ * hop — dung nhu mo ta tung tong da duyet — va sale van doi lai duoc ben duoi.
+ *
+ * Bon tong cu KHONG co goi y: truoc nay chon tong khong dong gi toi mau nhan, va
+ * chon lai chung khong duoc am tham doi mau nhan sale da chon.
+ */
+export const NHAN_GOI_Y: Partial<Record<Tone, Nhan>> = {
+  "hoa-van": "hong",
+  champagne: "dong",
+  "bach-kim": "luc",
+  "hong-phan": "hong",
+};
+
 /** Cac thong so co the bat/tat cho khach xem. Trung ten voi truong cua MucCatalogue. */
 export const THONG_SO = ["loaiSp", "chatLieu", "mau", "size", "tlVang"] as const;
 export type ThongSo = (typeof THONG_SO)[number];
@@ -55,12 +79,33 @@ export type ThongSo = (typeof THONG_SO)[number];
 export type Bia = { tenKhach: string; loiChao: string };
 
 /**
- * Nguoi tu van, hien o cuoi trang khach kem nut goi va nut Zalo.
+ * Cach khach nhan tin cho sale, ben canh nut goi.
+ *
+ * Truoc 12/09/2026 nut thu hai LUON la Zalo — nhung khach o My khong dung Zalo
+ * (gop y cua sale ben My). "khong" = chi co nut goi.
+ */
+export const CACH_NHAN = ["zalo", "tin-nhan", "whatsapp", "khong"] as const;
+export type CachNhan = (typeof CACH_NHAN)[number];
+
+/**
+ * Nguoi tu van, hien o cuoi trang khach kem nut goi va nut nhan tin.
  *
  * Day la thu bien mot catalogue dep thanh mot don hang: khach dang thich mot
  * mau ma khong biet nhan ai thi ho dong tab.
  */
-export type LienHe = { ten: string; dienThoai: string };
+export type LienHe = { ten: string; dienThoai: string; cachNhan: CachNhan };
+
+/**
+ * Loi keu goi — dong tieu de to cua khoi lien he ("Thich mau nao, nhan em giu
+ * ngay").
+ *
+ * Gop y 11/09/2026: cho sale chon cau co san hoac tu viet. Cau co san luu bang
+ * KHOA chu khong luu chu: trang khach dung chu theo ngon ngu cua catalogue, va ten
+ * nguoi tu van dien vao luc hien. "tu-viet" thi hien dung chu sale go.
+ */
+export const LOI_KEU_GOI = ["mac-dinh", "goi-ngay", "custom", "size-mau", "hen-xem", "tu-viet"] as const;
+export type MauLoiKeuGoi = (typeof LOI_KEU_GOI)[number];
+export type LoiKeuGoi = { mau: MauLoiKeuGoi; tuViet: string };
 
 export type GiaoDienCatalogue = {
   phienBan: 1;
@@ -70,6 +115,7 @@ export type GiaoDienCatalogue = {
   bia: Bia | null;
   /** null = khong hien khoi lien he. */
   lienHe: LienHe | null;
+  loiKeuGoi: LoiKeuGoi;
   nhan: Nhan;
   hien: Record<ThongSo, boolean>;
   ngonNgu: NgonNgu;
@@ -88,6 +134,7 @@ export const GIAO_DIEN_MAC_DINH: GiaoDienCatalogue = {
   tone: "beige",
   bia: null,
   lienHe: null,
+  loiKeuGoi: { mau: "mac-dinh", tuViet: "" },
   nhan: "hong",
   hien: { loaiSp: true, chatLieu: true, mau: true, size: true, tlVang: true },
   ngonNgu: "vi",
@@ -97,6 +144,8 @@ export const DAI_TEN_KHACH = 80;
 export const DAI_TEN_SALE = 80;
 export const DAI_LOI_CHAO = 300;
 export const DAI_DIEN_THOAI = 24;
+/** Mot cau tieu de, khong phai mot doan van: dai hon la vo khoi lien he. */
+export const DAI_LOI_KEU_GOI = 120;
 
 function cat(tho: unknown, toiDa: number): string {
   return typeof tho === "string" ? tho.trim().slice(0, toiDa) : "";
@@ -133,6 +182,9 @@ function docLienHe(goc: Record<string, unknown>): LienHe | null {
     const lh: LienHe = {
       ten: cat(x.ten, DAI_TEN_SALE),
       dienThoai: cat(x.dienThoai, DAI_DIEN_THOAI),
+      // THIEU truong nay = catalogue tao truoc 12/09/2026, luc nut thu hai luon
+      // la Zalo. Link da gui phai hien y nhu luc gui, nen mac dinh la zalo.
+      cachNhan: trong(CACH_NHAN, x.cachNhan, "zalo"),
     };
     return lh.ten || lh.dienThoai ? lh : null;
   }
@@ -141,7 +193,52 @@ function docLienHe(goc: Record<string, unknown>): LienHe | null {
     typeof bia === "object" && bia !== null
       ? cat((bia as Record<string, unknown>).tenSale, DAI_TEN_SALE)
       : "";
-  return tenCu ? { ten: tenCu, dienThoai: "" } : null;
+  return tenCu ? { ten: tenCu, dienThoai: "", cachNhan: "zalo" } : null;
+}
+
+/**
+ * Cach nhan tin GOI Y theo so dien thoai sale vua go.
+ *
+ * So Viet Nam (0... hay +84) -> Zalo; so My (+1, 10 chu so khong bat dau bang 0,
+ * hay 11 chu so bat dau bang 1) -> Tin nhan. Khong nhan ra thi null: de nguyen
+ * lua chon dang co, khong doan bua.
+ */
+export function goiYCachNhan(dienThoai: string): CachNhan | null {
+  const so = soGoiDuoc(dienThoai);
+  if (so.startsWith("+84") || /^0\d{8,10}$/.test(so)) return "zalo";
+  if (so.startsWith("+1") || /^[2-9]\d{9}$/.test(so) || /^1[2-9]\d{9}$/.test(so)) {
+    return "tin-nhan";
+  }
+  return null;
+}
+
+/**
+ * Duong dan cua nut nhan tin, hoac null khi khong co nut (chi goi, hay so rong).
+ *
+ * Zalo giu Y NGUYEN cach cu (zalo.me/<so da lam sach>): link da gui khong duoc
+ * doi. WhatsApp bat buoc so co ma quoc gia — xem soQuocTe.
+ */
+export function lienKetNhan(lh: LienHe): string | null {
+  const so = soGoiDuoc(lh.dienThoai);
+  if (so === "") return null;
+  if (lh.cachNhan === "zalo") return `https://zalo.me/${so}`;
+  if (lh.cachNhan === "tin-nhan") return `sms:${so}`;
+  if (lh.cachNhan === "whatsapp") return `https://wa.me/${soQuocTe(so)}`;
+  return null;
+}
+
+/**
+ * So co ma quoc gia, chi chu so — dang ma wa.me doi hoi.
+ *
+ * Sale go so dia phuong la chuyen thuong ("0909 123 456", "(408) 555-0199"), ma
+ * wa.me/0909123456 thi WhatsApp bao so khong hop le. Chi doan ma quoc gia cho
+ * DUNG hai dang so goiYCachNhan nhan ra; dang khac giu nguyen.
+ */
+export function soQuocTe(so: string): string {
+  if (so.startsWith("+")) return so.slice(1);
+  if (/^0\d{8,10}$/.test(so)) return `84${so.slice(1)}`;
+  if (/^[2-9]\d{9}$/.test(so)) return `1${so}`;
+  return so;
 }
 
 function docHien(tho: unknown): Record<ThongSo, boolean> {
@@ -175,10 +272,65 @@ export function docGiaoDien(tho: unknown): GiaoDienCatalogue {
     tone: trong(TONE, o.tone, GIAO_DIEN_MAC_DINH.tone),
     bia: docBia(o.bia),
     lienHe: docLienHe(o),
+    loiKeuGoi: docLoiKeuGoi(o.loiKeuGoi),
     nhan: trong(NHAN, o.nhan, GIAO_DIEN_MAC_DINH.nhan),
     hien: docHien(o.hien),
     ngonNgu: docNgonNgu(o.ngonNgu),
   };
+}
+
+/**
+ * Doc loi keu goi. THIEU truong (catalogue tao truoc 12/09/2026) = cau mac dinh,
+ * dung cau khach da thay luc nhan link.
+ */
+function docLoiKeuGoi(tho: unknown): LoiKeuGoi {
+  if (typeof tho !== "object" || tho === null) return GIAO_DIEN_MAC_DINH.loiKeuGoi;
+  const o = tho as Record<string, unknown>;
+  const tuViet = cat(o.tuViet, DAI_LOI_KEU_GOI);
+  const mau = trong(LOI_KEU_GOI, o.mau, "mac-dinh");
+  // "Tu viet" ma khong co chu nao thi khong phai loi keu goi: de nguyen la mot dong
+  // tieu de trong truoc mat khach.
+  return { mau: mau === "tu-viet" && tuViet === "" ? "mac-dinh" : mau, tuViet };
+}
+
+/** Nhung chu cauKeuGoi can — `t.chia_se` cua ca hai ngon ngu deu co du. */
+export type ChuKeuGoi = Record<
+  "cta_tieu_de" | "cta_goi_ngay" | "cta_goi_ngay_khong_ten" | "cta_custom" | "cta_size_mau" | "cta_hen_xem",
+  string
+>;
+
+/**
+ * Chu cua dong tieu de khoi lien he.
+ *
+ * Dung o CA trang khach lan nhan tung lua chon o trang tao, nen sale nhin thay dung
+ * cau khach se doc. "Tu viet" dang rong (sale vua xoa chu) thi ve cau mac dinh —
+ * cung quy tac voi docLoiKeuGoi.
+ */
+export function cauKeuGoi(lkg: LoiKeuGoi, tenTuVan: string, chu: ChuKeuGoi): string {
+  const ten = tenTuVan.trim();
+  if (lkg.mau === "tu-viet") return lkg.tuViet.trim() || chu.cta_tieu_de;
+  if (lkg.mau === "goi-ngay") {
+    return ten ? chu.cta_goi_ngay.replace("{ten}", ten) : chu.cta_goi_ngay_khong_ten;
+  }
+  if (lkg.mau === "custom") return chu.cta_custom;
+  if (lkg.mau === "size-mau") return chu.cta_size_mau;
+  if (lkg.mau === "hen-xem") return chu.cta_hen_xem;
+  return chu.cta_tieu_de;
+}
+
+/**
+ * Khoi lien he co hien ra khong.
+ *
+ * Co nguoi tu van hay so dien thoai thi hien, nhu truoc. VA hien ca khi sale da chon
+ * mot loi keu goi khac mac dinh hay da tu viet, du chua dien lien he. Loi that
+ * 12/09/2026: sale tu viet loi keu goi, bo trong ten va so, nen khoi bi an — khach
+ * khong thay gi ca, du cau da luu dung. Catalogue cu (khong lien he, cau mac dinh)
+ * van an nhu luc gui.
+ */
+export function coKhoiLienHe(g: Pick<GiaoDienCatalogue, "lienHe" | "loiKeuGoi">): boolean {
+  if (g.lienHe !== null) return true;
+  const { mau, tuViet } = g.loiKeuGoi;
+  return mau === "tu-viet" ? tuViet.trim() !== "" : mau !== "mac-dinh";
 }
 
 /**
