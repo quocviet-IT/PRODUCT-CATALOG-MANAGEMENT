@@ -462,6 +462,9 @@ async function chupMotNgonNgu(trinhDuyet: Browser, nn: NgonNgu): Promise<void> {
     await page.mouse.move(0, 0);
 
     // --- 7b. Bo cuc, tong mau, mau nhan ---
+    // 15/09/2026: 11 bo cuc = them mot hang the, khung Bo cuc -> Mau nhan vuot 1600px. Khung
+    // nhin cao tam thoi cho buoc nay roi tra ve 1600 de cac buoc sau chup y nhu cu.
+    await page.setViewportSize({ width: RONG, height: 2100 });
     await cuonToi(page, boCucKhoi, 40);
     await chup(luot, page, "07-bo-cuc-mau", [
       { o: kieu.getByText(dung(gd.bo_cuc_danh_sach)), huong: "duoi" },
@@ -470,6 +473,7 @@ async function chupMotNgonNgu(trinhDuyet: Browser, nn: NgonNgu): Promise<void> {
       // O mau nhan CUOI: dat canh chu "Mau nhan" thi de len dong mo ta.
       { o: khoi(page, dung(gd.nhan_mau_nhan)).locator("label").last(), huong: "trai" },
     ], await khungTu(page, boCucKhoi, khoi(page, dung(gd.nhan_mau_nhan))));
+    await page.setViewportSize({ width: RONG, height: 1600 });
 
     // --- 8. Thong so va ngon ngu ---
     const thongSo = khoi(page, dung(gd.hien_nhan));

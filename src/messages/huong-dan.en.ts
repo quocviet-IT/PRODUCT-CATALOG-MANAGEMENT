@@ -141,7 +141,7 @@ export const HUONG_DAN_EN: BoChu["huong_dan"] = {
     ten: "Choose layout, colour and accent",
     mo_ta: "The Presentation box decides how your customer sees the catalogue. Click an option to choose it.",
     chu: [
-      "Eight layouts: Vertical list (default, easy to compare), Image grid (many models), Lookbook and Gallery (few models, big pictures), Classic frame (easiest to read details), Magazine (quickest to skim), Line sheet (wholesale, prints tight), Invitation (one page per model, for VIP clients and bridal).",
+      "Eleven layouts: Vertical list (default, easy to compare), Image grid (many models), Lookbook and Gallery (few models, big pictures), Classic frame (easiest to read details), Magazine (quickest to skim), Line sheet (wholesale, prints tight), Invitation (one page per model, for VIP clients and bridal), plus three 2026 trends: Art Deco frame (bridal, diamonds), Specimen sheet (many models per page), Big type (few models, bold opening).",
       "Thirteen background colours. Many switch the accent to match — Champagne to Antique gold, Graphite to Sapphire blue, for example — and you can still change it back.",
       "The hint line says which kind of jewellery the chosen colour suits.",
       "Accent colour: the colour of the HUNG PHAT logo, the numbers and the Call button on the customer page. On dark backgrounds the accent text turns lighter so it stays easy to read.",
@@ -229,7 +229,7 @@ export const HUONG_DAN_EN: BoChu["huong_dan"] = {
     chu: [
       "Images kept out of the model's total.",
       "Untick (or click the picture) to leave it out; dropped images fade. Tick again to bring it back.",
-      "Main image: the first ticked image. It is the big picture in Lookbook, Gallery and Magazine; Classic frame uses the first two.",
+      "Main image: the first ticked image. It is the big picture in Lookbook, Gallery, Magazine and Big type; Classic frame uses the first two, and Art Deco frame shows the second one as a small medallion.",
       "Make this the main image: it jumps to the front. An unticked image is ticked again.",
       "Move the image one place earlier or later. On a computer you can also drag it by the six-dot handle.",
     ],

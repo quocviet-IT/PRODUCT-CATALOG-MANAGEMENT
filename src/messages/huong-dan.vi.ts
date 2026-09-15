@@ -142,7 +142,7 @@ export const HUONG_DAN_VI = {
     ten: "Chọn bố cục, tông màu và màu nhấn",
     mo_ta: "Khung Kiểu trình bày quyết định khách thấy catalogue ra sao. Bấm vào ô nào là chọn ô đó.",
     chu: [
-      "Tám bố cục: Danh sách dọc (mặc định, dễ so sánh), Lưới ảnh (hợp nhiều mẫu), Lookbook và Triển lãm (ít mẫu, ảnh lớn), Khung cổ điển (dễ đọc thông số), Tạp chí (lướt nhanh), Bảng mẫu (khách sỉ, in gọn), Thư mời (mỗi mẫu một trang, cho khách VIP và đồ cưới).",
+      "Mười một bố cục: Danh sách dọc (mặc định, dễ so sánh), Lưới ảnh (hợp nhiều mẫu), Lookbook và Triển lãm (ít mẫu, ảnh lớn), Khung cổ điển (dễ đọc thông số), Tạp chí (lướt nhanh), Bảng mẫu (khách sỉ, in gọn), Thư mời (mỗi mẫu một trang, cho khách VIP và đồ cưới), và ba kiểu xu hướng 2026: Khung Art Deco (nhẫn cưới, kim cương), Thẻ tiêu bản (nhiều mẫu một trang), Chữ lớn (ít mẫu, mở đầu ấn tượng).",
       "Mười ba tông màu nền. Nhiều tông tự chuyển màu nhấn cho hợp — ví dụ Champagne sang Vàng đồng, Than chì sang Xanh sapphire — vẫn đổi lại được.",
       "Dòng gợi ý cho biết tông đang chọn hợp với nhóm sản phẩm nào.",
       "Màu nhấn: màu của logo HUNG PHAT, số thứ tự và nút Gọi trên trang khách. Trên nền tối, chữ màu nhấn tự sáng hơn cho dễ đọc.",
@@ -230,7 +230,7 @@ export const HUONG_DAN_VI = {
     chu: [
       "Số ảnh đang giữ trên tổng số ảnh của mẫu.",
       "Bỏ tích (hoặc bấm vào ảnh) để bỏ ảnh đó khỏi catalogue; ảnh bị bỏ mờ đi. Tích lại để lấy lại.",
-      "Ảnh chính: ảnh được tích đầu tiên. Đây là ảnh lớn ở Lookbook, Triển lãm và Tạp chí; Khung cổ điển dùng hai ảnh đầu.",
+      "Ảnh chính: ảnh được tích đầu tiên. Đây là ảnh lớn ở Lookbook, Triển lãm, Tạp chí và Chữ lớn; Khung cổ điển dùng hai ảnh đầu, Khung Art Deco lấy ảnh thứ hai làm huy hiệu nhỏ.",
       "Đặt ảnh này làm ảnh chính: ảnh nhảy lên đầu. Ảnh đang bỏ tích sẽ được tích lại.",
       "Đưa ảnh lên trước hoặc ra sau một bậc. Trên máy tính cũng kéo thả ảnh được, bằng tay cầm sáu chấm.",
     ],
