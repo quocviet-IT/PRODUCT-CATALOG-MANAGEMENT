@@ -62,6 +62,10 @@ function nhanBoCuc(t: BoChu): Record<BoCuc, { ten: string; moTa: string }> {
       ten: t.mau_giao_dien.bo_cuc_thu_moi,
       moTa: t.mau_giao_dien.bo_cuc_thu_moi_mo_ta,
     },
+    "art-deco": {
+      ten: t.mau_giao_dien.bo_cuc_art_deco,
+      moTa: t.mau_giao_dien.bo_cuc_art_deco_mo_ta,
+    },
   };
 }
 
@@ -165,6 +169,24 @@ function nhanThongSo(t: BoChu): Record<ThongSo, string> {
  */
 function HinhBoCuc({ kieu }: { kieu: BoCuc }) {
   const o = "bg-hp-rule";
+  if (kieu === "art-deco") {
+    return (
+      <div aria-hidden className="mx-auto max-w-[150px] border border-hp-rule p-0.5">
+        <div className="relative flex flex-col items-center gap-1.5 border border-hp-rule px-3 py-2">
+          <span className="absolute left-0.5 top-0.5 h-1.5 w-1.5 border-l border-t border-hp-ink/60" />
+          <span className="absolute right-0.5 top-0.5 h-1.5 w-1.5 border-r border-t border-hp-ink/60" />
+          <span className="absolute bottom-0.5 left-0.5 h-1.5 w-1.5 border-b border-l border-hp-ink/60" />
+          <span className="absolute bottom-0.5 right-0.5 h-1.5 w-1.5 border-b border-r border-hp-ink/60" />
+          <div className="relative w-4/5">
+            <div className={`${o} aspect-[4/3]`} />
+            <div className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border border-hp-card bg-hp-ink/30" />
+          </div>
+          <div className="mt-1 h-1.5 w-1/2 bg-hp-ink/40" />
+          <div className="h-1 w-2/3 bg-hp-rule" />
+        </div>
+      </div>
+    );
+  }
   if (kieu === "bang-mau") {
     return (
       <div aria-hidden className="mx-auto max-w-[150px] divide-y divide-hp-rule border-y border-hp-rule">

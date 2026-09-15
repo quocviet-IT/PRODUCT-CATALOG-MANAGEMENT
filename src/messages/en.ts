@@ -406,6 +406,8 @@ export const en: BoChu = {
     bo_cuc_bang_mau_mo_ta: "One compact row per model: a small picture beside its details. Suits wholesale buyers and long lists; prints tight.",
     bo_cuc_thu_moi: "Invitation",
     bo_cuc_thu_moi_mo_ta: "Each model on its own page, centred, with a “Specially for” line using the client's name. Suits VIP clients and bridal.",
+    bo_cuc_art_deco: "Art Deco frame",
+    bo_cuc_art_deco_mo_ta: "Double-ruled frame with stepped corners, a large picture and a detail medallion. A 2026 trend — suits bridal, diamonds and VIP clients.",
 
     tone_reu: "Deep green",
 

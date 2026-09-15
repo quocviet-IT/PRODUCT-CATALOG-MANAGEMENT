@@ -393,9 +393,19 @@ describe("năm tông và ba màu nhấn mới (12/09/2026)", () => {
   });
 });
 
+describe("bố cục xu hướng 2026 (15/09/2026)", () => {
+  it("thêm vào cuối, sau tám bố cục cũ", () => {
+    expect(BO_CUC.slice(8)).toEqual(["art-deco"]);
+  });
+
+  it("docGiaoDien nhận khoá bố cục mới", () => {
+    for (const k of BO_CUC.slice(8)) expect(docGiaoDien({ boCuc: k }).boCuc).toBe(k);
+  });
+});
+
 describe("hai bố cục mới (12/09/2026)", () => {
   it("chỉ thêm vào cuối — thứ tự cũ giữ nguyên", () => {
-    expect(BO_CUC).toEqual([
+    expect(BO_CUC.slice(0, 8)).toEqual([
       "danh-sach", "luoi", "lookbook", "trien-lam", "khung-co-dien", "tap-chi",
       "bang-mau", "thu-moi",
     ]);

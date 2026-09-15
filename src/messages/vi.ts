@@ -418,6 +418,9 @@ export const vi = {
     bo_cuc_bang_mau_mo_ta: "Mỗi mẫu một hàng gọn: ảnh nhỏ cạnh thông số. Hợp khách sỉ, gửi nhiều mẫu, in gọn.",
     bo_cuc_thu_moi: "Thư mời",
     bo_cuc_thu_moi_mo_ta: "Mỗi mẫu một trang riêng, căn giữa, có dòng “Dành riêng cho” tên khách. Hợp khách VIP, đồ cưới.",
+    // Ba bo cuc xu huong 2026 (15/09/2026).
+    bo_cuc_art_deco: "Khung Art Deco",
+    bo_cuc_art_deco_mo_ta: "Khung kẻ đôi, góc bậc thang, ảnh lớn kèm huy hiệu ảnh chi tiết. Xu hướng 2026 — hợp nhẫn cưới, kim cương, khách VIP.",
 
     tone_reu: "Xanh rêu",
 
