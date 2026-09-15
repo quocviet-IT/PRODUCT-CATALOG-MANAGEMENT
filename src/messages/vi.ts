@@ -423,6 +423,8 @@ export const vi = {
     bo_cuc_art_deco_mo_ta: "Khung kẻ đôi, góc bậc thang, ảnh lớn kèm huy hiệu ảnh chi tiết. Xu hướng 2026 — hợp nhẫn cưới, kim cương, khách VIP.",
     bo_cuc_tieu_ban: "Thẻ tiêu bản",
     bo_cuc_tieu_ban_mo_ta: "Nhiều mẫu một trang như tủ trưng bày bảo tàng: ảnh nền trắng, nhãn số Nº. Xu hướng 2026 — lướt nhanh, gửi nhiều mẫu.",
+    bo_cuc_chu_lon: "Chữ lớn",
+    bo_cuc_chu_lon_mo_ta: "Mỗi mẫu một trang, loại sản phẩm viết cỡ poster phía trên ảnh. Xu hướng 2026 — mở đầu ấn tượng, hợp ít mẫu.",
 
     tone_reu: "Xanh rêu",
 

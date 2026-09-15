@@ -18,7 +18,7 @@ export const BO_CUC = [
   // 12/09/2026: Bang mau cho khach si, Thu moi cho khach VIP va do cuoi.
   "bang-mau", "thu-moi",
   // 15/09/2026: bo cuc xu huong 2026 (bo-cuc-xu-huong.tsx).
-  "art-deco", "tieu-ban",
+  "art-deco", "tieu-ban", "chu-lon",
 ] as const;
 export type BoCuc = (typeof BO_CUC)[number];
 

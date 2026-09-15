@@ -410,6 +410,8 @@ export const en: BoChu = {
     bo_cuc_art_deco_mo_ta: "Double-ruled frame with stepped corners, a large picture and a detail medallion. A 2026 trend — suits bridal, diamonds and VIP clients.",
     bo_cuc_tieu_ban: "Specimen sheet",
     bo_cuc_tieu_ban_mo_ta: "Many models per page, like a museum case: white-ground pictures with Nº labels. A 2026 trend — quick to browse, good for many models.",
+    bo_cuc_chu_lon: "Big type",
+    bo_cuc_chu_lon_mo_ta: "One page per model, with the product type set poster-size above the picture. A 2026 trend — a bold first impression, best for a few models.",
 
     tone_reu: "Deep green",
 

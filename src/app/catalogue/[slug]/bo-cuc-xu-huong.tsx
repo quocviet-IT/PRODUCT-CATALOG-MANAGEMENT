@@ -1,4 +1,14 @@
-import { Anh, GioiThieu, ThongSoDong, mocAnh, thongSo, type DoiSo } from "./bo-cuc-chung";
+import { chuLonCuaMau } from "@/modules/catalogue-share/giao-dien.model";
+import {
+  Anh,
+  DuongTrangTri,
+  GioiThieu,
+  MaMau,
+  ThongSoDong,
+  mocAnh,
+  thongSo,
+  type DoiSo,
+} from "./bo-cuc-chung";
 
 /**
  * Ba bo cuc XU HUONG 2026 (15/09/2026) — tach khoi bo-cuc.tsx de tep do khong phinh them.
@@ -207,6 +217,72 @@ export function TheTieuBan({ muc, g, t }: DoiSo) {
             <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.08em] text-hp-muted">{nhan}</p>
             <ThongSoDong ds={thongSo(m, g, t)} lop="mt-1.5" />
             <GioiThieu m={m} lop="mt-2" />
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/**
+ * Bo cuc 11 — chu lon (xu huong "Typographic Maximalism" 2026).
+ *
+ * Chu co poster la hinh anh chinh: loai san pham, hoac chat lieu, hoac ma mau — xem
+ * chuLonCuaMau, khong bao gio in to mot thong so sale da an. Chu nam TREN anh, khong de len
+ * anh. Khoang cach dong >= 1.12 de dau tieng Viet chong nhieu tang (Ề, Ẫ) khong bi cat.
+ * Moi mau mot to giay khi in.
+ */
+export function ChuLon({ muc, g, t }: DoiSo) {
+  const moc = mocAnh(muc);
+  return (
+    <ul data-bo-cuc="chu-lon" className="space-y-24 print:space-y-0">
+      {muc.map((m, i) => {
+        const [chinh, ...phu] = m.anh;
+        return (
+          <li
+            key={`${m.maMau ?? "x"}-${i}`}
+            data-muc={i}
+            className="break-inside-avoid print:break-after-page"
+          >
+            <div className="flex items-center gap-4">
+              <span className="font-title text-lg tabular-nums leading-none text-hp-pink">
+                {`${String(i + 1).padStart(2, "0")} / ${String(muc.length).padStart(2, "0")}`}
+              </span>
+              <span aria-hidden className="h-px flex-grow bg-hp-rule" />
+            </div>
+
+            <p
+              data-chu-lon
+              className="mt-6 break-words font-title text-[clamp(3rem,13vw,9.5rem)] uppercase
+                         leading-[1.12] tracking-[0.02em] text-hp-ink print:text-[64pt]"
+            >
+              {chuLonCuaMau(m, g.hien) ?? t.catalogue_sheet.chua_co_ma_mau}
+            </p>
+
+            <div className="mt-8 grid gap-8 sm:grid-cols-[minmax(0,1fr)_15rem] sm:items-end">
+              <div>
+                {chinh && (
+                  <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={2000}
+                       tyLe="aspect-[4/3]" uuTien={moc[i] === 0} />
+                )}
+                {phu.length > 0 && (
+                  <ul className="mt-3 grid grid-cols-4 gap-2">
+                    {phu.slice(0, 4).map((a) => (
+                      <li key={a.fileId}>
+                        <Anh m={m} fileId={a.fileId} ten={a.ten} rong={500}
+                             tyLe="aspect-[4/3]" uuTien={false} />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+              <div className="flex flex-col gap-3">
+                <MaMau m={m} t={t} />
+                <DuongTrangTri lop="w-24 gap-2" />
+                <ThongSoDong ds={thongSo(m, g, t)} />
+                <GioiThieu m={m} />
+              </div>
+            </div>
           </li>
         );
       })}

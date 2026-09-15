@@ -16,7 +16,7 @@ vi.mock("@/messages/dung-chu", async () => {
   return { useChu: () => bo("vi") };
 });
 
-import { KhungArtDeco, TheTieuBan } from "@/app/catalogue/[slug]/bo-cuc-xu-huong";
+import { ChuLon, KhungArtDeco, TheTieuBan } from "@/app/catalogue/[slug]/bo-cuc-xu-huong";
 
 const t = boChu("vi");
 
@@ -102,5 +102,36 @@ describe("Thẻ tiêu bản", () => {
   it("thông số và lời giới thiệu có mặt", () => {
     expect(html).toContain("NHẪN · Vàng 18K");
     expect(html).toContain("Nhẫn cưới đan tay.");
+  });
+});
+
+describe("Chữ lớn", () => {
+  const html = ve(ChuLon, "chu-lon");
+  const chuLon = (s: string) => [...s.matchAll(/data-chu-lon="true"[^>]*>([^<]*)</g)].map((x) => x[1]);
+
+  it("gốc mang data-bo-cuc, mỗi mẫu một data-muc", () => {
+    expect(dem(html, 'data-bo-cuc="chu-lon"')).toBe(1);
+    expect(dem(html, "data-muc=")).toBe(3);
+  });
+
+  it("chữ lớn theo chuLonCuaMau: Loại SP, thiếu thì Chất liệu", () => {
+    expect(chuLon(html)).toEqual(["NHẪN", "Vàng trắng 14K", "DÂY CHUYỀN"]);
+  });
+
+  it("ẩn Loại SP thì chữ lớn sang Chất liệu, thiếu nữa thì chữ thay cho mã mẫu", () => {
+    expect(chuLon(ve(ChuLon, "chu-lon", { loaiSp: false }))).toEqual([
+      "Vàng 18K", "Vàng trắng 14K", t.catalogue_sheet.chua_co_ma_mau,
+    ]);
+  });
+
+  it("số thứ tự dạng 01 / 03 và tối đa bốn ảnh phụ", () => {
+    expect(html).toContain(">01 / 03<");
+    expect(html).toContain('data-anh="c-5"');
+    expect(html).not.toContain('data-anh="c-6"');
+  });
+
+  it("thông số và lời giới thiệu có mặt", () => {
+    expect(html).toContain("Nhẫn cưới đan tay.");
+    expect(html).toContain(">D101<");
   });
 });
