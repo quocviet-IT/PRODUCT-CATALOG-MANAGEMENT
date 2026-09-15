@@ -14,7 +14,7 @@
 - `BO_CUC` CHỈ THÊM VÀO CUỐI, đúng thứ tự: `"art-deco"`, `"tieu-ban"`, `"chu-lon"`. Không đổi `GIAO_DIEN_MAC_DINH`, `CHU_DE`, `docGiaoDien`. Không migration.
 - Tám bố cục cũ phải ra ĐÚNG Y markup cũ sau khi tách tệp (Task 2 chứng minh bằng snapshot tạm).
 - `bo-cuc-xu-huong.tsx` chỉ import từ `./bo-cuc-chung`, `@/modules/...`, `@/messages` — KHÔNG import từ `./bo-cuc` (tránh vòng lặp import).
-- Mỗi bố cục mới: gốc `<ul data-bo-cuc="<khoá>">` (Thẻ tiêu bản: `ul` nằm trong một `div` bọc, `data-bo-cuc` vẫn trên `ul`); mỗi mẫu một `<li data-muc={i}>`; duyệt mẫu và ảnh theo đúng thứ tự gốc; được phép chỉ hiện một phần ảnh.
+- Mỗi bố cục mới: gốc `<ul data-bo-cuc="<khoá>">` (cả Thẻ tiêu bản — bản sửa 15/09/2026 đã bỏ `div` bọc và dòng đếm); mỗi mẫu một `<li data-muc={i}>`; duyệt mẫu và ảnh theo đúng thứ tự gốc; được phép chỉ hiện một phần ảnh.
 - KHÔNG chữ nào đè lên ảnh (ảnh đè ảnh thì được).
 - Chữ lớn: `chuLonCuaMau(m, g.hien)` — Loại SP (nếu `hien.loaiSp` và có giá trị) → Chất liệu (nếu `hien.chatLieu` và có giá trị) → Mã mẫu → `null` (hiện `catalogue_sheet.chua_co_ma_mau`); chuỗi chỉ khoảng trắng coi như trống; trả chuỗi đã cắt khoảng trắng hai đầu.
 - Chỉ dùng token màu có sẵn (`hp-ink`, `hp-body`, `hp-muted`, `hp-rule`, `hp-pink`, `hp-foundation`, `hp-plate`); hoạ tiết SVG vẽ bằng `text-hp-pink` (màu nhấn, `.mau-nhan` của trang tự chọn sắc theo tông), `aria-hidden`. Không thêm biến CSS.
@@ -27,7 +27,7 @@
   - `mau_giao_dien.bo_cuc_chu_lon` = "Chữ lớn" / "Big type"
   - `mau_giao_dien.bo_cuc_chu_lon_mo_ta` = "Mỗi mẫu một trang, loại sản phẩm viết cỡ poster phía trên ảnh. Xu hướng 2026 — mở đầu ấn tượng, hợp ít mẫu." / "One page per model, with the product type set poster-size above the picture. A 2026 trend — a bold first impression, best for a few models."
   - `chia_se.tieu_ban_so` = "Nº {n}" / "Nº {n}"
-  - Dòng đếm của Thẻ tiêu bản dùng khoá CÓ SẴN `chia_se.khach_gom` ("{n} mẫu" / "{n} models") — cùng chữ spec định cho `tieu_ban_dem`, nên KHÔNG thêm khoá `tieu_ban_dem`.
+  - Thẻ tiêu bản KHÔNG có dòng đếm riêng (anh chốt 15/09/2026 sau review Task 4: đầu trang khách và bản Xem trước đã hiện "{n} mẫu" qua `chia_se.khach_gom`); KHÔNG thêm khoá `tieu_ban_dem`.
 - Chú thích trong code viết KHÔNG DẤU (lối cả repo); chữ hiện trên giao diện có dấu.
 - Scratchpad: `$S = "C:\Users\pit010\AppData\Local\Temp\claude\C--Users-pit010-QUICKBOOK-WEBAPP--claude-worktrees-strange-dirac-fe8335\89331c5e-4e2b-46fc-9bff-e8a5a7b42926\scratchpad"`.
 - Commit message tiếng Việt, ghi bằng Write ra tệp UTF-8 `$S\commit-msg.txt` (Read trước nếu tệp đã có, rồi ghi đè), `git commit -F "$S\commit-msg.txt"`; dòng cuối `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>` (repo này mọi commit có trailer; memory "không gắn Claude" chỉ áp cho repo kế toán).
@@ -1777,11 +1777,8 @@ try {
     }
     if (khoa === "tieu-ban") {
       const nhanDau = (await goc.locator(":scope > li").first().locator("p.font-mono").textContent())?.trim() ?? "";
-      // Dong dem la the p ngay truoc ul trong div boc — trang khach con mot dong "N mau" o dau trang.
-      const dongDem = (await khach.locator('div:has(> [data-bo-cuc="tieu-ban"]) > p').first().textContent())?.trim() ?? "";
-      kiem("tieu-ban: nhan mau dau Nº 001, dong dem dung so mau",
-        nhanDau.startsWith("Nº 001") && dongDem === ch.khach_gom.replace("{n}", String(SO_MAU)),
-        `(nhan "${nhanDau}", dong dem "${dongDem}")`);
+      // Bo cuc khong co dong dem rieng (anh chot 15/09/2026) — dau trang da hien so mau.
+      kiem("tieu-ban: nhan mau dau bat dau bang Nº 001", nhanDau.startsWith("Nº 001"), `(thay "${nhanDau}")`);
     }
     if (khoa === "chu-lon") {
       const chu = await goc.locator("[data-chu-lon]").allTextContents();
