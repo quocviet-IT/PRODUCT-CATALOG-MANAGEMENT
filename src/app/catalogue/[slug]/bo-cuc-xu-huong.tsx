@@ -174,45 +174,42 @@ export function KhungArtDeco({ muc, g, t }: DoiSo) {
  * bam vao van luot du anh. Khac Bang mau (hang du lieu, chu dan dat) va Luoi anh (moi anh
  * mot o): o day moi MAU mot the, anh dan dat. Vach cham duoi moi the nhu khay trung bay,
  * de trang khong trong tron.
+ *
+ * Khong co dong dem rieng: dau trang khach va ban Xem truoc da hien so mau (anh chot 15/09/2026).
  */
 export function TheTieuBan({ muc, g, t }: DoiSo) {
   return (
-    <div>
-      <p className="border-b border-hp-rule pb-3 text-[11px] uppercase tracking-[0.18em] text-hp-muted">
-        {t.chia_se.khach_gom.replace("{n}", String(muc.length))}
-      </p>
-      <ul
-        data-bo-cuc="tieu-ban"
-        className="mt-10 grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 sm:gap-x-8 print:grid-cols-3"
-      >
-        {muc.map((m, i) => {
-          const [chinh] = m.anh;
-          const nhan = [
-            t.chia_se.tieu_ban_so.replace("{n}", String(i + 1).padStart(3, "0")),
-            m.maMau ?? t.catalogue_sheet.chua_co_ma_mau,
-            ...(m.anh.length > 1 ? [t.chia_se.bang_mau_so_anh.replace("{n}", String(m.anh.length))] : []),
-          ].join(" · ");
-          return (
-            <li
-              key={`${m.maMau ?? "x"}-${i}`}
-              data-muc={i}
-              className="break-inside-avoid border-b border-dotted border-hp-rule pb-6"
-            >
-              {chinh ? (
-                // Ba the dau nam tren man hinh dau tien: tai ngay.
-                <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={900}
-                     tyLe="aspect-[4/3]" uuTien={i < 3} />
-              ) : (
-                <div aria-hidden className="aspect-[4/3] bg-hp-plate" />
-              )}
-              <span aria-hidden className="mt-3 block h-px bg-hp-rule" />
-              <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.08em] text-hp-muted">{nhan}</p>
-              <ThongSoDong ds={thongSo(m, g, t)} lop="mt-1.5" />
-              <GioiThieu m={m} lop="mt-2" />
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+    <ul
+      data-bo-cuc="tieu-ban"
+      className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 sm:gap-x-8 print:grid-cols-3"
+    >
+      {muc.map((m, i) => {
+        const [chinh] = m.anh;
+        const nhan = [
+          t.chia_se.tieu_ban_so.replace("{n}", String(i + 1).padStart(3, "0")),
+          m.maMau ?? t.catalogue_sheet.chua_co_ma_mau,
+          ...(m.anh.length > 1 ? [t.chia_se.bang_mau_so_anh.replace("{n}", String(m.anh.length))] : []),
+        ].join(" · ");
+        return (
+          <li
+            key={`${m.maMau ?? "x"}-${i}`}
+            data-muc={i}
+            className="break-inside-avoid border-b border-dotted border-hp-rule pb-6"
+          >
+            {chinh ? (
+              // Ba the dau nam tren man hinh dau tien: tai ngay.
+              <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={900}
+                   tyLe="aspect-[4/3]" uuTien={i < 3} />
+            ) : (
+              <div aria-hidden className="aspect-[4/3] bg-hp-plate" />
+            )}
+            <span aria-hidden className="mt-3 block h-px bg-hp-rule" />
+            <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.08em] text-hp-muted">{nhan}</p>
+            <ThongSoDong ds={thongSo(m, g, t)} lop="mt-1.5" />
+            <GioiThieu m={m} lop="mt-2" />
+          </li>
+        );
+      })}
+    </ul>
   );
 }

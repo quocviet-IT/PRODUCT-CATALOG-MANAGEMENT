@@ -78,10 +78,13 @@ describe("Khung Art Deco", () => {
 describe("Thẻ tiêu bản", () => {
   const html = ve(TheTieuBan, "tieu-ban");
 
-  it("gốc mang data-bo-cuc, mỗi mẫu một data-muc, có dòng đếm số mẫu", () => {
-    expect(dem(html, 'data-bo-cuc="tieu-ban"')).toBe(1);
+  it("gốc là ul mang data-bo-cuc, mỗi mẫu một data-muc, không lặp dòng đếm số mẫu", () => {
+    // React 19 SSR tự đẩy <link rel="preload"> cho <img> lên đầu chuỗi HTML (không
+    // liên quan cây component) — bỏ các thẻ đó trước khi xét phần tử gốc thật sự.
+    const noiDung = html.replace(/^(<link[^>]*\/>)*/, "");
+    expect(noiDung.startsWith('<ul data-bo-cuc="tieu-ban"')).toBe(true);
     expect(dem(html, "data-muc=")).toBe(3);
-    expect(html).toContain(">3 mẫu<");
+    expect(html).not.toContain(">3 mẫu<");
   });
 
   it("nhãn: số đệm ba chữ số · mã mẫu · số ảnh khi hơn một ảnh", () => {

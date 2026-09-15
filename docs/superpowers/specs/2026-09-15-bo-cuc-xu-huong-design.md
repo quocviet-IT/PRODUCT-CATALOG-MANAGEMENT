@@ -103,9 +103,8 @@ Anh chốt (15/09/2026):
 
 ### 3.4 Thẻ tiêu bản (`tieu-ban`)
 
-- Bọc ngoài một `div`: dòng đếm **`chia_se.tieu_ban_dem`** ("{n} mẫu") chữ nhỏ in hoa màu phụ,
-  kẻ mảnh bên dưới; rồi gốc `<ul data-bo-cuc="tieu-ban">` — `data-bo-cuc` vẫn nằm trên `ul`
-  và `ul > li` đúng bằng số mẫu.
+- Gốc `<ul data-bo-cuc="tieu-ban">`, `ul > li` đúng bằng số mẫu. KHÔNG có dòng đếm riêng (anh
+  chốt 15/09/2026): đầu trang khách và bản Xem trước đã hiện "{n} mẫu".
 - Lưới **2 cột** trên điện thoại, **3 cột** từ màn hình vừa trở lên và trên bản in. Mỗi thẻ
   `break-inside-avoid`, ngăn dưới bằng một vạch chấm mảnh (`border-dotted border-hp-rule`) như
   khay trưng bày.
@@ -144,7 +143,6 @@ Anh chốt (15/09/2026):
   | `mau_giao_dien.bo_cuc_chu_lon` | Chữ lớn | Big type |
   | `mau_giao_dien.bo_cuc_chu_lon_mo_ta` | Mỗi mẫu một trang, loại sản phẩm viết cỡ poster phía trên ảnh. Xu hướng 2026 — mở đầu ấn tượng, hợp ít mẫu. | One page per model, with the product type set poster-size above the picture. A 2026 trend — a bold first impression, best for a few models. |
   | `chia_se.tieu_ban_so` | Nº {n} | Nº {n} |
-  | `chia_se.tieu_ban_dem` | {n} mẫu | {n} models |
 
 ### 3.7 Hướng dẫn
 
@@ -172,7 +170,7 @@ Anh chốt (15/09/2026):
   sau khi push. Với mỗi bố cục mới, chọn 3 mẫu có ảnh:
   - Xem trước: `[data-bo-cuc="<khoá>"] > li` đúng bằng số mẫu.
   - Art Deco: số huy hiệu bằng số mẫu có ≥ 2 ảnh.
-  - Tiêu bản: nhãn mẫu đầu bắt đầu bằng `Nº 001`; dòng đếm đúng "3 mẫu".
+  - Tiêu bản: nhãn mẫu đầu bắt đầu bằng `Nº 001`.
   - Chữ lớn: chữ lớn mẫu đầu bằng Loại SP của mẫu đó; bỏ tích Loại SP → chữ lớn đổi sang Chất liệu.
   - Tạo link, mở trang khách: đúng `data-bo-cuc`; mô phỏng in: `li` của Art Deco và Chữ lớn có
     `break-after: page`.
