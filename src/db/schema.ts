@@ -60,6 +60,15 @@ export const users = pgTable("users", {
     .references(() => vaiTro.ma, { onDelete: "restrict", onUpdate: "cascade" }),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  /**
+   * Lan cuoi nguoi nay DUNG he thong — cho cham mau o trang Tai khoan.
+   *
+   * Khac lan cuoi dang nhap cua Supabase Auth: phien duoc proxy.ts gia han tren moi
+   * yeu cau, nen nguoi dung hang ngay co the giu mot phien nhieu tuan ma khong dang
+   * nhap lai. Ghi trong getSessionUser (auth/guard.ts) toi da 10 phut mot lan.
+   * NULL: chua mo trang nao tu khi co cot nay.
+   */
+  lastSeenAt: timestamp("last_seen_at", { withTimezone: true }),
 }, (t) => [uniqueIndex("users_email_idx").on(t.email)]);
 
 export const brandSettings = pgTable("brand_settings", {

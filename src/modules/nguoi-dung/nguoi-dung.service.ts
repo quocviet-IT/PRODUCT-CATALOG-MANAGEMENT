@@ -4,7 +4,13 @@ import { asc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { getEnv } from "@/lib/env";
-import { suyRaCachDangNhap, type CachDangNhap } from "./nguoi-dung.model";
+import {
+  gopLanCuoiVao,
+  mucHoatDong,
+  suyRaCachDangNhap,
+  type CachDangNhap,
+  type MucHoatDong,
+} from "./nguoi-dung.model";
 
 /**
  * Quan tri tai khoan. CHI chay o may chu — "server-only" o dau tep khien build
@@ -33,7 +39,13 @@ export type NguoiDungHang = {
   taoLuc: Date;
   /** Suy ra tu Supabase Auth; null khi khong doc duoc phia Auth. */
   cachDangNhap: CachDangNhap | null;
-  lanCuoiDangNhap: Date | null;
+  /**
+   * Moc muon hon giua lan cuoi dung he thong (users.last_seen_at) va lan cuoi dang
+   * nhap (Supabase Auth). null khi chua co ca hai.
+   */
+  lanCuoiVao: Date | null;
+  /** Tinh san o may chu — bang tai khoan la client component, chi hien thi. */
+  mucHoatDong: MucHoatDong;
 };
 
 /** Toi da mot trang danh sach nguoi dung — cong ty nay khong toi muc do. */
@@ -42,11 +54,12 @@ const MOI_TRANG_AUTH = 200;
 /**
  * Danh sach tai khoan.
  *
- * Ghep hai nguon: bang `users` (vai tro, trang thai — do minh quan ly) va
- * Supabase Auth (cach dang nhap, lan cuoi vao — do Supabase quan ly). Bang
- * `users` la nguon THAT cua danh sach; Auth chi bo sung. Neu goi Auth hong thi
- * van hien du danh sach, chi thieu hai cot phu — mot man hinh quan tri khong
- * duoc trang chi vi mot loi phu.
+ * Ghep hai nguon: bang `users` (vai tro, trang thai, lan cuoi hoat dong — do minh
+ * quan ly) va Supabase Auth (cach dang nhap, lan cuoi dang nhap — do Supabase quan
+ * ly). Bang `users` la nguon THAT cua danh sach; Auth chi bo sung. Neu goi Auth
+ * hong thi van hien du danh sach: cot cach dang nhap de trong, lan cuoi vao va cham
+ * mau chi con dua vao lan cuoi hoat dong — mot man hinh quan tri khong duoc trang
+ * chi vi mot loi phu.
  */
 export async function danhSachNguoiDung(): Promise<NguoiDungHang[]> {
   const hoSo = await db.select().from(users).orderBy(asc(users.email));
@@ -71,8 +84,12 @@ export async function danhSachNguoiDung(): Promise<NguoiDungHang[]> {
     console.error("[nguoi-dung] khong doc duoc Supabase Auth:", loi);
   }
 
+  // MOT moc bayGio cho ca danh sach, tinh o may chu: bang la client component, tinh
+  // lai o trinh duyet thi luc dung o may chu va luc nap lai co the lech nhau mot muc.
+  const bayGio = new Date();
   return hoSo.map((h) => {
     const a = theoId.get(h.id);
+    const lanCuoiVao = gopLanCuoiVao(h.lastSeenAt, a?.lanCuoi ? new Date(a.lanCuoi) : null);
     return {
       id: h.id,
       email: h.email,
@@ -81,7 +98,8 @@ export async function danhSachNguoiDung(): Promise<NguoiDungHang[]> {
       dangHoatDong: h.isActive,
       taoLuc: h.createdAt,
       cachDangNhap: a ? suyRaCachDangNhap(a.providers) : null,
-      lanCuoiDangNhap: a?.lanCuoi ? new Date(a.lanCuoi) : null,
+      lanCuoiVao,
+      mucHoatDong: mucHoatDong(lanCuoiVao, bayGio),
     };
   });
 }

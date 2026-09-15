@@ -57,6 +57,13 @@
       "when": 1789035036094,
       "tag": "0007_gop_y_anh",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1789448334502,
+      "tag": "0008_users_last_seen_at",
+      "breakpoints": true
     }
   ]
 }

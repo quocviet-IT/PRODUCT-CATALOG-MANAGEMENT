@@ -1,9 +1,13 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { and, eq, isNull, lt, or, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { users, vaiTro } from "@/db/schema";
-import type { MucQuyen } from "@/modules/nguoi-dung/nguoi-dung.model";
+import {
+  PHUT_GIUA_HAI_LAN_GHI,
+  ghiHoatDongNeuCan,
+  type MucQuyen,
+} from "@/modules/nguoi-dung/nguoi-dung.model";
 import { taoSupabaseServer } from "./supabase-server";
 
 export type NguoiDung = {
@@ -69,14 +73,50 @@ export const getSessionUser = cache(async (): Promise<NguoiDung | null> => {
       role: users.role,
       mucQuyen: vaiTro.mucQuyen,
       isActive: users.isActive,
+      // Doc kem trong CUNG cau nay de biet co can ghi khong — khong ton them mot
+      // luot truy van cho moi yeu cau.
+      lanCuoiHoatDong: users.lastSeenAt,
     })
     .from(users)
     .innerJoin(vaiTro, eq(vaiTro.ma, users.role))
     .where(eq(users.id, data.user.id))
     .limit(1);
   if (!ho_so) return null;
-  return ho_so;
+  const { lanCuoiHoatDong, ...nguoiDung } = ho_so;
+  /*
+   * Ghi lan cuoi hoat dong cho cham mau o trang Tai khoan — toi da 10 phut mot lan.
+   *
+   * AWAIT tuan tu NGAY SAU cau doc, truoc khi tra ve: khung trang va trang cung doi
+   * promise nay (cache), nen cau UPDATE khong chay song song voi truy van nao khac
+   * cua yeu cau tren ket noi duy nhat.
+   *
+   * KHONG dua sang after(): no chay sau khi phan hoi da gui va dua vao waitUntil giu
+   * ban ham song — dung loai ban ham bi dong bang giua cuoc noi chuyen voi Postgres
+   * da de lai phien ket ClientRead ngay 10/09/2026. KHONG ghi o proxy.ts: tuyen do
+   * chi gia han phien, khong cham co so du lieu.
+   */
+  await ghiHoatDongNeuCan({ ...nguoiDung, lanCuoiHoatDong }, new Date(), ghiLanCuoiHoatDong);
+  return nguoiDung;
 });
+
+/**
+ * Cau UPDATE that. Dieu kien 10 phut lap lai trong WHERE va tinh bang now() cua co
+ * so du lieu: hai ban ham cung thay moc cu thi chi mot cau thuc su ghi.
+ */
+async function ghiLanCuoiHoatDong(id: string): Promise<void> {
+  await db
+    .update(users)
+    .set({ lastSeenAt: sql`now()` })
+    .where(
+      and(
+        eq(users.id, id),
+        or(
+          isNull(users.lastSeenAt),
+          lt(users.lastSeenAt, sql`now() - make_interval(mins => ${PHUT_GIUA_HAI_LAN_GHI}::int)`),
+        ),
+      ),
+    );
+}
 
 async function chot(canAdmin: boolean): Promise<NguoiDung> {
   const kq = kiemTraQuyen(await getSessionUser(), canAdmin);

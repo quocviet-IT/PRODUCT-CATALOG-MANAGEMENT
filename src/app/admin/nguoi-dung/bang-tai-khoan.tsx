@@ -227,7 +227,7 @@ export function BangTaiKhoan({
                 <td className={`${O} whitespace-nowrap`}>
                   {u.cachDangNhap ? cach[u.cachDangNhap] : t.nguoi_dung.vao_khac}
                 </td>
-                <td className={`${O} whitespace-nowrap tabular-nums`}>{ngay(u.lanCuoiDangNhap, nn, t)}</td>
+                <td className={`${O} whitespace-nowrap tabular-nums`}>{ngay(u.lanCuoiVao, nn, t)}</td>
                 <td className={`${O} whitespace-nowrap`}>
                   {u.dangHoatDong ? (
                     t.nguoi_dung.dang_hoat_dong
