@@ -22,3 +22,6 @@ thiet-ke-template/template-trang-suc.html
 # kiem tra, khong phai tai san cua du an — anh huong dan trong public/huong-dan
 # moi la thu phai commit.
 /anh-soat/
+
+# Script tam cua cac lan kiem thu — repo cong khai, khong bao gio commit.
+scripts/tmp-*

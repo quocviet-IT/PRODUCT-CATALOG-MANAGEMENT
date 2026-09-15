@@ -39,6 +39,23 @@ function ve(
   return renderToStaticMarkup(createElement(Comp, { muc: MUC, g, t }));
 }
 
+/** Nhu `ve` nhung nhan danh sach mau rieng — dung khi test can them mau vao MUC goc. */
+function veMuc(Comp: (p: DoiSo) => ReactElement, boCuc: BoCuc, muc: MucCatalogue[]): string {
+  const g: GiaoDienCatalogue = { ...GIAO_DIEN_MAC_DINH, boCuc };
+  return renderToStaticMarkup(createElement(Comp, { muc, g, t }));
+}
+
+/** Mau khong con anh nao — dungNoiDung() van giu mau khi file bi loc het (anh: []). */
+const MAU_KHONG_ANH: MucCatalogue = {
+  maMau: "D104",
+  loaiSp: "NHẪN",
+  chatLieu: null,
+  mau: null,
+  size: null,
+  tlVang: null,
+  anh: [],
+};
+
 const dem = (html: string, chuoi: string) => html.split(chuoi).length - 1;
 
 describe("Khung Art Deco", () => {
@@ -133,5 +150,43 @@ describe("Chữ lớn", () => {
   it("thông số và lời giới thiệu có mặt", () => {
     expect(html).toContain("Nhẫn cưới đan tay.");
     expect(html).toContain(">D101<");
+  });
+
+  it("thông số có nhãn (mã mẫu chữ tiêu đề, không dùng MaMau)", () => {
+    expect(html).toContain(`>${t.catalogue_sheet.cot_chat_lieu}<`);
+    expect(html).toContain(">Vàng 18K<");
+  });
+
+  it('dòng "N ảnh" chỉ hiện khi mẫu có hơn năm ảnh', () => {
+    expect(html).toContain(">6 ảnh<");
+    expect(html).not.toContain(">3 ảnh<");
+  });
+
+  it("số thứ tự không còn là chữ màu nhấn", () => {
+    expect(html).toMatch(/class="[^"]*text-hp-ink[^"]*">01 \/ 03</);
+  });
+});
+
+describe("mẫu không có ảnh", () => {
+  const mucVoiRong = [...MUC, MAU_KHONG_ANH];
+
+  it("thẻ tiêu bản: giữ chỗ trống thay ảnh", () => {
+    const html = veMuc(TheTieuBan, "tieu-ban", mucVoiRong);
+    expect(dem(html, "data-muc=")).toBe(4);
+    expect(html).toContain('aria-hidden="true" class="aspect-[4/3] bg-hp-plate"');
+  });
+
+  it("khung Art Deco: không huy hiệu cho mẫu trống, vẫn hiện mã mẫu", () => {
+    const html = veMuc(KhungArtDeco, "art-deco", mucVoiRong);
+    expect(dem(html, "data-muc=")).toBe(4);
+    expect(dem(html, "data-huy-hieu")).toBe(2);
+    expect(html).toContain(">D104<");
+  });
+
+  it("chữ lớn: mẫu trống vẫn có chữ lớn từ Loại SP", () => {
+    const html = veMuc(ChuLon, "chu-lon", mucVoiRong);
+    expect(dem(html, "data-muc=")).toBe(4);
+    const chuLon = [...html.matchAll(/data-chu-lon="true"[^>]*>([^<]*)</g)].map((x) => x[1]);
+    expect(chuLon[chuLon.length - 1]).toBe("NHẪN");
   });
 });

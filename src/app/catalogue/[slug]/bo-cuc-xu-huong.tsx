@@ -3,7 +3,6 @@ import {
   Anh,
   DuongTrangTri,
   GioiThieu,
-  MaMau,
   ThongSoDong,
   mocAnh,
   thongSo,
@@ -41,14 +40,14 @@ function GocBacThang({ lop }: { lop: string }) {
     >
       <path {...NET} d="M1 23V1h22" />
       <path {...NET} d="M5 17V5h12" />
-      <path {...NET} d="M9 11V9h2" />
+      <path {...NET} d="M9 13V9h4" />
     </svg>
   );
 }
 
 /** Quat toa tia (nua mat troi): cung tron, bay tia va duong day — ngan anh voi ten mau. */
 function QuatToaTia({ lop }: { lop: string }) {
-  const tia = [0, 30, 60, 90, 120, 150, 180].map((goc) => {
+  const tia = [30, 50, 70, 90, 110, 130, 150].map((goc) => {
     const r = (goc * Math.PI) / 180;
     return {
       x1: (50 - 12 * Math.cos(r)).toFixed(2),
@@ -142,7 +141,7 @@ export function KhungArtDeco({ muc, g, t }: DoiSo) {
                 </div>
               )}
 
-              <QuatToaTia lop="mt-10 h-8 w-36 sm:w-44" />
+              <QuatToaTia lop="mt-10 h-[4.5rem] w-36 sm:h-[5.5rem] sm:w-44" />
 
               {/* Khong dung MaMau: o day ma mau la tieu de cua khung, MaMau la nhan nho. */}
               <span className="mt-4 font-title text-[20px] uppercase leading-tight tracking-[0.28em] text-hp-ink sm:text-[24px]">
@@ -207,7 +206,7 @@ export function TheTieuBan({ muc, g, t }: DoiSo) {
             className="break-inside-avoid border-b border-dotted border-hp-rule pb-6"
           >
             {chinh ? (
-              // Ba the dau nam tren man hinh dau tien: tai ngay.
+              // Ba the dau (hang dau tren may tinh) tai ngay.
               <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={900}
                    tyLe="aspect-[4/3]" uuTien={i < 3} />
             ) : (
@@ -231,6 +230,12 @@ export function TheTieuBan({ muc, g, t }: DoiSo) {
  * chuLonCuaMau, khong bao gio in to mot thong so sale da an. Chu nam TREN anh, khong de len
  * anh. Khoang cach dong >= 1.12 de dau tieng Viet chong nhieu tang (Ề, Ẫ) khong bi cat.
  * Moi mau mot to giay khi in.
+ *
+ * So thu tu dau trang: chu chinh (text-hp-ink), khong phai mau nhan — chu nhan 18px chi
+ * dat ~3.8-4:1 tren tong sang, duoi AA cho chu co thuong; mau nhan giu lai o vach ke ben
+ * canh. Cot thong tin ben phai noi bat hon ban dau: ma mau chu tieu de ~20px in hoa, thong
+ * so tung dong co nhan (nhan trai, gia tri phai, ke manh duoi), dong "{n} anh" khi mau co
+ * hon nam anh (anh mieng chi hien anh 2-5). Anh chinh 1600px, khop voi Thu moi.
  */
 export function ChuLon({ muc, g, t }: DoiSo) {
   const moc = mocAnh(muc);
@@ -238,6 +243,7 @@ export function ChuLon({ muc, g, t }: DoiSo) {
     <ul data-bo-cuc="chu-lon" className="space-y-24 print:space-y-0">
       {muc.map((m, i) => {
         const [chinh, ...phu] = m.anh;
+        const ct = thongSo(m, g, t);
         return (
           <li
             key={`${m.maMau ?? "x"}-${i}`}
@@ -245,10 +251,12 @@ export function ChuLon({ muc, g, t }: DoiSo) {
             className="break-inside-avoid print:break-after-page"
           >
             <div className="flex items-center gap-4">
-              <span className="font-title text-lg tabular-nums leading-none text-hp-pink">
+              {/* So o chu chinh, khong phai mau nhan: chu nhan 18px chi dat ~3.8-4:1 tren
+                  tong sang, duoi muc AA cho chu co thuong — mau nhan giu lai o vach ke. */}
+              <span className="font-title text-lg tabular-nums leading-none text-hp-ink">
                 {`${String(i + 1).padStart(2, "0")} / ${String(muc.length).padStart(2, "0")}`}
               </span>
-              <span aria-hidden className="h-px flex-grow bg-hp-rule" />
+              <span aria-hidden className="h-px flex-grow bg-hp-pink" />
             </div>
 
             <p
@@ -259,10 +267,10 @@ export function ChuLon({ muc, g, t }: DoiSo) {
               {chuLonCuaMau(m, g.hien) ?? t.catalogue_sheet.chua_co_ma_mau}
             </p>
 
-            <div className="mt-8 grid gap-8 sm:grid-cols-[minmax(0,1fr)_15rem] sm:items-end">
+            <div className="mt-8 grid gap-8 sm:grid-cols-[minmax(0,1fr)_17rem] sm:items-end">
               <div>
                 {chinh && (
-                  <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={2000}
+                  <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={1600}
                        tyLe="aspect-[4/3]" uuTien={moc[i] === 0} />
                 )}
                 {phu.length > 0 && (
@@ -277,9 +285,25 @@ export function ChuLon({ muc, g, t }: DoiSo) {
                 )}
               </div>
               <div className="flex flex-col gap-3">
-                <MaMau m={m} t={t} />
+                <span className="font-title text-[20px] uppercase leading-tight tracking-[0.18em] text-hp-ink">
+                  {m.maMau ?? t.catalogue_sheet.chua_co_ma_mau}
+                </span>
                 <DuongTrangTri lop="w-24 gap-2" />
-                <ThongSoDong ds={thongSo(m, g, t)} />
+                {ct.length > 0 && (
+                  <dl className="flex flex-col gap-2.5">
+                    {ct.map(([nhan, v]) => (
+                      <div key={nhan} className="flex items-baseline justify-between gap-4 border-b border-hp-rule pb-2">
+                        <dt className="shrink-0 text-[10px] uppercase tracking-[0.14em] text-hp-muted">{nhan}</dt>
+                        <dd className="text-right text-sm text-hp-body">{v}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+                {m.anh.length > 5 && (
+                  <span className="text-[11px] tabular-nums text-hp-muted">
+                    {t.chia_se.bang_mau_so_anh.replace("{n}", String(m.anh.length))}
+                  </span>
+                )}
                 <GioiThieu m={m} />
               </div>
             </div>

@@ -116,15 +116,18 @@ Anh chốt (15/09/2026):
 ### 3.5 Chữ lớn (`chu-lon`)
 
 - Gốc `<ul data-bo-cuc="chu-lon">`; mỗi mẫu cách nhau bằng kẻ mảnh; bản in mỗi mẫu một trang.
-- Dòng đầu: số thứ tự màu nhấn `01 / 12` (chữ tiêu đề, cỡ ~18px) + kẻ mảnh kéo hết bề ngang.
+- Dòng đầu: số thứ tự `01 / 12` (chữ tiêu đề, cỡ ~18px, màu `text-hp-ink`) + kẻ mảnh màu nhấn kéo
+  hết bề ngang. Quyết định của anh sau khi soát toàn nhánh (15/09/2026): chữ cỡ 18px màu nhấn chỉ
+  đạt AA yếu trên tông sáng, nên số thứ tự chuyển sang màu chữ chính; màu nhấn giữ lại ở kẻ mảnh.
 - **Chữ lớn**: `chuLonCuaMau(m, g.hien)` (null → `catalogue_sheet.chua_co_ma_mau`), chữ tiêu đề
   in hoa, cỡ `clamp(3rem, 13vw, 9.5rem)`, khoảng cách dòng ≥ 1.12 để dấu tiếng Việt chồng nhiều
   tầng không bị cắt, xuống dòng khi dài (`break-words`), màu `text-hp-ink`. Bản in giới hạn cỡ
   (~64pt).
 - **Chữ không bao giờ đè lên ảnh**: ảnh nằm dưới khối chữ.
 - Dưới chữ: lưới hai cột trên màn hình lớn — trái là ảnh chính 4:3 và dải ảnh phụ (ảnh 2–5, lưới
-  4 ô nhỏ); phải là `MaMau`, `DuongTrangTri`, `ThongSoDong`, `GioiThieu`, căn đáy. Điện thoại: một
-  cột theo đúng thứ tự đó.
+  4 ô nhỏ); phải là mã mẫu chữ tiêu đề in hoa (~20px), `DuongTrangTri`, thông số từng dòng có
+  nhãn (nhãn trái, giá trị phải, kẻ mảnh dưới mỗi dòng), dòng "{n} ảnh" khi mẫu có hơn 5 ảnh,
+  `GioiThieu`, căn đáy; cột phải rộng 17rem. Điện thoại: một cột theo đúng thứ tự đó.
 
 ### 3.6 Bảng chọn
 
