@@ -2,8 +2,10 @@
 
 import { useActionState, useState } from "react";
 import {
+  MUC_HOAT_DONG,
   tenVaiTro,
   type CachDangNhap,
+  type MucHoatDong,
   type VaiTro,
 } from "@/modules/nguoi-dung/nguoi-dung.model";
 import type { NguoiDungHang } from "@/modules/nguoi-dung/nguoi-dung.service";
@@ -24,6 +26,14 @@ const NUT =
   "text-hp-muted transition-colors duration-150 hover:text-hp-ink " +
   "disabled:cursor-not-allowed disabled:opacity-40";
 const LOP_ICON = "h-4 w-4 shrink-0";
+/** Cham hoat dong — cung mot hinh o bang va o dong chu giai. */
+const CHAM = "inline-block h-2 w-2 shrink-0 rounded-full";
+/** Ten lop viet san day du: Tailwind chi sinh lop ma no doc thay nguyen van trong ma nguon. */
+const LOP_CHAM: Record<MucHoatDong, string> = {
+  "trong-ngay": "bg-hp-hoat-dong-ngay",
+  "trong-tuan": "bg-hp-hoat-dong-tuan",
+  lau: "bg-hp-hoat-dong-lau",
+};
 
 function nhanCach(t: BoChu): Record<CachDangNhap, string> {
   return {
@@ -31,6 +41,14 @@ function nhanCach(t: BoChu): Record<CachDangNhap, string> {
     "mat-khau": t.nguoi_dung.vao_mat_khau,
     "ca-hai": t.nguoi_dung.vao_ca_hai,
     khac: t.nguoi_dung.vao_khac,
+  };
+}
+
+function nhanHoatDong(t: BoChu): Record<MucHoatDong, string> {
+  return {
+    "trong-ngay": t.nguoi_dung.hoat_dong_trong_ngay,
+    "trong-tuan": t.nguoi_dung.hoat_dong_trong_tuan,
+    lau: t.nguoi_dung.hoat_dong_lau,
   };
 }
 
@@ -182,6 +200,28 @@ function DatMatKhau({ id, tenHien }: { id: string; tenHien: string }) {
   );
 }
 
+/**
+ * Dong chu giai ngay tren bang: xanh, vang, xam theo thu tu MUC_HOAT_DONG.
+ * aria-label dat ten cho danh sach de trinh doc man hinh doc ra day la chu giai mau.
+ */
+function ChuGiaiHoatDong() {
+  const t = useChu();
+  const nhan = nhanHoatDong(t);
+  return (
+    <ul
+      aria-label={t.nguoi_dung.chu_giai_hoat_dong}
+      className="mb-3 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-hp-muted"
+    >
+      {MUC_HOAT_DONG.map((m) => (
+        <li key={m} className="inline-flex items-center gap-2">
+          <span aria-hidden className={`${CHAM} ${LOP_CHAM[m]}`} />
+          {nhan[m]}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function BangTaiKhoan({
   ds,
   idCuaToi,
@@ -194,68 +234,81 @@ export function BangTaiKhoan({
   const t = useChu();
   const nn = useNgonNgu();
   const cach = nhanCach(t);
+  const nhanMuc = nhanHoatDong(t);
   /** Ma vai tro -> ten hien. Ma la la thi hien nguyen ma, hon la hien trong khong. */
   const ten = (ma: string) => {
     const v = vaiTros.find((x) => x.ma === ma);
     return v ? tenVaiTro(v, nn === "en") : ma;
   };
   return (
-    <div className="overflow-x-auto border border-hp-rule">
-      <table className="w-full border-collapse">
-        <thead>
-          <tr className="bg-hp-inset">
-            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_email}</th>
-            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_ho_ten}</th>
-            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_vai_tro}</th>
-            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_cach_vao}</th>
-            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_lan_cuoi}</th>
-            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_trang_thai}</th>
-            <th className={O_TIEU_DE}>{t.nguoi_dung.cot_thao_tac}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ds.map((u) => {
-            const laToi = u.id === idCuaToi;
-            return (
-              <tr key={u.id} className="bg-hp-card">
-                <td className={`${O} whitespace-nowrap text-hp-ink`}>
-                  {u.email}
-                  {laToi && <span className="ml-2 text-xs text-hp-muted">{t.nguoi_dung.la_ban}</span>}
-                </td>
-                <td className={O}>{u.hoTen}</td>
-                <td className={`${O} whitespace-nowrap`}>{ten(u.vaiTro)}</td>
-                <td className={`${O} whitespace-nowrap`}>
-                  {u.cachDangNhap ? cach[u.cachDangNhap] : t.nguoi_dung.vao_khac}
-                </td>
-                <td className={`${O} whitespace-nowrap tabular-nums`}>{ngay(u.lanCuoiVao, nn, t)}</td>
-                <td className={`${O} whitespace-nowrap`}>
-                  {u.dangHoatDong ? (
-                    t.nguoi_dung.dang_hoat_dong
-                  ) : (
-                    <span className="text-hp-pink-strong">{t.nguoi_dung.da_khoa}</span>
-                  )}
-                </td>
-                <td className={O}>
-                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-                    <DatMatKhau id={u.id} tenHien={u.email} />
-                    <NutHanhDong
-                      hanhDong={doiTrangThai}
-                      truong={{ id: u.id, bat: u.dangHoatDong ? "0" : "1" }}
-                      nhan={u.dangHoatDong ? t.nguoi_dung.khoa : t.nguoi_dung.mo_khoa}
-                      Icon={u.dangHoatDong ? Lock : LockOpen}
-                      // Tu khoa chinh minh la khong con ai vao duoc man hinh
-                      // nay. Server van chan lan nua — day chi la de nut khong
-                      // moi nguoi bam vao mot viec chac chan that bai.
-                      tat={laToi && u.dangHoatDong}
+    <>
+      <ChuGiaiHoatDong />
+      <div className="overflow-x-auto border border-hp-rule">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="bg-hp-inset">
+              <th className={O_TIEU_DE}>{t.nguoi_dung.cot_email}</th>
+              <th className={O_TIEU_DE}>{t.nguoi_dung.cot_ho_ten}</th>
+              <th className={O_TIEU_DE}>{t.nguoi_dung.cot_vai_tro}</th>
+              <th className={O_TIEU_DE}>{t.nguoi_dung.cot_cach_vao}</th>
+              <th className={O_TIEU_DE}>{t.nguoi_dung.cot_lan_cuoi}</th>
+              <th className={O_TIEU_DE}>{t.nguoi_dung.cot_trang_thai}</th>
+              <th className={O_TIEU_DE}>{t.nguoi_dung.cot_thao_tac}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {ds.map((u) => {
+              const laToi = u.id === idCuaToi;
+              return (
+                <tr key={u.id} className="bg-hp-card">
+                  <td className={`${O} whitespace-nowrap text-hp-ink`}>
+                    {/* Cham: mau cho mat, title khi re chuot, chu an cho trinh doc man hinh.
+                        Ngay o cot Lan cuoi vao la kenh thu hai — thong tin khong chi nam o mau. */}
+                    <span
+                      aria-hidden
+                      title={nhanMuc[u.mucHoatDong]}
+                      data-muc-hoat-dong={u.mucHoatDong}
+                      className={`${CHAM} ${LOP_CHAM[u.mucHoatDong]} mr-2 align-middle`}
                     />
-                    <DoiVaiTro u={u} vaiTros={vaiTros} />
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+                    <span className="sr-only">{nhanMuc[u.mucHoatDong]}</span>
+                    <span data-email>{u.email}</span>
+                    {laToi && <span className="ml-2 text-xs text-hp-muted">{t.nguoi_dung.la_ban}</span>}
+                  </td>
+                  <td className={O}>{u.hoTen}</td>
+                  <td className={`${O} whitespace-nowrap`}>{ten(u.vaiTro)}</td>
+                  <td className={`${O} whitespace-nowrap`}>
+                    {u.cachDangNhap ? cach[u.cachDangNhap] : t.nguoi_dung.vao_khac}
+                  </td>
+                  <td className={`${O} whitespace-nowrap tabular-nums`}>{ngay(u.lanCuoiVao, nn, t)}</td>
+                  <td className={`${O} whitespace-nowrap`}>
+                    {u.dangHoatDong ? (
+                      t.nguoi_dung.dang_hoat_dong
+                    ) : (
+                      <span className="text-hp-pink-strong">{t.nguoi_dung.da_khoa}</span>
+                    )}
+                  </td>
+                  <td className={O}>
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+                      <DatMatKhau id={u.id} tenHien={u.email} />
+                      <NutHanhDong
+                        hanhDong={doiTrangThai}
+                        truong={{ id: u.id, bat: u.dangHoatDong ? "0" : "1" }}
+                        nhan={u.dangHoatDong ? t.nguoi_dung.khoa : t.nguoi_dung.mo_khoa}
+                        Icon={u.dangHoatDong ? Lock : LockOpen}
+                        // Tu khoa chinh minh la khong con ai vao duoc man hinh
+                        // nay. Server van chan lan nua — day chi la de nut khong
+                        // moi nguoi bam vao mot viec chac chan that bai.
+                        tat={laToi && u.dangHoatDong}
+                      />
+                      <DoiVaiTro u={u} vaiTros={vaiTros} />
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }

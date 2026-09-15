@@ -133,6 +133,10 @@ export const vi = {
     dang_hoat_dong: "Đang hoạt động",
     da_khoa: "Đã khoá",
     la_ban: "(bạn)",
+    hoat_dong_trong_ngay: "Hoạt động trong 24h",
+    hoat_dong_trong_tuan: "Hoạt động trong 7 ngày",
+    hoat_dong_lau: "Lâu không đăng nhập",
+    chu_giai_hoat_dong: "Chú giải màu hoạt động",
 
     // Thao tac
     khoa: "Khoá",

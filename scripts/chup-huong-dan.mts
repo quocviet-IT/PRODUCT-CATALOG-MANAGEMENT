@@ -707,10 +707,11 @@ async function chupMotNgonNgu(trinhDuyet: Browser, nn: NgonNgu): Promise<void> {
     await bangTaiKhoan.evaluate((bang, a) => {
       bang.querySelectorAll("tbody tr").forEach((tr, i) => {
         const o = tr.querySelectorAll("td");
-        // O email co the kem the "(ban)"; chi doi doan chu dau, giu the do.
-        const nutEmail = o[0]?.firstChild;
-        if (nutEmail && nutEmail.nodeType === Node.TEXT_NODE) nutEmail.textContent = a.email[i % a.email.length];
-        else if (o[0]) o[0].textContent = a.email[i % a.email.length];
+        // O email: cham hoat dong + chu an + [data-email] + the "(ban)". Chi doi chu trong
+        // [data-email]. Khong thay thi DUNG LAI — chup tiep la lo email that len anh cong khai.
+        const email = o[0]?.querySelector("[data-email]");
+        if (!email) throw new Error("bang tai khoan khong con [data-email] — khong che duoc email");
+        email.textContent = a.email[i % a.email.length];
         if (o[1]) o[1].textContent = a.ho[i % a.ho.length];
       });
     }, { email: EMAIL_MINH_HOA, ho: HO_TEN_MINH_HOA });

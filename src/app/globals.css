@@ -12,6 +12,15 @@
   --color-hp-pink-strong: #C4165F;
 
   /*
+   * Cham hoat dong o trang Tai khoan: trong 24h, trong 7 ngay, lau hon. Moi mau
+   * >= 3:1 tren nen the va nen trang (tests/app/hoat-dong-tuong-phan.test.ts).
+   * Vang tuoi khong dat muc do tren nen be, nen dung vang ho phach.
+   */
+  --color-hp-hoat-dong-ngay: #3F7D4E;
+  --color-hp-hoat-dong-tuan: #A8741A;
+  --color-hp-hoat-dong-lau:  #8F877F;
+
+  /*
    * Nen dat anh san pham. GAN TRANG chu khong phai mau be cua the.
    *
    * Anh trang suc chup studio co nen sang; dat len nen be xam thi lo ra mot

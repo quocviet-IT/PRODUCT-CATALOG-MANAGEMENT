@@ -136,6 +136,10 @@ export const en: BoChu = {
     dang_hoat_dong: "Active",
     da_khoa: "Locked",
     la_ban: "(you)",
+    hoat_dong_trong_ngay: "Active in the last 24h",
+    hoat_dong_trong_tuan: "Active in the last 7 days",
+    hoat_dong_lau: "Not signed in for a while",
+    chu_giai_hoat_dong: "Activity colour key",
 
     khoa: "Lock",
     mo_khoa: "Unlock",

@@ -361,7 +361,7 @@ export const HUONG_DAN_EN: BoChu["huong_dan"] = {
     meo: [
       "Staff with a company Gmail need no account in advance: their first Google sign-in creates a Sales account.",
       "You cannot lock yourself or lower your own access — so someone can always reach this screen.",
-      "The Sign-in method column shows Google, password or both; Last seen shows whether the account is still in use.",
+      "The dot before each email shows when that person last used the system: green — within 24 hours, amber — within 7 days, grey — longer ago or never. The Sign-in method column shows Google, password or both.",
     ],
   },
 

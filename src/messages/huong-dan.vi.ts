@@ -362,7 +362,7 @@ export const HUONG_DAN_VI = {
     meo: [
       "Nhân viên dùng Gmail công ty không cần cấp trước: lần đầu đăng nhập bằng Google, hệ thống tự tạo tài khoản vai trò Sale.",
       "Không tự khoá hay tự hạ quyền của chính mình được — để luôn còn người vào được màn hình này.",
-      "Cột Cách đăng nhập cho biết người đó vào bằng Google, mật khẩu hay cả hai; cột Lần cuối vào cho biết tài khoản còn dùng không.",
+      "Chấm màu trước email cho biết lần cuối người đó dùng hệ thống: xanh — trong 24 giờ, vàng — trong 7 ngày, xám — lâu hơn hoặc chưa vào lần nào. Cột Cách đăng nhập cho biết họ vào bằng Google, mật khẩu hay cả hai.",
     ],
   },
 
