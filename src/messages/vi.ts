@@ -421,6 +421,8 @@ export const vi = {
     // Ba bo cuc xu huong 2026 (15/09/2026).
     bo_cuc_art_deco: "Khung Art Deco",
     bo_cuc_art_deco_mo_ta: "Khung kẻ đôi, góc bậc thang, ảnh lớn kèm huy hiệu ảnh chi tiết. Xu hướng 2026 — hợp nhẫn cưới, kim cương, khách VIP.",
+    bo_cuc_tieu_ban: "Thẻ tiêu bản",
+    bo_cuc_tieu_ban_mo_ta: "Nhiều mẫu một trang như tủ trưng bày bảo tàng: ảnh nền trắng, nhãn số Nº. Xu hướng 2026 — lướt nhanh, gửi nhiều mẫu.",
 
     tone_reu: "Xanh rêu",
 
@@ -577,6 +579,8 @@ export const vi = {
     // Bo cuc Bang mau / Thu moi (12/09/2026). {n} = so anh, {ten} = ten khach tren trang bia.
     bang_mau_so_anh: "{n} ảnh",
     thu_moi_danh_cho: "Dành riêng cho {ten}",
+    // Bo cuc The tieu ban (15/09/2026). {n} = so thu tu da dem ba chu so.
+    tieu_ban_so: "Nº {n}",
     tai_pdf: "Tải PDF",
     phong_to: "Xem ảnh lớn",
     anh_truoc: "Ảnh trước",

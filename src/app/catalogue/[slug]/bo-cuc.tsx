@@ -25,7 +25,7 @@ import {
   thongSo,
   type DoiSo,
 } from "./bo-cuc-chung";
-import { KhungArtDeco } from "./bo-cuc-xu-huong";
+import { KhungArtDeco, TheTieuBan } from "./bo-cuc-xu-huong";
 
 /**
  * Ba cach bay mot catalogue ra truoc mat khach.
@@ -561,6 +561,7 @@ const BANG: Record<BoCuc, (p: DoiSo) => React.ReactElement> = {
   "bang-mau": BangMau,
   "thu-moi": ThuMoi,
   "art-deco": KhungArtDeco,
+  "tieu-ban": TheTieuBan,
 };
 
 export function ThanCatalogue(p: DoiSo) {

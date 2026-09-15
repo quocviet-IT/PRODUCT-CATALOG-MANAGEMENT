@@ -395,7 +395,7 @@ describe("năm tông và ba màu nhấn mới (12/09/2026)", () => {
 
 describe("bố cục xu hướng 2026 (15/09/2026)", () => {
   it("thêm vào cuối, sau tám bố cục cũ", () => {
-    expect(BO_CUC.slice(8)).toEqual(["art-deco"]);
+    expect(BO_CUC.slice(8)).toEqual(["art-deco", "tieu-ban"]);
   });
 
   it("docGiaoDien nhận khoá bố cục mới", () => {

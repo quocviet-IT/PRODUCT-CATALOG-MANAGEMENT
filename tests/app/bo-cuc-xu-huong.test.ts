@@ -16,7 +16,7 @@ vi.mock("@/messages/dung-chu", async () => {
   return { useChu: () => bo("vi") };
 });
 
-import { KhungArtDeco } from "@/app/catalogue/[slug]/bo-cuc-xu-huong";
+import { KhungArtDeco, TheTieuBan } from "@/app/catalogue/[slug]/bo-cuc-xu-huong";
 
 const t = boChu("vi");
 
@@ -72,5 +72,32 @@ describe("Khung Art Deco", () => {
     expect(html).toContain("2,40 g");
     expect(html).toContain("Nhẫn cưới đan tay.");
     expect(ve(KhungArtDeco, "art-deco", { tlVang: false })).not.toContain("2,40 g");
+  });
+});
+
+describe("Thẻ tiêu bản", () => {
+  const html = ve(TheTieuBan, "tieu-ban");
+
+  it("gốc mang data-bo-cuc, mỗi mẫu một data-muc, có dòng đếm số mẫu", () => {
+    expect(dem(html, 'data-bo-cuc="tieu-ban"')).toBe(1);
+    expect(dem(html, "data-muc=")).toBe(3);
+    expect(html).toContain(">3 mẫu<");
+  });
+
+  it("nhãn: số đệm ba chữ số · mã mẫu · số ảnh khi hơn một ảnh", () => {
+    expect(html).toContain(">Nº 001 · D101 · 3 ảnh<");
+    expect(html).toContain(">Nº 002 · D102<");
+    expect(html).toContain(`>Nº 003 · ${t.catalogue_sheet.chua_co_ma_mau} · 6 ảnh<`);
+  });
+
+  it("chỉ hiện ảnh chính của mỗi mẫu", () => {
+    expect(dem(html, "data-anh=")).toBe(3);
+    expect(html).toContain('data-anh="a-1"');
+    expect(html).not.toContain('data-anh="a-2"');
+  });
+
+  it("thông số và lời giới thiệu có mặt", () => {
+    expect(html).toContain("NHẪN · Vàng 18K");
+    expect(html).toContain("Nhẫn cưới đan tay.");
   });
 });

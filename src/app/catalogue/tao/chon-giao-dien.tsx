@@ -66,6 +66,10 @@ function nhanBoCuc(t: BoChu): Record<BoCuc, { ten: string; moTa: string }> {
       ten: t.mau_giao_dien.bo_cuc_art_deco,
       moTa: t.mau_giao_dien.bo_cuc_art_deco_mo_ta,
     },
+    "tieu-ban": {
+      ten: t.mau_giao_dien.bo_cuc_tieu_ban,
+      moTa: t.mau_giao_dien.bo_cuc_tieu_ban_mo_ta,
+    },
   };
 }
 
@@ -184,6 +188,19 @@ function HinhBoCuc({ kieu }: { kieu: BoCuc }) {
           <div className="mt-1 h-1.5 w-1/2 bg-hp-ink/40" />
           <div className="h-1 w-2/3 bg-hp-rule" />
         </div>
+      </div>
+    );
+  }
+  if (kieu === "tieu-ban") {
+    return (
+      <div aria-hidden className="mx-auto grid max-w-[150px] grid-cols-3 gap-x-1.5 gap-y-2">
+        {Array.from({ length: 6 }, (_, i) => (
+          <div key={i}>
+            <div className={`${o} aspect-[4/3]`} />
+            <div className="mt-1 h-px bg-hp-ink/40" />
+            <div className="mt-0.5 h-1 w-2/3 bg-hp-rule" />
+          </div>
+        ))}
       </div>
     );
   }
