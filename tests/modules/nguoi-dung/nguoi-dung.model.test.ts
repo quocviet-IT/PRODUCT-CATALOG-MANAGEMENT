@@ -1,9 +1,15 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   DAI_MAT_KHAU_TOI_THIEU,
+  MUC_HOAT_DONG,
+  PHUT_GIUA_HAI_LAN_GHI,
+  ghiHoatDongNeuCan,
+  gopLanCuoiVao,
   kiemTraMatKhau,
   kiemTraSuaDoi,
   kiemTraTaoTaiKhoan,
+  mucHoatDong,
+  nenGhiHoatDong,
   suyRaCachDangNhap,
 } from "@/modules/nguoi-dung/nguoi-dung.model";
 
@@ -98,5 +104,115 @@ describe("suyRaCachDangNhap", () => {
     expect(suyRaCachDangNhap(["email"])).toBe("mat-khau");
     expect(suyRaCachDangNhap(["google", "email"])).toBe("ca-hai");
     expect(suyRaCachDangNhap([])).toBe("khac");
+  });
+});
+
+// ─────────────────────────────────────────────── cham hoat dong (trang Tai khoan)
+
+const BAY_GIO = new Date("2026-09-15T10:00:00Z");
+const PHUT = 60_000;
+const GIO = 60 * PHUT;
+const NGAY = 24 * GIO;
+/** Moc cach BAY_GIO mot khoang (ms). So am la moc o tuong lai. */
+const truoc = (ms: number) => new Date(BAY_GIO.getTime() - ms);
+
+describe("nenGhiHoatDong", () => {
+  it("chua co moc thi ghi", () => {
+    expect(nenGhiHoatDong(null, BAY_GIO)).toBe(true);
+  });
+
+  it("chua du 10 phut thi khong ghi", () => {
+    expect(nenGhiHoatDong(truoc(10 * PHUT - 1000), BAY_GIO)).toBe(false);
+  });
+
+  it("du 10 phut thi ghi", () => {
+    expect(PHUT_GIUA_HAI_LAN_GHI).toBe(10);
+    expect(nenGhiHoatDong(truoc(10 * PHUT), BAY_GIO)).toBe(true);
+  });
+
+  it("moc o tuong lai (lech dong ho) thi khong ghi", () => {
+    expect(nenGhiHoatDong(truoc(-5 * PHUT), BAY_GIO)).toBe(false);
+  });
+});
+
+describe("gopLanCuoiVao", () => {
+  const som = truoc(3 * NGAY);
+  const muon = truoc(2 * GIO);
+
+  it("lay moc muon hon, du ben nao muon", () => {
+    expect(gopLanCuoiVao(muon, som)).toEqual(muon);
+    expect(gopLanCuoiVao(som, muon)).toEqual(muon);
+  });
+
+  it("mot ben trong thi lay ben kia", () => {
+    expect(gopLanCuoiVao(null, som)).toEqual(som);
+    expect(gopLanCuoiVao(som, null)).toEqual(som);
+  });
+
+  it("ca hai trong thi null", () => {
+    expect(gopLanCuoiVao(null, null)).toBeNull();
+  });
+});
+
+describe("mucHoatDong", () => {
+  it("chua vao lan nao thi lau", () => {
+    expect(mucHoatDong(null, BAY_GIO)).toBe("lau");
+  });
+
+  it("duoi 24 gio la trong-ngay", () => {
+    expect(mucHoatDong(truoc(PHUT), BAY_GIO)).toBe("trong-ngay");
+    expect(mucHoatDong(truoc(23 * GIO + 59 * PHUT), BAY_GIO)).toBe("trong-ngay");
+  });
+
+  it("dung 24 gio da sang trong-tuan", () => {
+    expect(mucHoatDong(truoc(NGAY), BAY_GIO)).toBe("trong-tuan");
+    expect(mucHoatDong(truoc(6 * NGAY + 23 * GIO), BAY_GIO)).toBe("trong-tuan");
+  });
+
+  it("dung 7 ngay tro len la lau", () => {
+    expect(mucHoatDong(truoc(7 * NGAY), BAY_GIO)).toBe("lau");
+    expect(mucHoatDong(truoc(30 * NGAY), BAY_GIO)).toBe("lau");
+  });
+
+  it("moc o tuong lai tinh la trong-ngay", () => {
+    expect(mucHoatDong(truoc(-2 * PHUT), BAY_GIO)).toBe("trong-ngay");
+  });
+
+  it("MUC_HOAT_DONG theo thu tu chu giai: xanh, vang, xam", () => {
+    expect(MUC_HOAT_DONG).toEqual(["trong-ngay", "trong-tuan", "lau"]);
+  });
+});
+
+describe("ghiHoatDongNeuCan", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  const hoSo = { id: "u1", isActive: true, lanCuoiHoatDong: null as Date | null };
+
+  it("ghi khi tai khoan dang mo va moc da cu", async () => {
+    const ghi = vi.fn().mockResolvedValue(undefined);
+    await ghiHoatDongNeuCan({ ...hoSo, lanCuoiHoatDong: truoc(11 * PHUT) }, BAY_GIO, ghi);
+    expect(ghi).toHaveBeenCalledTimes(1);
+    expect(ghi).toHaveBeenCalledWith("u1");
+  });
+
+  it("khong ghi khi moc con moi", async () => {
+    const ghi = vi.fn().mockResolvedValue(undefined);
+    await ghiHoatDongNeuCan({ ...hoSo, lanCuoiHoatDong: truoc(PHUT) }, BAY_GIO, ghi);
+    expect(ghi).not.toHaveBeenCalled();
+  });
+
+  it("khong ghi cho tai khoan bi khoa", async () => {
+    const ghi = vi.fn().mockResolvedValue(undefined);
+    await ghiHoatDongNeuCan({ ...hoSo, isActive: false }, BAY_GIO, ghi);
+    expect(ghi).not.toHaveBeenCalled();
+  });
+
+  it("ghi loi thi chi log, khong nem ra ngoai", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const ghi = vi.fn().mockRejectedValue(new Error("pooler het cho"));
+    await expect(ghiHoatDongNeuCan(hoSo, BAY_GIO, ghi)).resolves.toBeUndefined();
+    expect(log).toHaveBeenCalledTimes(1);
   });
 });

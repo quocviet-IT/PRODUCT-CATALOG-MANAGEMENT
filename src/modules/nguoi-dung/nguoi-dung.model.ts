@@ -168,3 +168,83 @@ export function suyRaCachDangNhap(providers: readonly string[]): CachDangNhap {
   if (coMatKhau) return "mat-khau";
   return "khac";
 }
+
+// ─────────────────────────────────────────────────────── cham hoat dong
+
+/**
+ * Khoang cach toi thieu giua hai lan ghi users.last_seen_at cho cung mot nguoi.
+ *
+ * Moi yeu cau co dang nhap deu di qua getSessionUser; ghi o MOI yeu cau la them
+ * mot cau UPDATE tren ket noi duy nhat (db/client.ts giu max: 1). Cham chi phan
+ * biet 24 gio / 7 ngay nen sai so 10 phut khong doi mau cua ai.
+ */
+export const PHUT_GIUA_HAI_LAN_GHI = 10;
+
+const MOT_PHUT = 60_000;
+const MOT_NGAY = 24 * 60 * MOT_PHUT;
+
+/** Muc hoat dong hien bang cham mau o trang Tai khoan. */
+export type MucHoatDong = "trong-ngay" | "trong-tuan" | "lau";
+
+/** Thu tu cua dong chu giai: xanh, vang, xam. */
+export const MUC_HOAT_DONG: readonly MucHoatDong[] = ["trong-ngay", "trong-tuan", "lau"];
+
+/**
+ * Da den luc ghi lai lan cuoi hoat dong chua.
+ *
+ * Moc nam o TUONG LAI (dong ho may chu ung dung va co so du lieu lech nhau) thi
+ * coi nhu con moi — lan mo trang sau se ghi.
+ */
+export function nenGhiHoatDong(lanCuoi: Date | null, bayGio: Date): boolean {
+  if (lanCuoi === null) return true;
+  return bayGio.getTime() - lanCuoi.getTime() >= PHUT_GIUA_HAI_LAN_GHI * MOT_PHUT;
+}
+
+/**
+ * Moc "lan cuoi vao" cua mot tai khoan: muon hon giua lan cuoi dung he thong
+ * (users.last_seen_at) va lan cuoi dang nhap (Supabase Auth).
+ *
+ * Dang nhap cung la hoat dong. Quan trong nhat la ngay sau khi them cot: moi
+ * last_seen_at con trong, khong gop thi ai cung hien cham xam cho toi lan mo trang
+ * ke tiep.
+ */
+export function gopLanCuoiVao(hoatDong: Date | null, dangNhap: Date | null): Date | null {
+  if (hoatDong === null) return dangNhap;
+  if (dangNhap === null) return hoatDong;
+  return hoatDong.getTime() >= dangNhap.getTime() ? hoatDong : dangNhap;
+}
+
+/**
+ * Xep muc: duoi 24 gio, duoi 7 ngay, con lai. Moc o tuong lai tinh la trong ngay.
+ * Chua vao lan nao cung la "lau" — cot Lan cuoi vao ghi ro "Chua vao lan nao".
+ */
+export function mucHoatDong(lanCuoi: Date | null, bayGio: Date): MucHoatDong {
+  if (lanCuoi === null) return "lau";
+  const hieu = bayGio.getTime() - lanCuoi.getTime();
+  if (hieu < MOT_NGAY) return "trong-ngay";
+  if (hieu < 7 * MOT_NGAY) return "trong-tuan";
+  return "lau";
+}
+
+/**
+ * Ghi lan cuoi hoat dong khi can — cau noi giua cua gac va cau UPDATE.
+ *
+ * `ghi` la ham chay UPDATE that (o auth/guard.ts); truyen vao de quy tac o day
+ * kiem duoc ma khong can co so du lieu. Tai khoan bi khoa khong ghi: ho bi cua gac
+ * chan, khong phai dang dung.
+ *
+ * Loi ghi CHI LOG. Ghi hoat dong la viec phu — khong duoc vi no ma mot nguoi dang
+ * lam viec bi day ra ngoai.
+ */
+export async function ghiHoatDongNeuCan(
+  hoSo: { id: string; isActive: boolean; lanCuoiHoatDong: Date | null },
+  bayGio: Date,
+  ghi: (id: string) => Promise<unknown>,
+): Promise<void> {
+  if (!hoSo.isActive || !nenGhiHoatDong(hoSo.lanCuoiHoatDong, bayGio)) return;
+  try {
+    await ghi(hoSo.id);
+  } catch (loi) {
+    console.error("[hoat-dong] khong ghi duoc lan cuoi hoat dong:", loi);
+  }
+}
