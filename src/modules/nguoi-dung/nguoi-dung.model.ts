@@ -215,6 +215,30 @@ export function gopLanCuoiVao(hoatDong: Date | null, dangNhap: Date | null): Dat
 }
 
 /**
+ * Moc "lan cuoi vao" DUNG DE HIEN THI: tai khoan bi khoa bo qua moc dang nhap,
+ * chi tinh theo lan cuoi dung he thong that (hoatDong / users.last_seen_at).
+ *
+ * Ly do: Supabase ghi last_sign_in_at ngay khi mat khau/Google dung, TRUOC KHI
+ * cua gac (getSessionUser) kip xet is_active va chan nguoi bi khoa vao. Mot
+ * nhan vien da nghi viec chi can THU dang nhap la Supabase da coi la "dang
+ * nhap thanh cong" du cua gac tu choi ho ngay sau do — gop moc do vao se hien
+ * cham xanh canh dong "Da khoa", sai hoan toan y nghia "dang dung he thong".
+ * Tai khoan dang mo van giu nguyen quy tac cu (gopLanCuoiVao): dang nhap van
+ * la hoat dong that.
+ *
+ * Truong hop chuyen tiep: mot tai khoan vua bi khoa ma hoatDong con null (chua
+ * tung dung he thong lan nao, chi tung dang nhap) se hien "chua vao lan nao" —
+ * chap nhan duoc, dung voi thuc te la ho chua he dung he thong.
+ */
+export function lanCuoiVaoHienThi(v: {
+  hoatDong: Date | null;
+  dangNhap: Date | null;
+  dangHoatDong: boolean;
+}): Date | null {
+  return gopLanCuoiVao(v.hoatDong, v.dangHoatDong ? v.dangNhap : null);
+}
+
+/**
  * Xep muc: duoi 24 gio, duoi 7 ngay, con lai. Moc o tuong lai tinh la trong ngay.
  * Chua vao lan nao cung la "lau" — cot Lan cuoi vao ghi ro "Chua vao lan nao".
  */

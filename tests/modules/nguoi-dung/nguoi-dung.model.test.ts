@@ -8,6 +8,7 @@ import {
   kiemTraMatKhau,
   kiemTraSuaDoi,
   kiemTraTaoTaiKhoan,
+  lanCuoiVaoHienThi,
   mucHoatDong,
   nenGhiHoatDong,
   suyRaCachDangNhap,
@@ -154,6 +155,27 @@ describe("gopLanCuoiVao", () => {
   });
 });
 
+describe("lanCuoiVaoHienThi", () => {
+  const som = truoc(3 * NGAY);
+  const muon = truoc(2 * GIO);
+
+  it("tai khoan dang mo: lay moc muon hon (dang nhap muon hon thi thang)", () => {
+    expect(lanCuoiVaoHienThi({ hoatDong: som, dangNhap: muon, dangHoatDong: true })).toEqual(muon);
+  });
+
+  it("tai khoan bi khoa: bo qua moc dang nhap du no muon hon, tra ve hoatDong", () => {
+    expect(lanCuoiVaoHienThi({ hoatDong: som, dangNhap: muon, dangHoatDong: false })).toEqual(som);
+  });
+
+  it("tai khoan bi khoa, chua co hoat dong thuc: null du co moc dang nhap", () => {
+    expect(lanCuoiVaoHienThi({ hoatDong: null, dangNhap: muon, dangHoatDong: false })).toBeNull();
+  });
+
+  it("tai khoan dang mo, chi co moc dang nhap: lay moc dang nhap", () => {
+    expect(lanCuoiVaoHienThi({ hoatDong: null, dangNhap: muon, dangHoatDong: true })).toEqual(muon);
+  });
+});
+
 describe("mucHoatDong", () => {
   it("chua vao lan nao thi lau", () => {
     expect(mucHoatDong(null, BAY_GIO)).toBe("lau");
@@ -214,5 +236,6 @@ describe("ghiHoatDongNeuCan", () => {
     const ghi = vi.fn().mockRejectedValue(new Error("pooler het cho"));
     await expect(ghiHoatDongNeuCan(hoSo, BAY_GIO, ghi)).resolves.toBeUndefined();
     expect(log).toHaveBeenCalledTimes(1);
+    expect(log).toHaveBeenCalledWith("[hoat-dong] khong ghi duoc lan cuoi hoat dong:", expect.any(Error));
   });
 });

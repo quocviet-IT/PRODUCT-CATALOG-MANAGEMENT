@@ -85,6 +85,11 @@ export type MucHoatDong = "trong-ngay" | "trong-tuan" | "lau";
 export const MUC_HOAT_DONG: readonly MucHoatDong[] = ["trong-ngay", "trong-tuan", "lau"];
 export function nenGhiHoatDong(lanCuoi: Date | null, bayGio: Date): boolean;
 export function gopLanCuoiVao(hoatDong: Date | null, dangNhap: Date | null): Date | null;
+export function lanCuoiVaoHienThi(v: {
+  hoatDong: Date | null;
+  dangNhap: Date | null;
+  dangHoatDong: boolean;
+}): Date | null;
 export function mucHoatDong(lanCuoi: Date | null, bayGio: Date): MucHoatDong;
 ```
 
@@ -94,13 +99,19 @@ Quy tắc:
   mốc nằm ở tương lai do lệch đồng hồ → `false`.
 - `gopLanCuoiVao`: lấy mốc muộn hơn; một bên `null` thì lấy bên kia; cả hai `null` → `null`.
   Đăng nhập cũng là hoạt động — nhờ vậy ngay sau khi triển khai không ai bị xám oan.
+- `lanCuoiVaoHienThi`: tài khoản đang mở dùng `gopLanCuoiVao(hoatDong, dangNhap)` như cũ;
+  tài khoản **bị khoá bỏ qua mốc đăng nhập**, chỉ còn `hoatDong` — vì Supabase ghi
+  `last_sign_in_at` ngay khi mật khẩu/Google đúng, TRƯỚC KHI cửa gác kịp xét `is_active` và
+  chặn người bị khoá vào, nên một người đã nghỉ việc chỉ cần THỬ đăng nhập là bị hiện nhầm
+  chấm xanh.
 - `mucHoatDong`: `null` → `lau`; hiệu `< 24 giờ` → `trong-ngay` (mốc ở tương lai cũng vậy);
   `< 7 ngày` → `trong-tuan`; còn lại → `lau`. Đúng 24 giờ → `trong-tuan`; đúng 7 ngày → `lau`.
 
 ### 3.4 Danh sách tài khoản — `src/modules/nguoi-dung/nguoi-dung.service.ts`
 
 - `NguoiDungHang`: bỏ `lanCuoiDangNhap`, thay bằng
-  - `lanCuoiVao: Date | null` = `gopLanCuoiVao(h.lastSeenAt, last_sign_in_at)`
+  - `lanCuoiVao: Date | null` =
+    `lanCuoiVaoHienThi({ hoatDong: h.lastSeenAt, dangNhap: last_sign_in_at, dangHoatDong: h.isActive })`
   - `mucHoatDong: MucHoatDong` = `mucHoatDong(lanCuoiVao, bayGio)`
 - `danhSachNguoiDung()` lấy MỘT `bayGio = new Date()` cho cả danh sách. Tính ở máy chủ;
   bảng (client component) chỉ hiển thị, nên lúc dựng ở máy chủ và lúc trình duyệt nạp lại

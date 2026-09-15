@@ -5,7 +5,7 @@ import { db } from "@/db/client";
 import { users } from "@/db/schema";
 import { getEnv } from "@/lib/env";
 import {
-  gopLanCuoiVao,
+  lanCuoiVaoHienThi,
   mucHoatDong,
   suyRaCachDangNhap,
   type CachDangNhap,
@@ -41,7 +41,9 @@ export type NguoiDungHang = {
   cachDangNhap: CachDangNhap | null;
   /**
    * Moc muon hon giua lan cuoi dung he thong (users.last_seen_at) va lan cuoi dang
-   * nhap (Supabase Auth). null khi chua co ca hai.
+   * nhap (Supabase Auth) — CHI khi tai khoan dang mo. Tai khoan bi khoa bo qua moc
+   * dang nhap (Supabase ghi no ngay ca khi cua gac tu choi nguoi bi khoa vao), chi
+   * con lan cuoi dung he thong that. Xem lanCuoiVaoHienThi. null khi chua co moc nao.
    */
   lanCuoiVao: Date | null;
   /** Tinh san o may chu — bang tai khoan la client component, chi hien thi. */
@@ -89,7 +91,11 @@ export async function danhSachNguoiDung(): Promise<NguoiDungHang[]> {
   const bayGio = new Date();
   return hoSo.map((h) => {
     const a = theoId.get(h.id);
-    const lanCuoiVao = gopLanCuoiVao(h.lastSeenAt, a?.lanCuoi ? new Date(a.lanCuoi) : null);
+    const lanCuoiVao = lanCuoiVaoHienThi({
+      hoatDong: h.lastSeenAt,
+      dangNhap: a?.lanCuoi ? new Date(a.lanCuoi) : null,
+      dangHoatDong: h.isActive,
+    });
     return {
       id: h.id,
       email: h.email,
