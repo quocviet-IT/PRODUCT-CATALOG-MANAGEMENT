@@ -10,6 +10,7 @@ import {
   NHOM_CHU_DE,
   NHAN_GOI_Y,
   chuDeDangChon,
+  chuLonCuaMau,
   THONG_SO,
   coThongSo,
   docGiaoDien,
@@ -453,5 +454,34 @@ describe("chủ đề sẵn (12/09/2026)", () => {
       const goiY = NHAN_GOI_Y[c.tone];
       expect(goiY === undefined || goiY === c.nhan, `${c.khoa}: tong ${c.tone} goi y ${goiY}, chu de ${c.nhan}`).toBe(true);
     }
+  });
+});
+
+describe("chuLonCuaMau (15/09/2026)", () => {
+  const MAU = { loaiSp: "NHẪN", chatLieu: "Vàng 18K", maMau: "D101" };
+  const HIEN = { loaiSp: true, chatLieu: true };
+
+  it("Loại SP hiện và có giá trị → Loại SP", () => {
+    expect(chuLonCuaMau(MAU, HIEN)).toBe("NHẪN");
+  });
+
+  it("Loại SP bị ẩn → Chất liệu", () => {
+    expect(chuLonCuaMau(MAU, { ...HIEN, loaiSp: false })).toBe("Vàng 18K");
+  });
+
+  it("Loại SP hiện nhưng trống → Chất liệu", () => {
+    expect(chuLonCuaMau({ ...MAU, loaiSp: null }, HIEN)).toBe("Vàng 18K");
+  });
+
+  it("cả Loại SP lẫn Chất liệu bị ẩn → Mã mẫu", () => {
+    expect(chuLonCuaMau(MAU, { loaiSp: false, chatLieu: false })).toBe("D101");
+  });
+
+  it("chỉ khoảng trắng coi như trống; giá trị được cắt khoảng trắng hai đầu", () => {
+    expect(chuLonCuaMau({ loaiSp: "   ", chatLieu: "  Vàng 18K ", maMau: "D101" }, HIEN)).toBe("Vàng 18K");
+  });
+
+  it("tất cả trống → null", () => {
+    expect(chuLonCuaMau({ loaiSp: null, chatLieu: " ", maMau: null }, HIEN)).toBeNull();
   });
 });

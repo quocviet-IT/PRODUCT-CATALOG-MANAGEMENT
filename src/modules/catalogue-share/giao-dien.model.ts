@@ -131,6 +131,25 @@ export function chuDeDangChon(g: Pick<GiaoDienCatalogue, "boCuc" | "tone" | "nha
   return c ? c.khoa : null;
 }
 
+/**
+ * Chu co poster cua bo cuc Chu lon (15/09/2026).
+ *
+ * Loai SP -> Chat lieu -> Ma mau: KHONG bao gio in to mot thong so sale da bo tich
+ * (hien.loaiSp / hien.chatLieu). Ma mau dung duoc vi no hien o moi bo cuc. Chuoi chi co
+ * khoang trang coi nhu trong.
+ */
+export function chuLonCuaMau(
+  m: { loaiSp: string | null; chatLieu: string | null; maMau: string | null },
+  hien: { loaiSp: boolean; chatLieu: boolean },
+): string | null {
+  const ungVien = [hien.loaiSp ? m.loaiSp : null, hien.chatLieu ? m.chatLieu : null, m.maMau];
+  for (const v of ungVien) {
+    const gon = v?.trim() ?? "";
+    if (gon !== "") return gon;
+  }
+  return null;
+}
+
 /** Cac thong so co the bat/tat cho khach xem. Trung ten voi truong cua MucCatalogue. */
 export const THONG_SO = ["loaiSp", "chatLieu", "mau", "size", "tlVang"] as const;
 export type ThongSo = (typeof THONG_SO)[number];
