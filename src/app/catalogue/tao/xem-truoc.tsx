@@ -15,6 +15,7 @@ import {
   TrangBia,
   bienMauNhan,
 } from "@/app/catalogue/[slug]/bo-cuc";
+import { DoiAnhLon } from "@/app/catalogue/[slug]/doi-anh";
 
 /**
  * Ban xem truoc truoc khi bam Tao.
@@ -158,7 +159,11 @@ export function XemTruoc({
                 </header>
               )}
 
-              <ThanCatalogue muc={danhSach} g={gia} t={k} />
+              {/* Nhu trang khach: bam anh nho thi doi cho voi anh lon. Xem truoc khong
+                  co PhongToAnh nen bam anh lon van khong ra gi — dung nhu truoc. */}
+              <DoiAnhLon>
+                <ThanCatalogue muc={danhSach} g={gia} t={k} />
+              </DoiAnhLon>
 
               <KhoiLienHe lienHe={gia.lienHe} loiKeuGoi={gia.loiKeuGoi} t={k} />
 

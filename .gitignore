@@ -26,3 +26,4 @@ thiet-ke-template/template-trang-suc.html
 # Script tam cua cac lan kiem thu — repo cong khai, khong bao gio commit.
 scripts/tmp-*
 tests/tmp-*
+src/app/tmp-*

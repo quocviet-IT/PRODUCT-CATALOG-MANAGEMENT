@@ -249,7 +249,7 @@ export const HUONG_DAN_VI = {
       "Cuộn trong khung để xem hết các mẫu và khối liên hệ ở cuối.",
     ],
     meo: [
-      "Xem trước không có khung phóng to ảnh và thanh Gọi / Nhắn dính ở đáy điện thoại — hai thứ đó chỉ có trên trang khách thật.",
+      "Xem trước không có khung phóng to ảnh và thanh Gọi / Nhắn dính ở đáy điện thoại — hai thứ đó chỉ có trên trang khách thật. Riêng việc bấm ảnh nhỏ cho nó lên làm ảnh lớn thì xem trước làm được.",
       "Thanh dưới cùng còn đếm số mẫu và số ảnh đang chọn.",
     ],
   },
@@ -279,7 +279,7 @@ export const HUONG_DAN_VI = {
       "Mã mẫu là nhãn nhỏ, kèm số thứ tự của mẫu.",
       "Chỉ những thông số anh để tích mới hiện.",
       "Lời giới thiệu mẫu, đúng chỗ xuống dòng anh gõ.",
-      "Khách bấm vào ảnh để xem ảnh lớn; bấm Ảnh trước / Ảnh sau hoặc phím mũi tên để chuyển ảnh, Esc để đóng.",
+      "Khách bấm vào ảnh để xem ảnh lớn; bấm Ảnh trước / Ảnh sau hoặc phím mũi tên để chuyển ảnh, Esc để đóng. Ở bố cục có một ảnh lớn riêng, bấm một ảnh nhỏ thì nó đổi chỗ lên làm ảnh lớn (bấm lần nữa là về như cũ) — bấm chính ảnh lớn mới mở khung phóng to.",
     ],
     meo: [
       "Trang khách không hiện SKU, MO, SO, chi tiết kỹ thuật hay cảnh báo nội bộ.",

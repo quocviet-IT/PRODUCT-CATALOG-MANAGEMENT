@@ -212,6 +212,7 @@ function Lookbook({ muc, g, t }: DoiSo) {
                 rong={2000}
                 tyLe="aspect-[4/3]"
                 uuTien={dau === 0}
+                chinh
               />
             )}
 
@@ -275,6 +276,7 @@ function TrienLam({ muc, g, t }: DoiSo) {
                     rong={2000}
                     tyLe="aspect-[4/3]"
                     uuTien={dau === 0}
+                    chinh
                   />
                 </div>
                 {/* Nen cua trang sau con so: so de len mep anh (nen gan trang), tren tong toi sac sang cua mau nhan khong doc duoc neu khong co nen nay. */}
@@ -398,7 +400,7 @@ function TapChi({ muc, g, t }: DoiSo) {
               {chinh && (
                 <div className="w-3/5 shrink-0">
                   <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={1200}
-                       tyLe="aspect-square" uuTien={dau === 0} />
+                       tyLe="aspect-square" uuTien={dau === 0} chinh />
                 </div>
               )}
               <div className="flex flex-grow flex-col justify-center gap-2.5">
@@ -520,7 +522,7 @@ function ThuMoi({ muc, g, t }: DoiSo) {
             {chinh && (
               <div className="w-full max-w-xl border border-hp-rule p-3">
                 <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={1600}
-                     tyLe="aspect-[4/3]" uuTien={moc[i] === 0} />
+                     tyLe="aspect-[4/3]" uuTien={moc[i] === 0} chinh />
               </div>
             )}
 

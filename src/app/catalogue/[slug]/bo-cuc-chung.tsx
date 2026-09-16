@@ -34,6 +34,7 @@ export function Anh({
   uuTien,
   tyLe,
   rong,
+  chinh,
 }: {
   m: MucCatalogue;
   fileId: string;
@@ -41,10 +42,18 @@ export function Anh({
   uuTien: boolean;
   tyLe: string;
   rong: number;
+  /**
+   * O LON cua mau: cho nay la cho anh nho nhay len khi khach bam (xem doi-anh.tsx).
+   * Moi mau nhieu nhat MOT o — hai o thi khong biet nhay len cai nao. Bo cuc bay moi anh
+   * ngang hang nhau (Danh sach, Luoi) hay chi hien mot anh (Bang mau, The tieu ban) thi
+   * khong danh dau o nao ca.
+   */
+  chinh?: boolean;
 }) {
   return (
     <div
       data-anh={fileId}
+      data-anh-chinh={chinh ? "" : undefined}
       title={ten}
       className={`flex cursor-zoom-in items-center justify-center overflow-hidden
                   bg-hp-plate ${tyLe}`}

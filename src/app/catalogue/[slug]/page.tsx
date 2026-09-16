@@ -6,6 +6,7 @@ import { conMoDuoc } from "@/modules/catalogue-share/hieu-luc.model";
 import { boChu } from "@/messages";
 import { NguonNgonNgu } from "@/messages/dung-chu";
 import { MoHopThoaiIn } from "./nut-in";
+import { DoiAnhLon } from "./doi-anh";
 import { PhongToAnh } from "./phong-to";
 import {
   KhoiLienHe, LOP_TONE, ThanCatalogue, ThanhLienHe, TrangBia, bienMauNhan,
@@ -133,10 +134,18 @@ export default async function TrangKhachXem({
             )}
           </header>
 
-          {/* Thu tu anh o day PHAI trung thu tu tren trang: khung phong to bam
-              qua lai theo chinh mang nay. Ca ba bo cuc deu giu dung thu tu do. */}
+          {/* Thu tu anh o day PHAI trung thu tu tren trang: khung phong to bam qua lai
+              theo chinh mang nay, va moi bo cuc deu duyet anh theo dung thu tu goc.
+              (Khach tu doi cho mot anh nho voi anh lon thi hai tam do lech khoi thu tu
+              nay — khung phong to van mo dung tam duoc bam vi no tim theo ma anh.)
+
+              DoiAnhLon nam TRONG PhongToAnh: bam anh nho thi no doi cho voi anh lon va
+              chan su kien lai, bam chinh anh lon thi su kien noi tiep len khung phong
+              to. Hai lop khong gio nhau vi lop trong quyet dinh truoc. */}
           <PhongToAnh anh={c.noiDung.muc.flatMap((m) => m.anh)}>
-            <ThanCatalogue muc={c.noiDung.muc} g={g} t={t} />
+            <DoiAnhLon>
+              <ThanCatalogue muc={c.noiDung.muc} g={g} t={t} />
+            </DoiAnhLon>
           </PhongToAnh>
 
           {/* KhoiLienHe tu quyet dinh hien hay an (coKhoiLienHe): co the chi co loi

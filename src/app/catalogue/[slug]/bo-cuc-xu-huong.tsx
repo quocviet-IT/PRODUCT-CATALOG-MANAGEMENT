@@ -136,7 +136,7 @@ export function KhungArtDeco({ muc, g, t }: DoiSo) {
               {chinh && (
                 <div className="relative mt-6 w-full max-w-xl">
                   <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={1600}
-                       tyLe="aspect-[4/3]" uuTien={moc[i] === 0} />
+                       tyLe="aspect-[4/3]" uuTien={moc[i] === 0} chinh />
                   {huyHieu && (
                     <div
                       data-huy-hieu
@@ -314,7 +314,7 @@ export function ChuLon({ muc, g, t }: DoiSo) {
               <div>
                 {chinh && (
                   <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={1600}
-                       tyLe="aspect-[4/3]" uuTien={moc[i] === 0} />
+                       tyLe="aspect-[4/3]" uuTien={moc[i] === 0} chinh />
                 )}
                 {phu.length > 0 && (
                   <ul className="mt-3 grid grid-cols-4 gap-2">
