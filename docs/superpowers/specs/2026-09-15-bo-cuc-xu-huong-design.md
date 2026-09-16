@@ -98,8 +98,8 @@ Anh chốt (15/09/2026):
   hàng lẻ vẫn nằm giữa khung. Ba tấm một hàng trên điện thoại, năm tấm một hàng từ `sm`.
   Cắt ở năm để khung giữ đối xứng. Dải một hoặc hai tấm thì cho tấm to hơn (`basis-36 sm:basis-40`)
   — chia năm mà chỉ có một tấm thì nó lạc lõng dưới ảnh lớn.
-- Bấm một ảnh trong dải (hoặc huy hiệu) thì nó **đổi chỗ với ảnh chính** — xem `doi-anh.tsx`.
-  Ảnh chính mang dấu `data-anh-chinh`; bấm chính nó mới mở khung phóng to.
+- Bấm ảnh nào cũng mở khung phóng to. Riêng ảnh trong dải (và huy hiệu) thì bấm một cái còn
+  **đổi chỗ với ảnh chính** — xem `doi-anh.tsx`; ảnh chính mang dấu `data-anh-chinh`.
 - **Dải ảnh KHÔNG in ra** (`print:hidden`). Đo trên A4 16/09/2026: thẻ đã cao ~1000px mà một tờ chỉ
   chứa 1047px, thêm dải là tràn sang tờ thứ hai và phá luật "mỗi mẫu một tờ giấy". Bản in giữ ảnh
   chính + huy hiệu, bù lại bằng dòng đếm (bên dưới).

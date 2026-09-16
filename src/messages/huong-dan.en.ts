@@ -278,7 +278,7 @@ export const HUONG_DAN_EN: BoChu["huong_dan"] = {
       "The model code is a small label with the model's number.",
       "Only the details you left ticked are shown.",
       "The About text, with your line breaks.",
-      "Your customer clicks a picture to see it large; Previous image / Next image or the arrow keys move between pictures, Esc closes. In layouts with a big picture of its own, clicking a small picture swaps it into the big slot (click it again to swap back) — only the big picture opens the zoom.",
+      "Any picture your customer clicks opens large; Previous image / Next image or the arrow keys move between pictures, Esc closes. In layouts with a big picture of its own, clicking a small picture also moves it into the big slot — close the zoom and it is sitting there.",
     ],
     meo: [
       "The customer page never shows SKU, MO, SO, technical details or internal warnings.",

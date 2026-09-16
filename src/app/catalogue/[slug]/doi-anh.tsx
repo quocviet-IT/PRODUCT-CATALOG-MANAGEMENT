@@ -15,8 +15,15 @@ import { type ReactNode } from "react";
  * IN co du anh). React khong bao gio ve lai nhung nut nay — chung la `children` tu server —
  * nen viec sua thang thuoc tinh o day khong bi ghi de.
  *
- * Bam vao chinh o lon thi de yen cho su kien noi len: o trang khach PhongToAnh se mo khung
- * phong to. Man hinh Xem truoc khong co PhongToAnh nen bam o lon khong ra gi — dung nhu truoc.
+ * KHONG chan su kien: bam anh nho thi no vua mo to ra vua nhay len o lon (16/09/2026, sau
+ * khi anh bao "khach mo link, bam to anh khong duoc"). Ban dau lop nay chan su kien lai nen
+ * anh nho mat kha nang phong to — muon xem to phai bam hai lan. Bam vao anh la muon XEM TO,
+ * doi cho chi la cai duoc them.
+ *
+ * Vi the o trang khach lop nay boc NGOAI PhongToAnh: div cua PhongToAnh nam trong nen chay
+ * TRUOC, doc duoc ma anh GOC roi mo dung tam vua bam; sau do lop nay moi doi cho. Dao thu tu
+ * long nhau la khung phong to mo nham tam anh cu cua o lon.
+ * Man hinh Xem truoc khong co PhongToAnh nen o do chi doi cho, khong mo to — dung nhu truoc.
  */
 export function DoiAnhLon({ children }: { children: ReactNode }) {
   function bat(e: React.MouseEvent) {
@@ -27,8 +34,6 @@ export function DoiAnhLon({ children }: { children: ReactNode }) {
     if (!lon) return;
 
     doiCho(o, lon);
-    // Da doi anh roi thi thoi, khong mo them khung phong to de len.
-    e.stopPropagation();
   }
 
   return <div onClick={bat}>{children}</div>;

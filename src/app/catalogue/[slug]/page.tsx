@@ -139,14 +139,15 @@ export default async function TrangKhachXem({
               (Khach tu doi cho mot anh nho voi anh lon thi hai tam do lech khoi thu tu
               nay — khung phong to van mo dung tam duoc bam vi no tim theo ma anh.)
 
-              DoiAnhLon nam TRONG PhongToAnh: bam anh nho thi no doi cho voi anh lon va
-              chan su kien lai, bam chinh anh lon thi su kien noi tiep len khung phong
-              to. Hai lop khong gio nhau vi lop trong quyet dinh truoc. */}
-          <PhongToAnh anh={c.noiDung.muc.flatMap((m) => m.anh)}>
-            <DoiAnhLon>
+              DoiAnhLon boc NGOAI PhongToAnh, va thu tu nay quan trong: div cua PhongToAnh
+              nam trong nen chay TRUOC — no doc ma anh GOC va mo dung tam vua bam — roi
+              DoiAnhLon moi doi cho tam do len o lon. Long nguoc lai thi khung phong to
+              mo nham tam anh cu cua o lon. */}
+          <DoiAnhLon>
+            <PhongToAnh anh={c.noiDung.muc.flatMap((m) => m.anh)}>
               <ThanCatalogue muc={c.noiDung.muc} g={g} t={t} />
-            </DoiAnhLon>
-          </PhongToAnh>
+            </PhongToAnh>
+          </DoiAnhLon>
 
           {/* KhoiLienHe tu quyet dinh hien hay an (coKhoiLienHe): co the chi co loi
               keu goi ma chua co ten hay so. */}

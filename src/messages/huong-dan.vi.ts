@@ -279,7 +279,7 @@ export const HUONG_DAN_VI = {
       "Mã mẫu là nhãn nhỏ, kèm số thứ tự của mẫu.",
       "Chỉ những thông số anh để tích mới hiện.",
       "Lời giới thiệu mẫu, đúng chỗ xuống dòng anh gõ.",
-      "Khách bấm vào ảnh để xem ảnh lớn; bấm Ảnh trước / Ảnh sau hoặc phím mũi tên để chuyển ảnh, Esc để đóng. Ở bố cục có một ảnh lớn riêng, bấm một ảnh nhỏ thì nó đổi chỗ lên làm ảnh lớn (bấm lần nữa là về như cũ) — bấm chính ảnh lớn mới mở khung phóng to.",
+      "Khách bấm vào ảnh nào cũng xem được ảnh lớn; bấm Ảnh trước / Ảnh sau hoặc phím mũi tên để chuyển ảnh, Esc để đóng. Ở bố cục có một ảnh lớn riêng, bấm một ảnh nhỏ thì ngoài việc mở to ra, nó còn nhảy lên thế chỗ ảnh lớn — đóng khung phóng to là thấy nó đang nằm ở đó.",
     ],
     meo: [
       "Trang khách không hiện SKU, MO, SO, chi tiết kỹ thuật hay cảnh báo nội bộ.",
