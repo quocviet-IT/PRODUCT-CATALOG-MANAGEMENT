@@ -70,14 +70,37 @@ describe("Khung Art Deco", () => {
     expect(dem(html, "data-huy-hieu")).toBe(2);
     expect(html).toContain('data-anh="a-2"');
     expect(html).toContain('data-anh="c-2"');
-    expect(html).not.toContain('data-anh="a-3"');
-    expect(html).not.toContain('data-anh="c-3"');
   });
 
-  it("đếm số ảnh khi mẫu có hơn một ảnh", () => {
+  it("ảnh từ thứ ba trở đi nằm trong dải nhỏ dưới ảnh chính", () => {
+    // Mẫu 1 dư một ảnh, mẫu 3 dư bốn ảnh; mẫu 2 chỉ có ảnh chính nên không có dải.
+    expect(dem(html, "data-dai-anh")).toBe(2);
+    expect(dem(html, "data-anh=")).toBe(3 + 1 + 6);
+    expect(html).toContain('data-anh="a-3"');
+    expect(html).toContain('data-anh="c-6"');
+  });
+
+  it("dải ảnh không in ra — một mẫu vẫn gọn một tờ giấy", () => {
+    expect(dem(html, "print:hidden")).toBe(dem(html, "data-dai-anh"));
+    expect(dem(html, "print:hidden")).toBe(2);
+  });
+
+  it("dải bày hết ảnh thì dòng đếm chỉ còn trên bản in", () => {
+    // Mẫu 3 ảnh và 6 ảnh: màn hình đã thấy đủ nên ẩn, nhưng bản in không có dải nên vẫn cần.
+    expect(dem(html, "data-dem-anh")).toBe(2);
+    expect(dem(html, "hidden print:block")).toBe(2);
     expect(html).toContain(">3 ảnh<");
     expect(html).toContain(">6 ảnh<");
     expect(html).not.toContain(">1 ảnh<");
+  });
+
+  it("dải ảnh dừng ở năm tấm; mẫu còn ảnh chưa hiện thì đếm cả trên màn hình", () => {
+    const h = veMuc(KhungArtDeco, "art-deco", [{ ...MUC[0], maMau: "D105", anh: anh(9, "d") }]);
+    expect(dem(h, "data-anh=")).toBe(7);
+    expect(h).toContain('data-anh="d-7"');
+    expect(h).not.toContain('data-anh="d-8"');
+    expect(h).toContain(">9 ảnh<");
+    expect(h).not.toContain("hidden print:block");
   });
 
   it("mã mẫu làm tiêu đề; mẫu thiếu mã hiện chữ thay thế", () => {

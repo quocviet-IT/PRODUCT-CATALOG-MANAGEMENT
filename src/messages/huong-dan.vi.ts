@@ -230,7 +230,7 @@ export const HUONG_DAN_VI = {
     chu: [
       "Số ảnh đang giữ trên tổng số ảnh của mẫu.",
       "Bỏ tích (hoặc bấm vào ảnh) để bỏ ảnh đó khỏi catalogue; ảnh bị bỏ mờ đi. Tích lại để lấy lại.",
-      "Ảnh chính: ảnh được tích đầu tiên. Đây là ảnh lớn ở Lookbook, Triển lãm, Tạp chí và Chữ lớn; Khung cổ điển dùng hai ảnh đầu, Khung Art Deco lấy ảnh thứ hai làm huy hiệu nhỏ.",
+      "Ảnh chính: ảnh được tích đầu tiên. Đây là ảnh lớn ở Lookbook, Triển lãm, Tạp chí và Chữ lớn; Khung cổ điển dùng hai ảnh đầu, Khung Art Deco lấy ảnh thứ hai làm huy hiệu nhỏ rồi xếp tối đa năm ảnh sau thành dải nhỏ dưới ảnh chính.",
       "Đặt ảnh này làm ảnh chính: ảnh nhảy lên đầu. Ảnh đang bỏ tích sẽ được tích lại.",
       "Đưa ảnh lên trước hoặc ra sau một bậc. Trên máy tính cũng kéo thả ảnh được, bằng tay cầm sáu chấm.",
     ],

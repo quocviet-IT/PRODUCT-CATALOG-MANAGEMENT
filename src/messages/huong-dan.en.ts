@@ -229,7 +229,7 @@ export const HUONG_DAN_EN: BoChu["huong_dan"] = {
     chu: [
       "Images kept out of the model's total.",
       "Untick (or click the picture) to leave it out; dropped images fade. Tick again to bring it back.",
-      "Main image: the first ticked image. It is the big picture in Lookbook, Gallery, Magazine and Big type; Classic frame uses the first two, and Art Deco frame shows the second one as a small medallion.",
+      "Main image: the first ticked image. It is the big picture in Lookbook, Gallery, Magazine and Big type; Classic frame uses the first two, and Art Deco frame shows the second one as a small medallion, then up to five more in a strip below the main picture.",
       "Make this the main image: it jumps to the front. An unticked image is ticked again.",
       "Move the image one place earlier or later. On a computer you can also drag it by the six-dot handle.",
     ],

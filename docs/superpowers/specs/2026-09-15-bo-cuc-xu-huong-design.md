@@ -92,13 +92,26 @@ Anh chốt (15/09/2026):
 - **Ảnh chính** (`Anh`, 4:3) căn giữa, rộng tối đa khoảng `max-w-xl`. Nếu mẫu có ảnh thứ hai:
   **huy hiệu** tròn (khung tròn viền `border-hp-rule`, lót nền trang) chứa ảnh thứ hai, đặt đè
   lên góc dưới bên phải ảnh chính. Chỉ ảnh đè ảnh, không có chữ đè ảnh.
-- Dưới ảnh: **nét quạt toả tia** (nửa mặt trời) SVG nét mảnh màu nhấn, căn giữa.
+- **Dải ảnh phụ** (sửa 16/09/2026, sau khi anh hỏi "chọn nhiều ảnh sao chỉ hiện hai"): các ảnh
+  từ thứ ba trở đi, **tối đa năm tấm**, thành một dải nhỏ 4:3 **căn giữa** ngay dưới ảnh chính,
+  trong viền khung (`<ul data-dai-anh>`). Dùng `flex-wrap justify-center` chứ không dùng lưới —
+  hàng lẻ vẫn nằm giữa khung. Ba tấm một hàng trên điện thoại, năm tấm một hàng từ `sm`.
+  Cắt ở năm để khung giữ đối xứng. Dải một hoặc hai tấm thì cho tấm to hơn (`basis-36 sm:basis-40`)
+  — chia năm mà chỉ có một tấm thì nó lạc lõng dưới ảnh lớn.
+- **Dải ảnh KHÔNG in ra** (`print:hidden`). Đo trên A4 16/09/2026: thẻ đã cao ~1000px mà một tờ chỉ
+  chứa 1047px, thêm dải là tràn sang tờ thứ hai và phá luật "mỗi mẫu một tờ giấy". Bản in giữ ảnh
+  chính + huy hiệu, bù lại bằng dòng đếm (bên dưới).
+- Dưới dải ảnh: **nét quạt toả tia** (nửa mặt trời) SVG nét mảnh màu nhấn, căn giữa.
 - Mã mẫu làm tiêu đề: chữ tiêu đề in hoa, giãn chữ rộng (~0.28em), cỡ ~22px, căn giữa (cùng lý
   do Thư mời không dùng `MaMau`).
 - Thông số: lưới **hai cột đối xứng**, căn giữa, nhãn nhỏ in hoa trên giá trị (component riêng
   trong tệp mới — `ThongSoBang` có sẵn luôn thành 4 cột trên màn hình lớn).
 - `GioiThieu` căn giữa dưới thông số.
-- Mẫu có hơn một ảnh: dòng nhỏ `chia_se.bang_mau_so_anh` ("{n} ảnh") căn giữa ở cuối khung.
+- Dòng đếm `chia_se.bang_mau_so_anh` ("{n} ảnh") căn giữa ở cuối khung, hiện **khi còn ảnh chưa
+  bày ra** (sửa 16/09/2026; trước đó đếm khi hơn một ảnh):
+  - **trên màn hình** khi hơn bảy ảnh (ảnh chính + huy hiệu + năm tấm dải);
+  - **trên bản in** khi hơn hai ảnh — bản in không có dải nên ngưỡng thấp hơn. Dòng dùng chung
+    một thẻ, gắn `hidden print:block` khi chỉ cần cho bản in.
 - Điện thoại: khoảng đệm khung nhỏ lại, huy hiệu nhỏ lại, hoạ tiết góc thu nhỏ theo.
 
 ### 3.4 Thẻ tiêu bản (`tieu-ban`)

@@ -100,15 +100,24 @@ function KhienSo({ so }: { so: number }) {
  *
  * Khung ke doi nhu Khung co dien nhung co HOA TIET: goc bac thang, quat toa tia, khien so;
  * thong so chia hai cot doi xung. Mot anh chinh lon; anh thu hai (neu co) nam trong huy
- * hieu tron de len goc anh chinh. Cac anh con lai chi dem so — bam anh la luot du. Moi mau
- * mot to giay khi in.
+ * hieu tron de len goc anh chinh; cac anh tiep theo thanh mot dai nho CAN GIUA duoi khung
+ * anh (16/09/2026 — anh hoi "chon nhieu anh sao chi hien hai"). Moi mau mot to giay khi in.
  */
+
+/**
+ * So anh toi da trong dai nho. Nam: sale giu trung vi 5 anh/mau va 90% duoi 8, nen
+ * anh chinh + huy hieu + nam la du cho gan het catalogue; du thi dong dem noi tong so.
+ * Cat ngan de dai anh khong pha doi xung cua khung va khong lam mau tran sang to thu hai.
+ */
+const SO_ANH_DAI = 5;
+
 export function KhungArtDeco({ muc, g, t }: DoiSo) {
   const moc = mocAnh(muc);
   return (
     <ul data-bo-cuc="art-deco" className="space-y-14 print:space-y-0">
       {muc.map((m, i) => {
         const [chinh, huyHieu] = m.anh;
+        const dai = m.anh.slice(2, 2 + SO_ANH_DAI);
         const ct = thongSo(m, g, t);
         return (
           <li
@@ -141,6 +150,33 @@ export function KhungArtDeco({ muc, g, t }: DoiSo) {
                 </div>
               )}
 
+              {/* Dai anh can giua: flex-wrap chu khong grid — hang le van nam giua khung,
+                  grid se day chung ve ben trai va lech doi xung. mt-9 de qua huy hieu.
+                  Mot hai tam thi cho to hon co dinh: chia nam mot tam le trong nhu bi bo quen
+                  duoi anh lon. Khong dung `grow` — hang cuoi khi xuong dong se to hon hang tren.
+
+                  `print:hidden`: KHI IN thi bo dai nay di. Do thu tren A4 (16/09/2026), the da
+                  cao 1000px trong khi mot to chi chua 1047px — them dai anh la tran sang to thu
+                  hai, pha luat "moi mau mot to giay" cua bo cuc. Ban in giu anh chinh + huy hieu,
+                  va dong dem ben duoi luon hien khi con anh chua in. */}
+              {dai.length > 0 && (
+                <ul data-dai-anh className="mt-9 flex w-full max-w-xl flex-wrap justify-center gap-2 print:hidden">
+                  {dai.map((a) => (
+                    <li
+                      key={a.fileId}
+                      className={
+                        dai.length <= 2
+                          ? "basis-36 sm:basis-40"
+                          : "basis-[calc((100%-1rem)/3)] sm:basis-[calc((100%-2rem)/5)]"
+                      }
+                    >
+                      <Anh m={m} fileId={a.fileId} ten={a.ten} rong={500}
+                           tyLe="aspect-[4/3]" uuTien={false} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+
               <QuatToaTia lop="mt-10 h-[4.5rem] w-36 sm:h-[5.5rem] sm:w-44" />
 
               {/* Khong dung MaMau: o day ma mau la tieu de cua khung, MaMau la nhan nho. */}
@@ -162,8 +198,15 @@ export function KhungArtDeco({ muc, g, t }: DoiSo) {
 
               <GioiThieu m={m} lop="mx-auto mt-5" />
 
-              {m.anh.length > 1 && (
-                <span className="mt-5 text-[11px] tabular-nums text-hp-muted">
+              {/* Chi dem khi CON anh chua hien. Tren man hinh, dai anh da bay toi bay tam nen
+                  chi mau nhieu hon the moi can dem; ban in khong co dai nen tu ba anh da can. */}
+              {m.anh.length > 2 && (
+                <span
+                  data-dem-anh
+                  className={`mt-5 text-[11px] tabular-nums text-hp-muted ${
+                    m.anh.length > 2 + SO_ANH_DAI ? "" : "hidden print:block"
+                  }`}
+                >
                   {t.chia_se.bang_mau_so_anh.replace("{n}", String(m.anh.length))}
                 </span>
               )}
