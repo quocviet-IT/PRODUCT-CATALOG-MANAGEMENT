@@ -39,11 +39,14 @@ const dem = (html: string, chuoi: string) => html.split(chuoi).length - 1;
 /**
  * Bố cục nào có "ô lớn" — ảnh chính đứng riêng một chỗ để ảnh nhỏ nhảy lên.
  *
- * Bốn bố cục ngoài danh sách này KHÔNG có: Danh sách và Lưới bày mọi ảnh ngang hàng
- * nhau (không có ô nào lớn hơn), Bảng màu và Thẻ tiêu bản chỉ hiện đúng một ảnh, còn
- * Khung cổ điển mở đầu bằng HAI ảnh lớn ngang nhau nên không có ô nào là "ô lớn" duy nhất.
+ * Ba bố cục ngoài danh sách này KHÔNG có: Danh sách và Lưới bày mọi ảnh ngang hàng nhau
+ * (không có ô nào lớn hơn), còn Khung cổ điển mở đầu bằng HAI ảnh lớn ngang nhau nên không có
+ * ô nào là "ô lớn" duy nhất. Bảng mẫu và Thẻ tiêu bản vào danh sách từ 17/09/2026, khi có dải
+ * ảnh phụ (anh: "chỉ hiện có 2 ảnh, khách xem sẽ không có hứng thú mua hàng").
  */
-const CO_O_LON: BoCuc[] = ["lookbook", "trien-lam", "tap-chi", "thu-moi", "art-deco", "chu-lon"];
+const CO_O_LON: BoCuc[] = [
+  "lookbook", "trien-lam", "tap-chi", "thu-moi", "art-deco", "chu-lon", "bang-mau", "tieu-ban",
+];
 
 describe("ô ảnh lớn để ảnh nhỏ nhảy lên", () => {
   it.each(CO_O_LON)("%s: mỗi mẫu có ảnh đúng một ô lớn", (boCuc) => {

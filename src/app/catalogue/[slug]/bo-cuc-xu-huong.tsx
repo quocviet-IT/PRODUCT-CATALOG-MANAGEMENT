@@ -3,6 +3,7 @@ import {
   Anh,
   DuongTrangTri,
   GioiThieu,
+  SO_ANH_DAI,
   ThongSoDong,
   mocAnh,
   thongSo,
@@ -103,13 +104,6 @@ function KhienSo({ so }: { so: number }) {
  * hieu tron de len goc anh chinh; cac anh tiep theo thanh mot dai nho CAN GIUA duoi khung
  * anh (16/09/2026 — anh hoi "chon nhieu anh sao chi hien hai"). Moi mau mot to giay khi in.
  */
-
-/**
- * So anh toi da trong dai nho. Nam: sale giu trung vi 5 anh/mau va 90% duoi 8, nen
- * anh chinh + huy hieu + nam la du cho gan het catalogue; du thi dong dem noi tong so.
- * Cat ngan de dai anh khong pha doi xung cua khung va khong lam mau tran sang to thu hai.
- */
-const SO_ANH_DAI = 5;
 
 export function KhungArtDeco({ muc, g, t }: DoiSo) {
   const moc = mocAnh(muc);
@@ -228,7 +222,14 @@ export function KhungArtDeco({ muc, g, t }: DoiSo) {
  * de trang khong trong tron.
  *
  * Khong co dong dem rieng: dau trang khach va ban Xem truoc da hien so mau (anh chot 15/09/2026).
+ *
+ * 17/09/2026: them dai anh phu BON tam duoi anh chinh (anh: "chi hien co 2 anh, khach xem se
+ * khong co hung thu mua hang"). Bon chu khong phai SO_ANH_DAI: the chi rong ~260px tren may
+ * tinh, nam tam thi moi tam con to bang dau ngon tay. Dai `print:hidden` de ban in van nhieu
+ * mau mot trang; nhan "N anh" giu nguyen vi no la mot dong cua nhan tieu ban, khong phai loi nhac.
  */
+const SO_ANH_TIEU_BAN = 4;
+
 export function TheTieuBan({ muc, g, t }: DoiSo) {
   return (
     <ul
@@ -236,7 +237,8 @@ export function TheTieuBan({ muc, g, t }: DoiSo) {
       className="grid grid-cols-2 gap-x-5 gap-y-10 sm:grid-cols-3 sm:gap-x-8 print:grid-cols-3"
     >
       {muc.map((m, i) => {
-        const [chinh] = m.anh;
+        const [chinh, ...phu] = m.anh;
+        const dai = phu.slice(0, SO_ANH_TIEU_BAN);
         const nhan = [
           t.chia_se.tieu_ban_so.replace("{n}", String(i + 1).padStart(3, "0")),
           m.maMau ?? t.catalogue_sheet.chua_co_ma_mau,
@@ -251,9 +253,21 @@ export function TheTieuBan({ muc, g, t }: DoiSo) {
             {chinh ? (
               // Ba the dau (hang dau tren may tinh) tai ngay.
               <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={900}
-                   tyLe="aspect-[4/3]" uuTien={i < 3} />
+                   tyLe="aspect-[4/3]" uuTien={i < 3} chinh />
             ) : (
               <div aria-hidden className="aspect-[4/3] bg-hp-plate" />
+            )}
+            {/* Luon chia bon cot du it anh: cac o giu cung mot co tren moi the, hang the nhin
+                deu nhau nhu khay tieu ban. Can trai theo luoi, khong can giua. */}
+            {dai.length > 0 && (
+              <ul data-dai-anh className="mt-1.5 grid grid-cols-4 gap-1.5 print:hidden">
+                {dai.map((a) => (
+                  <li key={a.fileId}>
+                    <Anh m={m} fileId={a.fileId} ten={a.ten} rong={300}
+                         tyLe="aspect-[4/3]" uuTien={false} />
+                  </li>
+                ))}
+              </ul>
             )}
             <span aria-hidden className="mt-3 block h-px bg-hp-rule" />
             <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.08em] text-hp-muted">{nhan}</p>

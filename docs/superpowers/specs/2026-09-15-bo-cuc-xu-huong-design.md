@@ -126,6 +126,11 @@ Anh chốt (15/09/2026):
 - Mỗi thẻ: **ảnh chính** 4:3 đặt thẳng trên nền (không khung) → vạch kẻ mảnh → **nhãn** chữ đơn
   cách (`font-mono`, cỡ 11px, in hoa, màu phụ): `Nº 001 · <mã mẫu>` và thêm ` · {n} ảnh` khi mẫu
   có hơn một ảnh → `ThongSoDong` → `GioiThieu`.
+- **Dải ảnh phụ** (sửa 17/09/2026, anh: "chỉ hiện có 2 ảnh, khách xem sẽ không có hứng thú mua
+  hàng"): ngay dưới ảnh chính, tối đa **bốn** tấm trong lưới 4 cột — không phải năm như Khung Art
+  Deco và Bảng mẫu, vì thẻ chỉ rộng ~260px. Bấm tấm nào cũng mở to và nhảy lên ô ảnh chính.
+  `print:hidden`, nhãn "N ảnh" giữ nguyên. Thẻ có dải cao hơn thẻ không có, nên nhãn trong
+  cùng một hàng có thể lệch nhau — chấp nhận, y như khi thông số một thẻ xuống hai dòng.
 - Số trong nhãn đệm ba chữ số. Chữ `Nº {n}` là khoá `chia_se.tieu_ban_so`.
 
 ### 3.5 Chữ lớn (`chu-lon`)

@@ -133,10 +133,17 @@ describe("Thẻ tiêu bản", () => {
     expect(html).toContain(`>Nº 003 · ${t.catalogue_sheet.chua_co_ma_mau} · 6 ảnh<`);
   });
 
-  it("chỉ hiện ảnh chính của mỗi mẫu", () => {
-    expect(dem(html, "data-anh=")).toBe(3);
-    expect(html).toContain('data-anh="a-1"');
-    expect(html).not.toContain('data-anh="a-2"');
+  it("ảnh chính kèm dải nhỏ tối đa bốn tấm — thẻ hẹp, năm tấm thì nhỏ quá", () => {
+    // Mẫu 3 ảnh bày đủ 3, mẫu 1 ảnh bày 1, mẫu 6 ảnh bày 1 + 4.
+    expect(dem(html, "data-anh=")).toBe(3 + 1 + 5);
+    expect(dem(html, "data-dai-anh")).toBe(2);
+    expect(html).toContain('data-anh="c-5"');
+    expect(html).not.toContain('data-anh="c-6"');
+    expect(dem(html, "data-anh-chinh")).toBe(3);
+  });
+
+  it("dải ảnh không in ra — vẫn nhiều mẫu một trang", () => {
+    expect(dem(html, "print:hidden")).toBe(dem(html, "data-dai-anh"));
   });
 
   it("thông số và lời giới thiệu có mặt", () => {

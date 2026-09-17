@@ -19,6 +19,7 @@ import {
   DuongTrangTri,
   GioiThieu,
   MaMau,
+  SO_ANH_DAI,
   ThongSoBang,
   ThongSoDong,
   mocAnh,
@@ -441,32 +442,46 @@ function TapChi({ muc, g, t }: DoiSo) {
  * Bo cuc 7 — bang mau (line sheet, 12/09/2026).
  *
  * Cho KHACH SI va danh sach dai: moi mau mot hang gon, anh chinh nho canh thong so, in
- * duoc nhieu mau mot trang. Chi hien anh CHINH: bam vao la mo khung phong to va luot
- * duoc moi anh — khung do tim anh theo fileId trong mang anh phang, khong can o cho
- * cac anh con lai.
+ * duoc nhieu mau mot trang.
+ *
+ * Tu 17/09/2026 co them DAI ANH PHU toi da SO_ANH_DAI tam duoi thong so (anh: "chi hien co
+ * 2 anh, khach xem se khong co hung thu mua hang"). Truoc do chi hien anh chinh. Dai anh
+ * `print:hidden` — ban in giu dung dang gon nhu truoc, nhieu mau mot trang van la ly do
+ * bo cuc nay ton tai. Dai can TRAI chu khong can giua: day la hang du lieu, doc tu trai sang.
  */
 function BangMau({ muc, g, t }: DoiSo) {
   const moc = mocAnh(muc);
   return (
     <ul data-bo-cuc="bang-mau" className="border-t border-hp-rule">
       {muc.map((m, i) => {
-        const [chinh] = m.anh;
+        const [chinh, ...phu] = m.anh;
+        const dai = phu.slice(0, SO_ANH_DAI);
         const ct = thongSo(m, g, t);
         return (
           <li
             key={`${m.maMau ?? "x"}-${i}`}
             className="grid break-inside-avoid grid-cols-[120px_1fr] gap-4 border-b border-hp-rule py-4
-                       sm:grid-cols-[180px_1fr_auto] sm:gap-6"
+                       sm:grid-cols-[180px_1fr_auto] sm:grid-rows-[auto_1fr] sm:gap-x-6 sm:gap-y-3"
           >
-            <div>
+            {/* sm:row-span-2: anh chinh trai ca hai hang de dai anh (hang 2, cot 2) nam SAT duoi
+                thong so. Khong co dong nay thi hang 2 bat dau duoi day anh chinh — dai anh roi
+                xa thong so mot khoang trong va moi hang cao gap ruoi, mat cai gon cua bang mau. */}
+            <div className="sm:row-span-2">
               {chinh ? (
                 <Anh m={m} fileId={chinh.fileId} ten={chinh.ten} rong={600}
-                     tyLe="aspect-[4/3]" uuTien={moc[i] === 0} />
+                     tyLe="aspect-[4/3]" uuTien={moc[i] === 0} chinh />
               ) : (
                 <div aria-hidden className="aspect-[4/3] bg-hp-plate" />
               )}
+              {/* Chi dem khi CON anh chua bay ra. Man hinh co dai nen chi mau nhieu hon dai
+                  moi can; ban in khong co dai nen tu hai anh da can — y nhu truoc khi co dai. */}
               {m.anh.length > 1 && (
-                <span className="mt-1.5 block text-[11px] tabular-nums text-hp-muted">
+                <span
+                  data-dem-anh
+                  className={`mt-1.5 text-[11px] tabular-nums text-hp-muted ${
+                    m.anh.length > 1 + SO_ANH_DAI ? "block" : "hidden print:block"
+                  }`}
+                >
                   {t.chia_se.bang_mau_so_anh.replace("{n}", String(m.anh.length))}
                 </span>
               )}
@@ -481,6 +496,24 @@ function BangMau({ muc, g, t }: DoiSo) {
             <span className="hidden text-[11px] tabular-nums text-hp-muted sm:block">
               {String(i + 1).padStart(2, "0")}
             </span>
+
+            {/* Dien thoai: cot thong so chi con ~190px, nam tam nho xiu — nen dai trai ca hang
+                (col-span-2). May tinh: nam duoi cot thong so, rong toi da max-w-md de o nho
+                van ro rang nho hon anh chinh 180px. */}
+            {dai.length > 0 && (
+              <ul
+                data-dai-anh
+                className="col-span-2 grid grid-cols-5 gap-1.5 sm:col-span-1 sm:col-start-2 sm:max-w-md
+                           print:hidden"
+              >
+                {dai.map((a) => (
+                  <li key={a.fileId}>
+                    <Anh m={m} fileId={a.fileId} ten={a.ten} rong={400}
+                         tyLe="aspect-[4/3]" uuTien={false} />
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
         );
       })}

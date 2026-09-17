@@ -138,6 +138,16 @@ export function GioiThieu({ m, lop }: { m: MucCatalogue; lop?: string }) {
 export type DoiSo = { muc: MucCatalogue[]; g: GiaoDienCatalogue; t: BoChu };
 
 /**
+ * So anh toi da trong DAI ANH PHU (hang anh nho duoi hay canh anh chinh). Nam: sale giu
+ * trung vi 5 anh/mau va 90% duoi 8 (do 10/09/2026), nen anh chinh + nam la du cho gan het
+ * catalogue; mau nhieu hon thi dong dem noi tong so, bam anh van luot du trong khung phong to.
+ *
+ * Dung chung cho Khung Art Deco, Bang mau (16–17/09/2026). The tieu ban de rieng bon tam vi
+ * the hep — nam tam trong mot the chi con to bang dau ngon tay.
+ */
+export const SO_ANH_DAI = 5;
+
+/**
  * Vi tri anh dau tien cua tung muc trong mang anh PHANG.
  *
  * Can no de biet anh nao la anh dau ca trang (anh do tai ngay, so con lai cho
