@@ -13,6 +13,10 @@ import {
   phanTenCuaSlug,
   slugDoiTen,
   DAI_GIOI_THIEU,
+  DAI_GIA_TRI_THONG_SO,
+  DAI_NHAN_THONG_SO,
+  SO_THONG_SO_THEM,
+  locThongSoThem,
   doiCho,
   sapXepMuc,
   tuoiVangCaoNhat,
@@ -271,6 +275,46 @@ describe("gioi thieu tung mau (gop y 11/09/2026)", () => {
     const [m] = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["a1"], gioiThieu: "Quà tặng" }]).muc;
     expect(Object.keys(m).sort()).toEqual(
       ["anh", "chatLieu", "gioiThieu", "loaiSp", "mau", "maMau", "size", "tlVang"].sort(),
+    );
+  });
+});
+
+describe("thong so sale tu dien (gop y kd01 18/09/2026)", () => {
+  const dong = (nhan: string, giaTri: string) => ({ nhan, giaTri });
+
+  it("cat khoang trang va cat do dai, giu dung thu tu sale go", () => {
+    expect(locThongSoThem([dong("  Đá chính  ", "  Kim cương 5 ly  ")])).toEqual([
+      { nhan: "Đá chính", giaTri: "Kim cương 5 ly" },
+    ]);
+    const [d] = locThongSoThem([dong("n".repeat(100), "v".repeat(300))]);
+    expect(d.nhan).toHaveLength(DAI_NHAN_THONG_SO);
+    expect(d.giaTri).toHaveLength(DAI_GIA_TRI_THONG_SO);
+  });
+
+  it("bỏ dòng thiếu một vế — một dòng thông số phải có cả nhãn lẫn giá trị", () => {
+    expect(locThongSoThem([dong("Đá chính", "   "), dong("  ", "Kim cương"), dong("", "")])).toEqual([]);
+  });
+
+  it("chỉ nhận tối đa ba dòng", () => {
+    const nhieu = Array.from({ length: 9 }, (_, i) => dong(`N${i}`, `V${i}`));
+    expect(locThongSoThem(nhieu)).toHaveLength(SO_THONG_SO_THEM);
+    expect(locThongSoThem(nhieu)[0]).toEqual({ nhan: "N0", giaTri: "V0" });
+  });
+
+  it("không gõ gì thì KHÔNG có trường — hình dạng mục y như cũ", () => {
+    const [m] = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["a1"], thongSoThem: [dong("  ", " ")] }]).muc;
+    expect(m).not.toHaveProperty("thongSoThem");
+    const [k] = dungNoiDung(NGUON, [{ ma: "D12741", anh: ["a1"] }]).muc;
+    expect(k).not.toHaveProperty("thongSoThem");
+  });
+
+  it("có gõ thì ranh giới riêng tư chỉ thêm đúng trường đó", () => {
+    const [m] = dungNoiDung(NGUON, [
+      { ma: "D12741", anh: ["a1"], thongSoThem: [dong("Đá chính", "Kim cương")] },
+    ]).muc;
+    expect(m.thongSoThem).toEqual([{ nhan: "Đá chính", giaTri: "Kim cương" }]);
+    expect(Object.keys(m).sort()).toEqual(
+      ["anh", "chatLieu", "loaiSp", "mau", "maMau", "size", "thongSoThem", "tlVang"].sort(),
     );
   });
 });

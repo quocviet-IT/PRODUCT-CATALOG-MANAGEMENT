@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import { boChu } from "@/messages";
 import { NguonNgonNgu, useChu } from "@/messages/dung-chu";
 import {
-  DAI_GIOI_THIEU, type MucCatalogue, type MucDeChon,
+  DAI_GIOI_THIEU, locThongSoThem, type MucCatalogue, type MucDeChon, type ThongSoThem,
 } from "@/modules/catalogue-share/chia-se.model";
 import type { GiaoDienCatalogue } from "@/modules/catalogue-share/giao-dien.model";
 import {
@@ -34,12 +34,14 @@ function dungMuc(
   muc: MucDeChon[],
   anhGiu: Record<string, string[]>,
   gioiThieu: Record<string, string>,
+  thongSoThem: Record<string, ThongSoThem[]>,
 ): MucCatalogue[] {
   return muc.map((m) => {
     const giu = new Set(anhGiu[m.ma] ?? []);
     // Cung quy tac cat voi dungNoiDung: xem truoc khong hien loi gioi thieu dai hon
     // cai khach se thay.
     const gt = (gioiThieu[m.ma] ?? "").trim().slice(0, DAI_GIOI_THIEU);
+    const ts = locThongSoThem(thongSoThem[m.ma]);
     return {
       maMau: m.maMau,
       loaiSp: m.loaiSp,
@@ -49,6 +51,7 @@ function dungMuc(
       tlVang: m.tlVang,
       anh: m.anh.filter((a) => giu.has(a.fileId)),
       ...(gt ? { gioiThieu: gt } : {}),
+      ...(ts.length > 0 ? { thongSoThem: ts } : {}),
     };
   });
 }
@@ -57,6 +60,7 @@ export function XemTruoc({
   muc,
   anhGiu,
   gioiThieu,
+  thongSoThem,
   gia,
   ten,
   khiDong,
@@ -65,6 +69,7 @@ export function XemTruoc({
   anhGiu: Record<string, string[]>;
   /** ma -> loi gioi thieu sale dang go. */
   gioiThieu: Record<string, string>;
+  thongSoThem: Record<string, ThongSoThem[]>;
   gia: GiaoDienCatalogue;
   ten: string;
   khiDong: () => void;
@@ -96,7 +101,7 @@ export function XemTruoc({
     };
   }, [khiDong]);
 
-  const danhSach = dungMuc(muc, anhGiu, gioiThieu);
+  const danhSach = dungMuc(muc, anhGiu, gioiThieu, thongSoThem);
   const tieuDe = ten.trim() || k.chia_se.xem_truoc_chua_dat_ten;
 
   return (

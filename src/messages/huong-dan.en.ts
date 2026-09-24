@@ -211,7 +211,7 @@ export const HUONG_DAN_EN: BoChu["huong_dan"] = {
 
   gioi_thieu: {
     ten: "About each model",
-    mo_ta: "Each model has its own card: details, an About box and the image library.",
+    mo_ta: "Each model has its own card: details, an About box, your own details and the image library.",
     chu: [
       "About this piece: a few words for your customer (material, how it wears, a gift idea…). Optional; leave it empty and nothing extra shows.",
       "Up to 300 characters; the counter appears once you type. Line breaks are kept on the customer page.",
@@ -220,6 +220,8 @@ export const HUONG_DAN_EN: BoChu["huong_dan"] = {
     meo: [
       "The text appears right under the model's details in every layout; in Image grid it sits under the model's first picture.",
       "It is not translated when you choose English — write it in your customer's language.",
+      "Your own details: press Add a detail to type what the spreadsheet does not carry — centre stone, engraving, warranty. Up to 3 rows per model, each a name and a value; a row missing either side is left out.",
+      "Your own details appear right after the built-in ones, in every layout and in print. The Details tick boxes under Presentation only switch off spreadsheet columns, never the rows you typed.",
     ],
   },
 

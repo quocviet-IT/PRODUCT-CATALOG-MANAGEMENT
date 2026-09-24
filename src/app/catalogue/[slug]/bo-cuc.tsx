@@ -20,6 +20,7 @@ import {
   GioiThieu,
   MaMau,
   SO_ANH_DAI,
+  chuThongSo,
   ThongSoBang,
   ThongSoDong,
   mocAnh,
@@ -164,7 +165,7 @@ function Luoi({ muc, g, t }: DoiSo) {
           <MaMau m={x.m} t={t} lop="mt-3" />
           {x.dauMuc && x.chiTiet.length > 0 && (
             <p className="mt-1 text-xs leading-relaxed text-hp-muted">
-              {x.chiTiet.map(([, v]) => v).join(" · ")}
+              {x.chiTiet.map(chuThongSo).join(" · ")}
             </p>
           )}
           {/* Luoi anh: gioi thieu chi o o dau cua mau, chu nho — cung ly do voi dong
@@ -412,8 +413,10 @@ function TapChi({ muc, g, t }: DoiSo) {
                 <MaMau m={m} t={t} />
                 {ct.length > 0 && (
                   <div className="flex flex-col gap-0.5">
-                    {ct.map(([nhan, v]) => (
-                      <span key={nhan} className="text-sm leading-relaxed text-hp-body">{v}</span>
+                    {ct.map((d) => (
+                      <span key={d[0]} className="text-sm leading-relaxed text-hp-body">
+                        {chuThongSo(d)}
+                      </span>
                     ))}
                   </div>
                 )}

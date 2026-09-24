@@ -35,7 +35,46 @@ export type MucCatalogue = {
    * catalogue cu va mau khong ai viet gi thi khong co truong nay.
    */
   gioiThieu?: string;
+  /**
+   * Thong so SALE tu go them cho mau nay (gop y kd01 18/09/2026: "them mot o de sale tu
+   * dien thong so san pham cho khach"). Bang tinh khong co moi thu — da chinh, khac ten,
+   * han bao hanh — nen sale phai go duoc tay. Nhu gioiThieu: do sale viet chu khong phai
+   * du lieu noi bo chep sang, va chi co khi ho co go.
+   */
+  thongSoThem?: ThongSoThem[];
 };
+
+/** Mot dong thong so sale go tay: nhan trai, gia tri phai — hien nhu cac thong so khac. */
+export type ThongSoThem = { nhan: string; giaTri: string };
+
+/**
+ * Gioi han cua thong so tu dien. Ba dong: du cho vai chi tiet quan trong, khong bien
+ * khung thong so thanh mot bai viet (da co gioiThieu cho viec do). Nhan ngan vi no dung
+ * canh "CHAT LIEU", "TL VANG (G)"; gia tri dai hon mot chut cho "Kim cuong 5 ly, 3 vien".
+ */
+export const SO_THONG_SO_THEM = 3;
+export const DAI_NHAN_THONG_SO = 24;
+export const DAI_GIA_TRI_THONG_SO = 80;
+
+/**
+ * Cat va loc thong so tu dien — MOT noi quyet dinh hinh dang, dung chung cho may chu
+ * (dungNoiDung) va ban Xem truoc. Hai noi thi chung se lech nhau, va luc do xem truoc
+ * noi doi voi sale.
+ *
+ * Bo dong thieu mot ve: mot dong thong so khong co nhan thi khach doc ra mot gia tri
+ * tro troi, con nhan khong co gia tri la mot nhan rong.
+ */
+export function locThongSoThem(
+  ds: readonly Partial<ThongSoThem>[] | undefined,
+): ThongSoThem[] {
+  return (ds ?? [])
+    .map((x) => ({
+      nhan: (x?.nhan ?? "").trim().slice(0, DAI_NHAN_THONG_SO),
+      giaTri: (x?.giaTri ?? "").trim().slice(0, DAI_GIA_TRI_THONG_SO),
+    }))
+    .filter((x) => x.nhan !== "" && x.giaTri !== "")
+    .slice(0, SO_THONG_SO_THEM);
+}
 
 /**
  * phienBan de sau nay doi hinh dang van doc duoc catalogue cu. Catalogue da
@@ -45,7 +84,12 @@ export type MucCatalogue = {
 export type NoiDungCatalogue = { phienBan: 1; muc: MucCatalogue[] };
 
 /** Mot lua chon cua sale: mot mau, kem nhung anh ho giu lai va loi gioi thieu neu co. */
-export type LuaChon = { ma: string; anh: string[]; gioiThieu?: string };
+export type LuaChon = {
+  ma: string;
+  anh: string[];
+  gioiThieu?: string;
+  thongSoThem?: Partial<ThongSoThem>[];
+};
 
 /** Nguon de dung anh chup: dong bang tinh + thu vien anh cua no. */
 export type NguonMau = { d: DongCatalogue; anh: AnhTrongThuMuc[] };
@@ -106,6 +150,7 @@ export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogu
     // Loi gioi thieu: cat khoang trang va do dai O DAY, khong tin trinh duyet. Rong
     // thi khong ghi truong — mau khong ai viet gi giu dung hinh dang cu.
     const gioiThieu = (c.gioiThieu ?? "").trim().slice(0, DAI_GIOI_THIEU);
+    const thongSoThem = locThongSoThem(c.thongSoThem);
     muc.push({
       maMau: n.d.maMau,
       loaiSp: n.d.loaiSp,
@@ -115,6 +160,7 @@ export function dungNoiDung(nguon: NguonMau[], chon: LuaChon[]): NoiDungCatalogu
       tlVang: n.d.tlVang,
       anh,
       ...(gioiThieu ? { gioiThieu } : {}),
+      ...(thongSoThem.length > 0 ? { thongSoThem } : {}),
     });
   }
 

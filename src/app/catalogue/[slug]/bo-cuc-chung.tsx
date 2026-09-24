@@ -13,8 +13,16 @@ function gam(v: number | null): string | null {
   return v === null ? null : `${v.toFixed(2).replace(".", ",")} g`;
 }
 
-/** Cac thong so duoc phep hien, theo dung lua chon cua sale. */
-export function thongSo(m: MucCatalogue, g: GiaoDienCatalogue, t: BoChu): [string, string][] {
+/**
+ * Cac thong so duoc phep hien, theo dung lua chon cua sale.
+ *
+ * MOI bo cuc deu lay thong so tu day, nen them o day la ca 11 bo cuc lan ban in deu co.
+ *
+ * Dong sale tu go (thongSoThem, gop y kd01 18/09/2026) noi vao SAU va KHONG chiu o tich
+ * `g.hien`: nam o tich do la cua nam cot bang tinh — "dung hien TL vang cho khach nay" —
+ * con dong sale go tay thi chinh ho vua go cho khach nay, tat no di la vo nghia.
+ */
+export function thongSo(m: MucCatalogue, g: GiaoDienCatalogue, t: BoChu): DongThongSo[] {
   const tatCa: [boolean, string, string | null][] = [
     [g.hien.loaiSp, t.catalogue_sheet.cot_loai_sp, m.loaiSp],
     [g.hien.chatLieu, t.catalogue_sheet.cot_chat_lieu, m.chatLieu],
@@ -22,9 +30,24 @@ export function thongSo(m: MucCatalogue, g: GiaoDienCatalogue, t: BoChu): [strin
     [g.hien.size, t.catalogue_sheet.cot_size, m.size],
     [g.hien.tlVang, t.catalogue_sheet.cot_tl_vang, gam(m.tlVang)],
   ];
-  return tatCa
-    .filter((x): x is [boolean, string, string] => x[0] && x[2] !== null)
-    .map(([, nhan, v]) => [nhan, v]);
+  return [
+    ...tatCa
+      .filter((x): x is [boolean, string, string] => x[0] && x[2] !== null)
+      .map(([, nhan, v]): DongThongSo => [nhan, v]),
+    ...(m.thongSoThem ?? []).map((x): DongThongSo => [x.nhan, x.giaTri, true]),
+  ];
+}
+
+/**
+ * Mot dong thong so. Co `sale` khi day la dong sale tu go, va dau hieu do chi dung cho
+ * MOT viec: bo cuc nao chi in GIA TRI (Danh sach, Luoi anh, ThongSoDong) thi dong sale
+ * phai keo nhan theo, khong thi khach doc ra "Mien phi" tro troi giua mot hang thong so.
+ */
+export type DongThongSo = [nhan: string, giaTri: string, sale?: boolean];
+
+/** Chu cho mot dong khi bo cuc khong ve nhan rieng — quy tac nam DUNG mot cho. */
+export function chuThongSo([nhan, v, sale]: DongThongSo): string {
+  return sale ? `${nhan}: ${v}` : v;
 }
 
 export function Anh({
@@ -83,11 +106,11 @@ export function MaMau({ m, t, lop }: { m: MucCatalogue; t: BoChu; lop?: string }
 }
 
 /** Thong so tren mot dong, ngan cach bang dau cham giua. */
-export function ThongSoDong({ ds, lop }: { ds: [string, string][]; lop?: string }) {
+export function ThongSoDong({ ds, lop }: { ds: DongThongSo[]; lop?: string }) {
   if (ds.length === 0) return null;
   return (
     <p className={`text-sm leading-relaxed text-hp-body ${lop ?? ""}`}>
-      {ds.map(([, v]) => v).join(" · ")}
+      {ds.map(chuThongSo).join(" · ")}
     </p>
   );
 }
@@ -96,7 +119,7 @@ export function ThongSoDong({ ds, lop }: { ds: [string, string][]; lop?: string 
  * Thong so xep cot, co nhan — dung o bo cuc con nhieu cho. `gon` cho hang cua Bang mau:
  * khoang cach nho hon de nhieu mau vua mot trang.
  */
-export function ThongSoBang({ ds, lop, gon }: { ds: [string, string][]; lop?: string; gon?: boolean }) {
+export function ThongSoBang({ ds, lop, gon }: { ds: DongThongSo[]; lop?: string; gon?: boolean }) {
   if (ds.length === 0) return null;
   const khoang = gon ? "gap-x-6 gap-y-2" : "gap-x-8 gap-y-4";
   return (

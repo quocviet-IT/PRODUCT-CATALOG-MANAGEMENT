@@ -2,7 +2,14 @@
 
 import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
-import { DAI_GIOI_THIEU, type MucDeChon } from "@/modules/catalogue-share/chia-se.model";
+import {
+  DAI_GIA_TRI_THONG_SO,
+  DAI_GIOI_THIEU,
+  DAI_NHAN_THONG_SO,
+  SO_THONG_SO_THEM,
+  type MucDeChon,
+  type ThongSoThem,
+} from "@/modules/catalogue-share/chia-se.model";
 import { SO_NGAY_SONG } from "@/modules/catalogue-share/hieu-luc.model";
 import { DoiTenLink } from "@/app/admin/catalogue/doi-ten-link";
 import { XemTruocLink } from "./xem-truoc-link";
@@ -27,6 +34,12 @@ const NUT_PHU =
   "inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em] " +
   "text-hp-muted transition-colors duration-150 hover:text-hp-ink";
 const ICON = { "aria-hidden": true, strokeWidth: 1.5, className: "h-4 w-4 shrink-0" } as const;
+
+/** O nhap thong so tu dien — cung kieu gach chan voi cac o khac tren man hinh nay. */
+const O_THONG_SO =
+  "block border-0 border-b border-hp-rule bg-transparent px-0.5 py-1.5 text-sm text-hp-body " +
+  "transition-colors duration-150 placeholder:text-hp-rule focus:border-b-2 " +
+  "focus:border-hp-pink focus:pb-[5px] focus:outline-none";
 
 function ThongSo({ m }: { m: MucDeChon }) {
   const t = useChu();
@@ -55,6 +68,11 @@ export function TaoCatalogue() {
   const [thuTuGoc, setThuTuGoc] = useState<string[]>([]);
   /** ma -> loi gioi thieu sale dang go. Khong bat buoc. */
   const [gioiThieu, setGioiThieu] = useState<Record<string, string>>({});
+  /**
+   * ma -> thong so sale tu go them (gop y kd01 18/09/2026). Giu ca dong con trong de sale
+   * go dan; may chu va ban Xem truoc deu bo dong thieu ve qua locThongSoThem.
+   */
+  const [thongSoThem, setThongSoThem] = useState<Record<string, ThongSoThem[]>>({});
   const [ten, setTen] = useState("");
   // Ten link di theo ten catalogue cho toi khi sale tu sua o ten link. Hai state
   // rieng + mot co, KHONG chep ten sang bang effect: effect goi setState la mot
@@ -116,6 +134,25 @@ export function TaoCatalogue() {
     setMuc((truoc) => truoc.map((x) => (x.ma === ma ? { ...x, anh } : x)));
   }
 
+  function themThongSo(ma: string) {
+    setThongSoThem((truoc) => {
+      const ds = truoc[ma] ?? [];
+      if (ds.length >= SO_THONG_SO_THEM) return truoc;
+      return { ...truoc, [ma]: [...ds, { nhan: "", giaTri: "" }] };
+    });
+  }
+
+  function suaThongSo(ma: string, i: number, phan: Partial<ThongSoThem>) {
+    setThongSoThem((truoc) => ({
+      ...truoc,
+      [ma]: (truoc[ma] ?? []).map((d, j) => (j === i ? { ...d, ...phan } : d)),
+    }));
+  }
+
+  function boThongSo(ma: string, i: number) {
+    setThongSoThem((truoc) => ({ ...truoc, [ma]: (truoc[ma] ?? []).filter((_, j) => j !== i) }));
+  }
+
   function goMau(ma: string) {
     setMuc((truoc) => truoc.filter((m) => m.ma !== ma));
     // Go khoi man hinh nay thi cung go khoi gio, khong thi quay lai danh sach
@@ -142,6 +179,7 @@ export function TaoCatalogue() {
               ma: m.ma,
               anh: m.anh.filter((a) => giu.has(a.fileId)).map((a) => a.fileId),
               gioiThieu: gioiThieu[m.ma] ?? "",
+              thongSoThem: thongSoThem[m.ma] ?? [],
             };
           }),
           giaoDien,
@@ -254,6 +292,7 @@ export function TaoCatalogue() {
         {muc.map((m) => {
           const giu = anhGiu[m.ma] ?? [];
           const gt = gioiThieu[m.ma] ?? "";
+          const ts = thongSoThem[m.ma] ?? [];
           return (
             <li key={m.ma} className="border border-hp-rule bg-hp-card p-6">
               <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
@@ -296,6 +335,62 @@ export function TaoCatalogue() {
                   </span>
                 )}
               </label>
+
+              {/* Thong so sale tu go them (gop y kd01 18/09/2026). Hai o mot dong: nhan va
+                  noi dung — dong thieu mot ve se bi bo khi tao, nen cho o nhan hep lai de
+                  nhin ra ngay day la mot CAP chu khong phai hai o roi nhau. */}
+              <div className="mt-4">
+                <span className="text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+                  {t.chia_se.thong_so_them_nhan}
+                </span>
+                <span className="ml-2 text-xs text-hp-muted">
+                  {t.chia_se.thong_so_them_tuy_chon.replace("{n}", String(SO_THONG_SO_THEM))}
+                </span>
+
+                {ts.length > 0 && (
+                  <ul className="mt-2 space-y-2">
+                    {ts.map((d, i) => (
+                      // flex-wrap + o noi dung co be rong toi thieu: tren dien thoai o
+                      // noi dung xuong dong rieng thay vi bop lai con vai chu.
+                      <li key={i} className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                        <input
+                          value={d.nhan}
+                          onChange={(e) => suaThongSo(m.ma, i, { nhan: e.target.value })}
+                          maxLength={DAI_NHAN_THONG_SO}
+                          placeholder={t.chia_se.thong_so_them_ten_goi_y}
+                          className={`${O_THONG_SO} w-40 shrink-0`}
+                        />
+                        <input
+                          value={d.giaTri}
+                          onChange={(e) => suaThongSo(m.ma, i, { giaTri: e.target.value })}
+                          maxLength={DAI_GIA_TRI_THONG_SO}
+                          placeholder={t.chia_se.thong_so_them_gia_tri_goi_y}
+                          className={`${O_THONG_SO} min-w-[12rem] flex-1`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => boThongSo(m.ma, i)}
+                          aria-label={t.chia_se.thong_so_them_bo.replace("{n}", String(i + 1))}
+                          className="shrink-0 text-hp-muted transition-colors duration-150 hover:text-hp-ink"
+                        >
+                          <X {...ICON} />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {ts.length < SO_THONG_SO_THEM && (
+                  <button
+                    type="button"
+                    onClick={() => themThongSo(m.ma)}
+                    className={`mt-2 ${NUT_PHU}`}
+                  >
+                    <Plus {...ICON} />
+                    {t.chia_se.thong_so_them_nut}
+                  </button>
+                )}
+              </div>
 
               {/* Luoi anh: tich de giu/bo, keo hoac bam mui ten de doi thu tu (gop y
                   12/09/2026). Anh duoc tich dau tien la anh chinh. */}
@@ -354,6 +449,7 @@ export function TaoCatalogue() {
           muc={muc}
           anhGiu={anhGiu}
           gioiThieu={gioiThieu}
+          thongSoThem={thongSoThem}
           gia={giaoDien}
           ten={ten}
           khiDong={() => setMoXemTruoc(false)}

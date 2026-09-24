@@ -212,7 +212,7 @@ export const HUONG_DAN_VI = {
 
   gioi_thieu: {
     ten: "Giới thiệu từng mẫu",
-    mo_ta: "Mỗi mẫu có một thẻ riêng: thông số, ô giới thiệu và thư viện ảnh.",
+    mo_ta: "Mỗi mẫu có một thẻ riêng: thông số, ô giới thiệu, thông số tự điền và thư viện ảnh.",
     chu: [
       "Giới thiệu mẫu này: vài câu anh muốn nói với khách (chất liệu, cách đeo, dịp tặng…). Không bắt buộc; bỏ trống thì trang khách không có gì thêm.",
       "Tối đa 300 ký tự, bộ đếm hiện khi bắt đầu gõ. Chỗ xuống dòng giữ nguyên trên trang khách.",
@@ -221,6 +221,8 @@ export const HUONG_DAN_VI = {
     meo: [
       "Lời giới thiệu hiện ngay dưới thông số của mẫu ở mọi bố cục; ở Lưới ảnh nó nằm dưới ảnh đầu tiên của mẫu.",
       "Lời giới thiệu không tự dịch khi chọn English — viết bằng thứ tiếng khách đọc.",
+      "Thông số tự điền: bấm Thêm thông số để gõ những gì bảng tính không có — đá chính, khắc tên, bảo hành. Mỗi mẫu tối đa 3 dòng, mỗi dòng một tên và một nội dung; thiếu một vế thì dòng đó không hiện.",
+      "Thông số tự điền hiện ngay sau các thông số có sẵn, ở mọi bố cục và cả bản in. Các ô tích Thông số trong Kiểu trình bày chỉ tắt được cột của bảng tính, không tắt dòng anh tự gõ.",
     ],
   },
 
