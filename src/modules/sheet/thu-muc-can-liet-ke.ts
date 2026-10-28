@@ -108,3 +108,49 @@ export function tronBanDo(
   }
   return { banDo, daGhi, giuLai };
 }
+
+/**
+ * Bao nhieu luot LIEN TIEP mot thu muc bi giu lai duoc thu lai NGAY, truoc khi
+ * phai lui ve nhip 30 phut nhu moi thu muc khac.
+ *
+ * Hai, khong phai mot: mot truc trac Drive thoang qua van duoc thu lai ngay o
+ * luot sau — do la y cua chot giuLai. Ba thi qua nhieu: moi luot giu lai la mot
+ * suat trong 30 suat cua luot do.
+ */
+export const SO_LAN_THU_LAI_NGAY = 2;
+
+/**
+ * Thu muc nao duoc cap moc thoi gian sau mot lan gop, va so lan hong moi.
+ * Ham THUAN — test duoc.
+ *
+ * VI SAO PHAI CO HAM NAY. Ban dau thu muc bi giu lai (nhan mang rong trong khi
+ * dang co anh) KHONG duoc cap moc, de luot sau thu lai ngay. Nhung "khong co
+ * moc" dong nghia voi "mai mai qua han", ma hang doi lai xep CU NHAT TRUOC —
+ * nen thu muc do dung dau hang doi o MOI luot chay, va 174 thu muc con lai
+ * khong bao gio toi luot. Do dung la cai kep da dong bang G10322, G10323,
+ * G10302, G10303, G10305, G10306 tu 07/10 toi 28/10/2026: hai tam anh nguoi
+ * dung xoa khoi Drive van nam nguyen tren web suot 21 ngay.
+ *
+ * Nay: thu lai ngay toi SO_LAN_THU_LAI_NGAY luot, sau do van cap moc — thu muc
+ * chet that cung chi ton mot suat moi vong, khong chan ai.
+ *
+ * So dem hong duoc giu lai (khong xoa khi cap moc) de man quan tri noi duoc
+ * "thu muc nay hong N luot roi" thay vi im lang.
+ */
+export function mocSauKhiGop(
+  daGhi: readonly string[],
+  giuLai: readonly string[],
+  hongTruoc: Readonly<Record<string, number>>,
+): { capMoc: string[]; hong: Record<string, number> } {
+  const hong = { ...hongTruoc };
+  const capMoc = [...daGhi];
+
+  for (const id of daGhi) delete hong[id];
+  for (const id of giuLai) {
+    const lan = (hongTruoc[id] ?? 0) + 1;
+    hong[id] = lan;
+    if (lan > SO_LAN_THU_LAI_NGAY) capMoc.push(id);
+  }
+
+  return { capMoc, hong };
+}

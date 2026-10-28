@@ -2,7 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   HAN_LIET_KE_LAI_MS,
   SO_LIET_KE_LAI_MOI_LUOT,
+  SO_LAN_THU_LAI_NGAY,
   luotLietKe,
+  mocSauKhiGop,
   thuMucCanLietKe,
   tronBanDo,
 } from "@/modules/sheet/thu-muc-can-liet-ke";
@@ -119,5 +121,39 @@ describe("tronBanDo", () => {
     tronBanDo(cu, them);
     expect(cu).toEqual({ a: [1] });
     expect(them).toEqual({ a: [2] });
+  });
+});
+
+describe("mocSauKhiGop", () => {
+  it("thu muc ghi duoc thi cap moc va xoa so dem hong", () => {
+    const r = mocSauKhiGop(["a"], [], { a: 3 });
+    expect(r.capMoc).toEqual(["a"]);
+    expect(r.hong).toEqual({});
+  });
+
+  it("thu muc bi giu lai lan dau thi KHONG cap moc — Drive truc trac thi luot sau thu lai ngay", () => {
+    const r = mocSauKhiGop([], ["a"], {});
+    expect(r.capMoc).toEqual([]);
+    expect(r.hong).toEqual({ a: 1 });
+  });
+
+  it("giu lai qua SO_LAN_THU_LAI_NGAY lan thi PHAI cap moc, khong thi no chan dau hang doi mai mai", () => {
+    // Day la cai da dong bang G10322/G10323 suot 21 ngay: khong co moc = mai mai
+    // "qua han" = mai mai dung dau hang doi "cu nhat truoc", 174 thu muc con lai
+    // khong bao gio toi luot.
+    const r = mocSauKhiGop([], ["a"], { a: SO_LAN_THU_LAI_NGAY });
+    expect(r.capMoc).toEqual(["a"]);
+    expect(r.hong).toEqual({ a: SO_LAN_THU_LAI_NGAY + 1 });
+  });
+
+  it("giu so dem hong de man quan tri noi duoc thu muc nao dang hong", () => {
+    const r = mocSauKhiGop([], ["a", "b"], { a: 1 });
+    expect(r.hong).toEqual({ a: 2, b: 1 });
+  });
+
+  it("khong sua dau vao", () => {
+    const hong = { a: 1 };
+    mocSauKhiGop(["a"], [], hong);
+    expect(hong).toEqual({ a: 1 });
   });
 });

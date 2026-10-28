@@ -465,6 +465,7 @@ function lietKeThuMuc_(c, nganSachMs, chiMoi) {
   if (!thieu.length) return { xong: 0, hong: 0, conLai: 0 };
 
   var lo = {};
+  var loLoi = [];
   var soTrongLo = 0;
   var byteLo = 0;
   var xong = 0;
@@ -472,10 +473,12 @@ function lietKeThuMuc_(c, nganSachMs, chiMoi) {
 
   function guiLo_() {
     if (soTrongLo === 0) return;
-    var kq = goiWeb_(c, '/api/dong-bo/anh-thu-muc', { anhThuMuc: lo });
+    var kq = goiWeb_(c, '/api/dong-bo/anh-thu-muc', { anhThuMuc: lo, loi: loLoi });
     xong += soTrongLo;
-    Logger.log('  da gui ' + soTrongLo + ' thu muc; ban do co ' + kq.tong + ' cai.');
+    Logger.log('  da gui ' + soTrongLo + ' thu muc (' + loLoi.length +
+      ' cai khong mo duoc); ban do co ' + kq.tong + ' cai.');
     lo = {};
+    loLoi = [];
     soTrongLo = 0;
     byteLo = 0;
   }
@@ -483,18 +486,35 @@ function lietKeThuMuc_(c, nganSachMs, chiMoi) {
   for (var i = 0; i < thieu.length; i++) {
     if (Date.now() > het) break;
     var id = thieu[i];
+    var ds;
     try {
       // Thu muc RONG van phai gui len (mang rong). Co mat trong ban do nghia la
       // "da liet ke roi" — thieu buoc do thi luot sau lai hoi dung nhung thu muc
       // rong nay, mai mai.
-      lo[id] = lietKeAnh_(id);
+      ds = lietKeAnh_(id);
     } catch (e) {
-      // Thu muc bi xoa hay doi quyen: van danh dau la da xet, khong thi no chan
-      // ca hang doi o moi luot chay.
-      lo[id] = [];
+      // Thu muc bi xoa, doi quyen, hay DriveApp het han muc: bao RIENG, tuyet
+      // doi khong gui mang rong.
+      //
+      // Ban cu gui lo[id] = [] voi ly do "van danh dau la da xet, khong thi no
+      // chan ca hang doi". May chu khong phan biet duoc mang rong do voi mot thu
+      // muc rong that, nen no lam dung hai viec khong ai muon: thu muc CHUA co
+      // trong ban do bi ghi thanh "rong" vinh vien (15 ma G103xx), con thu muc
+      // DANG co anh thi bi chot giuLai tu choi — ma tu choi thi khong duoc cap
+      // moc, tuc la mai mai dung dau hang doi, dung cai ket ma dong chu tren
+      // tuong minh da tranh (G10322/G10323 ket 21 ngay).
+      //
+      // Nay may chu nhan danh sach loi rieng: giu nguyen ban cu, van dem la mot
+      // luot da thu. Xem mocSauKhiGop ben src/modules/sheet/thu-muc-can-liet-ke.ts.
+      loLoi.push(id);
       hong++;
+      soTrongLo++;
+      byteLo += id.length + 8;
       Logger.log('  khong liet ke duoc ' + id + ': ' + e);
+      if (soTrongLo >= SO_THU_MUC_MOI_GOI) guiLo_();
+      continue;
     }
+    lo[id] = ds;
     // Do TRUOC khi them, giong duong anh: do sau khi them thi lo da qua tran
     // roi moi phat hien, va lan gui do nhan 413.
     var themByte = JSON.stringify(lo[id]).length + id.length + 8;

@@ -23,3 +23,11 @@ export const KHOA_LUC_THU_MUC = "dong-bo/thu-muc-luc.json";
 export const NGUON_BANG_DONG_BO = `storage:${KHOA_BANG}`;
 /** Gia tri phai dat cho CATALOGUE_TEP_ANH_MAU. */
 export const NGUON_ANH_DONG_BO = `storage:${KHOA_ANH_THU_MUC}`;
+
+/**
+ * idThuMuc -> so luot LIEN TIEP khong liet ke duoc (nhan mang rong trong khi
+ * dang co anh, hay script bao loi han hoi). Tach khoi tep moc vi no tra loi
+ * mot cau khac: "moc" la bao gio thu lan cuoi, tep nay la lan cuoi do co an
+ * thua hay khong. Man quan tri can ca hai de noi duoc "chua doc duoc tu 07/10".
+ */
+export const KHOA_THU_MUC_HONG = "dong-bo/thu-muc-hong.json";

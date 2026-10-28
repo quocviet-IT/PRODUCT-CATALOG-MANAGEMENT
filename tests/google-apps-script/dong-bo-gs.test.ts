@@ -19,6 +19,10 @@ type TuyChon = {
   doiBang: boolean;
   thieuThuMuc?: Record<string, unknown>;
   loiThieuThuMuc?: boolean;
+  /** Thu muc ma DriveApp tu choi mo — quyen bi thu, bi xoa, hay het han muc. */
+  thuMucHong?: string;
+  /** Thu muc rong THAT — mo duoc, khong co tep anh nao. */
+  thuMucRong?: string;
   khiDayAnh?: (thuocTinh: Map<string, string>) => void;
 };
 
@@ -60,7 +64,8 @@ function dungScript(tuy: TuyChon) {
     Utilities: { base64Encode: () => "QUJD" },
     DriveApp: {
       getFolderById: (id: string) => {
-        let con = 1;
+        if (id === tuy.thuMucHong) throw new Error("Khong mo duoc thu muc");
+        let con = id === tuy.thuMucRong ? 0 : 1;
         return {
           getFiles: () => ({
             hasNext: () => con-- > 0,
@@ -235,5 +240,34 @@ describe("DongBo.gs — lich du phong", () => {
     expect(s.thuocTinh.has("CHO_THU_MUC")).toBe(false);
     expect(s.thuocTinh.has("CHO_ANH")).toBe(false);
     expect(s.thuocTinh.has("CAN_NOI")).toBe(false);
+  });
+});
+
+describe("DongBo.gs — thu muc khong mo duoc", () => {
+  it("bao vao danh sach loi, KHONG gui mang rong — mang rong bi ghi thanh 'thu muc nay rong'", () => {
+    // Truoc day script gui lo[id] = [] cho ca truong hop khong mo duoc. May chu
+    // khong phan biet duoc voi thu muc rong that, nen mot thu muc chua tung doc
+    // duoc bi dong bang o trang thai rong vinh vien — dung 15 ma G103xx.
+    const s = dungScript({ doiBang: false, thuMucHong: "thu-muc-qua-han" });
+    s.chay("dongBoThuMuc");
+
+    const than = s.than("/api/dong-bo/anh-thu-muc") as {
+      anhThuMuc: Record<string, unknown[]>;
+      loi?: string[];
+    };
+    expect(than.loi).toEqual(["thu-muc-qua-han"]);
+    expect(Object.keys(than.anhThuMuc)).toEqual(["thu-muc-moi"]);
+  });
+
+  it("thu muc rong THAT van gui mang rong — co mat trong ban do la thu ngan hoi lai mai", () => {
+    const s = dungScript({ doiBang: false, thuMucRong: "thu-muc-qua-han" });
+    s.chay("dongBoThuMuc");
+
+    const than = s.than("/api/dong-bo/anh-thu-muc") as {
+      anhThuMuc: Record<string, unknown[]>;
+      loi?: string[];
+    };
+    expect(than.anhThuMuc["thu-muc-qua-han"]).toEqual([]);
+    expect(than.loi ?? []).toEqual([]);
   });
 });

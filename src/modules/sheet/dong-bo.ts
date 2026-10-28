@@ -2,8 +2,14 @@ import "server-only";
 import { timingSafeEqual } from "node:crypto";
 import { getEnv } from "@/lib/env";
 import { ghiTep, taiVe } from "@/modules/media/storage";
-import { KHOA_ANH_THU_MUC, KHOA_BANG, KHOA_LUC_THU_MUC, KHOA_TRANG_THAI } from "./dong-bo.khoa";
-import { tronBanDo } from "./thu-muc-can-liet-ke";
+import {
+  KHOA_ANH_THU_MUC,
+  KHOA_BANG,
+  KHOA_LUC_THU_MUC,
+  KHOA_THU_MUC_HONG,
+  KHOA_TRANG_THAI,
+} from "./dong-bo.khoa";
+import { mocSauKhiGop, tronBanDo } from "./thu-muc-can-liet-ke";
 
 /**
  * Nhan du lieu do Google Apps Script day sang.
@@ -17,7 +23,13 @@ import { tronBanDo } from "./thu-muc-can-liet-ke";
  * mat tot hon ca hai duong kia, khong phai mot su danh doi.
  */
 
-export { KHOA_ANH_THU_MUC, KHOA_BANG, KHOA_LUC_THU_MUC, KHOA_TRANG_THAI } from "./dong-bo.khoa";
+export {
+  KHOA_ANH_THU_MUC,
+  KHOA_BANG,
+  KHOA_LUC_THU_MUC,
+  KHOA_THU_MUC_HONG,
+  KHOA_TRANG_THAI,
+} from "./dong-bo.khoa";
 
 export class LoiChuaBatDongBo extends Error {
   constructor() {
@@ -168,6 +180,7 @@ export async function ghiLucThuMuc(luc: Record<string, string>): Promise<void> {
  */
 export async function gopAnhThuMuc(
   them: Record<string, unknown[]>,
+  loi: readonly string[] = [],
 ): Promise<{ tong: number; themMoi: number; soAnh: number; giuLai: number }> {
   const cu = await docAnhThuMuc();
   const { banDo, daGhi, giuLai } = tronBanDo(cu, them);
@@ -175,13 +188,25 @@ export async function gopAnhThuMuc(
   for (const k of daGhi) if (!(k in cu)) themMoi++;
   await ghiAnhThuMuc(banDo);
 
-  // Cap moc CHI cho thu muc thuc su duoc ghi. Thu muc bi giu lai vi nhan mang
-  // rong khong duoc moc — luot sau phai thu lai, bang khong mot lan Drive truc
-  // trac se khoa danh sach cu them 30 phut ma khong ai biet.
-  if (daGhi.length > 0) {
+  // Thu muc script BAO LOI di chung duong voi thu muc bi giu lai: khong ghi gi
+  // vao ban do, nhung van tinh la mot luot hong. Khac biet duy nhat — va la ly
+  // do phai tach ra — la thu muc CHUA co trong ban do: truoc day script gui
+  // mang rong cho ca truong hop khong mo duoc, va mang rong do bi ghi thanh
+  // "thu muc nay rong", dong bang no vinh vien. Dung 15 ma G103xx da dinh.
+  const hongLuotNay = [...giuLai, ...loi];
+
+  // Cap moc cho thu muc ghi duoc, VA cho thu muc hong qua nhieu luot lien tiep.
+  // Khong cap moc cho cai thu hai la de no mai mai "qua han" — ma hang doi xep
+  // cu nhat truoc, nen no dung dau moi luot va chan het phan con lai. Xem
+  // mocSauKhiGop.
+  const hongTruoc = await docThuMucHong();
+  const { capMoc, hong } = mocSauKhiGop(daGhi, hongLuotNay, hongTruoc);
+  await ghiThuMucHong(hong);
+
+  if (capMoc.length > 0) {
     const luc = await docLucThuMuc();
     const bayGio = new Date().toISOString();
-    for (const k of daGhi) luc[k] = bayGio;
+    for (const k of capMoc) luc[k] = bayGio;
     await ghiLucThuMuc(luc);
   }
 
@@ -193,5 +218,30 @@ export async function gopAnhThuMuc(
   let soAnh = 0;
   for (const ds of Object.values(banDo)) soAnh += ds.length;
 
-  return { tong: Object.keys(banDo).length, themMoi, soAnh, giuLai: giuLai.length };
+  return { tong: Object.keys(banDo).length, themMoi, soAnh, giuLai: hongLuotNay.length };
+}
+
+/**
+ * Doc so luot hong lien tiep cua tung thu muc. Tra {} khi chua co.
+ *
+ * Chi giu so nguyen duong doc duoc: tep hong hay gia tri la thi thu muc do coi
+ * nhu chua hong lan nao — tuc la duoc thu lai ngay, dung ve phia an toan.
+ * Khong bao gio nem loi.
+ */
+export async function docThuMucHong(): Promise<Record<string, number>> {
+  try {
+    const b = JSON.parse((await taiVe(KHOA_THU_MUC_HONG)).toString("utf8")) as unknown;
+    if (typeof b !== "object" || b === null || Array.isArray(b)) return {};
+    const kq: Record<string, number> = {};
+    for (const [k, v] of Object.entries(b as Record<string, unknown>)) {
+      if (typeof v === "number" && Number.isInteger(v) && v > 0) kq[k] = v;
+    }
+    return kq;
+  } catch {
+    return {};
+  }
+}
+
+export async function ghiThuMucHong(hong: Record<string, number>): Promise<void> {
+  await ghiTep(KHOA_THU_MUC_HONG, Buffer.from(JSON.stringify(hong), "utf8"), "application/json");
 }

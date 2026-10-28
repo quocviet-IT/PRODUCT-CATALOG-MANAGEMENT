@@ -6,8 +6,18 @@ const taiVe = vi.fn();
 vi.mock("@/lib/env", () => ({ getEnv }));
 vi.mock("@/modules/media/storage", () => ({ ghiTep, taiVe }));
 
-const { KHOA_TRANG_THAI, LoiChuaBatDongBo, docTrangThai, ghiTrangThai, kiemKhoa } =
+const {
+  KHOA_ANH_THU_MUC,
+  KHOA_LUC_THU_MUC,
+  KHOA_TRANG_THAI,
+  LoiChuaBatDongBo,
+  docTrangThai,
+  ghiTrangThai,
+  gopAnhThuMuc,
+  kiemKhoa,
+} =
   await import("@/modules/sheet/dong-bo");
+const { SO_LAN_THU_LAI_NGAY } = await import("@/modules/sheet/thu-muc-can-liet-ke");
 
 const KHOA = "khoa-bi-mat-dai-hon-hai-muoi-bon-ky-tu";
 
@@ -78,5 +88,54 @@ describe("ghiTrangThai", () => {
     expect(khoa).toBe(KHOA_TRANG_THAI);
     expect(kieu).toBe("application/json");
     expect(JSON.parse((noiDung as Buffer).toString("utf8")).soDong).toBe(1);
+  });
+});
+
+describe("gopAnhThuMuc", () => {
+  const tep = new Map<string, unknown>();
+
+  const dungStorage = () => {
+    tep.clear();
+    taiVe.mockImplementation(async (khoa: string) => {
+      if (!tep.has(khoa)) throw new Error("khong co " + khoa);
+      return Buffer.from(JSON.stringify(tep.get(khoa)), "utf8");
+    });
+    ghiTep.mockImplementation(async (khoa: string, buf: Buffer) => {
+      tep.set(khoa, JSON.parse(buf.toString("utf8")));
+    });
+  };
+
+  beforeEach(dungStorage);
+
+  it("thu muc bi giu lai nhieu luot van duoc cap moc — khong duoc chan dau hang doi", async () => {
+    // Day la cai da dong bang G10323 suot 21 ngay. Xem mocSauKhiGop.
+    tep.set(KHOA_ANH_THU_MUC, { a: [{ fileId: "x" }] });
+
+    for (let luot = 1; luot <= SO_LAN_THU_LAI_NGAY; luot++) {
+      await gopAnhThuMuc({ a: [] });
+      expect(tep.get(KHOA_LUC_THU_MUC) ?? {}).toEqual({});
+    }
+
+    await gopAnhThuMuc({ a: [] });
+    expect(Object.keys((tep.get(KHOA_LUC_THU_MUC) ?? {}) as object)).toEqual(["a"]);
+    // ... va danh sach anh cu van con nguyen.
+    expect(tep.get(KHOA_ANH_THU_MUC)).toEqual({ a: [{ fileId: "x" }] });
+  });
+
+  it("thu muc KHONG MO DUOC khong bi ghi thanh rong, ke ca khi chua co trong ban do", async () => {
+    // Script gui mang rong ca khi Drive bao loi. Ghi no vao ban do la dong bang
+    // mot thu muc chua tung doc duoc o trang thai "rong" vinh vien — dung cai da
+    // xay ra voi 15 ma G103xx.
+    const kq = await gopAnhThuMuc({}, ["moi"]);
+    expect(tep.get(KHOA_ANH_THU_MUC)).toEqual({});
+    // Va no phai duoc TINH la mot lan hong, khong phai lo di: co dem thi moc moi
+    // duoc cap sau SO_LAN_THU_LAI_NGAY luot, va man quan tri moi noi duoc.
+    expect(kq.giuLai).toBe(1);
+    expect(tep.get(KHOA_LUC_THU_MUC) ?? {}).toEqual({});
+  });
+
+  it("thu muc ghi duoc thi cap moc nhu cu", async () => {
+    await gopAnhThuMuc({ a: [{ fileId: "x" }] });
+    expect(Object.keys((tep.get(KHOA_LUC_THU_MUC) ?? {}) as object)).toEqual(["a"]);
   });
 });

@@ -438,6 +438,21 @@ describe("liet ke thu muc theo lo", () => {
     expect(Object.keys(banDo).sort()).toEqual(["cu", "moi"]);
   });
 
+  it("anh-thu-muc: thu muc trong danh sach loi KHONG bi ghi thanh rong", async () => {
+    // Script bao rieng thu muc no khong mo duoc. Ghi chung thanh mang rong la
+    // dong bang mot thu muc chua tung doc duoc o trang thai rong vinh vien.
+    taiVe.mockResolvedValue(Buffer.from(JSON.stringify({}), "utf8"));
+    const res = await anhThuMuc.POST(
+      goi("anh-thu-muc", { anhThuMuc: {}, loi: ["khong-mo-duoc"] }),
+    );
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ giuLai: 1 });
+
+    const ghi = ghiTep.mock.calls.find((c) => c[0] === "dong-bo/anh-thu-muc.json");
+    const banDo = JSON.parse((ghi![1] as Buffer).toString("utf8")) as Record<string, unknown[]>;
+    expect(banDo).toEqual({});
+  });
+
   it("anh-thu-muc: tu choi lo qua lon", async () => {
     const qua = Object.fromEntries(
       Array.from({ length: 401 }, (_, i) => [`tm${i}`, []]),

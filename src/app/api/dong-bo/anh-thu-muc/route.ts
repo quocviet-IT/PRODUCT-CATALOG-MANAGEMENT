@@ -38,6 +38,14 @@ const Than = z.object({
         .max(SO_ANH_MOI_THU_MUC),
     )
     .refine((b) => Object.keys(b).length <= SO_THU_MUC_MOI_LAN, "qua nhieu thu muc mot lan"),
+  /**
+   * Thư mục script KHÔNG MỞ ĐƯỢC — quyền bị thu, thư mục bị xoá, hay DriveApp
+   * hết hạn mức. Phải tách khỏi `anhThuMuc` chứ không gửi mảng rỗng: máy chủ
+   * không phân biệt được mảng rỗng "rỗng thật" với "không đọc được", và ghi nó
+   * vào bản đồ là đóng băng một thư mục chưa từng đọc được ở trạng thái rỗng
+   * vĩnh viễn — đúng cái đã xảy ra với 15 mã G103xx.
+   */
+  loi: z.array(z.string().min(1).max(200)).max(SO_THU_MUC_MOI_LAN).optional(),
 });
 
 export async function POST(req: Request): Promise<Response> {
@@ -63,7 +71,7 @@ export async function POST(req: Request): Promise<Response> {
   // So dem lay THANG tu buoc gop — no da cam ban do trong tay. Khong cong don
   // so cua rieng lo nay: cong don thi chay lai mot lo se dem hai lan, va dong
   // chu trang thai bao sai.
-  const { tong, themMoi, soAnh, giuLai } = await gopAnhThuMuc(than.anhThuMuc);
+  const { tong, themMoi, soAnh, giuLai } = await gopAnhThuMuc(than.anhThuMuc, than.loi ?? []);
   const truoc = await docTrangThai();
   if (truoc) {
     await ghiTrangThai({ ...truoc, luc: new Date().toISOString(), soThuMuc: tong, soAnh });
