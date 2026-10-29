@@ -18,5 +18,6 @@ export function nhanCo(t: BoChu): Record<CoBatThuong, string> {
     "thieu-mo-ta": t.catalogue_sheet.co_thieu_mo_ta,
     "trung": t.catalogue_sheet.co_trung,
     "tl-vang-lech": t.catalogue_sheet.co_tl_vang_lech,
+    "thu-muc-da-xoa": t.catalogue_sheet.co_thu_muc_da_xoa,
   };
 }

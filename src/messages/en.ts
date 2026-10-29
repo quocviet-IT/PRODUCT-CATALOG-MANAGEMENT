@@ -276,6 +276,7 @@ export const en: BoChu = {
     co_thieu_mo_ta: "Missing description",
     co_trung: "Duplicate row",
     co_tl_vang_lech: "Gold weight mismatch",
+    co_thu_muc_da_xoa: "Image folder deleted",
     loi_doc_bang: "Could not read the spreadsheet. Check the data source settings and try again.",
     sap_xep_nhan: "Sort",
     sap_theo_dong: "Spreadsheet order",

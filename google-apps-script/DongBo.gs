@@ -339,10 +339,27 @@ function docBangTho_(c) {
  * cho token ma ham tai anh ben duoi can toi.
  */
 function lietKeAnh_(idThuMuc) {
+  var thuMuc = DriveApp.getFolderById(idThuMuc);
+
+  // THU MUC DA BI BO VAO THUNG RAC -> tra null, KHONG phai mang rong.
+  //
+  // DriveApp mo duoc ca thu muc da nam trong Thung rac, va getFiles() van liet
+  // ke du tep ben trong. May chu vi vay khong phan biet duoc voi mot thu muc
+  // song, nen web cu the hien anh cua mot thu muc khong con ton tai — G10323
+  // van bay hai tam da xoa suot nhieu ngay (29/10/2026).
+  //
+  // Mang rong khong dung duoc o day: chot tronBanDo coi mang rong la "co the
+  // Drive truc trac" nen giu nguyen danh sach cu. Con "da vao Thung rac" la tin
+  // hieu CHAC CHAN, nen no di duong rieng (daXoa) va duoc phep xoa danh sach.
+  if (thuMuc.isTrashed()) return null;
+
   var ds = [];
-  var it = DriveApp.getFolderById(idThuMuc).getFiles();
+  var it = thuMuc.getFiles();
   while (it.hasNext()) {
     var f = it.next();
+    // Tep da vao Thung rac van nam trong ket qua getFiles(). Bo qua, khong thi
+    // anh nguoi dung vua xoa van tiep tuc hien tren web.
+    if (f.isTrashed()) continue;
     if (String(f.getMimeType()).indexOf('image/') === 0) {
       ds.push({ fileId: f.getId(), ten: f.getName() });
       // Dung han o nguong may chu chap nhan. Doc them roi de may chu tu choi
@@ -478,6 +495,7 @@ function lietKeThuMuc_(c, nganSachMs, chiMoi) {
 
   var lo = {};
   var loLoi = [];
+  var loDaXoa = [];
   var soTrongLo = 0;
   var byteLo = 0;
   var xong = 0;
@@ -485,12 +503,15 @@ function lietKeThuMuc_(c, nganSachMs, chiMoi) {
 
   function guiLo_() {
     if (soTrongLo === 0) return;
-    var kq = goiWeb_(c, '/api/dong-bo/anh-thu-muc', { anhThuMuc: lo, loi: loLoi });
+    var kq = goiWeb_(c, '/api/dong-bo/anh-thu-muc',
+      { anhThuMuc: lo, loi: loLoi, daXoa: loDaXoa });
     xong += soTrongLo;
     Logger.log('  da gui ' + soTrongLo + ' thu muc (' + loLoi.length +
-      ' cai khong mo duoc); ban do co ' + kq.tong + ' cai.');
+      ' cai khong mo duoc, ' + loDaXoa.length + ' cai da vao Thung rac); ban do co ' +
+      kq.tong + ' cai.');
     lo = {};
     loLoi = [];
+    loDaXoa = [];
     soTrongLo = 0;
     byteLo = 0;
   }
@@ -523,6 +544,16 @@ function lietKeThuMuc_(c, nganSachMs, chiMoi) {
       soTrongLo++;
       byteLo += id.length + 8;
       Logger.log('  khong liet ke duoc ' + id + ': ' + e);
+      if (soTrongLo >= SO_THU_MUC_MOI_GOI) guiLo_();
+      continue;
+    }
+    if (ds === null) {
+      // Thu muc da vao Thung rac. Bao rieng de may chu xoa danh sach anh va danh
+      // dau cho man quan tri, thay vi de anh ma nam lai tren web.
+      loDaXoa.push(id);
+      soTrongLo++;
+      byteLo += id.length + 8;
+      Logger.log('  thu muc ' + id + ' da bi bo vao Thung rac.');
       if (soTrongLo >= SO_THU_MUC_MOI_GOI) guiLo_();
       continue;
     }

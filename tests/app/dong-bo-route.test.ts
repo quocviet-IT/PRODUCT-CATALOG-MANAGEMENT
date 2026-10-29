@@ -453,6 +453,20 @@ describe("liet ke thu muc theo lo", () => {
     expect(banDo).toEqual({});
   });
 
+  it("anh-thu-muc: thu muc da vao Thung rac thi XOA danh sach anh", async () => {
+    // Khac han mang rong: mang rong bi giu lai vi mo ho, con "da vao Thung rac"
+    // la chac chan nen duoc phep xoa. Xem gopAnhThuMuc.
+    taiVe.mockResolvedValue(
+      Buffer.from(JSON.stringify({ cu: [{ fileId: "a", ten: "a.jpg" }] }), "utf8"),
+    );
+    const res = await anhThuMuc.POST(goi("anh-thu-muc", { anhThuMuc: {}, daXoa: ["cu"] }));
+    expect(res.status).toBe(200);
+
+    const ghi = ghiTep.mock.calls.find((c) => c[0] === "dong-bo/anh-thu-muc.json");
+    const banDo = JSON.parse((ghi![1] as Buffer).toString("utf8")) as Record<string, unknown[]>;
+    expect(banDo).toEqual({ cu: [] });
+  });
+
   it("anh-thu-muc: tu choi lo qua lon", async () => {
     const qua = Object.fromEntries(
       Array.from({ length: 401 }, (_, i) => [`tm${i}`, []]),

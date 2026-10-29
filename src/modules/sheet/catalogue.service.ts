@@ -1,10 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { getEnv } from "@/lib/env";
 import { ganAnhDaiDien } from "./anh-dai-dien";
+import { ganCoThuMucDaXoa } from "./thu-muc-da-xoa";
 import { anhXaBang, type DongCatalogue, type OTho } from "./catalogue.mapper";
 import { docBangTho } from "./sheet.client";
 import { lietKeAnhTrongThuMuc, type AnhTrongThuMuc } from "./drive.client";
-import { NGUON_BANG_DONG_BO } from "./dong-bo.khoa";
+import { KHOA_THU_MUC_DA_XOA, NGUON_BANG_DONG_BO } from "./dong-bo.khoa";
 
 /**
  * mau       — tep JSON tren dia, dung khi xem thu
@@ -116,7 +117,25 @@ export async function layDanhSachCatalogue(): Promise<DongCatalogue[]> {
     }
   }
 
-  // Chi ghi bo dem SAU khi ca hai buoc thanh cong — khong dem ket qua loi.
+  // Co "thu muc da bi xoa". CHI khi du lieu den tu duong dong bo — tep mau tren
+  // dia khong co khai niem nay.
+  //
+  // Nuot loi khong ghi nhat ky: tep chi duoc tao khi Apps Script lan dau gap mot
+  // thu muc trong Thung rac, nen "khong co tep" la trang thai BINH THUONG va la
+  // trang thai pho bien nhat. Ghi console.error o day la moi lan mo man hinh lai
+  // de lai mot dong loi gia.
+  if (nguonDangDung() === "dong-bo") {
+    try {
+      const daXoa = JSON.parse(
+        await docTepMau(`${TIEN_TO_STORAGE}${KHOA_THU_MUC_DA_XOA}`),
+      ) as Record<string, string>;
+      ds = ganCoThuMucDaXoa(ds, daXoa);
+    } catch {
+      // chua co thu muc nao bi xoa
+    }
+  }
+
+  // Chi ghi bo dem SAU khi ca ba buoc thanh cong — khong dem ket qua loi.
   boDem = { luc: Date.now(), ds };
   return ds;
 }

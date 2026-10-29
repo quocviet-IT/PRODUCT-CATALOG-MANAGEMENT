@@ -9,6 +9,7 @@ vi.mock("@/modules/media/storage", () => ({ ghiTep, taiVe }));
 const {
   KHOA_ANH_THU_MUC,
   KHOA_LUC_THU_MUC,
+  KHOA_THU_MUC_DA_XOA,
   KHOA_TRANG_THAI,
   LoiChuaBatDongBo,
   docTrangThai,
@@ -137,5 +138,54 @@ describe("gopAnhThuMuc", () => {
   it("thu muc ghi duoc thi cap moc nhu cu", async () => {
     await gopAnhThuMuc({ a: [{ fileId: "x" }] });
     expect(Object.keys((tep.get(KHOA_LUC_THU_MUC) ?? {}) as object)).toEqual(["a"]);
+  });
+});
+
+describe("gopAnhThuMuc — thu muc da vao Thung rac", () => {
+  const tep = new Map<string, unknown>();
+
+  beforeEach(() => {
+    tep.clear();
+    taiVe.mockImplementation(async (khoa: string) => {
+      if (!tep.has(khoa)) throw new Error("khong co " + khoa);
+      return Buffer.from(JSON.stringify(tep.get(khoa)), "utf8");
+    });
+    ghiTep.mockImplementation(async (khoa: string, buf: Buffer) => {
+      tep.set(khoa, JSON.parse(buf.toString("utf8")));
+    });
+  });
+
+  it("XOA danh sach anh du thu muc dang co anh — khac han chot giu mang rong", () => {
+    // Mang rong la tin hieu mo ho (co the Drive truc trac) nen duoc giu lai.
+    // "Da vao Thung rac" la tin hieu CHAC CHAN, nen phai xoa — bang khong anh
+    // cua mot thu muc khong con ton tai van nam tren web va lot vao catalogue
+    // gui khach (G10323, 29/10/2026).
+    tep.set(KHOA_ANH_THU_MUC, { a: [{ fileId: "x" }] });
+    return gopAnhThuMuc({}, [], ["a"]).then(() => {
+      expect(tep.get(KHOA_ANH_THU_MUC)).toEqual({ a: [] });
+    });
+  });
+
+  it("cap moc ngay, khong bat thu lai — thu muc da xoa thi thu lai cung vay", async () => {
+    tep.set(KHOA_ANH_THU_MUC, { a: [{ fileId: "x" }] });
+    await gopAnhThuMuc({}, [], ["a"]);
+    expect(Object.keys((tep.get(KHOA_LUC_THU_MUC) ?? {}) as object)).toEqual(["a"]);
+  });
+
+  it("ghi lai de man quan tri noi duoc, va giu moc phat hien DAU TIEN", async () => {
+    await gopAnhThuMuc({}, [], ["a"]);
+    const lan1 = (tep.get(KHOA_THU_MUC_DA_XOA) as Record<string, string>).a;
+    expect(lan1).toBeTruthy();
+
+    await gopAnhThuMuc({}, [], ["a"]);
+    expect((tep.get(KHOA_THU_MUC_DA_XOA) as Record<string, string>).a).toBe(lan1);
+  });
+
+  it("thu muc duoc khoi phuc thi het bi danh dau", async () => {
+    await gopAnhThuMuc({}, [], ["a"]);
+    expect(Object.keys(tep.get(KHOA_THU_MUC_DA_XOA) as object)).toEqual(["a"]);
+
+    await gopAnhThuMuc({ a: [{ fileId: "x" }] });
+    expect(tep.get(KHOA_THU_MUC_DA_XOA)).toEqual({});
   });
 });

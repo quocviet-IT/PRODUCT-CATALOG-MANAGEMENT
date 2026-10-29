@@ -46,6 +46,12 @@ const Than = z.object({
    * vĩnh viễn — đúng cái đã xảy ra với 15 mã G103xx.
    */
   loi: z.array(z.string().min(1).max(200)).max(SO_THU_MUC_MOI_LAN).optional(),
+  /**
+   * Thư mục đã bị bỏ vào THÙNG RÁC. Tách khỏi `loi` vì đây là tín hiệu chắc
+   * chắn — script mở được thư mục và thấy cờ `isTrashed` — nên nó được phép
+   * XOÁ danh sách ảnh, việc mà một mảng rỗng mơ hồ không được phép làm.
+   */
+  daXoa: z.array(z.string().min(1).max(200)).max(SO_THU_MUC_MOI_LAN).optional(),
 });
 
 export async function POST(req: Request): Promise<Response> {
@@ -71,7 +77,7 @@ export async function POST(req: Request): Promise<Response> {
   // So dem lay THANG tu buoc gop — no da cam ban do trong tay. Khong cong don
   // so cua rieng lo nay: cong don thi chay lai mot lo se dem hai lan, va dong
   // chu trang thai bao sai.
-  const { tong, themMoi, soAnh, giuLai } = await gopAnhThuMuc(than.anhThuMuc, than.loi ?? []);
+  const { tong, themMoi, soAnh, giuLai } = await gopAnhThuMuc(than.anhThuMuc, than.loi ?? [], than.daXoa ?? []);
   const truoc = await docTrangThai();
   if (truoc) {
     await ghiTrangThai({ ...truoc, luc: new Date().toISOString(), soThuMuc: tong, soAnh });

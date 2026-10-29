@@ -13,7 +13,9 @@ export type OTho = {
 };
 
 export type CoBatThuong =
-  | "thieu-sku" | "thieu-anh" | "thieu-mo-ta" | "trung" | "tl-vang-lech";
+  | "thieu-sku" | "thieu-anh" | "thieu-mo-ta" | "trung" | "tl-vang-lech"
+  /** Thu muc anh cot Q da bi bo vao Thung rac — xem thu-muc-da-xoa.ts. */
+  | "thu-muc-da-xoa";
 
 export type DongCatalogue = {
   dongSheet: number;

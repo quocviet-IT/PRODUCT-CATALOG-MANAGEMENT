@@ -23,6 +23,10 @@ type TuyChon = {
   thuMucHong?: string;
   /** Thu muc rong THAT — mo duoc, khong co tep anh nao. */
   thuMucRong?: string;
+  /** Thu muc da bi bo vao Thung rac. DriveApp van mo duoc no. */
+  thuMucThungRac?: string;
+  /** Thu muc ma tep anh ben trong da bi bo vao Thung rac. */
+  anhThungRac?: string;
   khiDayAnh?: (thuocTinh: Map<string, string>) => void;
 };
 
@@ -67,12 +71,14 @@ function dungScript(tuy: TuyChon) {
         if (id === tuy.thuMucHong) throw new Error("Khong mo duoc thu muc");
         let con = id === tuy.thuMucRong ? 0 : 1;
         return {
+          isTrashed: () => id === tuy.thuMucThungRac,
           getFiles: () => ({
             hasNext: () => con-- > 0,
             next: () => ({
               getMimeType: () => "image/jpeg",
               getId: () => `anh-cua-${id}`,
               getName: () => "a.jpg",
+              isTrashed: () => id === tuy.anhThungRac,
             }),
           }),
         };
@@ -269,5 +275,41 @@ describe("DongBo.gs — thu muc khong mo duoc", () => {
     };
     expect(than.anhThuMuc["thu-muc-qua-han"]).toEqual([]);
     expect(than.loi ?? []).toEqual([]);
+  });
+});
+
+describe("DongBo.gs — Thung rac", () => {
+  const than = (s: ReturnType<typeof dungScript>) =>
+    s.than("/api/dong-bo/anh-thu-muc") as {
+      anhThuMuc: Record<string, unknown[]>;
+      loi?: string[];
+      daXoa?: string[];
+    };
+
+  it("thu muc da bi bo vao Thung rac: bao vao daXoa, KHONG gui danh sach anh cua no", () => {
+    // DriveApp mo duoc ca thu muc da nam trong Thung rac va van liet ke du tep
+    // ben trong, nen he thong khong phan biet duoc voi thu muc song — web cu the
+    // hien anh cua mot thu muc khong con ton tai (G10323, 29/10/2026).
+    const s = dungScript({ doiBang: false, thuMucThungRac: "thu-muc-qua-han" });
+    s.chay("dongBoThuMuc");
+
+    expect(than(s).daXoa).toEqual(["thu-muc-qua-han"]);
+    expect(Object.keys(than(s).anhThuMuc)).toEqual(["thu-muc-moi"]);
+  });
+
+  it("tep anh da bi bo vao Thung rac thi khong tinh la anh cua mau", () => {
+    const s = dungScript({ doiBang: false, anhThungRac: "thu-muc-qua-han" });
+    s.chay("dongBoThuMuc");
+
+    expect(than(s).anhThuMuc["thu-muc-qua-han"]).toEqual([]);
+    expect(than(s).daXoa ?? []).toEqual([]);
+  });
+
+  it("thu muc binh thuong khong bi xep nham vao daXoa", () => {
+    const s = dungScript({ doiBang: false });
+    s.chay("dongBoThuMuc");
+
+    expect(than(s).daXoa ?? []).toEqual([]);
+    expect(Object.keys(than(s).anhThuMuc).sort()).toEqual(["thu-muc-moi", "thu-muc-qua-han"]);
   });
 });

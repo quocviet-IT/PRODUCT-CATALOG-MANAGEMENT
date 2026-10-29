@@ -6,6 +6,7 @@ import {
   KHOA_ANH_THU_MUC,
   KHOA_BANG,
   KHOA_LUC_THU_MUC,
+  KHOA_THU_MUC_DA_XOA,
   KHOA_THU_MUC_HONG,
   KHOA_TRANG_THAI,
 } from "./dong-bo.khoa";
@@ -27,6 +28,7 @@ export {
   KHOA_ANH_THU_MUC,
   KHOA_BANG,
   KHOA_LUC_THU_MUC,
+  KHOA_THU_MUC_DA_XOA,
   KHOA_THU_MUC_HONG,
   KHOA_TRANG_THAI,
 } from "./dong-bo.khoa";
@@ -181,12 +183,36 @@ export async function ghiLucThuMuc(luc: Record<string, string>): Promise<void> {
 export async function gopAnhThuMuc(
   them: Record<string, unknown[]>,
   loi: readonly string[] = [],
+  daXoa: readonly string[] = [],
 ): Promise<{ tong: number; themMoi: number; soAnh: number; giuLai: number }> {
   const cu = await docAnhThuMuc();
   const { banDo, daGhi, giuLai } = tronBanDo(cu, them);
   let themMoi = 0;
   for (const k of daGhi) if (!(k in cu)) themMoi++;
+
+  // Thu muc da vao Thung rac: XOA danh sach anh, du no dang co anh.
+  //
+  // Day la cho duy nhat duoc phep di qua chot tronBanDo, va co ly do. Chot do
+  // giu danh sach cu khi nhan mang rong vi mang rong la tin hieu MO HO — khong
+  // phan biet duoc "rong that" voi "Drive truc trac". Con "thu muc da vao Thung
+  // rac" la tin hieu CHAC CHAN: script doc duoc thu muc va thay co isTrashed.
+  // Giu lai o day la de anh cua mot thu muc khong con ton tai tiep tuc nam tren
+  // web va lot vao catalogue gui khach — dung cai da xay ra voi G10323.
+  const bayGio = new Date().toISOString();
+  const daGhiTatCa = [...daGhi];
+  for (const id of daXoa) {
+    banDo[id] = [];
+    if (!daGhiTatCa.includes(id)) daGhiTatCa.push(id);
+  }
   await ghiAnhThuMuc(banDo);
+
+  // Danh dau cho man quan tri. Giu moc PHAT HIEN DAU TIEN — nguoi doc can biet
+  // "bi xoa tu bao gio", khong phai "lan cuoi he thong nhin thay".
+  const daXoaTruoc = await docThuMucDaXoa();
+  const banDaXoa = { ...daXoaTruoc };
+  for (const id of daGhi) delete banDaXoa[id];
+  for (const id of daXoa) banDaXoa[id] ??= bayGio;
+  await ghiThuMucDaXoa(banDaXoa);
 
   // Thu muc script BAO LOI di chung duong voi thu muc bi giu lai: khong ghi gi
   // vao ban do, nhung van tinh la mot luot hong. Khac biet duy nhat — va la ly
@@ -200,12 +226,11 @@ export async function gopAnhThuMuc(
   // cu nhat truoc, nen no dung dau moi luot va chan het phan con lai. Xem
   // mocSauKhiGop.
   const hongTruoc = await docThuMucHong();
-  const { capMoc, hong } = mocSauKhiGop(daGhi, hongLuotNay, hongTruoc);
+  const { capMoc, hong } = mocSauKhiGop(daGhiTatCa, hongLuotNay, hongTruoc);
   await ghiThuMucHong(hong);
 
   if (capMoc.length > 0) {
     const luc = await docLucThuMuc();
-    const bayGio = new Date().toISOString();
     for (const k of capMoc) luc[k] = bayGio;
     await ghiLucThuMuc(luc);
   }
@@ -244,4 +269,27 @@ export async function docThuMucHong(): Promise<Record<string, number>> {
 
 export async function ghiThuMucHong(hong: Record<string, number>): Promise<void> {
   await ghiTep(KHOA_THU_MUC_HONG, Buffer.from(JSON.stringify(hong), "utf8"), "application/json");
+}
+
+/**
+ * Doc danh sach thu muc da bi bo vao Thung rac (idThuMuc -> ISO phat hien dau
+ * tien). Tra {} khi chua co. Chi giu gia tri la chuoi ngay gio doc duoc. Khong
+ * bao gio nem loi.
+ */
+export async function docThuMucDaXoa(): Promise<Record<string, string>> {
+  try {
+    const b = JSON.parse((await taiVe(KHOA_THU_MUC_DA_XOA)).toString("utf8")) as unknown;
+    if (typeof b !== "object" || b === null || Array.isArray(b)) return {};
+    const kq: Record<string, string> = {};
+    for (const [k, v] of Object.entries(b as Record<string, unknown>)) {
+      if (typeof v === "string" && Number.isFinite(Date.parse(v))) kq[k] = v;
+    }
+    return kq;
+  } catch {
+    return {};
+  }
+}
+
+export async function ghiThuMucDaXoa(ds: Record<string, string>): Promise<void> {
+  await ghiTep(KHOA_THU_MUC_DA_XOA, Buffer.from(JSON.stringify(ds), "utf8"), "application/json");
 }

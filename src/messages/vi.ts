@@ -283,6 +283,7 @@ export const vi = {
     co_thieu_mo_ta: "Thiếu mô tả",
     co_trung: "Trùng dòng",
     co_tl_vang_lech: "Lệch TL vàng",
+    co_thu_muc_da_xoa: "Thư mục ảnh đã bị xoá",
     loi_doc_bang: "Không đọc được bảng tính. Kiểm tra cấu hình nguồn dữ liệu rồi thử lại.",
     sap_xep_nhan: "Sắp xếp",
     sap_theo_dong: "Thứ tự bảng tính",
