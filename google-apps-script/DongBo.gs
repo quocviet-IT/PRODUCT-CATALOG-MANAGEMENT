@@ -28,6 +28,18 @@
  *     DriveApp van chay binh thuong nen rat de tuong la da du quyen — roi
  *     dung phat 403 "Google Sheets API has not been used in project ...".
  *     Them Service o day chinh la cai cong tac do.
+ *  3b. Project Settings -> tick "Show 'appsscript.json' manifest file in editor",
+ *     roi dan google-apps-script/appsscript.json ben canh tep nay de len no.
+ *
+ *     VI SAO PHAI KHAI oauthScopes. Khong khai thi Apps Script tu suy pham vi
+ *     bang cach quet ma nguon, va ban quyen da cap la ban suy ra tu LAN CAP
+ *     QUYEN DAU TIEN. Pham vi Drive roi khoi ban do — bi thu hoi, hay chua tung
+ *     co — thi manifest khong khai gi nen Apps Script khong biet la minh thieu:
+ *     no KHONG hoi lai, chi nem "You do not have permission to call
+ *     DriveApp.getFolderById" o moi lan goi. Im lang 21 ngay (07/10-29/10/2026),
+ *     1.282 anh dong bang, khong mot canh bao nao. Khai ro thi ban quyen thieu
+ *     bi coi la khong du va Google BAT BUOC phai hien bang xin quyen.
+ *
  *  4. Chon ham chayThuMotLan roi bam Run. Google se hoi cap quyen — dong y.
  *  5. Chon ham datLichChay roi bam Run. Tu day no tu chay.
  *
