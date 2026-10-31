@@ -268,6 +268,8 @@ export const vi = {
     dashboard_bo_loc: "Bỏ lọc {nhan}",
     dashboard_xem_het: "Xem tất cả mẫu",
     dem_mau: "Mẫu",
+    dem_tong_anh: "Tổng ảnh",
+    dem_tong_anh_chu_thich: "Ảnh trong thư mục “Hình đã xử lý” của các mẫu đang hiện",
     dem_thieu_anh: "Thiếu ảnh",
     dem_thieu_sku: "Thiếu SKU",
     dem_tl_vang_lech: "Lệch TL vàng",

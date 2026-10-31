@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Barcode, Copy, Gem, ImageOff, Scale, type LucideIcon } from "lucide-react";
+import { Barcode, Copy, Gem, ImageOff, Images, Scale, type LucideIcon } from "lucide-react";
 import type { CoBatThuong } from "@/modules/sheet/catalogue.mapper";
 import type { ThongKe } from "@/modules/sheet/catalogue.view";
 import type { BoChu } from "@/messages";
@@ -112,6 +112,60 @@ function O({
   );
 }
 
+/**
+ * O chi MANG TIN, khong bam duoc.
+ *
+ * Bon o canh bao deu LA mot bo loc — bam vao thay dung nhung mau do. "Tong anh"
+ * khong co tap mau nao de loc toi, nen cho bam ma khong xay ra gi con te hon la
+ * khong cho bam. Khac biet do phai nhin thay duoc: o nay khong doi mau vien khi
+ * re chuot va khong co vach ty le.
+ */
+function OTin({
+  so,
+  tongKho,
+  dangLoc,
+  nhan,
+  Icon,
+  tieuDe,
+}: {
+  so: number;
+  tongKho: number;
+  dangLoc: boolean;
+  nhan: string;
+  Icon: LucideIcon;
+  tieuDe: string;
+}) {
+  return (
+    <div
+      title={tieuDe}
+      className="flex flex-col justify-between gap-6 border border-hp-rule bg-hp-card p-5"
+    >
+      <div className="flex items-start justify-between gap-3">
+        <span
+          className={`font-title text-[32px] leading-none tabular-nums
+                      ${so === 0 ? "text-hp-muted" : "text-hp-ink"}`}
+        >
+          {so}
+          {/* Dang loc thi con so tren o la cua phan DA LOC — khong noi mau so
+              thi nguoi doc tuong kho chi con bay nhieu anh. Giong o "Mau". */}
+          {dangLoc && <span className="text-xl text-hp-muted"> / {tongKho}</span>}
+        </span>
+        <Icon aria-hidden strokeWidth={1.25} className="h-5 w-5 shrink-0 text-hp-rule" />
+      </div>
+
+      <div>
+        <span className="block text-[11px] uppercase tracking-[0.14em] text-hp-muted">
+          {nhan}
+        </span>
+        {/* Khoang trong dung bang vach ty le cua cac o ben canh. O nay khong co
+            vach, nhung thieu khoang nay thi nhan cua no tut len cao hon nhan cua
+            bon o kia va ca hang trong lech. */}
+        <span aria-hidden className="mt-3 block h-0.5 w-full" />
+      </div>
+    </div>
+  );
+}
+
 export function BangDieuKhien({
   thongKe,
   thongKeHien,
@@ -140,7 +194,9 @@ export function BangDieuKhien({
 
   return (
     <div className="mb-10">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      {/* Sau o: lg xuong 3 cot (hai hang can nhau) chu khong ep sau o vao mot
+          hang 1024px — nhan nhu "Gold weight mismatch" da phai xuong dong san. */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {/* O tong: khong phai bo loc ma la loi ve — bam vao la xoa moi canh bao. */}
         <Link
           href={urlLoc(sp, thamSoCanhBao, null)}
@@ -183,6 +239,17 @@ export function BangDieuKhien({
             </span>
           </div>
         </Link>
+
+        {/* Dat ngay sau o "Mau": hai o nay deu la SO LIEU, bon o sau deu la VAN
+            DE. Xep lan lon thi mat khac biet do. */}
+        <OTin
+          so={thongKeHien.tongAnh}
+          tongKho={thongKe.tongAnh}
+          dangLoc={dangLoc}
+          nhan={t.catalogue_sheet.dem_tong_anh}
+          Icon={Images}
+          tieuDe={t.catalogue_sheet.dem_tong_anh_chu_thich}
+        />
 
         {o.map((x) => {
           const bat = canhBaoDangBat.includes(x.co);

@@ -69,3 +69,25 @@ describe("anhThuNho", () => {
     expect(anhThuNho({ fileIdAnh: "hinh", anhDaiDien: null })).toBeNull();
   });
 });
+
+describe("ganAnhDaiDien — so anh cua mau", () => {
+  it("dem so anh trong thu muc cot Hinh da xu ly", () => {
+    const [d] = ganAnhDaiDien([dong({})], banDo);
+    expect(d.soAnh).toBe(2);
+  });
+
+  it("thu muc rong thi la 0, khong phai undefined — da tinh roi va ket qua la khong co", () => {
+    const [d] = ganAnhDaiDien([dong({ idThuMuc: "rong" })], banDo);
+    expect(d.soAnh).toBe(0);
+  });
+
+  it("dong khong co thu muc thi la 0", () => {
+    const [d] = ganAnhDaiDien([dong({ idThuMuc: null })], banDo);
+    expect(d.soAnh).toBe(0);
+  });
+
+  it("thu muc chua liet ke lan nao cung la 0", () => {
+    const [d] = ganAnhDaiDien([dong({ idThuMuc: "chua-co-trong-ban-do" })], banDo);
+    expect(d.soAnh).toBe(0);
+  });
+});

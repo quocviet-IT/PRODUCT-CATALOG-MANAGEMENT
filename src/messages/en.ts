@@ -261,6 +261,8 @@ export const en: BoChu = {
     dashboard_bo_loc: "Remove filter {nhan}",
     dashboard_xem_het: "Show every model",
     dem_mau: "Models",
+    dem_tong_anh: "Total images",
+    dem_tong_anh_chu_thich: "Images in the “Hình đã xử lý” folders of the models shown",
     dem_thieu_anh: "Missing images",
     dem_thieu_sku: "Missing SKU",
     dem_tl_vang_lech: "Gold weight mismatch",

@@ -122,6 +122,23 @@ describe("tinhThongKe", () => {
     expect(tk.tlVangLech).toBe(1);
     expect(tk.trung).toBe(2);
   });
+
+  it("cong don so anh cua cac mau DANG XET — o tong anh tren bang dieu khien", () => {
+    // Di theo bo loc giong bon o canh bao: loc con 20 mau thi o hien anh cua
+    // dung 20 mau do. Nen phep cong phai nam o tinhThongKe, cho nhan danh sach
+    // da loc, chu khong doc thang ban do anh.
+    const co = [
+      { soAnh: 3, co: [] },
+      { soAnh: 0, co: [] },
+      { soAnh: 7, co: [] },
+    ] as unknown as DongCatalogue[];
+    expect(tinhThongKe(co).tongAnh).toBe(10);
+  });
+
+  it("mau chua tinh so anh (nguon khong co ban do) khong lam hong phep cong", () => {
+    const co = [{ soAnh: 4, co: [] }, { co: [] }] as unknown as DongCatalogue[];
+    expect(tinhThongKe(co).tongAnh).toBe(4);
+  });
 });
 
 describe("tinhDemLoc", () => {

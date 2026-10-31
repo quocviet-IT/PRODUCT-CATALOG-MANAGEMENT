@@ -46,6 +46,15 @@ export type DongCatalogue = {
    * thu muc khong co anh.
    */
   anhDaiDien?: string | null;
+  /**
+   * So anh trong thu muc cot "Hinh da xu ly". Mapper KHONG dat truong nay —
+   * dich vu gan sau khi doc ban do anh, cung luc voi anhDaiDien.
+   *
+   * Luon la mot SO khi da gan: thu muc rong, thu muc chua liet ke va dong khong
+   * co thu muc deu ra 0. Ba truong hop do khac nhau ve nguyen nhan nhung giong
+   * nhau ve thu nguoi xem thay — khong co anh nao.
+   */
+  soAnh?: number;
   /** Cot "Hinh raw - concept": thu muc anh y tuong, tach hoan toan voi anh mau. */
   urlAnhConcept: string | null;
   /** Cot "Source clip tho": thu muc video quay tho. */

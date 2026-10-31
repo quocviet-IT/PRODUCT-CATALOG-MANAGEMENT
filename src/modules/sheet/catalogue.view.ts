@@ -39,6 +39,8 @@ export type DemLoc = Record<ChieuLoc, MucDem[]>;
 
 export type ThongKe = {
   tong: number;
+  /** Tong so anh cua cac mau DANG XET — di theo bo loc nhu moi con so khac. */
+  tongAnh: number;
   thieuAnh: number;
   thieuSku: number;
   tlVangLech: number;
@@ -431,6 +433,9 @@ export function tinhDemLoc(ds: DongCatalogue[], loc: BoLocCatalogue): DemLoc {
 export function tinhThongKe(ds: DongCatalogue[]): ThongKe {
   return {
     tong: ds.length,
+    // Lui ve 0 vi nguon khong co ban do anh (chay thu bang tep mau) thi khong
+    // dong nao duoc gan soAnh, va cong undefined vao se cho ra NaN tren man hinh.
+    tongAnh: ds.reduce((t, d) => t + (d.soAnh ?? 0), 0),
     thieuAnh: ds.filter((d) => d.co.includes("thieu-anh")).length,
     thieuSku: ds.filter((d) => d.co.includes("thieu-sku")).length,
     tlVangLech: ds.filter((d) => d.co.includes("tl-vang-lech")).length,

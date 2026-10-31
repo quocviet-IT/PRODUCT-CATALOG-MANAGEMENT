@@ -20,11 +20,15 @@ export function ganAnhDaiDien(
   banDo: Readonly<Record<string, readonly { fileId: string }[]>>,
 ): DongCatalogue[] {
   return ds.map((d) => {
-    const anhDaiDien = (d.idThuMuc ? banDo[d.idThuMuc]?.[0]?.fileId : undefined) ?? null;
+    const anh = d.idThuMuc ? (banDo[d.idThuMuc] ?? []) : [];
+    const anhDaiDien = anh[0]?.fileId ?? null;
+    // Dem luon o day thay vi mot luot map rieng: ham nay la cho DUY NHAT cam ca
+    // dong lan ban do anh, nen moi thu suy ra tu ban do nen nam chung mot cho.
+    const soAnh = anh.length;
     const co: CoBatThuong[] = d.co.filter((c) => c !== "thieu-anh");
     // Dat "thieu-anh" dung cho mapper van dat: ngay sau "thieu-sku" neu co.
     if (anhDaiDien === null) co.splice(co.indexOf("thieu-sku") + 1, 0, "thieu-anh");
-    return { ...d, anhDaiDien, co };
+    return { ...d, anhDaiDien, soAnh, co };
   });
 }
 
