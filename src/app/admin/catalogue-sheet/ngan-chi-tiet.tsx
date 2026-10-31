@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { DuLieuChiTiet } from "@/app/api/catalogue-sheet/[dong]/route";
-import type { AnhTrongThuMuc } from "@/modules/sheet/drive.client";
 import { ChiTietMau } from "./chi-tiet-mau";
 import { X } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
-import { AnhTai } from "@/ui/anh-tai";
 import { VungXuong, Xuong } from "@/ui/xuong";
+import { KhungXemAnh } from "@/ui/khung-xem-anh";
 
 /**
  * Boc danh sach (bang hoac luoi) va mo ngan chi tiet khi bam vao mot dong.
@@ -22,31 +21,32 @@ export function NganChiTiet({ children }: { children: ReactNode }) {
   const [dl, setDl] = useState<DuLieuChiTiet | null>(null);
   const [dangTai, setDangTai] = useState(false);
   const [loi, setLoi] = useState(false);
-  const [anhLon, setAnhLon] = useState<AnhTrongThuMuc | null>(null);
+  /** Chi so trong dl.anh, khong phai tam anh: khung xem can biet no nam thu may. */
+  const [viTriAnh, setViTriAnh] = useState<number | null>(null);
   const nutDong = useRef<HTMLButtonElement>(null);
 
   const dongNgan = useCallback(() => {
     setDong(null);
     setDl(null);
     setLoi(false);
-    setAnhLon(null);
+    setViTriAnh(null);
   }, []);
 
   // Escape dong lop tren cung truoc: dang phong to anh thi tra ve ngan, chua
   // phong to thi moi dong han ngan.
+  //
+  // Lop anh to tu bat Escape cua no (xem KhungXemAnh), nen o day chi can DUNG
+  // LAI khi no dang mo. Truoc day ca hai cung xu ly mot phim trong mot ham, va
+  // thu tu dung duoc la nho may — doi mot dong o cho khac la ngan dong theo anh.
   useEffect(() => {
     if (dong === null) return;
     function batPhim(e: KeyboardEvent) {
-      if (e.key !== "Escape") return;
-      setAnhLon((truoc) => {
-        if (truoc !== null) return null;
-        dongNgan();
-        return null;
-      });
+      if (e.key !== "Escape" || viTriAnh !== null) return;
+      dongNgan();
     }
     window.addEventListener("keydown", batPhim);
     return () => window.removeEventListener("keydown", batPhim);
-  }, [dong, dongNgan]);
+  }, [dong, dongNgan, viTriAnh]);
 
   useEffect(() => {
     if (dong !== null) nutDong.current?.focus();
@@ -148,37 +148,22 @@ export function NganChiTiet({ children }: { children: ReactNode }) {
                 anh={dl.anh}
                 loiAnh={dl.loiAnh}
                 nguon={dl.nguon}
-                khiBamAnh={setAnhLon}
+                khiBamAnh={(a) =>
+                  setViTriAnh(dl.anh.findIndex((x) => x.fileId === a.fileId))
+                }
               />
             ) : null}
           </aside>
         </>
       )}
 
-      {anhLon && (
-        <div
-          onClick={() => setAnhLon(null)}
-          role="dialog"
-          aria-modal="true"
-          aria-label={anhLon.ten}
-          className="fixed inset-0 z-[60] flex cursor-zoom-out flex-col items-center
-                     justify-center gap-4 bg-hp-ink/90 p-8 transition-opacity duration-150"
-        >
-          <AnhTai
-            src={`/api/anh-drive/${anhLon.fileId}?w=1400`}
-            alt={anhLon.ten}
-            nen="toi"
-            tai="eager"
-            // Ban 1400px la mot KHOA BO DEM khac voi ban 600px dang hien trong
-            // luoi, nen no thuong phai tai moi that su — day la mot lan cho co
-            // that, khong phai chop mat.
-            lopBoc="flex h-[85vh] w-full max-w-[1100px] items-center justify-center"
-            lop="max-h-full max-w-full object-contain"
-          />
-          <p className="text-[11px] uppercase tracking-[0.14em] text-hp-foundation/80">
-            {anhLon.ten}
-          </p>
-        </div>
+      {viTriAnh !== null && dl && (
+        <KhungXemAnh
+          anh={dl.anh}
+          viTri={viTriAnh}
+          datViTri={setViTriAnh}
+          dong={() => setViTriAnh(null)}
+        />
       )}
     </>
   );

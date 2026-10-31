@@ -1,9 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
-import { useChu } from "@/messages/dung-chu";
-import { AnhTai } from "@/ui/anh-tai";
+import { useCallback, useState, type ReactNode } from "react";
+import { KhungXemAnh } from "@/ui/khung-xem-anh";
 
 /**
  * Boc danh sach mau va cho khach bam vao anh de phong to.
@@ -15,6 +13,10 @@ import { AnhTai } from "@/ui/anh-tai";
  * Giu nguyen viec server dung danh sach anh — khong chuyen sang dung o phia
  * trinh duyet — vi hai ly do: khach mo link tren dien thoai thay anh ngay tu
  * lan son dau, va ban IN (nut "Tai PDF") van co day du anh.
+ *
+ * Phan khung xem (nut qua lai, phim mui ten, quet tay, khoa cuon) nam o
+ * KhungXemAnh, dung chung voi man quan tri. Tep nay chi lo viec BIET khach vua
+ * bam vao tam nao.
  */
 export function PhongToAnh({
   anh,
@@ -24,38 +26,8 @@ export function PhongToAnh({
   anh: { fileId: string; ten: string }[];
   children: ReactNode;
 }) {
-  const t = useChu();
   const [viTri, setViTri] = useState<number | null>(null);
-
   const dong = useCallback(() => setViTri(null), []);
-  const di = useCallback(
-    (buoc: number) => {
-      setViTri((truoc) => {
-        if (truoc === null) return null;
-        // Vong tron: tu anh cuoi bam tiep quay ve anh dau. Khach dang luot xem
-        // chu khong doc sach, khong co ly do gi de chan ho o hai dau.
-        return (truoc + buoc + anh.length) % anh.length;
-      });
-    },
-    [anh.length],
-  );
-
-  useEffect(() => {
-    if (viTri === null) return;
-    function batPhim(e: KeyboardEvent) {
-      if (e.key === "Escape") dong();
-      else if (e.key === "ArrowRight") di(1);
-      else if (e.key === "ArrowLeft") di(-1);
-    }
-    window.addEventListener("keydown", batPhim);
-    // Chan cuon nen: dang xem anh to ma nen truot ben duoi la mat phuong huong.
-    const cuonCu = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      window.removeEventListener("keydown", batPhim);
-      document.body.style.overflow = cuonCu;
-    };
-  }, [viTri, dong, di]);
 
   function batClick(e: React.MouseEvent) {
     const o = (e.target as HTMLElement).closest<HTMLElement>("[data-anh]");
@@ -64,66 +36,13 @@ export function PhongToAnh({
     if (i >= 0) setViTri(i);
   }
 
-  const dangXem = viTri === null ? null : anh[viTri];
-
   return (
     <>
       <div onClick={batClick}>{children}</div>
 
-      {dangXem && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={dangXem.ten}
-          onClick={dong}
-          className="fixed inset-0 z-50 flex cursor-zoom-out flex-col items-center
-                     justify-center gap-4 bg-hp-ink/92 p-4 sm:p-8 print:hidden"
-        >
-          <AnhTai
-            src={`/api/anh-drive/${dangXem.fileId}?w=1400`}
-            alt={dangXem.ten}
-            nen="toi"
-            tai="eager"
-            lopBoc="flex h-[82vh] w-full max-w-[1100px] items-center justify-center"
-            lop="max-h-full max-w-full object-contain"
-          />
-
-          {anh.length > 1 && (
-            <div
-              // Bam vao dai nut khong duoc dong khung xem — nguoi dung dang muon
-              // chuyen anh, khong phai thoat ra.
-              onClick={(e) => e.stopPropagation()}
-              className="flex cursor-default items-center gap-8"
-            >
-              <button type="button" onClick={() => di(-1)} aria-label={t.chia_se.anh_truoc}
-                className={NUT}>
-                <ChevronLeft aria-hidden strokeWidth={1.5} className="h-6 w-6" />
-              </button>
-              <span className="text-[11px] tabular-nums tracking-[0.14em] text-hp-foundation/70">
-                {viTri! + 1} / {anh.length}
-              </span>
-              <button type="button" onClick={() => di(1)} aria-label={t.chia_se.anh_sau}
-                className={NUT}>
-                <ChevronRight aria-hidden strokeWidth={1.5} className="h-6 w-6" />
-              </button>
-            </div>
-          )}
-
-          <button
-            type="button"
-            onClick={dong}
-            className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.14em]
-                       text-hp-foundation/70 transition-colors duration-150 hover:text-hp-foundation"
-          >
-            <X aria-hidden strokeWidth={1.5} className="h-4 w-4" />
-            {t.chia_se.dong_anh}
-          </button>
-        </div>
+      {viTri !== null && (
+        <KhungXemAnh anh={anh} viTri={viTri} datViTri={setViTri} dong={dong} />
       )}
     </>
   );
 }
-
-const NUT =
-  "px-4 py-1 text-xl leading-none text-hp-foundation/70 " +
-  "transition-colors duration-150 hover:text-hp-foundation";
