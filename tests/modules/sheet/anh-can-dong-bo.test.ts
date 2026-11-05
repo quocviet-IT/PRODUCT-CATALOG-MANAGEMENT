@@ -23,6 +23,28 @@ describe("anhCanDongBo", () => {
     expect(anhCanDongBo([{ idThuMuc: "q2" }, { idThuMuc: "q1" }], banDo)).toEqual(["b1", "a1", "a2"]);
   });
 
+  // Tu 05/11/2026 o anh tren bang lay tam o cot HINH. Tam do thuong KHONG nam
+  // trong thu muc da xu ly, nen neu duong nap anh chi gom anh trong thu muc thi
+  // no khong bao gio duoc nap — va web khong tu keo tu Drive duoc (tai khoan may
+  // bi chan), nen o anh ra 502.
+  it("nap CA anh cot HINH, khong chi anh trong thu muc", () => {
+    expect(anhCanDongBo([{ idThuMuc: "q1", fileIdAnh: "h1" }], banDo)).toEqual(["h1", "a1", "a2"]);
+  });
+
+  it("anh cot HINH dung TRUOC — do la tam nguoi dung thay dau tien tren bang", () => {
+    const r = anhCanDongBo([{ idThuMuc: "q1", fileIdAnh: "h1" }, { idThuMuc: "q2", fileIdAnh: "h2" }], banDo);
+    expect(r.indexOf("h1")).toBeLessThan(r.indexOf("a1"));
+    expect(r.indexOf("h2")).toBeLessThan(r.indexOf("b1"));
+  });
+
+  it("anh cot HINH trung voi anh trong thu muc thi chi nap mot lan", () => {
+    expect(anhCanDongBo([{ idThuMuc: "q1", fileIdAnh: "a2" }], banDo)).toEqual(["a2", "a1"]);
+  });
+
+  it("dong chi co cot HINH, khong co thu muc, van duoc nap", () => {
+    expect(anhCanDongBo([{ idThuMuc: null, fileIdAnh: "h9" }], banDo)).toEqual(["h9"]);
+  });
+
   it("khong lap khi hai dong chung mot thu muc, hay hai thu muc chung mot anh", () => {
     const chung = { ...banDo, q3: [{ fileId: "a2" }, { fileId: "c1" }] };
     expect(

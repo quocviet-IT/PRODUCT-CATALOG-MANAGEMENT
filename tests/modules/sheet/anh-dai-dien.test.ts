@@ -29,22 +29,29 @@ describe("ganAnhDaiDien", () => {
       banDo,
     );
     expect(ds.map((d) => d.anhDaiDien)).toEqual([null, null, null]);
-    expect(ds.every((d) => d.co.includes("thieu-anh"))).toBe(true);
+    // Ba dong nay van co anh cot HINH nen luoi KHONG trong -> khong bao thieu.
+    expect(ds.some((d) => d.co.includes("thieu-anh"))).toBe(false);
   });
 
-  it("co 'thieu-anh' di theo anh thu nho, KHONG theo cot HINH", () => {
-    // Dong thieu cot HINH nhung co anh cot Q: luoi hien anh, nen khong duoc bao thieu.
-    const [coAnh] = ganAnhDaiDien([dong({ fileIdAnh: null, co: ["thieu-anh"] })], banDo);
-    expect(coAnh.co).not.toContain("thieu-anh");
-    // Dong co cot HINH nhung thu muc cot Q rong: luoi trong, nen phai bao thieu.
-    const [trong] = ganAnhDaiDien([dong({ idThuMuc: "rong", co: [] })], banDo);
+  it("co 'thieu-anh' di theo dung tam ANH THU NHO dang hien, khong theo rieng nguon nao", () => {
+    // Co cot HINH, thu muc Q rong: luoi VAN hien anh cot HINH -> khong bao thieu.
+    const [coHinh] = ganAnhDaiDien([dong({ idThuMuc: "rong", co: ["thieu-anh"] })], banDo);
+    expect(coHinh.co).not.toContain("thieu-anh");
+
+    // Thieu cot HINH nhung thu muc Q co anh: lui ve duoc -> khong bao thieu.
+    const [luiDuoc] = ganAnhDaiDien([dong({ fileIdAnh: null, co: ["thieu-anh"] })], banDo);
+    expect(luiDuoc.co).not.toContain("thieu-anh");
+
+    // Ca hai deu khong co: o anh trong that -> phai bao thieu.
+    const [trong] = ganAnhDaiDien([dong({ fileIdAnh: null, idThuMuc: "rong", co: [] })], banDo);
     expect(trong.co).toContain("thieu-anh");
   });
 
   it("dat 'thieu-anh' ngay sau 'thieu-sku', dung cho mapper van dat", () => {
-    const [d] = ganAnhDaiDien([dong({ idThuMuc: null, co: ["thieu-sku", "thieu-mo-ta"] })], banDo);
+    const trong = { fileIdAnh: null, idThuMuc: null };
+    const [d] = ganAnhDaiDien([dong({ ...trong, co: ["thieu-sku", "thieu-mo-ta"] })], banDo);
     expect(d.co).toEqual(["thieu-sku", "thieu-anh", "thieu-mo-ta"]);
-    const [khongSku] = ganAnhDaiDien([dong({ idThuMuc: null, co: ["thieu-mo-ta"] })], banDo);
+    const [khongSku] = ganAnhDaiDien([dong({ ...trong, co: ["thieu-mo-ta"] })], banDo);
     expect(khongSku.co).toEqual(["thieu-anh", "thieu-mo-ta"]);
   });
 
@@ -57,16 +64,27 @@ describe("ganAnhDaiDien", () => {
 });
 
 describe("anhThuNho", () => {
-  it("co anh dai dien thi lay no", () => {
-    expect(anhThuNho({ fileIdAnh: "hinh", anhDaiDien: "q" })).toBe("q");
+  // CHOT 05/11/2026, dao lai quyet dinh 11/09: o anh tren bang lay tam o COT
+  // HINH. Do la tam nguoi ban hang tu chon lam dai dien; anh dau thu muc chi la
+  // tam Drive tra ve truoc, khong ai ngam qua.
+  it("co anh cot HINH thi lay no, ke ca khi thu muc Q cung co anh", () => {
+    expect(anhThuNho({ fileIdAnh: "hinh", anhDaiDien: "q" })).toBe("hinh");
   });
 
-  it("chua tinh (nguon khong co ban do anh) thi lui ve cot HINH nhu cu", () => {
+  it("cot HINH de trong thi lui ve anh dau thu muc Q", () => {
+    expect(anhThuNho({ fileIdAnh: null, anhDaiDien: "q" })).toBe("q");
+  });
+
+  it("ca hai deu khong co thi tra null", () => {
+    expect(anhThuNho({ fileIdAnh: null, anhDaiDien: null })).toBeNull();
+  });
+
+  it("nguon khong co ban do anh (chay bang tep mau) thi van ra cot HINH", () => {
     expect(anhThuNho({ fileIdAnh: "hinh" })).toBe("hinh");
   });
 
-  it("da tinh ma khong co anh thi KHONG lui ve cot HINH — anh do khong duoc nap", () => {
-    expect(anhThuNho({ fileIdAnh: "hinh", anhDaiDien: null })).toBeNull();
+  it("khong cot HINH va cung chua tinh anh dai dien thi tra null, khong tra undefined", () => {
+    expect(anhThuNho({ fileIdAnh: null })).toBeNull();
   });
 });
 

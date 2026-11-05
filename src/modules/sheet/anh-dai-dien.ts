@@ -26,19 +26,34 @@ export function ganAnhDaiDien(
     // dong lan ban do anh, nen moi thu suy ra tu ban do nen nam chung mot cho.
     const soAnh = anh.length;
     const co: CoBatThuong[] = d.co.filter((c) => c !== "thieu-anh");
-    // Dat "thieu-anh" dung cho mapper van dat: ngay sau "thieu-sku" neu co.
-    if (anhDaiDien === null) co.splice(co.indexOf("thieu-sku") + 1, 0, "thieu-anh");
+    // Co "thieu-anh" phai di theo dung tam ANH THU NHO dang hien, khong theo
+    // rieng mot nguon nao. Xet rieng thu muc Q thi dong co anh cot HINH van bi
+    // bao thieu — mot man hinh tu mau thuan: cai nhan "thieu anh" nam ngay canh
+    // mot o dang hien anh ro rang.
+    if (anhThuNho({ fileIdAnh: d.fileIdAnh, anhDaiDien }) === null) {
+      // Dat dung cho mapper van dat: ngay sau "thieu-sku" neu co.
+      co.splice(co.indexOf("thieu-sku") + 1, 0, "thieu-anh");
+    }
     return { ...d, anhDaiDien, soAnh, co };
   });
 }
 
 /**
- * Anh thu nho de HIEN.
+ * Anh thu nho de HIEN: COT HINH truoc, khong co thi lui ve anh dau thu muc Q.
  *
- * undefined = chua tinh vi nguon khong co ban do anh (chay thu bang Drive API
- * truc tiep) -> lui ve cot HINH nhu cu. null = da tinh va thu muc cot Q khong co
- * anh -> KHONG lui ve cot HINH: anh do khong duoc nap, hien ra chi la mot o vo.
+ * CHOT 05/11/2026, dao lai quyet dinh 11/09. Cot HINH la tam nguoi ban hang TU
+ * CHON lam dai dien cho mau; anh dau thu muc chi la tam Drive tinh co tra ve
+ * truoc, khong ai ngam qua. Lay tam duoc chon la dung y nguoi dung bang tinh.
+ *
+ * Duong lui ton tai cho 29 dong chua dien cot HINH (do 05/11): bo han duong lui
+ * thi 7 mau dang hien anh binh thuong se trang o — mat mot thu dang chay de doi
+ * lay su thuan nhat, khong dang.
+ *
+ * KEM THEO, va khong duoc quen: anh cot HINH phai duoc duong dong bo nap vao bo
+ * dem (xem anh-can-dong-bo.ts). Web khong tu keo anh tu Drive duoc — tai khoan
+ * may bi chinh sach Workspace chan — nen tam nao khong co trong bo dem thi
+ * /api/anh-drive tra 502 va o anh vo.
  */
 export function anhThuNho(d: Pick<DongCatalogue, "fileIdAnh" | "anhDaiDien">): string | null {
-  return d.anhDaiDien === undefined ? d.fileIdAnh : d.anhDaiDien;
+  return d.fileIdAnh ?? d.anhDaiDien ?? null;
 }

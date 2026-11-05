@@ -85,9 +85,11 @@ describe("anh thu nho tu thu muc cot Hinh da xu ly", () => {
 
     const ds = await layDanhSachCatalogue();
     expect(ds[1].anhDaiDien).toBe("q-dau");
-    // Dong dau chi co cot raw -> khong co thu muc cot Q -> khong anh, bao thieu.
+    // Dong dau chi co cot raw -> khong co thu muc cot Q -> khong co anh dai dien.
     expect(ds[0].anhDaiDien).toBeNull();
-    expect(ds[0].co).toContain("thieu-anh");
+    // Nhung no co anh cot HINH, va tu 05/11/2026 o anh lay tam do — luoi van
+    // hien anh, nen KHONG duoc bao thieu.
+    expect(ds[0].co).not.toContain("thieu-anh");
     expect(docBangTho).not.toHaveBeenCalled();
   });
 

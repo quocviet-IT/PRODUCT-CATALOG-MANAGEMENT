@@ -211,15 +211,17 @@ describe("POST /api/dong-bo/thieu-anh", () => {
     }
   });
 
-  it("CHI nap anh thu muc cot Hinh da xu ly — khong anh cot HINH, khong thu muc cu", async () => {
-    // Chot 11/09/2026. Truoc day tuyen nay nap anh cot HINH truoc roi lap qua
-    // MOI thu muc trong ban do — ke ca 1.464 thu muc cu con sot sau khi tab rut
-    // tu 1.839 dong xuong 12.
+  it("nap anh cot HINH va anh thu muc cot Q — nhung KHONG nap thu muc cu", async () => {
+    // Chot 05/11/2026, dao lai quyet dinh 11/09: o anh tren bang lay tam o cot
+    // HINH, nen tam do phai duoc nap. Phan con giu nguyen tu 11/09 la khong lap
+    // qua MOI thu muc trong ban do — ke ca 1.464 thu muc cu con sot lai sau khi
+    // tab rut tu 1.839 dong xuong 12.
     datBanChup();
     const res = await thieuAnh.POST(goi("thieu-anh", {}));
     const { thieu } = (await res.json()) as { thieu: string[] };
-    expect(thieu).toEqual(["thuvien1", "thuvien2"]);
-    expect(thieu).not.toContain("18I_Y9I_tLtnizSbupQclY48QBxG3I3XB"); // anh cot HINH cua dong dau
+    expect(thieu).toContain("18I_Y9I_tLtnizSbupQclY48QBxG3I3XB"); // anh cot HINH cua dong dau
+    expect(thieu).toContain("thuvien1");
+    expect(thieu).toContain("thuvien2");
     expect(thieu).not.toContain("cu1"); // thu muc cu bang khong con tro toi
   });
 
