@@ -340,10 +340,14 @@ async function chupMotNgonNgu(trinhDuyet: Browser, nn: NgonNgu): Promise<void> {
     ], { x: 470, y: 140, width: 500, height: 620 });
     await page.fill("#email", EMAIL);
     await page.fill("#mat_khau", MAT_KHAU);
-    await Promise.all([
-      page.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout: 30_000 }),
-      page.getByRole("button", { name: dung(t.dang_nhap.nut) }).click(),
-    ]);
+    // Bam TRUOC roi moi cho, khong goi chung trong Promise.all.
+    //
+    // Ban cu dua hai viec: `Promise.all([waitForURL(...), click()])`. Cach do treo
+    // 30 giay roi timeout, va buoc chup chet ngay o dang nhap — ca bo anh huong dan
+    // khong dung duoc tu luc nao khong ai hay. Tach ra thi dang nhap xong trong 4
+    // giay. Nhip cua `redirect()` trong server action khong hop voi kieu dua do.
+    await page.getByRole("button", { name: dung(t.dang_nhap.nut) }).click();
+    await page.waitForURL((u) => !u.pathname.startsWith("/login"), { timeout: 60_000 });
 
     // --- 2. Thanh dau trang + menu nguoi dung ---
     await page.goto(`${GOC}/admin/catalogue-sheet`, { waitUntil: "networkidle" });
@@ -385,10 +389,30 @@ async function chupMotNgonNgu(trinhDuyet: Browser, nn: NgonNgu): Promise<void> {
     await page.locator("#q").blur();
     await page.setViewportSize({ width: RONG, height: 1500 });
     await page.waitForTimeout(300);
-    await page.locator("tbody tr").filter({ has: page.locator("img") }).first().locator("td").nth(1).click();
+    // Phai thu nhieu dong, khong lay dong dau co anh.
+    //
+    // Tu 05/11/2026 o anh tren bang lay tam o COT HINH, con thu vien trong ngan
+    // chi tiet van lay tu thu muc cot "Hinh da xu ly" — hai nguon khac nhau. Nen
+    // "dong co anh nho" KHONG con bao dam "ngan chi tiet co anh": mot mau co anh
+    // cot HINH ma thu muc rong se mo ra ngan khong co tam nao, va buoc nay treo.
     const ngan = page.getByRole("dialog", { name: co(cs.chi_tiet_mau) });
     const nutPhongTo = khuon(cs.phong_to, { ten: ".+" });
-    await ngan.getByRole("button", { name: nutPhongTo }).first().waitFor({ timeout: 30_000 });
+    const dongCoAnh = page.locator("tbody tr").filter({ has: page.locator("img") });
+    const soThu = Math.min(await dongCoAnh.count(), 10);
+    let moDuoc = false;
+    for (let i = 0; i < soThu && !moDuoc; i++) {
+      await dongCoAnh.nth(i).locator("td").nth(1).click();
+      moDuoc = await ngan
+        .getByRole("button", { name: nutPhongTo })
+        .first()
+        .waitFor({ timeout: 15_000 })
+        .then(() => true, () => false);
+      if (!moDuoc) {
+        await page.keyboard.press("Escape");
+        await ngan.waitFor({ state: "hidden", timeout: 10_000 }).catch(() => {});
+      }
+    }
+    if (!moDuoc) throw new Error("Khong tim duoc mau nao co anh trong ngan chi tiet (thu 10 dong dau).");
     // Doi MOI anh thu vien tai xong: anh tai cham hien thanh o trong.
     await page.waitForFunction(
       () => [...document.querySelectorAll("aside[role=dialog] img")]
