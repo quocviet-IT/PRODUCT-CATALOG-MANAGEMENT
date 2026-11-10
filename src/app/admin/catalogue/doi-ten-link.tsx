@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState, useId, useState, useSyncExternalStore } from "react";
+import { useActionState, useId, useState } from "react";
 import { Check, PencilLine } from "lucide-react";
 import { useChu } from "@/messages/dung-chu";
 import {
   chuanHoaSlug, maCuaSlug, phanTenCuaSlug,
 } from "@/modules/catalogue-share/chia-se.model";
 import { NutGui } from "@/ui/nut-gui";
+import { useGocLink } from "@/ui/goc-link";
 import { luuTenLink, type KetQuaDoiTen } from "./actions";
 
 const NUT =
@@ -86,12 +87,8 @@ function KhungDoiTen({
   const id = useId();
   // Dien san phan ten dang dung, de sua mot chu khong phai go lai ca cau.
   const [ten, setTen] = useState(() => phanTenCuaSlug(slug));
-  // Ten mien lay tu trinh duyet — xem ghi chu o DaXong (tao-catalogue.tsx).
-  const origin = useSyncExternalStore(
-    () => () => {},
-    () => window.location.origin,
-    () => "",
-  );
+  // Cung goc voi link se chep ra — xem useGocLink.
+  const origin = useGocLink();
 
   const [kq, gui, dangChay] = useActionState(
     async (truoc: KetQuaDoiTen, form: FormData): Promise<KetQuaDoiTen> => {

@@ -11,7 +11,7 @@ import { catTrang, docTrang } from "@/modules/sheet/catalogue.view";
 import { PhanTrang } from "@/ui/phan-trang";
 import { OTimNhanh } from "@/ui/o-tim-nhanh";
 import { KetQuaLoc, NguonLoc } from "@/ui/vung-loc";
-import { NutChep } from "./nut-chep";
+import { NutChep, NutChepTinNhan } from "./nut-chep";
 import { NutKhoa } from "./nut-khoa";
 import { DoiTenLink } from "./doi-ten-link";
 
@@ -208,6 +208,7 @@ export default async function TrangDanhSachCatalogue({
                         {t.danh_sach_catalogue.mo}
                       </Link>
                       <NutChep slug={c.slug} />
+                      <NutChepTinNhan slug={c.slug} />
                       <NutKhoa slug={c.slug} trangThai={c.trangThai} />
                       {/* ?in=1 mo san hop thoai in — duong nay chi sale dung,
                           link gui khach la link tran. */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   DAI_GIA_TRI_THONG_SO,
@@ -12,6 +12,9 @@ import {
 } from "@/modules/catalogue-share/chia-se.model";
 import { SO_NGAY_SONG } from "@/modules/catalogue-share/hieu-luc.model";
 import { DoiTenLink } from "@/app/admin/catalogue/doi-ten-link";
+import { NutChepTinNhan } from "@/app/admin/catalogue/nut-chep";
+import { duongDanCatalogue } from "@/modules/catalogue-share/duong-dan.model";
+import { useGocLink } from "@/ui/goc-link";
 import { XemTruocLink } from "./xem-truoc-link";
 import { ThuTuTrinhBay } from "./thu-tu-trinh-bay";
 import { LuoiAnhMau } from "./luoi-anh-mau";
@@ -470,18 +473,9 @@ function DaXong({
   const t = useChu();
   const [daChep, setDaChep] = useState(false);
 
-  // Link tuyet doi phai dung o phia trinh duyet: may chu khong biet ten mien
-  // that su nguoi dung dang mo (vercel.app hay ten mien rieng sau nay).
-  // Ten mien khong bao gio doi giua chung nen nguoi nghe la mot ham rong.
-  const origin = useSyncExternalStore(
-    () => () => {},
-    () => window.location.origin,
-    () => "",
-  );
-  // Duong dan day du, khong dung /c/: /c/ van song de nhung link da gui khong
-  // chet, nhung no la duong CHUYEN HUONG. Chep no cho khach la vut di chinh
-  // cai ten sale vua dat — khach nhan mot day ky tu roi moi bi day sang ten.
-  const link = `${origin}/catalogue/${slug}`;
+  // Goc link: ten mien thuong hieu neu da khai, khong thi ten mien dang mo —
+  // xem useGocLink. Duong dan day du, khong dung /c/ (xem duongDanCatalogue).
+  const link = duongDanCatalogue(useGocLink(), slug);
 
   async function chep() {
     try {
@@ -523,6 +517,7 @@ function DaXong({
           {daChep ? <Check {...ICON} /> : <Copy {...ICON} />}
           {daChep ? t.chia_se.da_chep : t.chia_se.chep_link}
         </button>
+        <NutChepTinNhan slug={slug} />
         <a href={`/catalogue/${slug}`} target="_blank" rel="noreferrer" className={NUT_PHU}>
           <ExternalLink {...ICON} />
           {t.chia_se.mo_thu}

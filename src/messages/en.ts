@@ -359,6 +359,8 @@ export const en: BoChu = {
     mo: "Open",
     chep: "Copy link",
     da_chep: "Copied",
+    chep_tin_nhan: "Copy text message",
+    chep_tin_nhan_goi_y: "Copies a ready-to-send SMS: the Hung Phat name, the link and Reply STOP. Paste it into your texting app instead of sending the link alone — US carriers often block link-only texts.",
     in: "Download PDF",
   },
   mau_giao_dien: {

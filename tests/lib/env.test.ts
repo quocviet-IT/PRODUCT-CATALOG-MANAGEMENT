@@ -84,3 +84,20 @@ describe("cau hinh Google Sheet", () => {
     expect(() => parseEnv(con_lai)).not.toThrow();
   });
 });
+
+describe("dia chi link gui khach", () => {
+  it("de trong duoc — link theo ten mien dang mo", () => {
+    expect(parseEnv(day).NEXT_PUBLIC_DIA_CHI_LINK_KHACH).toBeUndefined();
+  });
+
+  it("nhan mot URL day du", () => {
+    const env = parseEnv({ ...day, NEXT_PUBLIC_DIA_CHI_LINK_KHACH: "https://catalogue.hungphatusa.com" });
+    expect(env.NEXT_PUBLIC_DIA_CHI_LINK_KHACH).toBe("https://catalogue.hungphatusa.com");
+  });
+
+  it("nem loi khi thieu https:// — de khong lang le phat link hong", () => {
+    expect(() =>
+      parseEnv({ ...day, NEXT_PUBLIC_DIA_CHI_LINK_KHACH: "catalogue.hungphatusa.com" }),
+    ).toThrow(/NEXT_PUBLIC_DIA_CHI_LINK_KHACH/);
+  });
+});

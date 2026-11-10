@@ -1,8 +1,8 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import { useChu } from "@/messages/dung-chu";
 import { chuanHoaSlug } from "@/modules/catalogue-share/chia-se.model";
+import { useGocLink } from "@/ui/goc-link";
 
 /**
  * Dong "Link se la …" duoi o ten link tren man hinh tao catalogue.
@@ -13,13 +13,8 @@ import { chuanHoaSlug } from "@/modules/catalogue-share/chia-se.model";
  */
 export function XemTruocLink({ tenLink, ten }: { tenLink: string; ten: string }) {
   const t = useChu();
-  // Ten mien lay tu trinh duyet: he thong chay o ca hpcatalogue.app, ban xem thu
-  // tren Vercel va localhost. Khong bao gio doi giua chung nen nguoi nghe rong.
-  const host = useSyncExternalStore(
-    () => () => {},
-    () => window.location.host,
-    () => "",
-  );
+  // Cung goc voi link se chep ra (xem useGocLink), bo phan https:// cho gon.
+  const host = useGocLink().replace(/^https?:\/\//, "");
   const phanTen = chuanHoaSlug(tenLink) || chuanHoaSlug(ten) || t.chia_se.ten_link_mac_dinh;
 
   return (

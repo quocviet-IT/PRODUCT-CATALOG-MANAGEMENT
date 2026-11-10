@@ -42,6 +42,17 @@ const schema = z.object({
   // src/modules/sheet/dong-bo.ts). DE TRONG thi duong do TAT han — khong bao
   // gio duoc hieu "thieu khoa" thanh "khong can khoa".
   DONG_BO_SECRET: z.string().min(24).optional(),
+  // Goc cua link GUI KHACH, vi du https://catalogue.hungphatusa.com (xem
+  // src/modules/catalogue-share/duong-dan.model.ts). De trong thi link theo
+  // ten mien sale dang mo. Bien NEXT_PUBLIC_ duoc Next dan cung vao goi trinh
+  // duyet LUC BUILD: doi gia tri tren Vercel xong phai Redeploy.
+  // Khai o day de mot gia tri thieu https:// bao loi ngay o may chu, thay vi
+  // trinh duyet lang le lui ve ten mien cu.
+  NEXT_PUBLIC_DIA_CHI_LINK_KHACH: z
+    .string()
+    .regex(/^https?:\/\//, { message: "phai bat dau bang https://" })
+    .pipe(z.url())
+    .optional(),
 });
 
 export type Env = z.infer<typeof schema>;

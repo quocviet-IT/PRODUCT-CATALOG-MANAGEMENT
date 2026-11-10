@@ -370,6 +370,8 @@ export const vi = {
     mo: "Mở",
     chep: "Chép link",
     da_chep: "Đã chép",
+    chep_tin_nhan: "Chép tin nhắn",
+    chep_tin_nhan_goi_y: "Chép sẵn tin SMS tiếng Anh: tên Hung Phat, link và câu Reply STOP. Dán vào ứng dụng nhắn tin thay cho việc gửi mỗi cái link — nhà mạng Mỹ hay chặn tin chỉ có link.",
     in: "Tải PDF",
   },
   mau_giao_dien: {
